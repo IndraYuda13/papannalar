@@ -8,14 +8,18 @@ import {
   CHOICES,
   collectionDocumentSchema,
   collectionSchema,
+  libraryItemSchema,
   publicLibraryItem,
   type DraftDocument,
-  type LibraryItem,
   type Collection,
 } from "@/contracts/library";
 import { field, panel, libraryCall } from "./client";
 import { LibraryItemView } from "./item-view";
 import { defaultTool, ToolFields, TOOL_LABELS } from "./tool-fields";
+import { InteractiveHelp } from "./interactive-help";
+import { templateItem } from "./templates";
+import { ActivityIcon } from "@/ui/components/activity-icon";
+import { FileQuestion, Layers, Plus } from "lucide-react";
 export function CollectionsPage() {
   const { state } = useTeacher(),
     [tab, setTab] = useState<"system" | "teacher">("system");
@@ -25,9 +29,15 @@ export function CollectionsPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-[28px] font-extrabold">Soal & Presentasi</h1>
+        <h1 className="flex items-center gap-3 text-[28px] font-extrabold">
+          <Layers size={28} className="text-primary" aria-hidden />
+          Soal & Presentasi
+        </h1>
         <Button asChild>
-          <Link href="/guru/soal/baru">Buat kumpulan soal</Link>
+          <Link href="/guru/soal/baru">
+            <Plus size={20} aria-hidden />
+            Buat kumpulan soal
+          </Link>
         </Button>
       </div>
       <p className="text-muted-foreground">
@@ -48,7 +58,21 @@ export function CollectionsPage() {
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {sets.map((c) => (
-          <Link key={c.id} href={`/guru/soal/${c.id}`} className={panel}>
+          <Link
+            key={c.id}
+            href={`/guru/soal/${c.id}`}
+            className={`${panel} friendly-card`}
+          >
+            {c.document.kind === "cards" ? (
+              <FileQuestion size={28} className="text-primary" aria-hidden />
+            ) : (
+              <ActivityIcon
+                kind={
+                  c.document.items.find((i) => i.kind === "interactive")?.tool
+                    .kind ?? "writing"
+                }
+              />
+            )}
             <h2 className="text-xl font-bold">
               {c.document.title || "Kumpulan tanpa judul"}
             </h2>
@@ -130,7 +154,7 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
       setMessage(
         error instanceof Error && error.message === "CONFLICT"
           ? "Kumpulan telah berubah di perangkat lain. Salin isi sebelum memuat ulang."
-          : "Belum tersimpan. Periksa parameter aktivitas dan sambungan.",
+          : "Belum tersimpan. Periksa isian alat dan internet.",
       );
     } finally {
       setBusy(false);
@@ -176,11 +200,14 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
           ? "Isi empat pilihan yang berbeda."
           : prefix === "title"
             ? "Tuliskan nama kumpulan."
-            : "Lengkapi pertanyaan dan parameter aktivitas."}
+            : "Lengkapi pertanyaan dan isian alat."}
       </p>
     ) : null;
   }
-  const previewItem = preview === null ? undefined : document.items[preview];
+  const previewResult = libraryItemSchema.safeParse(
+    preview === null ? undefined : document.items[preview],
+  );
+  const previewItem = previewResult.success ? previewResult.data : undefined;
   return (
     <div className="space-y-5">
       <Link
@@ -201,8 +228,7 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
       )}
       {version > 0 && !readonly && (
         <p className="text-sm text-muted-foreground">
-          Perubahan yang disimpan sebagai siap membuat versi berikutnya. Hasil
-          lama tetap memakai versi sebelumnya.
+          Soal yang diubah berlaku untuk sesi baru. Hasil sesi lama tetap sama.
         </p>
       )}
       <label className="block font-semibold">
@@ -234,8 +260,7 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
         </select>
       </label>
       <p className="text-sm text-muted-foreground">
-        Maksimal 5 soal per kumpulan. Kartu memakai satu lembar dengan lima
-        baris.
+        Maksimal 5 soal. Untuk Kartu Nalar, satu soal memakai satu baris.
       </p>
       {document.items.map((item, index) => (
         <article
@@ -349,7 +374,7 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
                 />
               </label>
               <p className="text-sm">
-                Pilihan ? / Belum tahu ditambahkan otomatis.
+                Pilihan ? / Belum tahu sudah disediakan.
               </p>
             </>
           ) : (
@@ -381,6 +406,16 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
                   ))}
                 </select>
               </label>
+              {!readonly && (
+                <InteractiveHelp
+                  key={item.kind === "writing" ? "writing" : item.tool.kind}
+                  kind={item.kind === "writing" ? "writing" : item.tool.kind}
+                  onApply={(template) => {
+                    changeItem(index, templateItem(item.id, template));
+                    setPreview(null);
+                  }}
+                />
+              )}
               {item.kind === "interactive" && !readonly && (
                 <ToolFields
                   tool={item.tool}
@@ -399,7 +434,7 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
                 items: [item],
               });
               if (!single.success) {
-                setMessage("Lengkapi soal agar dapat dipreview.");
+                setMessage("Lengkapi soal sebelum membuka preview.");
                 return;
               }
               setPreview(index);
@@ -428,11 +463,25 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
             className="min-h-0 rounded-input bg-pn-board p-4"
           >
             <LibraryItemView
-              key={previewItem.id}
-              item={publicLibraryItem(previewItem as LibraryItem)}
+              key={
+                previewItem.kind === "interactive"
+                  ? `${previewItem.id}:${JSON.stringify(previewItem.tool)}`
+                  : previewItem.id
+              }
+              item={publicLibraryItem(previewItem)}
               row={preview + 1}
             />
           </div>
+        </section>
+      )}
+      {preview !== null && !previewItem && (
+        <section className={panel} aria-label="Pratinjau soal">
+          <Button variant="outline" onClick={() => setPreview(null)}>
+            Tutup preview
+          </Button>
+          <p role="status">
+            Periksa isian yang diubah untuk melanjutkan preview.
+          </p>
         </section>
       )}
       <div className="flex flex-wrap gap-3 border-t pt-4">

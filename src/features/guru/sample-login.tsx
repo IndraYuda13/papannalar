@@ -42,8 +42,8 @@ export function SampleLogin({ requiresCode }: { requiresCode: boolean }) {
     >
       <h2 className="text-lg font-bold">Coba PapanNalar</h2>
       <p className="text-sm">
-        Dua kelas dan materi contoh sudah tersedia. Semua hasil bersifat
-        sintetis.
+        Coba dua kelas dengan soal dan hasil contoh. Tidak memakai data siswa
+        nyata.
       </p>
       {requiresCode && (
         <label className="block">

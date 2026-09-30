@@ -1,0 +1,849 @@
+{
+  "recordedAt": "2026-09-30T19:27:08.033Z",
+  "baseCommit": "47aa60d729b293a53365a780c0d1cd9485ec6f95",
+  "implementation": "Uncommitted working tree; existing user baseline retained",
+  "fullVerifyCommand": {
+    "command": "pnpm verify",
+    "started": "2026-10-01T01:51:23.9373947+07:00",
+    "completed": "2026-10-01T02:07:53.5757099+07:00",
+    "exitCode": 1,
+    "baseCommit": "47aa60d729b293a53365a780c0d1cd9485ec6f95",
+    "target": "isolated local PostgreSQL pn_m01c_test loopback55432; Chromium loopback3100"
+  },
+  "targetedRepairCommand": {
+    "command": "PAPANNALAR_REUSE_LOCAL_DEMO=1 pnpm exec playwright test tests/e2e/board-capabilities.spec.ts:12 tests/e2e/exit.spec.ts:46 tests/e2e/offline.spec.ts:51 tests/e2e/prelim.spec.ts:88 tests/e2e/storage-recovery.spec.ts:181 tests/e2e/tool-patterns.spec.ts:10 tests/e2e/video-display.spec.ts tests/e2e/shell.spec.ts --reporter=list,json --output=artifacts/qa/ui-polish/repair-browser",
+    "started": "2026-10-01T02:19:20.7726004+07:00",
+    "completed": "2026-10-01T02:21:37.4541884+07:00",
+    "exitCode": 0,
+    "target": "managed production loopback3100 / isolated SQL55432; no build/reset in browser setup"
+  },
+  "unit": {
+    "passed": 1039,
+    "files": 68,
+    "coverage": "All files          |   92.44 |    87.47 |   96.26 |   93.44 |                   "
+  },
+  "buildId": "FNk5af98oFfsDZeeiRDem",
+  "offlineManifest": "Offline manifest: 63 static assets, 3 public shells (pn-shell-6b96ece226571d3e).",
+  "browserRuns": [
+    {
+      "report": "artifacts/qa/ui-polish/full-browser-results.json",
+      "stats": {
+        "startTime": "2026-09-30T18:53:40.342Z",
+        "duration": 853061.8709999999,
+        "expected": 104,
+        "skipped": 0,
+        "unexpected": 8,
+        "flaky": 0
+      },
+      "tests": 112
+    },
+    {
+      "report": "artifacts/qa/ui-polish/repair-browser-results.json",
+      "stats": {
+        "startTime": "2026-09-30T19:19:21.833Z",
+        "duration": 135551.12999999998,
+        "expected": 31,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "tests": 31
+    }
+  ],
+  "browserUnique": 112,
+  "browserLatestPass": 112,
+  "unresolved": [],
+  "browserLedger": [
+    {
+      "file": "assessments.spec.ts",
+      "title": "IndexedDB v1 migration, CAS, duplicate, reopen, atomic rollback and deletion",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1277
+    },
+    {
+      "file": "assessments.spec.ts",
+      "title": "scan review / Ganti / Lewati / manual fallback and offline durable reload",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 3705
+    },
+    {
+      "file": "auth-ownership.spec.ts",
+      "title": "refresh session mempertahankan cookie dan no-store meski resource tidak ditemukan",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1101
+    },
+    {
+      "file": "auth-ownership.spec.ts",
+      "title": "visitor dialihkan; cookie palsu dan callback invalid tidak mengautentikasi",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 471
+    },
+    {
+      "file": "auth-ownership.spec.ts",
+      "title": "magic link PKCE, reload session, cookie HttpOnly dan logout bekerja",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1548
+    },
+    {
+      "file": "auth-ownership.spec.ts",
+      "title": "board memakai anonymous identity terpisah tanpa teacher API atau nama lokal",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1491
+    },
+    {
+      "file": "auth-ownership.spec.ts",
+      "title": "CRUD kelas A/B melalui API tetap dibatasi RLS PostgreSQL",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 6252
+    },
+    {
+      "file": "auth-ownership.spec.ts",
+      "title": "nama local-only bergabung di UI guru; API baru dan papan tidak menerima canary",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2975
+    },
+    {
+      "file": "auth-ownership.spec.ts",
+      "title": "logout offline mengunci akses lokal dan dicabut saat online kembali",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1420
+    },
+    {
+      "file": "auth-ownership.spec.ts",
+      "title": "CSRF dan field tambahan ditolak pada endpoint mutasi",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1029
+    },
+    {
+      "file": "balance.spec.ts",
+      "title": "TOOL05 actual balance: symmetric drag/cancel, exact 3x−7=11, zero guard, offline undo",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 8018
+    },
+    {
+      "file": "balance.spec.ts",
+      "title": "TOOL05 seven patterns: predictions, distinct twin, Nala repair, open paths and separate models",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 23085
+    },
+    {
+      "file": "board-capabilities.spec.ts",
+      "title": "BOARD01 six checks, 0 touch fallback, local profile and public payload",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 5447
+    },
+    {
+      "file": "board-capabilities.spec.ts",
+      "title": "BOARD01 six checks, 1 touch fallback, local profile and public payload",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 3695
+    },
+    {
+      "file": "board-capabilities.spec.ts",
+      "title": "BOARD01 six checks, 2 touch fallback, local profile and public payload",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 7236
+    },
+    {
+      "file": "board-capabilities.spec.ts",
+      "title": "BOARD01 six checks, 4 touch fallback, local profile and public payload",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 5373
+    },
+    {
+      "file": "board-capabilities.spec.ts",
+      "title": "REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot control reflection and stops offline",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 13444
+    },
+    {
+      "file": "board-capabilities.spec.ts",
+      "title": "REMOTE02 fractions, ratio, algebra, balance and graphs use the bounded input channel",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 38554
+    },
+    {
+      "file": "board-content.spec.ts",
+      "title": "CACHE01 board content uses actual IndexedDB: empty, strict input, persistence, clear and no group data",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 563
+    },
+    {
+      "file": "board-content.spec.ts",
+      "title": "CACHE02 teacher uploads package, board navigates offline, explicit handoff reconciles, reload loses roster and retains content",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 35462
+    },
+    {
+      "file": "board-modes.spec.ts",
+      "title": "UI01 SD public questions, independent work and exit reasons render their given models without assessment keys",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 30705
+    },
+    {
+      "file": "board-modes.spec.ts",
+      "title": "UI01 teacher hint controls report board progress and target reveal needs explicit HP confirmation without replacing the student model",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 20843
+    },
+    {
+      "file": "board-modes.spec.ts",
+      "title": "UI01 Sorot uses a twin, permits Nala repair, and returns the same station model/undo after a fresh input epoch",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 13940
+    },
+    {
+      "file": "board-modes.spec.ts",
+      "title": "UI01 four public panels paginate with 72px prompts, independent model state and offline resume",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 15548
+    },
+    {
+      "file": "board-modes.spec.ts",
+      "title": "UI01 SD5 lower touch zone, 1.5x objects, SMA10 tariffs and explicit Berdua fallback",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 24480
+    },
+    {
+      "file": "cards.spec.ts",
+      "title": "teacher downloads all three real A4 PDFs locally without runtime errors",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1586
+    },
+    {
+      "file": "classroom.spec.ts",
+      "title": "teacher pairs board, public groups render and number line/lift respond locally",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 15519
+    },
+    {
+      "file": "exit.spec.ts",
+      "title": "exit storage is atomic, frozen, idempotent, isolated and can reopen offline",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 884
+    },
+    {
+      "file": "exit.spec.ts",
+      "title": "EXIT01 teacher freezes package, board gets each public row, manual review and correction survive offline",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 14165
+    },
+    {
+      "file": "freshclass.spec.ts",
+      "title": "E2E02 fresh 32-student class uses UI/photo inputs through check, rotations, late exit, finalization and next session",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 68589
+    },
+    {
+      "file": "graphs.spec.ts",
+      "title": "TOOL06 D6 linear slider is one undo step; point, exact table, and wrong guess are checked",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 8127
+    },
+    {
+      "file": "graphs.spec.ts",
+      "title": "TOOL06 SPLDV two lines intersect at 5 GB / 25 and share exact table values",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 7439
+    },
+    {
+      "file": "graphs.spec.ts",
+      "title": "TOOL06 E2 shades intersection of all inequalities, detects empty region, and works offline",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 7773
+    },
+    {
+      "file": "graphs.spec.ts",
+      "title": "TOOL06 E3 parabola roots 2 and 3; reversed roots and undo are real model changes",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 7578
+    },
+    {
+      "file": "graphs.spec.ts",
+      "title": "TOOL06 E4 exponent is multiplicative and compared with a line; no overflow or off-domain point",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 7439
+    },
+    {
+      "file": "graphs.spec.ts",
+      "title": "TOOL06 all seven patterns share graph engine, retain independent turns and deduplicate points",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 24036
+    },
+    {
+      "file": "llm.spec.ts",
+      "title": "LLM01 real teacher UI keeps name/raw question local, shows honest fallback, stores feedback and preserves board privacy",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 8314
+    },
+    {
+      "file": "llm.spec.ts",
+      "title": "LLM API rejects unowned/extra fields and remains disabled without credentials",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2367
+    },
+    {
+      "file": "local-demo.spec.ts",
+      "title": "explicit local demo uses the normal PKCE callback and grants only teacher session",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 703
+    },
+    {
+      "file": "offline.spec.ts",
+      "title": "manifest build hanya shell publik dan seluruh JS/CSS/font lokal",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 964
+    },
+    {
+      "file": "offline.spec.ts",
+      "title": "tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap bekerja",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1522
+    },
+    {
+      "file": "offline.spec.ts",
+      "title": "audit cache mendeteksi aset hilang; tidak mengklaim siap hanya karena online",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 936
+    },
+    {
+      "file": "omr.spec.ts",
+      "title": "real worker scans pixels/printed text, stays local and works offline after reload",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 971
+    },
+    {
+      "file": "opening-reflection.spec.ts",
+      "title": "OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective and ephemeral reflection",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 24738
+    },
+    {
+      "file": "oral.spec.ts",
+      "title": "oral CAS/frozen baseline/reopen/undo/skip/resume use real IndexedDB",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 755
+    },
+    {
+      "file": "oral.spec.ts",
+      "title": "oral grade 2 goes down on first wrong, skips without evidence, and resumes offline",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2637
+    },
+    {
+      "file": "package.spec.ts",
+      "title": "package cache survives reopen with CAS, freeze and tenant isolation",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 773
+    },
+    {
+      "file": "package.spec.ts",
+      "title": "teacher prepares and replaces offline package, reloads its cache and sees tool gaps",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2353
+    },
+    {
+      "file": "package.spec.ts",
+      "title": "C01 CSV stays local, invalid batch changes nothing, and empty name deletes identity",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2059
+    },
+    {
+      "file": "package.spec.ts",
+      "title": "static Bisik and printable independent tasks work offline",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2840
+    },
+    {
+      "file": "pairing.spec.ts",
+      "title": "pairing HTTP uses separate board auth, owner checks, public schema, CAS, ACK and revoke",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2865
+    },
+    {
+      "file": "prelim.spec.ts",
+      "title": "M05-a reset reproduces canonical inputs/groups, excluding three cards until actual pixel scan",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 3346
+    },
+    {
+      "file": "prelim.spec.ts",
+      "title": "M05-b recorded PRELIM regression: opening, check, scan, groups, station, actual exit and reflection",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 29364
+    },
+    {
+      "file": "privacy-storage.spec.ts",
+      "title": "IndexedDB kosong aman; nama optional dan operasi delete/update tidak crash",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 757
+    },
+    {
+      "file": "privacy-storage.spec.ts",
+      "title": "nama lokal dan referensi selamat setelah tutup/reload; join hanya di teacher view",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 869
+    },
+    {
+      "file": "privacy-storage.spec.ts",
+      "title": "namespace dua akun dan demo/pilot terpisah; clear hanya database nama aktif",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 882
+    },
+    {
+      "file": "privacy-storage.spec.ts",
+      "title": "transaksi bulk roster rollback penuh pada absen bentrok; schema menolak nama",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 732
+    },
+    {
+      "file": "privacy-storage.spec.ts",
+      "title": "browser canary: hanya DTO eksplisit masuk request, nama tidak di URL/log/cache/papan",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1119
+    },
+    {
+      "file": "rehearsal.spec.ts",
+      "title": "M17 software rehearsal 1: three rotations, source tools, exit, reflection and offline scan",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 35581
+    },
+    {
+      "file": "rehearsal.spec.ts",
+      "title": "M17 software rehearsal 2: three rotations, source tools, exit, reflection and offline scan",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 35508
+    },
+    {
+      "file": "rehearsal.spec.ts",
+      "title": "M17 software rehearsal 3: three rotations, source tools, exit, reflection and offline scan",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 35499
+    },
+    {
+      "file": "shell.spec.ts",
+      "title": "Aplikasi Guru terbuka pada HP, font lokal siap dan navigasi ke papan bekerja",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1392
+    },
+    {
+      "file": "shell.spec.ts",
+      "title": "Layar Kelas 1920x1080 memakai font papan, tanpa data guru atau kode pasangan palsu",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 876
+    },
+    {
+      "file": "shell.spec.ts",
+      "title": "Kontrol layar penuh terhidrasi dan dapat dibuka lalu ditutup",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 640
+    },
+    {
+      "file": "shell.spec.ts",
+      "title": "Ukuran teks guru 130% tetap dapat dibaca tanpa scroll horizontal",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1040
+    },
+    {
+      "file": "stations.spec.ts",
+      "title": "TURN01 real IndexedDB records actual start once, isolates semester/owner and rejects rewritten history",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 801
+    },
+    {
+      "file": "stations.spec.ts",
+      "title": "ROT01 teacher timer/three rounds and board projection preserve privacy",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 31953
+    },
+    {
+      "file": "storage-recovery.spec.ts",
+      "title": "OFF02 migration retains old records, quota aborts atomically, eviction is detected and canonical pseudonyms can be restored",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2338
+    },
+    {
+      "file": "storage-recovery.spec.ts",
+      "title": "OFF03 a new service worker stays waiting during class and activates only after local data is safe",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2231
+    },
+    {
+      "file": "storage-recovery.spec.ts",
+      "title": "PRIV03 paired roster exists only in board RAM and disappears on offline reload",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 3085
+    },
+    {
+      "file": "sync.spec.ts",
+      "title": "SYNC01 offline queue survives restart, lost ACK retry is idempotent and late correction stays pending until accepted",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2959
+    },
+    {
+      "file": "sync.spec.ts",
+      "title": "SYNC02 401/409/429/503 retain durable data; class deletion purges the local dependency group",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1896
+    },
+    {
+      "file": "sync.spec.ts",
+      "title": "SYNC03 two teacher devices enforce read-only import, explicit takeover and reviewed conflict",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 5963
+    },
+    {
+      "file": "tool-patterns.spec.ts",
+      "title": "Seven patterns use actual paired board, distinct examples, repairs, unique models and independent turns",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 24151
+    },
+    {
+      "file": "tools.spec.ts",
+      "title": "TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 11018
+    },
+    {
+      "file": "tools.spec.ts",
+      "title": "TOOL02 fractions keep whole size, check the model, undo, and run offline on actual board route",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 7738
+    },
+    {
+      "file": "ui-polish-editor.spec.ts",
+      "title": "Polish T01/T05/T06: examples fill forms and use real previews at 360x800",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 3456
+    },
+    {
+      "file": "ui-polish-editor.spec.ts",
+      "title": "Polish T03/T04: pairing CTA is bounded and phone control has one entry at 360x800",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 6234
+    },
+    {
+      "file": "ui-polish-editor.spec.ts",
+      "title": "Polish T01/T05/T06: examples fill forms and use real previews at 390x844",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2951
+    },
+    {
+      "file": "ui-polish-editor.spec.ts",
+      "title": "Polish T03/T04: pairing CTA is bounded and phone control has one entry at 390x844",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 6113
+    },
+    {
+      "file": "ui-polish-editor.spec.ts",
+      "title": "Polish T01/T05/T06: examples fill forms and use real previews at 1366x768",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2814
+    },
+    {
+      "file": "ui-polish-editor.spec.ts",
+      "title": "Polish T03/T04: pairing CTA is bounded and phone control has one entry at 1366x768",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 6398
+    },
+    {
+      "file": "video-connection-logout.spec.ts",
+      "title": "logout revokes only this controller across independent logins of the same teacher; retired UUID cannot re-claim",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1958
+    },
+    {
+      "file": "video-connection-logout.spec.ts",
+      "title": "displaced sample observer logout cannot revoke the active device even if the tab UUID is known",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1354
+    },
+    {
+      "file": "video-connection.spec.ts",
+      "title": "V2 re-scan keeps question 3 and presentation identity; displaced controller, replay and revoked QR are blocked",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 4589
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V1 400-character prompt and four options remain complete and bounded at 1280x720",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2055
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V1 400-character prompt and four options remain complete and bounded at 1366x768",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2093
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V1 400-character prompt and four options remain complete and bounded at 1920x1080",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2187
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V1 all six production tools fit the board after reading a long prompt",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 4399
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V1 model and temporary ink survive reading pages and appearance edits",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1182
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V1 teacher preview uses Atkinson and readable pages at 390x844",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1015
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V1 teacher preview uses Atkinson and readable pages at 1280x720",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1019
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V1/V2 presets use production previews and bounded controls at 1280x720",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1883
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V1/V2 presets use production previews and bounded controls at 1366x768",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1879
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V1/V2 presets use production previews and bounded controls at 1920x1080",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1884
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V2 profile survives resize, reload and failed metadata upload; local fields stay off the wire",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1563
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V2 touch result waits for release and fresh one/two/four contacts; mouse never passes",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 3547
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V2 legacy capabilities migrate to balanced appearance without another wizard",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 370
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "V2 rejected storage retains settings during the tab without a repeated wizard",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 490
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "Polish T02: normal connection stays small, details remain accessible and save notice expires",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 3935
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "Polish T02: a storage warning remains visible while the model still works",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 3843
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "Polish T07: pointer/keyboard motion is accurate with no-preference",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 542
+    },
+    {
+      "file": "video-display.spec.ts",
+      "title": "Polish T07: pointer/keyboard motion is accurate with reduce",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 522
+    },
+    {
+      "file": "video-library.spec.ts",
+      "title": "U01 sample login uses persistent teacher/classes/results on main routes",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2598
+    },
+    {
+      "file": "video-library.spec.ts",
+      "title": "U02 local class identity, attendance and export persist; student UUID and network remain private",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 3691
+    },
+    {
+      "file": "video-library.spec.ts",
+      "title": "U03-U05 system session plays, recovers question3 automatically and stored model survives reload",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 7176
+    },
+    {
+      "file": "video-library.spec.ts",
+      "title": "U12 actual custom-card pixels are bound to frozen form, and rescan is idempotent",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1944
+    },
+    {
+      "file": "video-library.spec.ts",
+      "title": "U14 sample, another teacher, board and visitor cannot read each other's private data",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 2385
+    },
+    {
+      "file": "video-library.spec.ts",
+      "title": "U15 two cached classes open offline; revised pending response syncs once and logout locks cache",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 4051
+    },
+    {
+      "file": "video-library.spec.ts",
+      "title": "U08-U13 author five cards, reuse across classes, store revise and retain historical keys",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 7804
+    },
+    {
+      "file": "video-library.spec.ts",
+      "title": "U10 teacher creates real interactive/writing collection and preview retains form",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 1594
+    },
+    {
+      "file": "video-library.spec.ts",
+      "title": "U16 teacher navigation fits phone and desktop with no runtime errors",
+      "expected": "passed",
+      "status": "passed",
+      "durationMs": 3163
+    }
+  ],
+  "limits": [
+    "Board display timing/transport fixtures are UI evidence only",
+    "Real SQL/RLS and teacher-board pairing use isolated local PostgreSQL/test Auth",
+    "Hosted Auth/Realtime/TLS, native camera QR and physical hardware NOT_RUN",
+    "No new dependency, production migration, deploy or public publication",
+    "Previous Video Ready ZIP remains the September30 snapshot"
+  ]
+}

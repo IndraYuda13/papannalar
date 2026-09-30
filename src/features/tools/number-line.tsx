@@ -42,7 +42,7 @@ export function NumberLine({
     ) => reduceNumberLine(s, a, task),
     initial ?? initialNumberLine(task),
   );
-  const [amount, setAmount] = useState(vertical ? "1" : "-1"),
+  const [amount, setAmount] = useState(asNumber(task.delta) < 0 ? "-1" : "1"),
     [notice, setNotice] = useState("");
   const graph = useRef<SVGSVGElement>(null),
     axisGroup = useRef<SVGGElement>(null),
@@ -171,11 +171,7 @@ export function NumberLine({
       className="board-tool w-full space-y-4"
     >
       <p className="text-[32px]">
-        {suppliedTask
-          ? `Mulai di ${label(asNumber(task.origin))}. Tunjukkan perpindahan ${label(asNumber(task.delta))}.`
-          : vertical
-            ? "Geser lift dari −2 menuju lantai 5. Tebak dulu jaraknya."
-            : "Mulai di −3. Tunjukkan gerakan mengurangi 5."}
+        {`Mulai dari ${label(asNumber(task.origin))}. Geser ${label(Math.abs(asNumber(task.delta)))} ${vertical ? "lantai" : "langkah"} ${asNumber(task.delta) < 0 ? (vertical ? "turun" : "ke kiri") : vertical ? "naik" : "ke kanan"}.`}
       </p>
       <div
         className={
@@ -226,6 +222,7 @@ export function NumberLine({
             {state.jumps.map((j, i) => (
               <path
                 key={i}
+                className="number-line-trail"
                 d={`M ${position(asNumber(j.from))} 140 Q ${(position(asNumber(j.from)) + position(asNumber(j.to))) / 2} ${30 - (i % 3) * 15} ${position(asNumber(j.to))} 140`}
                 fill="none"
                 stroke="var(--color-pn-teal-700)"
@@ -279,6 +276,8 @@ export function NumberLine({
             />
             <circle
               data-testid="number-marker-visual"
+              className="number-line-marker"
+              data-dragging={dragAt !== null ? "true" : "false"}
               aria-hidden="true"
               pointerEvents="none"
               cx={position(dragAt ?? current)}

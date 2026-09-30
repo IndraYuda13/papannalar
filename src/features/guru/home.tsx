@@ -6,6 +6,7 @@ import { Button } from "@/ui/components/button";
 import { panel } from "@/features/library/client";
 import { capturePairingLink } from "@/features/classroom/pairing-url";
 import { OfflineChooser } from "@/features/library/offline-chooser";
+import { BookOpen, Presentation } from "lucide-react";
 export function TeacherHome() {
   const { classes, state, offline } = useTeacher(),
     [pair, setPair] = useState("");
@@ -35,9 +36,14 @@ export function TeacherHome() {
         </p>
       )}
       <section className={panel}>
-        <h2 className="text-xl font-bold">Mulai dari kelas Anda</h2>
+        <h2 className="flex items-center gap-3 text-xl font-bold">
+          <span className="activity-icon" aria-hidden>
+            <BookOpen size={24} strokeWidth={1.8} />
+          </span>
+          Mulai dari kelas Anda
+        </h2>
         <p className="text-muted-foreground">
-          Pilih materi, sambungkan layar, lalu ajak siswa mencoba.
+          Pilih kelas dan soal untuk mulai mengajar.
         </p>
         <Button asChild>
           <Link href={last ? `/guru/mulai?class=${last.id}` : "/guru/kelas"}>
@@ -81,7 +87,10 @@ export function TeacherHome() {
       )}
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-kartu bg-pn-teal-100 p-5">
         <div>
-          <h2 className="font-bold">Layar Kelas</h2>
+          <h2 className="flex items-center gap-2 font-bold">
+            <Presentation size={24} className="text-primary" aria-hidden />
+            Layar Kelas
+          </h2>
           <p className="text-sm">
             Buka pada papan atau proyektor. Sambungkan dari sesi mengajar.
           </p>

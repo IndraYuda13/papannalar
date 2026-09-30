@@ -71,8 +71,13 @@ export function LibraryBoard({
 function PersistentItem({ value }: { value: LibraryBoardState }) {
   const [loaded, setLoaded] = useState(false),
     [model, setModel] = useState<ToolModel>(),
-    [notice, setNotice] = useState("");
+    [notice, setNotice] = useState<{ text: string; temporary: boolean }>();
   const { item, id } = value;
+  useEffect(() => {
+    if (!notice?.temporary) return;
+    const timer = setTimeout(() => setNotice(undefined), 3000);
+    return () => clearTimeout(timer);
+  }, [notice]);
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -82,7 +87,11 @@ function PersistentItem({ value }: { value: LibraryBoardState }) {
           if (!cancelled) setModel(saved);
         }
       } catch {
-        if (!cancelled) setNotice("Progres berlaku selama tab ini terbuka.");
+        if (!cancelled)
+          setNotice({
+            text: "Simpan belum tersedia. Pertahankan tab ini.",
+            temporary: false,
+          });
       } finally {
         if (!cancelled) setLoaded(true);
       }
@@ -102,16 +111,21 @@ function PersistentItem({ value }: { value: LibraryBoardState }) {
         onRun={(next) => {
           if (item.kind !== "interactive") return false;
           void boardToolProgress(id, item.id, item.tool, next)
-            .then(() => setNotice("Progres tersimpan di layar ini."))
+            .then(() =>
+              setNotice({ text: "Tersimpan di papan", temporary: true }),
+            )
             .catch(() =>
-              setNotice("Progres belum tersimpan. Pertahankan tab ini."),
+              setNotice({
+                text: "Belum tersimpan. Pertahankan tab ini.",
+                temporary: false,
+              }),
             );
           return checkModel(item.tool, next);
         }}
       />
       {notice && (
-        <p role="status" className="text-sm">
-          {notice}
+        <p role="status" className="save-notice text-sm" data-save-notice>
+          {notice.text}
         </p>
       )}
     </>

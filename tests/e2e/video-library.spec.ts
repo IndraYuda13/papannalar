@@ -178,7 +178,7 @@ test("U03-U05 system session plays, recovers question3 automatically and stored 
     await board.getByRole("button", { name: "Lompat", exact: true }).click();
     await board.getByRole("button", { name: "Jalankan", exact: true }).click();
     await expect(
-      board.getByText("Progres tersimpan di layar ini."),
+      board.getByText("Tersimpan di papan", { exact: true }),
     ).toBeVisible();
     await board.reload();
     await expect(board.getByTestId("library-board")).toContainText("Soal 3/3");

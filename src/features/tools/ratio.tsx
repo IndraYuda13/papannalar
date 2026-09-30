@@ -65,7 +65,7 @@ export function RatioTable({
       className="board-tool space-y-6 text-left"
     >
       <p className="text-[40px]">
-        Pengali yang sama bekerja pada kedua baris. Apa yang tetap?
+        Kalikan kedua baris dengan bilangan yang sama.
       </p>
       <div className="overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-3 text-center text-[48px]">

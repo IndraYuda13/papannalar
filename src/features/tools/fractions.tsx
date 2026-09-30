@@ -1,5 +1,11 @@
 "use client";
-import { useReducer, useRef, useState, type PointerEvent } from "react";
+import {
+  useReducer,
+  useRef,
+  useState,
+  type PointerEvent,
+  type CSSProperties,
+} from "react";
 import {
   initialFractions,
   reduceFractions,
@@ -56,10 +62,18 @@ export function Fractions({
       aria-label="Batang Pecahan"
       data-tool="fractions"
       className="board-tool space-y-4 text-left"
+      style={
+        {
+          "--fraction-min-whole": `${48 * Math.max(...state.bars.slice(0, task.operation === "represent" ? 1 : task.operation === "equivalent" ? 2 : 3).map((bar) => bar.parts))}px`,
+        } as CSSProperties
+      }
     >
       <p className="text-[32px]">
-        Satu utuh selalu sama panjang. Ketuk bagian untuk mewarnai; seret
-        pegangan untuk membandingkan.
+        {task.operation === "represent"
+          ? `Bagi batang menjadi ${task.left.denominator} bagian sama panjang. Ketuk ${Math.abs(task.left.numerator)} bagian${task.left.numerator < 0 ? ", lalu pilih Negatif" : ""}.`
+          : task.operation === "equivalent"
+            ? "Warnai pecahan yang sama pada dua batang dengan pembagian berbeda."
+            : "Warnai kedua pecahan. Samakan pembagiannya, lalu warnai jumlahnya di batang Gabung."}
       </p>
       {state.bars.map((bar, index) => {
         const i = index as 0 | 1 | 2;

@@ -21,6 +21,7 @@ import { createNameRepository } from "@/local/names";
 import { libraryCache } from "@/local/library";
 import { LocalRoster } from "./local-roster";
 import { classPresence } from "@/local/class-presence";
+import { UsersRound } from "lucide-react";
 export function ClassesPage() {
   const { classes, scope, refresh } = useTeacher(),
     [adding, setAdding] = useState(false),
@@ -29,7 +30,10 @@ export function ClassesPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-[28px] font-extrabold">Kelas</h1>
+        <h1 className="flex items-center gap-3 text-[28px] font-extrabold">
+          <UsersRound size={28} className="text-primary" aria-hidden />
+          Kelas
+        </h1>
         <Button onClick={() => setAdding(!adding)}>Tambah kelas</Button>
       </div>
       {adding && (

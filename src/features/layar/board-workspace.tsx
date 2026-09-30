@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CircleCheck } from "lucide-react";
 import {
   challengeSchema,
   pairingStatusSchema,
@@ -273,6 +274,12 @@ export function BoardWorkspace() {
       clearInterval(timer);
     };
   }, [envelope, locallyControlled]);
+  const connected =
+    !locallyControlled &&
+    Boolean(envelope) &&
+    browserOnline &&
+    online &&
+    connection?.controller === "present";
   return (
     <div className="board-workspace w-full">
       {!displayed || testing ? (
@@ -289,6 +296,20 @@ export function BoardWorkspace() {
         <summary className="min-h-24 cursor-pointer p-6">
           Menu papan · kemampuan dan cadangan
         </summary>
+        <section aria-label="Status papan" className="space-y-2 text-base">
+          <h2 className="font-bold">Status papan</h2>
+          <p>
+            {connected
+              ? "HP guru tersambung. Kendali siap digunakan."
+              : "Sambungkan HP guru untuk mengendalikan papan."}
+          </p>
+          {locallyControlled && (
+            <p>
+              Tampilan dikendalikan di papan. Catat giliran siswa di HP guru.
+              Daftar kelompok hanya tersedia saat tersambung.
+            </p>
+          )}
+        </section>
         <Button size="board" variant="outline" onClick={() => setTesting(true)}>
           Tes Kemampuan Papan
         </Button>
@@ -351,7 +372,7 @@ export function BoardWorkspace() {
           </p>
         )}
         {fallback && !fallback.together && (
-          <p>Pilot bergantian. Berdua serentak dimatikan.</p>
+          <p>Gunakan papan bergantian. Sentuhan bersama belum tersedia.</p>
         )}
         {fallback?.laptop && (
           <p>
@@ -360,25 +381,26 @@ export function BoardWorkspace() {
           </p>
         )}
         {fallback?.reducedMotion && (
-          <p>
-            Animasi dikurangi; kelancaran belum terverifikasi atau p95 ≥ 500 ms.
-          </p>
+          <p>Animasi dikurangi agar papan lebih nyaman digunakan.</p>
         )}
       </details>
       <p
         data-testid="board-connection"
         role="status"
-        className="mb-6 text-[28px] text-muted-foreground"
+        className={
+          connected ? "board-connection-badge" : "text-muted-foreground"
+        }
       >
+        {connected && <CircleCheck size={18} aria-hidden />}
         {locallyControlled
           ? envelope
-            ? "Kendali lokal di papan. Pilih tampilan papan atau HP dari HP guru saat tersambung kembali."
-            : "Paket offline · daftar kelompok tidak disimpan. Guru membacakan kelompok dan memilih aktivitas."
+            ? "Kendali lokal di papan. Sambungkan HP untuk mengambil kendali."
+            : "Paket offline · daftar kelompok tidak disimpan. Guru membacakan kelompok."
           : envelope
             ? !browserOnline
               ? "Offline di papan. Soal tetap dapat digunakan."
               : online && connection?.controller === "present"
-                ? "Terhubung ke HP guru"
+                ? "Tersambung"
                 : "Sambungan guru sedang dipulihkan. Soal tetap dapat digunakan."
             : "Belum tersambung"}
       </p>
@@ -411,8 +433,8 @@ export function BoardWorkspace() {
       )}
       {packageView.stale && (
         <p role="alert" className="my-4 text-[32px]">
-          Paket atau kelompok berubah saat papan offline. Buka navigasi dan
-          pilih ulang tampilan sebelum menyambungkan kendali HP.
+          Materi berubah saat papan offline. Pilih ulang tampilan, lalu
+          sambungkan HP.
         </p>
       )}
       {displayed ? (
@@ -471,12 +493,6 @@ export function BoardWorkspace() {
               mode={displayed.mode}
               onSelect={packageView.select}
             />
-            {locallyControlled && (
-              <p className="mt-4 text-[26px]">
-                Navigasi ini tidak mencatat giliran siswa. Konfirmasikan giliran
-                yang benar-benar terjadi pada HP guru.
-              </p>
-            )}
           </div>
         </BoardCapabilities>
       ) : (

@@ -1,4 +1,5 @@
 "use client";
+import { useId } from "react";
 import type { PublicTool } from "@/contracts/tools";
 import { field } from "./client";
 export const TOOL_LABELS = [
@@ -52,24 +53,34 @@ function NumberField({
   onChange,
   min = -100,
   max = 100,
+  help,
 }: {
   label: string;
   value: number;
   onChange: (n: number) => void;
   min?: number;
   max?: number;
+  help?: string;
 }) {
+  const helpId = useId();
   return (
     <label className="block text-sm">
       {label}
       <input
         type="number"
+        aria-label={label}
+        aria-describedby={help ? helpId : undefined}
         className={field}
         value={value}
         min={min}
         max={max}
         onChange={(e) => onChange(Number(e.target.value))}
       />
+      {help && (
+        <span id={helpId} className="mt-1 block text-xs text-muted-foreground">
+          {help}
+        </span>
+      )}
     </label>
   );
 }
@@ -86,13 +97,19 @@ export function ToolFields({
       <div className={grid}>
         <NumberField
           label="Titik awal"
+          help="Titik mulai penanda."
           value={t.origin.numerator}
           onChange={(n) =>
             set({ ...t, origin: { numerator: n, denominator: 1 } })
           }
         />
         <NumberField
-          label="Perubahan (negatif untuk turun)"
+          label="Perpindahan"
+          help={
+            t.orientation === "vertical"
+              ? "Positif untuk naik; negatif untuk turun."
+              : "Positif ke kanan; negatif ke kiri."
+          }
           value={t.delta.numerator}
           onChange={(n) =>
             set({ ...t, delta: { numerator: n, denominator: 1 } })
@@ -116,7 +133,7 @@ export function ToolFields({
           </select>
         </label>
         <p className="self-center text-sm">
-          Penanda mengikuti satuan bilangan.
+          Penanda berhenti pada tiap satuan bilangan.
         </p>
       </div>
     );
@@ -124,7 +141,7 @@ export function ToolFields({
     return (
       <div className={grid}>
         <label>
-          Aktivitas
+          Cara bermain
           <select
             className={field}
             value={t.operation}
@@ -140,7 +157,7 @@ export function ToolFields({
               })
             }
           >
-            <option value="represent">Mewakili pecahan</option>
+            <option value="represent">Menunjukkan pecahan</option>
             <option value="add">Penjumlahan</option>
             <option value="equivalent">Pecahan senilai</option>
           </select>
@@ -149,6 +166,7 @@ export function ToolFields({
           <div key={side} className="space-y-2">
             <NumberField
               label={`Pembilang ${i + 1}`}
+              help="Banyak bagian yang diwarnai. Negatif memakai tanda minus."
               value={t[side].numerator}
               min={-12}
               max={12}
@@ -158,6 +176,7 @@ export function ToolFields({
             />
             <NumberField
               label={`Penyebut ${i + 1}`}
+              help="Banyak bagian sama besar dalam satu utuh (2–12)."
               value={t[side].denominator}
               min={2}
               max={12}
@@ -172,6 +191,10 @@ export function ToolFields({
   if (t.kind === "ratio")
     return (
       <div className={grid}>
+        <p className="col-span-2 text-sm text-muted-foreground">
+          X dan Y adalah dua besaran, misalnya sirup dan air. Keduanya memakai
+          pengali yang sama.
+        </p>
         {(
           [
             ["baseX", "Nilai awal X"],
@@ -184,6 +207,11 @@ export function ToolFields({
             label={label}
             value={t[key]}
             min={1}
+            help={
+              key === "targetX"
+                ? "Nilai X yang ingin dicapai siswa."
+                : "Pasangan nilai awal pada tabel."
+            }
             max={10000}
             onChange={(n) => set({ ...t, [key]: n })}
           />
@@ -205,6 +233,11 @@ export function ToolFields({
             label={label}
             value={t[key]}
             min={min}
+            help={
+              key === "groups"
+                ? "Banyak kelompok yang dibuat siswa."
+                : "Isi setiap kelompok. Negatif memakai ubin bertanda minus."
+            }
             max={max}
             onChange={(n) => set({ ...t, [key]: n })}
           />
@@ -218,6 +251,7 @@ export function ToolFields({
           <div key={side}>
             <NumberField
               label={`Koefisien x sisi ${i === 0 ? "kiri" : "kanan"}`}
+              help="Banyak x di sisi ini. Isi 0 jika tidak ada x."
               value={t[side].x}
               min={-12}
               max={12}
@@ -225,6 +259,7 @@ export function ToolFields({
             />
             <NumberField
               label={`Konstanta sisi ${i === 0 ? "kiri" : "kanan"}`}
+              help="Bilangan tanpa x di sisi ini."
               value={t[side].constant}
               onChange={(n) =>
                 set({ ...t, [side]: { ...t[side], constant: n } })
@@ -239,6 +274,7 @@ export function ToolFields({
       <div className={grid}>
         <NumberField
           label="Gradien garis"
+          help="Perubahan y saat x bertambah 1. Negatif membuat garis menurun."
           value={t.lines[0].m}
           min={-12}
           max={12}
@@ -246,11 +282,13 @@ export function ToolFields({
         />
         <NumberField
           label="Titik potong Y"
+          help="Nilai y saat x = 0."
           value={t.lines[0].b}
           onChange={(n) => set({ ...t, lines: [{ m: t.lines[0].m, b: n }] })}
         />
         <NumberField
           label="Nilai x yang dicari"
+          help="Siswa memilih titik pada nilai x ini."
           value={t.goal.type === "value" ? t.goal.x : 0}
           min={-5}
           max={5}
@@ -263,8 +301,8 @@ export function ToolFields({
     );
   return (
     <p>
-      Konfigurasi tersimpan dapat dipreview. Salin ke aktivitas baru untuk
-      mengubah jenis.
+      Soal tersimpan dapat dipreview. Salin ke aktivitas baru untuk mengubah
+      jenis.
     </p>
   );
 }

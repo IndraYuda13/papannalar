@@ -130,7 +130,7 @@ export function CycleWorkspace({
       setDraft(undefined);
       setAckMissing(false);
       setMessage(
-        "Sesi baru dimulai tanpa jawaban bawaan. Paket dikunci untuk menjaga binding.",
+        "Sesi baru siap, belum ada jawaban. Soal dan kelas dikunci selama sesi ini.",
       );
     } catch {
       setMessage(

@@ -141,9 +141,7 @@ export function SessionWorkspace({
       setContext(undefined);
       setCards([]);
       setDraft(undefined);
-      setMessage(
-        "Sesi demo lokal direset. Mulai kembali untuk seed yang sama.",
-      );
+      setMessage("Sesi contoh dikosongkan. Mulai lagi dengan soal yang sama.");
     } catch {
       setMessage("Reset belum tersimpan.");
     } finally {

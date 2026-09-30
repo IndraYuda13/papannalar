@@ -225,7 +225,7 @@ test("M05-b recorded PRELIM regression: opening, check, scan, groups, station, a
       exact: true,
     })
     .click();
-  await expect(exit).toContainText("Kelompok dan soal keluar dibekukan");
+  await expect(exit).toContainText("Kelompok dan soal keluar dikunci");
   await exit
     .getByRole("button", { name: "Tampilkan baris keluar 2", exact: true })
     .click();

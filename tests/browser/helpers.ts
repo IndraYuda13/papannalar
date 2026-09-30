@@ -31,6 +31,12 @@ export async function openBoard(
     )
     .toBe(true);
   if (await save.isVisible()) await save.click();
+  // A connection badge can render before the first-use capability effect.
+  // Wait for the actual check when this browser has no saved profile.
+  const hasProfile = await page.evaluate(() =>
+    Boolean(localStorage.getItem("pn-board-capabilities-v1")),
+  );
+  if (!hasProfile) await expect(check).toBeVisible();
   await expect
     .poll(async () => {
       if (await check.isVisible())
@@ -41,8 +47,9 @@ export async function openBoard(
           })
           .click();
       return (
-        (await page.getByTestId("pairing-code").isVisible()) ||
-        (await page.getByTestId("board-connection").isVisible())
+        !(await check.isVisible()) &&
+        ((await page.getByTestId("pairing-code").isVisible()) ||
+          (await page.getByTestId("board-connection").isVisible()))
       );
     })
     .toBe(true);

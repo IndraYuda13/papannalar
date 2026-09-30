@@ -90,7 +90,7 @@ export function ExitWorkspace({
       setPlan(value);
       setCards([]);
       setMessage(
-        "Kelompok dan soal keluar dibekukan. Koreksi kartu memakai binding yang sama.",
+        "Kelompok dan soal keluar dikunci. Koreksi kartu tetap memakai sesi ini.",
       );
     } catch {
       setMessage(

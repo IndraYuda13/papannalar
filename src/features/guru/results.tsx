@@ -12,6 +12,7 @@ import { libraryCache } from "@/local/library";
 import { createNameRepository } from "@/local/names";
 import { Button } from "@/ui/components/button";
 import { mathText } from "@/features/library/item-view";
+import { ClipboardCheck, FileCheck2 } from "lucide-react";
 export function AssessmentsPage() {
   const { state, classes } = useTeacher(),
     [tab, setTab] = useState<"sessions" | "results">("sessions"),
@@ -31,12 +32,15 @@ export function AssessmentsPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-[28px] font-extrabold">Asesmen & Hasil</h1>
+        <h1 className="flex items-center gap-3 text-[28px] font-extrabold">
+          <ClipboardCheck size={28} className="text-primary" aria-hidden />
+          Asesmen & Hasil
+        </h1>
         <Button asChild>
           <Link href="/guru/mulai?mode=assessment">Buat asesmen</Link>
         </Button>
       </div>
-      <p>Kelola tes dan rekap pemahaman.</p>
+      <p>Periksa jawaban siswa dan lihat hasilnya.</p>
       <div role="tablist" className="flex gap-2">
         <Button
           role="tab"
@@ -195,17 +199,18 @@ export function ResultPage({ id }: { id: string }) {
         {run.document.title} · {run.date.split("-").reverse().join("/")}
       </p>
       {run.synthetic && (
-        <p className="text-sm">Hasil sintetis untuk data contoh.</p>
+        <p className="text-sm">Hasil contoh, bukan data siswa nyata.</p>
       )}
       <section className={panel}>
-        <h2 className="text-xl font-bold">
+        <h2 className="flex items-center gap-2 text-xl font-bold">
+          <FileCheck2 size={24} className="text-primary" aria-hidden />
           {responses.length}/{run.roster.length} lembar masuk
         </h2>
         <p className="text-sm text-muted-foreground">
           {navigator.onLine
-            ? "Tersimpan di database"
+            ? "Hasil tersimpan"
             : "Salinan tersimpan di perangkat"}{" "}
-          · Riwayat nomor absen saat asesmen
+          · Nomor absen saat asesmen
         </p>
         <ul className="divide-y">
           {run.roster.map((s) => {

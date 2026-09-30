@@ -6,6 +6,7 @@ import {
 import { snapshotSchema } from "../../src/contracts/presentation";
 import { loginTeacher } from "../browser/helpers";
 import type { PublicTool } from "../../src/contracts/tools";
+import { INTERACTIVE_HELP } from "../../src/features/library/templates";
 
 const fixtureId = "7b000001-0000-4000-8000-000000000099";
 const legacyCapabilities = {
@@ -24,7 +25,11 @@ const legacyCapabilities = {
   height: "normal",
   durationSeconds: 10,
 };
-async function storedBoard(page: Page, preset = "balanced") {
+async function storedBoard(
+  page: Page,
+  preset = "balanced",
+  allowMotion = false,
+) {
   await page.addInitScript(
     ({ capabilities, preset, id }) => {
       localStorage.setItem(
@@ -41,7 +46,16 @@ async function storedBoard(page: Page, preset = "balanced") {
         }),
       );
     },
-    { capabilities: legacyCapabilities, preset, id: fixtureId },
+    {
+      capabilities: {
+        ...legacyCapabilities,
+        samples: allowMotion ? 20 : 0,
+        medianMs: allowMotion ? 5 : null,
+        p95Ms: allowMotion ? 10 : null,
+      },
+      preset,
+      id: fixtureId,
+    },
   );
 }
 // UI-only transport fixtures. These tests neither claim live pairing coverage
@@ -307,7 +321,7 @@ test("V1 all six production tools fit the board after reading a long prompt", as
         /\S/,
       );
       await expect(
-        page.getByText("Progres tersimpan di layar ini.", { exact: true }),
+        page.getByText("Tersimpan di papan", { exact: true }),
       ).toBeVisible();
       await bounded(page);
       await readablePage(page);
@@ -825,3 +839,125 @@ test("V2 rejected storage retains settings during the tab without a repeated wiz
     await page.evaluate(() => localStorage.getItem("pn-board-appearance-v1")),
   ).toBeNull();
 });
+
+test("Polish T02: normal connection stays small, details remain accessible and save notice expires", async ({
+  page,
+}, info) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await storedBoard(page);
+  const item = INTERACTIVE_HELP["number-line"].templates[0].item;
+  await boardFixture(page, () => libraryItem({ id: fixtureId, ...item }));
+  await page.goto("/layar");
+  const badge = page.getByTestId("board-connection");
+  await expect(badge).toHaveText("Tersambung");
+  const geometry = await badge.evaluate((el) => ({
+    height: el.getBoundingClientRect().height,
+    size: parseFloat(getComputedStyle(el).fontSize),
+  }));
+  expect(geometry.height).toBeLessThanOrEqual(28);
+  expect(geometry.size).toBeLessThanOrEqual(18);
+  const menu = page.locator(".board-menu");
+  await menu.locator("summary").click();
+  await expect(
+    menu.getByRole("region", { name: "Status papan", exact: true }),
+  ).toContainText("HP guru tersambung");
+  await menu.locator("summary").click();
+  await page
+    .locator(".board-tool")
+    .getByRole("button", { name: "Jalankan", exact: true })
+    .click();
+  const notice = page.getByText("Tersimpan di papan", { exact: true });
+  await expect(notice).toBeVisible();
+  await expect(notice).not.toBeVisible({ timeout: 5000 });
+  await expect(page.locator(".board-tool > [role=status]")).toContainText(
+    "Coba periksa",
+  );
+  await bounded(page);
+  await page.screenshot({ path: info.outputPath("quiet-connected-board.png") });
+});
+
+test("Polish T02: a storage warning remains visible while the model still works", async ({
+  page,
+}) => {
+  await storedBoard(page);
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "indexedDB", {
+      get() {
+        throw new DOMException("Storage denied", "SecurityError");
+      },
+    });
+  });
+  const item = INTERACTIVE_HELP["number-line"].templates[0].item;
+  await boardFixture(page, () => libraryItem({ id: fixtureId, ...item }));
+  await page.goto("/layar");
+  await expect(
+    page.getByText("Simpan belum tersedia. Pertahankan tab ini.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Lompat", exact: true }).click();
+  await expect(page.getByTestId("number-position")).toHaveText("Posisi −2");
+  await page.getByRole("button", { name: "Jalankan", exact: true }).click();
+  const warning = page.getByText("Belum tersimpan. Pertahankan tab ini.", {
+    exact: true,
+  });
+  await expect(warning).toBeVisible();
+  await page.waitForTimeout(3400);
+  await expect(warning).toBeVisible();
+});
+
+for (const motion of ["no-preference", "reduce"] as const) {
+  test(`Polish T07: pointer/keyboard motion is accurate with ${motion}`, async ({
+    page,
+  }, info) => {
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message));
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.emulateMedia({ reducedMotion: motion });
+    // UI fixture timing enables animations; it is not a hardware measurement.
+    await storedBoard(page, "balanced", true);
+    const item = INTERACTIVE_HELP["number-line"].templates[0].item;
+    await boardFixture(page, () => libraryItem({ id: fixtureId, ...item }));
+    await page.goto("/layar");
+    const marker = page.getByTestId("number-marker");
+    await marker.focus();
+    await marker.press("ArrowRight");
+    await expect(page.getByTestId("number-position")).toHaveText("Posisi −2");
+    const visual = page.getByTestId("number-marker-visual");
+    expect(
+      await visual.evaluate((el) => getComputedStyle(el).transitionDuration),
+    ).toBe(motion === "reduce" ? "0s" : "0.16s");
+    const start = (await marker.boundingBox())!;
+    const to = await marker.evaluate((el) => {
+      const transform = (el.parentNode as SVGGElement).getScreenCTM()!;
+      const point = new DOMPoint(660, 150).matrixTransform(transform);
+      return { x: point.x, y: point.y };
+    });
+    await page.mouse.move(
+      start.x + start.width / 2,
+      start.y + start.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(to.x, to.y, { steps: 6 });
+    await expect(visual).toHaveAttribute("data-dragging", "true");
+    expect(
+      await visual.evaluate((el) => getComputedStyle(el).transitionDuration),
+    ).toBe("0s");
+    await page.mouse.up();
+    await expect(page.getByTestId("number-position")).toHaveText("Posisi 0");
+    await expect(visual).toHaveAttribute("data-dragging", "false");
+    if (motion === "reduce") {
+      expect(
+        await page
+          .locator(".number-line-trail")
+          .last()
+          .evaluate((el) => getComputedStyle(el).animationName),
+      ).toBe("none");
+    }
+    await bounded(page);
+    await page.screenshot({
+      path: info.outputPath(`number-line-${motion}.png`),
+    });
+    expect(errors).toEqual([]);
+  });
+}

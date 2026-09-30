@@ -137,7 +137,7 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
     .getByRole("button", { name: "Gunakan tampilan papan", exact: true })
     .click();
   await expect(board.getByTestId("board-connection")).toContainText(
-    "Terhubung ke HP",
+    "Tersambung",
     { timeout: 20000 },
   );
   await expect(
@@ -153,7 +153,7 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
     .getByRole("button", { name: "Kembali ke tampilan HP", exact: true })
     .click();
   await expect(board.getByTestId("board-connection")).toContainText(
-    "Terhubung ke HP",
+    "Tersambung",
   );
   await expect(
     board.getByRole("region", { name: "Soal cek paket", exact: true }),

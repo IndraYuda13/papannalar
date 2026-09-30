@@ -232,7 +232,7 @@ test("PRIV03 paired roster exists only in board RAM and disappears on offline re
     ).status(),
   ).toBe(200);
   await expect(board.getByTestId("board-connection")).toContainText(
-    "Terhubung",
+    "Tersambung",
   );
   await expect(board.getByText("Segitiga Biru", { exact: true })).toBeVisible();
   expect(await board.evaluate(() => Object.keys(localStorage))).toEqual([

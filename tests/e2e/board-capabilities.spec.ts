@@ -144,7 +144,9 @@ for (const touches of [0, 1, 2, 4])
       ).toBeVisible();
     if (touches <= 1)
       await expect(
-        page.getByText("Pilot bergantian. Berdua serentak dimatikan."),
+        page.getByText(
+          "Gunakan papan bergantian. Sentuhan bersama belum tersedia.",
+        ),
       ).toBeVisible();
     if (touches === 0 || touches === 2) {
       const teacherContext = await browser.newContext({
@@ -197,7 +199,7 @@ for (const touches of [0, 1, 2, 4])
       expect(claim.status()).toBe(200);
       const snapshot = await claim.json();
       await expect(page.getByTestId("board-connection")).toContainText(
-        "Terhubung",
+        "Tersambung",
       );
       const pairedProfile = await teacher.request.get(
         `/api/v1/board-profiles?presentationId=${snapshot.envelope.presentationId}`,
@@ -325,13 +327,13 @@ test("REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot
       lastInput = r.postDataJSON();
   });
   const remote = page
-    .getByText("Kendali alat dari HP", { exact: true })
+    .getByText("Kendali dari HP", { exact: true })
     .locator("..");
   await remote.locator("summary").click();
   await remote
     .getByRole("button", { name: "Aktifkan kendali alat", exact: true })
     .click();
-  await expect(remote.getByRole("status")).toContainText("Kendali terhubung");
+  await expect(remote.getByRole("status")).toContainText("Kendali aktif");
   async function clickBoard(target: Locator) {
     await target.scrollIntoViewIfNeeded();
     const p = await target.evaluate((element) => {

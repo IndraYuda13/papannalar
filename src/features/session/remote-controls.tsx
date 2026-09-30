@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { Smartphone } from "lucide-react";
 import type { PresentationEnvelope } from "@/contracts/presentation";
 import {
   remoteBinding,
@@ -13,7 +14,7 @@ export function RemoteControls({ env }: { env: PresentationEnvelope }) {
     [editable, setEditable] = useState(false),
     [value, setValue] = useState("1"),
     [message, setMessage] = useState(
-      "Kendali HP memerlukan sambungan aktif ke papan.",
+      "Aktifkan kendali setelah HP tersambung ke papan.",
     );
   const transport = useRef<{ instance: string; sequence: number } | undefined>(
       undefined,
@@ -33,7 +34,7 @@ export function RemoteControls({ env }: { env: PresentationEnvelope }) {
     setActive(false);
     setEditable(false);
     setMessage(
-      "Kendali berhenti. Tidak ada input yang diputar ulang; gunakan sentuhan/mouse lokal atau hubungkan kembali saat online.",
+      "Kendali berhenti. Gunakan papan langsung, atau sambungkan ulang HP saat internet kembali.",
     );
   }
   useEffect(() => {
@@ -60,7 +61,9 @@ export function RemoteControls({ env }: { env: PresentationEnvelope }) {
       };
       chain.current = Promise.resolve();
       setActive(true);
-      setMessage("Kendali terhubung. Pilih kontrol pada papan lewat trackpad.");
+      setMessage(
+        "Kendali aktif. Gerakkan penanda untuk memilih alat di papan.",
+      );
     } catch {
       stop();
     }
@@ -117,8 +120,8 @@ export function RemoteControls({ env }: { env: PresentationEnvelope }) {
         if (selected.data.kind !== "move")
           setMessage(
             status.receipt.applied
-              ? "Aksi diterapkan papan."
-              : "Pilih kontrol alat yang terlihat pada papan; perintah sesi dan tulisan tidak dikendalikan di sini.",
+              ? "Papan mengikuti gerakan Anda."
+              : "Pilih tombol atau objek alat di papan. Tulisan tetap dibuat langsung di papan.",
           );
       })
       .catch(() => {
@@ -153,13 +156,14 @@ export function RemoteControls({ env }: { env: PresentationEnvelope }) {
   }
   return (
     <details className="space-y-3 rounded-input border p-3">
-      <summary className="min-h-12 cursor-pointer font-bold">
-        Kendali alat dari HP
+      <summary className="min-h-12 cursor-pointer py-3 font-semibold text-primary">
+        <Smartphone size={20} className="mr-2 inline-block" aria-hidden />
+        Kendali dari HP
       </summary>
-      <p>
-        Gerakkan penanda, ketuk tombol alat, atau aktifkan Seret untuk
-        memindahkan objek. Siswa memberi arahan lisan. Tulisan refleksi tetap
-        hanya di papan.
+      <h3 className="font-bold">Gerakkan alat di papan</h3>
+      <p className="text-sm text-muted-foreground">
+        Geser penanda di bidang sentuh. Ketuk untuk memilih. Aktifkan Seret
+        objek untuk memindahkan alat.
       </p>
       <Button onClick={() => void connect()}>
         {active ? "Hubungkan ulang kendali" : "Aktifkan kendali alat"}
@@ -203,7 +207,7 @@ export function RemoteControls({ env }: { env: PresentationEnvelope }) {
             send({ kind: "cancel" });
           }}
         >
-          Trackpad · lihat penanda di papan
+          Bidang sentuh · lihat penanda di papan
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -220,7 +224,7 @@ export function RemoteControls({ env }: { env: PresentationEnvelope }) {
           </Button>
         </div>
         <label className="block">
-          Nilai kendali terpilih
+          Nilai untuk alat yang dipilih
           <input
             aria-label="Nilai kendali terpilih"
             inputMode="decimal"

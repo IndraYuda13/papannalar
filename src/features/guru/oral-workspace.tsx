@@ -253,8 +253,8 @@ export function OralWorkspace({
               {state.placement?.kind === "step"
                 ? state.placement.stepId
                 : "Lanjut"}
-              . Hasil ini disimpan terpisah dari penguasaan BKT; provisional
-              K13, perlu review sebelum pilot.
+              . Hasil cek lisan terpisah dari latihan tertulis. Cara penempatan
+              ini masih perlu ditinjau sebelum dipakai pada pilot.
             </p>
           )}
           <p>

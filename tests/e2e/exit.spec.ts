@@ -106,7 +106,7 @@ test("EXIT01 teacher freezes package, board gets each public row, manual review 
       exact: true,
     })
     .click();
-  await expect(exit).toContainText("Kelompok dan soal keluar dibekukan");
+  await expect(exit).toContainText("Kelompok dan soal keluar dikunci");
   for (const row of [1, 2, 3]) {
     await exit
       .getByRole("button", {

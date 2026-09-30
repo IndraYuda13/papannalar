@@ -314,7 +314,7 @@ export function SessionWorkspace({
             {transport.connection?.transport === "offline"
               ? "Koneksi terputus. Menyambungkan kembali…"
               : transport.message ||
-                "Buka /layar pada papan, lalu pindai QR atau masukkan kodenya."}
+                "Buka Layar Kelas di papan. Pindai QR atau masukkan kodenya."}
           </p>
           <PairingCodeInput
             onPair={transport.pair}
@@ -328,8 +328,8 @@ export function SessionWorkspace({
         </section>
       ) : (
         <p>
-          Sesi selesai. Hasil tetap dapat dibuka dan lembar yang terlambat dapat
-          dicatat.
+          Sesi selesai. Anda masih bisa membuka hasil atau mencatat lembar yang
+          terlambat.
         </p>
       )}
       <section className={panel}>
@@ -379,12 +379,7 @@ export function SessionWorkspace({
           </div>
         )}
         {transport.snapshot && item.kind === "interactive" && (
-          <details>
-            <summary className="min-h-12 cursor-pointer font-semibold text-primary">
-              Kendali dari HP
-            </summary>
-            <RemoteControls env={transport.snapshot.envelope} />
-          </details>
+          <RemoteControls key={item.id} env={transport.snapshot.envelope} />
         )}
       </section>
       {run.mode === "assessment" && (

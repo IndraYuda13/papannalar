@@ -84,7 +84,7 @@ test("Seven patterns use actual paired board, distinct examples, repairs, unique
   await board.getByRole("button", { name: "Petunjuk 3", exact: true }).click();
   await expect(
     board.getByRole("region", { name: "Contoh kembar", exact: true }),
-  ).toContainText("Mulai di −1");
+  ).toContainText("Mulai dari −1");
   await board.clock.runFor(31000);
   await expect(board.getByTestId("example-progress")).toContainText("30/30");
   await expect(

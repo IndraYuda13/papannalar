@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { ScanLine } from "lucide-react";
 import type { CardAnswer, CardKind } from "@/cards/layouts/layout-v1";
 import type { ScanResult } from "@/workers/omr/scan";
 import {
@@ -215,9 +216,12 @@ function CaptureSession({
       aria-label="Pindai Kartu"
       className="space-y-3 rounded-kartu border border-pn-ink-400/40 bg-white p-4"
     >
-      <h3 className="text-lg font-bold">Pindai Kartu</h3>
+      <h3 className="flex items-center gap-2 text-lg font-bold">
+        <ScanLine size={22} className="text-primary" aria-hidden />
+        Pindai Kartu
+      </h3>
       <p className="text-sm text-muted-foreground">
-        Pembacaan di perangkat ini. Foto tidak dikirim atau disimpan.
+        Foto dibaca di perangkat ini, tanpa dikirim atau disimpan.
       </p>
       <video
         ref={video}
@@ -295,14 +299,13 @@ function CaptureSession({
       </div>
       {failures >= 2 && (
         <p className="font-semibold text-pn-peringatan">
-          Dua pembacaan belum berhasil. Anda dapat melanjutkan dengan input
-          manual.
+          Kartu belum terbaca. Gunakan Input manual untuk melanjutkan.
         </p>
       )}
       {fixtures.length > 0 && (
         <div className="space-y-2 border-t pt-3">
           <p className="text-sm font-semibold">
-            Input demo sintetis — tetap melalui scanner piksel
+            Kartu contoh · dibaca seperti foto kartu
           </p>
           <div className="flex flex-wrap gap-2">
             {fixtures.map((fixture) => (

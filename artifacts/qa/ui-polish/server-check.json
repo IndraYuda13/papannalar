@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-01T02:27:08.2462751+07:00",
+  "serverSession": 95752,
+  "buildId": "FNk5af98oFfsDZeeiRDem",
+  "http": [
+    {
+      "route": "/masuk",
+      "status": 200
+    },
+    {
+      "route": "/layar",
+      "status": 200
+    }
+  ]
+}

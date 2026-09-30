@@ -129,8 +129,8 @@ export function AlgebraTiles({
       className="board-tool space-y-4 text-left"
     >
       <p className="text-[32px]">
-        Pilih kelompok lalu ketuk atau seret ubin. Satukan pasangan sejenis +
-        dan − menjadi nol.
+        Pilih kelompok. Ketuk atau seret ubin ke dalamnya. Pasangkan ubin + dan
+        − sejenis untuk membuat nol.
       </p>
       <div className="flex flex-wrap gap-3">
         <Button

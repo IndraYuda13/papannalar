@@ -1,7 +1,9 @@
 # PLAN - Eksekusi Codex PapanNalar
 
 Versi 1.0 | Disusun 29 September 2026
-Status terkini (30 September 2026): V1–V6 Video Ready DONE software lokal sesuai
+Status terkini (1 Oktober 2026): UI/UX polish P1–P3 DONE software lokal sesuai prompt
+pengguna `E:/ASUS/Downloads/PapanNalar_UI_UX_Polish_Prompt.md` dan jawaban
+“Jalankan perubahan di repo”. V1–V6 Video Ready DONE software lokal sesuai
 `PapanNalar_Video_Ready_Codex.md`; menggantikan prioritas corrective pass lama.
 Baseline M00–M17 dipertahankan; M00–M11 DONE sesuai batas evidence.
 M12-a DONE, M12-b NOT_RUN, audit M12-c selesai dengan gate eksternal terbuka.
@@ -53,7 +55,8 @@ Perbaikan terarah menutup seluruh failure: 102 skenario unik memiliki hasil tera
 PASS; bukan klaim satu run102 baru. Kandidat terakhir26 PASS, smoke server berjalan
 7 PASS. Regresi auth/clock56 unit/5 file PASS (16 tes baru). Build/typecheck/lint
 terakhir PASS. Evidence `artifacts/qa/video-ready/final-evidence.json` dan jurnal9.49.
-Server `pnpm video` terkelola37723 aktif; `/masuk` dan `/layar` HTTP200.
+Server Video Ready lama37723 telah diganti oleh kandidat polish terkelola95752;
+hasil dan validasi terkini pada jurnal9.51. Dataset rekaman persisten dipertahankan.
 Next exact: rekam dua jendela dengan `VIDEO_HANDOFF.md`; untuk HP-papan fisik,
 siapkan origin HTTPS/target Supabase yang diotorisasi dan matriks perangkat M12-b.
 Tidak ada TRUE BLOCKER coding. Hosted, native QR dan hardware tetap NOT_RUN.
@@ -90,13 +93,13 @@ Ubah status hanya berdasarkan pekerjaan yang benar-benar dilakukan.
 
 | Field | Nilai terkini |
 | --- | --- |
-| Milestone aktif | Video Ready V1–V6; baseline software lama dipertahankan |
-| Task aktif | V1–V6 DONE software lokal; handoff rekaman, tidak membuka milestone baru |
+| Milestone aktif | UI/UX polish P1–P3 DONE software lokal; Video Ready V1–V6 dan baseline dipertahankan |
+| Task aktif | P1–P3 selesai: microcopy/status/kendali/pairing, template editor, ikon dan motion ringan; handoff untuk walkthrough/rekaman |
 | Commit aplikasi terakhir | Implementasi masih working tree; base dokumen `47aa60d729b293a53365a780c0d1cd9485ec6f95` |
 | Repository diperiksa | Ya, 29 Sep 2026; satu Next app di root, pnpm-lock.yaml; perubahan baseline terdahulu dipertahankan |
 | Package manager / versi runtime | Node 24.14.1 + pnpm 11.19.0 dipin pada .node-version/package.json; lockfile tersedia. Launcher pnpm alat memakai Node 24.19.0, child app tetap 24.14.1 |
 | Dependency baseline | Next 16.3.6, React 19.3.0, TypeScript 5.9.3 strict; versi lengkap, kompatibilitas dan lisensi di bagian 9.2 |
-| Tes aplikasi | Video Ready:1001 unit/65 file full PASS +56 targeted/5 file PASS (16 baru), coverage full92.44/87.42;378 SQL PASS;102 browser unik hasil terakhir PASS melalui full+repair,26 kandidat+7 smoke PASS. Full verify awal exit1 tidak diubah menjadi exit0 |
+| Tes aplikasi | Polish:1039 unit/68 file PASS; format/typecheck/lint, SQL/RLS dan build PASS;31/31 browser repair PASS,112 skenario unik hasil terakhir PASS melalui full+repair. Full verify sekali exit1 awal, bukan klaim satu full run112 PASS; evidence/jurnal9.51 |
 | Target rilis | Video Ready software lokal pada aplikasi utama; pilot/final fisik belum disetujui |
 | Kesiapan demo awal | Runnable dengan pnpm demo: 29 seed + 3 scan piksel → replay/displayed placement → 7/13/12 → pairing/board → Garis Bilangan. Kartu/HP fisik dan provider live NOT_RUN |
 | Gate pilot/final | Review pedagogi/konten, cakupan K01, privasi Bisik bebas, lokasi/izin, perangkat dan jadwal tetap terbuka; rincian audit di bagian 9.1 |
@@ -2248,3 +2251,88 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
   uji perangkat M12-b bila rekaman menggunakan HP/papan fisik. Tidak deploy/commit.
 - Gate penutupan: `pnpm format:check` dan `git diff --check` akhir exit0;
   HTTP `/masuk`/`/layar` tetap200 setelah smoke, sesi server37723 masih berjalan.
+
+### 9.50 ZIP Video Ready terbaru — DONE (permintaan pengguna)
+
+- Arsip `artifacts/releases/papannalar-video-ready-2026-09-30.zip` dibuat dari
+  working tree terbaru:540 file sumber/config/lockfile/tes/dokumen/evidence aman,
+  37 migration, VIDEO_HANDOFF, manifest dan BUKA_DULU; total542 entry/1.136.635 byte.
+- ZIP dibuka kembali; hash/ukuran seluruh540 file dan allowlist entry cocok,
+  0 file secret/env terisi/DB/profil/node_modules/.next. ZIP M17 lama dipertahankan.
+  Build rujukan `8wosRzK9Zg6KTtOoogpnf`; tes aplikasi tidak diulang untuk packaging.
+- SHA256 `953c2388d3fc080937e433e3609abfe24c31e98f617aafd0826265ce31ba17de`.
+  Receipt `artifacts/releases/video-ready-archive-check.json`; manifest terpisah
+  `video-ready-manifest.json`; command helper `.local/video-ready-zip.ps1` exit0.
+- ZIP memuat PLAN sampai9.49 sebelum receipt ini untuk menghindari checksum
+  melingkar. Tidak mengubah kode/DB/server. TRUE BLOCKER tidak ada.
+  Next exact: buka arsip lalu VIDEO_HANDOFF.md untuk setup/rekaman.
+
+### 9.51 UI/UX polish — DONE software lokal (1 Oktober 2026)
+
+- Scope baru: P1 bahasa/status/kendali HP/CTA, P2 contoh editor dan ikon,
+  P3 motion ringan. Arsitektur, auth/RLS, DB dan baseline Video Ready dipertahankan.
+- Acceptance: satu entry kendali HP, CTA 48px proporsional, status normal kecil,
+  2–4 contoh per enam alat/Menulis yang mengisi form serta preview produksi;
+  guru360/390/1366 dan papan1280, reduced motion, regresi Video Ready.
+- Strategi validasi: tes terarah per batch; satu `pnpm verify` pada kandidat
+  akhir, browser/screenshot aktual dan `git diff --check`. Hasil aktual di bawah.
+- Keputusan kecil: contoh pecahan memakai representasi, penjumlahan dan senilai
+  yang didukung engine; tidak menambah mode perbandingan/kunci baru. Tanpa paket baru.
+- Implementasi: microcopy jalur utama guru/papan/scan/hasil serta beberapa pesan
+  adaptif; satu `RemoteControls` tanpa details berlapis, CTA pairing48px, badge
+  normal + detail status dan notice simpan3s (warning tetap terlihat).
+- `features/library/templates.ts`/`interactive-help.tsx`:20 contoh (3x6 alat+2
+  Menulis), helper isian, ikon Lucide existing dan preview produksi. ID soal
+  dipertahankan, metadata template tidak ikut disimpan; tulisan tetap RAM.
+  Preview memvalidasi perubahan isian dan membuat model baru saat alat diubah.
+- Ikon/menu/kartu memakai token existing; motion CSS ringan, marker mengikuti
+  pointer langsung saat drag, prefers-reduced-motion dan hasil kemampuan papan
+  tetap dihormati. Tidak mengubah core, kontrak model/onRun, auth/RLS atau schema.
+- Uji terarah unit73/4 file PASS (22 baru); typecheck kandidat PASS; lint terarah
+  PASS setelah satu warning ekspresi test diperbaiki. Alias runtime helper murni
+  diubah ke import relatif agar Vitest existing berjalan; run awal51/1 gagal
+  tidak dianggap PASS. Format terarah dan git diff --check PASS.
+- Browser dev:21/24 PASS awal,3 selector editor diperbaiki; run lanjutan ditutup
+  dengan3/3 editor final PASS14.2s. Display18/18 mencakup14 regresi + badge/notice,
+  storage ditolak, pointer/keyboard/reduced motion. Pairing/kendali nyata3 viewport
+  PASS; editor mengisi dan memainkan garis/pecahan/timbangan serta Menulis.
+- Screenshot aktual mengungkap batang pecahan terpotong pada preview HP; kini
+  satu utuh terlihat lengkap untuk contoh2/4 bagian, lebar unit tetap sama antar
+  batang dan target48px. Preview timbangan HP memakai scroll di area alat agar
+  semua operasi dapat digunakan. Tidak memperkenalkan scroll vertikal di board.
+- Satu `pnpm verify` aktual: format/typecheck/lint PASS; **1039 unit/68 file PASS**,
+  coverage92.44/87.47/96.26/93.44; SQL/RLS PASS; build PASS. Browser awal104 PASS/
+  8 FAIL, exit1. Tujuh failure mencari microcopy lama; satu helper menganggap
+  badge koneksi yang muncul sebelum tes kemampuan sebagai siap. Helper kini
+  menunggu tes kemampuan pada browser tanpa profil lalu menutupnya lewat UI.
+  Pemeriksaan privasi, math, offline dan auth tidak dihapus/dilonggarkan.
+- Perbaikan: label lama pada capability/exit/prelim/storage/pattern disesuaikan;
+  instruksi singkat pasangan ubin sejenis +/− tetap diberikan agar makna nol
+  tidak hilang. `pnpm build` akhir, `pnpm typecheck`, ESLint file perbaikan dan
+  `pnpm format:check` akhir exit0. Build `FNk5af98oFfsDZeeiRDem`, cache
+  `pn-shell-6b96ece226571d3e`,63 aset/3 shell publik.
+- Run produksi terarah dengan `PAPANNALAR_REUSE_LOCAL_DEMO=1 pnpm exec playwright
+  test` pada enam lokasi failure + `video-display.spec.ts` + `shell.spec.ts`,
+  reporter list/json dan output `artifacts/qa/ui-polish/repair-browser`:
+  **31/31 PASS,2.3m,exit0**. Argumen lengkap pada `repair-browser-command.json`.
+  Mencakup offline shell/font/IndexedDB/fullscreen, roster hanya RAM, exit/koreksi,
+  rantai demo, tujuh pola, enam alat dan tiga preset/viewport, model/ink dan motion.
+  Enam kasus editor/pairing polish juga PASS pada full run produksi.
+- Ledger `final-evidence.json`: **112 skenario unik hasil terakhir PASS**,0 failure
+  tersisa, gabungan full + repair. Tidak menjalankan full verify kedua atau
+  mengubah hasil full awal menjadi exit0. Screenshot akhir algebra/badge papan
+  1280x720 serta preview pecahan HP360 diperiksa aktual; viewport390/1366 juga diuji.
+- `pnpm video` terkelola95752 aktif pada build akhir, seed idempotent menyatakan
+  dataset contoh existing dipertahankan. Buka `/masuk` → Coba dengan data contoh →
+  `/guru`; papan `/layar`. PostgreSQL lokal nyata, Auth/transport provider uji
+  loopback; tidak deploy, membuka provider production atau membuat workspace visitor.
+- Gate penutupan: `/masuk` dan `/layar` HTTP200 aktual pada server95752,
+  `git diff --check` exit0 (warning CRLF non-blocking). Receipt `server-check.json`,
+  log command dan seluruh hasil ada di `artifacts/qa/ui-polish/`.
+- Warning non-blocking: launcher Node24.19.0 vs child24.14.1, NO_COLOR/FORCE_COLOR
+  dan `use client` pada bundling fixture, bukan bundle aplikasi. QA menambah
+  koleksi/sesi sintetis; dataset awal tidak direset. ZIP9.50 tetap snapshot sebelumnya.
+- TRUE BLOCKER implementasi: **tidak ada**. Native QR/kamera/digitizer fisik,
+  hosted Auth/Realtime/TLS, live AI dan izin/reviewer pilot tetap NOT_RUN/NEEDS_REVIEW.
+  Next exact: walkthrough/rekaman lokal empat route guru, contoh editor, pairing
+  dan alat; jika memakai HP/papan fisik, siapkan target HTTPS yang sah dan uji M12-b.

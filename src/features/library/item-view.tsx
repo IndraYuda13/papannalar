@@ -5,6 +5,7 @@ import { ToolView } from "@/features/tools/tool-view";
 import { Button } from "@/ui/components/button";
 import type { ToolModel } from "@/core/tools/patterns";
 import { paginateDisplayText } from "@/features/layar/appearance-pagination";
+import { ActivityIcon } from "@/ui/components/activity-icon";
 type ItemProps = {
   item: LibraryBoardState["item"];
   row?: number;
@@ -145,7 +146,15 @@ function ItemPages({ item, row = 1, model, onRun }: ItemProps) {
       <h1 className="library-prompt" hidden={paginated}>
         {mathText(item.prompt)}
       </h1>
-      <p className="library-instruction">{hint}</p>
+      <p className="library-instruction">
+        {item.kind !== "card" && (
+          <ActivityIcon
+            className="activity-icon-inline"
+            kind={item.kind === "writing" ? "writing" : item.tool.kind}
+          />
+        )}
+        {hint}
+      </p>
       {paginated && <p className="library-page-label">{current.label}</p>}
       <div ref={body} className="library-item-body">
         {item.kind === "card" && (
@@ -219,17 +228,17 @@ function ItemPages({ item, row = 1, model, onRun }: ItemProps) {
 function instruction(kind: string) {
   switch (kind) {
     case "number-line":
-      return "Geser penanda ke tujuan, lalu tekan Jalankan.";
+      return "Geser penanda. Tekan Jalankan untuk memeriksa.";
     case "fractions":
-      return "Bagi batang, warnai bagian, lalu tekan Jalankan.";
+      return "Ketuk bagian untuk mewarnai. Tekan Jalankan untuk memeriksa.";
     case "ratio":
-      return "Lengkapi pasangan pada tabel, lalu tekan Jalankan.";
+      return "Lengkapi pasangan pada tabel. Tekan Jalankan untuk memeriksa.";
     case "algebra":
-      return "Susun ubin sesuai kelompok, lalu tekan Jalankan.";
+      return "Susun ubin dalam kelompok. Tekan Jalankan untuk memeriksa.";
     case "balance":
       return "Jaga kedua sisi seimbang untuk menemukan nilai x.";
     default:
-      return "Geser atau atur model grafik, lalu periksa hasilnya.";
+      return "Pilih titik di grafik. Tekan Jalankan untuk memeriksa.";
   }
 }
 function mathParts(text: string) {

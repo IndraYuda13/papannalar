@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { QrCode } from "lucide-react";
 import { Button } from "../../ui/components/button";
 import { openCamera, type ImageAcquisition } from "../scanner/acquisition";
 import { capturePairingLink, parsePairingCode } from "./pairing-url";
@@ -154,7 +155,7 @@ export function PairingCodeInput({
       await onPair(code);
     } catch {
       setNotice(
-        "Layar belum tersambung. Periksa koneksi dan kode terbaru, lalu coba lagi.",
+        "Belum tersambung. Periksa internet dan kode di papan, lalu coba lagi.",
       );
     } finally {
       locked.current = false;
@@ -169,6 +170,7 @@ export function PairingCodeInput({
         disabled={disabled || sending}
         onClick={() => setScanning(!scanning)}
       >
+        <QrCode size={20} aria-hidden />
         Pindai QR
       </Button>
       {scanning && (
@@ -185,9 +187,9 @@ export function PairingCodeInput({
           event.preventDefault();
           void submit();
         }}
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap items-end gap-3"
       >
-        <label className="min-w-0 flex-1">
+        <label className="min-w-[min(100%,10rem)] flex-1">
           Kode dari papan
           <input
             name="code"
@@ -204,7 +206,11 @@ export function PairingCodeInput({
             className="mt-1 min-h-12 w-full rounded-input border px-3"
           />
         </label>
-        <Button type="submit" disabled={disabled || sending}>
+        <Button
+          type="submit"
+          className="h-12 self-end px-4 py-2"
+          disabled={disabled || sending}
+        >
           Hubungkan papan
         </Button>
       </form>

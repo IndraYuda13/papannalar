@@ -185,7 +185,9 @@ export function PackageWorkspace({
         "PDF siap. Gunakan satu lembar untuk dua siswa; cetak sesuai kebutuhan kelompok.",
       );
     } catch {
-      setMessage("Cetakan belum tersedia. Periksa cache font dan penyimpanan.");
+      setMessage(
+        "Cetakan belum tersedia. Buka ulang saat online untuk menyiapkan font dan materi.",
+      );
     } finally {
       setBusy(false);
     }
