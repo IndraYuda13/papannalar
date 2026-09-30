@@ -3,24 +3,27 @@ import {
   boardProfileSchema,
   publicBoardProfile,
   type BoardProfile,
-} from "@/contracts/board-profile";
+} from "../../contracts/board-profile";
 const KEY = "pn-board-capabilities-v1";
+let tabProfile: BoardProfile | undefined;
 export function readBoardProfile() {
   try {
     const result = boardProfileSchema.safeParse(
       JSON.parse(localStorage.getItem(KEY) ?? "null"),
     );
-    return result.success ? result.data : undefined;
+    return result.success ? result.data : tabProfile;
   } catch {
-    return undefined;
+    return tabProfile;
   }
 }
 export function saveBoardProfile(profile: BoardProfile) {
   const value = publicBoardProfile(profile);
   try {
     localStorage.setItem(KEY, JSON.stringify(value));
+    tabProfile = undefined;
     return true;
   } catch {
+    tabProfile = value;
     return false;
   }
 }

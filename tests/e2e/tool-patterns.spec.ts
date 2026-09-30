@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 import {
@@ -33,7 +34,7 @@ test("Seven patterns use actual paired board, distinct examples, repairs, unique
       if (m.type() === "error") errors.push("console");
     });
   }
-  await board.goto("/layar");
+  await openBoard(board);
   const code = await board.getByTestId("pairing-code").textContent();
   await page
     .getByLabel("Kode pasangan", { exact: true })
@@ -41,7 +42,9 @@ test("Seven patterns use actual paired board, distinct examples, repairs, unique
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   await page.getByText("Pratinjau Alat Nalar", { exact: true }).click();
   async function open(kind: string, label: string, pattern: string) {
     await page

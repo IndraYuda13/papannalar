@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { createRequire } from "node:module";
 import { randomBytes } from "node:crypto";
+import { SAMPLE_ID } from "./sample-data.mjs";
 const require = createRequire(import.meta.url),
   root = process.cwd();
 const psql =
@@ -20,6 +21,15 @@ const env = {
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-test-publishable-key",
   PAIRING_SECRET: randomBytes(32).toString("hex"),
   PAPANNALAR_LOCAL_ADAPTER: "1",
+  ...(process.argv.includes("--video")
+    ? {
+        SAMPLE_ENABLED: "true",
+        SAMPLE_TEACHER_ID: SAMPLE_ID,
+        SAMPLE_TEACHER_EMAIL: "recording@qa.invalid",
+        SAMPLE_TEACHER_PASSWORD: "local-recording-test-password-only-2026",
+        SAMPLE_ACCESS_CODE: "",
+      }
+    : {}),
 };
 const cluster = resolve(root, ".local/m01c-pg"),
   pgctl =
@@ -71,7 +81,11 @@ try {
     ownCluster = true;
   }
   run(process.execPath, ["scripts/test-db.mjs", "prepare"]);
-  if (!existsSync(".next/BUILD_ID")) {
+  if (process.argv.includes("--video"))
+    run(process.execPath, ["scripts/seed-local-recording.mjs"]);
+  const developing = process.argv.includes("--dev");
+  if (developing) run(process.execPath, ["scripts/prepare-assets.mjs"]);
+  if (!developing && !existsSync(".next/BUILD_ID")) {
     run(process.execPath, ["scripts/prepare-assets.mjs"]);
     run(process.execPath, [require.resolve("next/dist/bin/next"), "build"]);
     run(process.execPath, ["scripts/build-offline.mjs"]);
@@ -80,7 +94,7 @@ try {
     ["tests/harness/provider.mjs"],
     [
       require.resolve("next/dist/bin/next"),
-      "start",
+      developing ? "dev" : "start",
       "--hostname",
       "127.0.0.1",
       "--port",
@@ -101,7 +115,9 @@ try {
     });
   }
   console.log(
-    "Demo adapter lokal: http://127.0.0.1:3100/demo | papan: http://127.0.0.1:3100/layar | Ctrl+C untuk berhenti. Auth/email/WebSocket live tidak dipakai.",
+    process.argv.includes("--video")
+      ? "Rekaman lokal: http://127.0.0.1:3100/masuk → Coba dengan data contoh → /guru | papan /layar. PostgreSQL nyata; Auth/Realtimenya provider uji loopback. Ctrl+C untuk berhenti."
+      : "Demo adapter lokal: http://127.0.0.1:3100/demo | papan: http://127.0.0.1:3100/layar | Ctrl+C untuk berhenti. Auth/email/WebSocket live tidak dipakai.",
   );
   if (process.argv.includes("--smoke")) {
     let ready = false;

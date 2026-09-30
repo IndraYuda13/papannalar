@@ -1,10 +1,15 @@
 import type { GeneratedQuestion } from "../../content/templates/types";
 import type { ToolTask } from "../tools/patterns";
 import { commonParts } from "../tools/fractions";
+import type { ToolId } from "../../content/contexts/registry";
 /** Map the actual mathematical parameters, never a canned replacement problem. */
 export function questionTool(q: GeneratedQuestion): ToolTask | undefined {
   const { a, b, c, d } = q.params;
   switch (q.stepId) {
+    case "C2":
+      // A single displacement cannot model two sequences of multiples and
+      // their first common term. Keep the KPK question for the book fallback.
+      return undefined;
     case "D1":
       return {
         kind: "number-line",
@@ -16,12 +21,10 @@ export function questionTool(q: GeneratedQuestion): ToolTask | undefined {
     case "D2":
       // Frozen v1 questions can need more than the board's 12 equal parts.
       // Keep the original question/key and use the explicit book-model fallback.
-      if (q.metadata.version === "1.0.0") {
-        try {
-          commonParts(b, d);
-        } catch {
-          return undefined;
-        }
+      try {
+        commonParts(b, d);
+      } catch {
+        return undefined;
       }
       return {
         kind: "fractions",
@@ -93,4 +96,16 @@ export function questionTool(q: GeneratedQuestion): ToolTask | undefined {
     default:
       return undefined;
   }
+}
+
+/** A set is supported only when every actual board question has an adapter. */
+export function activityToolSupport(board: readonly GeneratedQuestion[]): {
+  tool: ToolId | null;
+  interactiveSupport: "supported" | "unavailable";
+} {
+  const tasks = board.map(questionTool);
+  const tool = tasks[0]?.kind;
+  return tool && tasks.every((task) => task?.kind === tool)
+    ? { tool, interactiveSupport: "supported" }
+    : { tool: null, interactiveSupport: "unavailable" };
 }

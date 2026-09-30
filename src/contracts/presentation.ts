@@ -257,6 +257,21 @@ export const challengeSchema = z.strictObject({
   id: randomIdSchema,
   code: z.string().regex(/^\d{6}$/),
   expiresAt: z.string(),
+  pairingUrl: z.url().nullable().optional(),
+});
+// Presence is separate from a successful snapshot read and from application ACK.
+export const connectionPulseSchema = z.strictObject({
+  channelEpoch: randomIdSchema,
+  revision: z.number().int().positive(),
+  ackRevision: z.number().int().nonnegative(),
+  ackCommandId: randomIdSchema.nullable(),
+  ackAt: z.string().nullable(),
+  controllerSeenAt: z.string().nullable(),
+  serverNow: z.string(),
+});
+export type ConnectionPulse = z.infer<typeof connectionPulseSchema>;
+export const presentationResumeSchema = z.strictObject({
+  snapshot: snapshotSchema.nullable(),
 });
 export const channelSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("snapshot") }),
@@ -272,9 +287,11 @@ export const pairingStatusSchema = z.strictObject({
   expired: z.boolean(),
 });
 const id = { presentationId: randomIdSchema };
+const controller = { controllerId: randomIdSchema.optional() };
 export const teacherPairingSchema = z.discriminatedUnion("action", [
   z.strictObject({
     action: z.literal("claim"),
+    ...controller,
     code: z.string().regex(/^\d{6}$/),
     classId: randomIdSchema,
     sessionId: randomIdSchema,
@@ -282,18 +299,31 @@ export const teacherPairingSchema = z.discriminatedUnion("action", [
   }),
   z.strictObject({
     action: z.literal("publish"),
+    ...controller,
     ...id,
     channelEpoch: randomIdSchema,
     baseRevision: z.number().int().positive(),
     commandId: randomIdSchema,
     payload: presentationStateSchema,
   }),
-  z.strictObject({ action: z.literal("snapshot"), ...id }),
-  z.strictObject({ action: z.literal("revoke"), ...id }),
-  z.strictObject({ action: z.literal("channel"), ...id }),
+  z.strictObject({ action: z.literal("snapshot"), ...id, ...controller }),
+  z.strictObject({ action: z.literal("revoke"), ...id, ...controller }),
+  z.strictObject({ action: z.literal("channel"), ...id, ...controller }),
+  z.strictObject({ action: z.literal("heartbeat"), ...id, ...controller }),
+  z.strictObject({
+    action: z.literal("resume"),
+    sessionId: randomIdSchema,
+    classId: randomIdSchema,
+    ...controller,
+  }),
 ]);
 export const boardPairingSchema = z.discriminatedUnion("action", [
-  z.strictObject({ action: z.literal("create") }),
+  z.strictObject({
+    action: z.literal("create"),
+    presentationId: randomIdSchema.optional(),
+  }),
+  z.strictObject({ action: z.literal("resume") }),
+  z.strictObject({ action: z.literal("heartbeat"), ...id }),
   z.strictObject({ action: z.literal("status"), challengeId: randomIdSchema }),
   z.strictObject({ action: z.literal("snapshot"), ...id }),
   z.strictObject({ action: z.literal("channel"), ...id }),

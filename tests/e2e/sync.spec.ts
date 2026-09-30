@@ -197,7 +197,7 @@ test("SYNC03 two teacher devices enforce read-only import, explicit takeover and
     errors: string[] = [];
   other.on("pageerror", () => errors.push("device2-runtime"));
   page.on("pageerror", () => errors.push("device1-runtime"));
-  await other.goto("/guru");
+  await other.goto("/guru/latihan");
   await other.getByLabel("Data kelas").selectOption("demo");
   await other.getByRole("button", { name: /Buka kelas 7S/ }).click();
   await other

@@ -1,16 +1,62 @@
 # PLAN - Eksekusi Codex PapanNalar
 
 Versi 1.0 | Disusun 29 September 2026
-Status terkini (30 September 2026): continuous execution menuju FINAL MVP sesuai
-instruksi pengguna terbaru. M00–M11 DONE sesuai batas evidence.
+Status terkini (30 September 2026): V1–V6 Video Ready DONE software lokal sesuai
+`PapanNalar_Video_Ready_Codex.md`; menggantikan prioritas corrective pass lama.
+Baseline M00–M17 dipertahankan; M00–M11 DONE sesuai batas evidence.
 M12-a DONE, M12-b NOT_RUN, audit M12-c selesai dengan gate eksternal terbuka.
 M13-a/b/c DONE software; live/konten/privasi AI tetap gate eksternal.
 M14-a/b/c dan M15-a/b/c DONE software; M16 DEFERRED (opsional).
-M17-a/b DONE software lokal; full verification/handoff selesai dan demo3100 aktif.
+M17-a/b DONE software lokal pada baseline sebelumnya; sekarang server rekaman3100 aktif.
 Gate fisik, live dan manusia
 tetap NOT_RUN/NEEDS_REVIEW; tidak menghalangi pekerjaan software independen.
 
 ## 1. Cara memakai paket
+
+### Video Ready — checklist aktif (instruksi 30 September)
+
+- [x] V1: empat route guru, akun contoh tunggal persisten, layout/microcopy.
+- [x] V2: profil/preset, auto-next sentuh, QR, lease dan reconnect (hosted/perangkat NOT_RUN).
+- [x] V3: koleksi sistem/guru lintas kelas, editor kartu/interaktif dan versi.
+- [x] V4: sesi terikat versi/roster, PDF/OMR, revisi dan hasil database.
+- [x] V5: koreksi konten relevan, chooser offline, scanner dan recovery.
+- [x] V6: U01–U16 lokal, viewport, satu full verify + perbaikan terarah, VIDEO_HANDOFF.
+
+Delta scope disetujui melalui dokumen pengguna: authoring dan rekap baru,
+akun contoh di `/guru`, ukuran responsif/preset menggantikan batas UX lama.
+Database/migration/lockfile dipegang integrator. Worker terpisah menangani
+layar, koneksi dan konten dengan path ownership terpisah. Targeted tests per
+batch; hasil baseline 778/340/76 bukan bukti perubahan baru.
+Hosted origin HTTPS/kredensial Supabase dan perangkat fisik belum tersedia;
+implementasi serta SQL lokal tetap dilanjutkan, tidak membuka provider uji ke
+production. Checkpoint aktual: SQL033/035/036 diterapkan hanya pada PostgreSQL
+uji loopback55432. Seed persisten berhasil: 7B/7C masing-masing32, dua koleksi
+sistem, dua guru, dua hasil historis sintetis, satu asesmen kosong. Dua defect
+SQL (tuple empat opsi dan alias penilaian) diperbaiki dengan migration baru.
+Targeted `vitest video-library/sync/llm-enrichment`: 38 PASS; `library.sql`:
+23 assertion PASS. Run awal unit gagal alias import, diperbaiki sebelum PASS.
+Worker display:33 unit PASS; konten:93 targeted PASS; kedua kegagalan hydration
+konten telah ditutup oleh targeted sync/enrichment di atas. Tidak ada hasil
+browser pada checkpoint lama. Update V6: SQL034/037 telah diterapkan setelah
+backup lokal; 15 assertion koneksi/logout/lease PASS. Display:39 unit/4 file,
+14 browser PASS (zero pageerrors); koneksi:73 unit/8 file PASS. Scanner:55 unit
+custom-form +16 OMR terpilih PASS; worker dibangun ulang. Unit progress/CSV:19 PASS.
+Browser dengan PostgreSQL nyata: akun contoh persisten, isolasi guru/board/visitor,
+scan piksel custom, resume soal3/model tersimpan dan revoke/logout PASS. Checkbox
+hadir diperbaiki dengan respons langsung, rollback gagal dan status commit lokal.
+Selector tes memakai accessible role; form tidak kehilangan isi saat preview.
+Reset operator salah target/konfirmasi/sesi aktif ditolak; fingerprint data tetap.
+Tidak ada reset sukses terhadap data rekaman. Format/typecheck preflight PASS.
+Penutupan V6: full `pnpm verify` sekali exit1 pada browser (66 PASS/36 FAIL),
+sedangkan format/typecheck/lint, 1001 unit/65 file, 378 SQL dan build PASS.
+Perbaikan terarah menutup seluruh failure: 102 skenario unik memiliki hasil terakhir
+PASS; bukan klaim satu run102 baru. Kandidat terakhir26 PASS, smoke server berjalan
+7 PASS. Regresi auth/clock56 unit/5 file PASS (16 tes baru). Build/typecheck/lint
+terakhir PASS. Evidence `artifacts/qa/video-ready/final-evidence.json` dan jurnal9.49.
+Server `pnpm video` terkelola37723 aktif; `/masuk` dan `/layar` HTTP200.
+Next exact: rekam dua jendela dengan `VIDEO_HANDOFF.md`; untuk HP-papan fisik,
+siapkan origin HTTPS/target Supabase yang diotorisasi dan matriks perangkat M12-b.
+Tidak ada TRUE BLOCKER coding. Hosted, native QR dan hardware tetap NOT_RUN.
 
 Letakkan AGENTS.md dan PLAN.md di root repo, serta folder docs di root yang sama.
 Delapan sumber bernama 00-07 adalah salinan utuh unggahan pengguna. Semua kontrak
@@ -44,18 +90,18 @@ Ubah status hanya berdasarkan pekerjaan yang benar-benar dilakukan.
 
 | Field | Nilai terkini |
 | --- | --- |
-| Milestone aktif | Software FINAL MVP lokal selesai; gate eksternal M12/M13/M15/M17 tetap terbuka |
-| Task aktif | Tidak ada task coding aktif; next exact M12-b uji kartu/kamera/papan nyata |
+| Milestone aktif | Video Ready V1–V6; baseline software lama dipertahankan |
+| Task aktif | V1–V6 DONE software lokal; handoff rekaman, tidak membuka milestone baru |
 | Commit aplikasi terakhir | Implementasi masih working tree; base dokumen `47aa60d729b293a53365a780c0d1cd9485ec6f95` |
 | Repository diperiksa | Ya, 29 Sep 2026; satu Next app di root, pnpm-lock.yaml; perubahan baseline terdahulu dipertahankan |
 | Package manager / versi runtime | Node 24.14.1 + pnpm 11.19.0 dipin pada .node-version/package.json; lockfile tersedia. Launcher pnpm alat memakai Node 24.19.0, child app tetap 24.14.1 |
 | Dependency baseline | Next 16.3.6, React 19.3.0, TypeScript 5.9.3 strict; versi lengkap, kompatibilitas dan lisensi di bagian 9.2 |
-| Tes aplikasi | M17 full verify exit0: 778 unit/48 file; coverage 92.06% statements/86.83% branches; 340 SQL; 76 browser/0 skip/0 flaky. Tiga gladi lokal PASS pada build sama; hardware/live NOT_RUN |
-| Target rilis | Kandidat software FINAL MVP lokal; pilot/final fisik belum disetujui |
+| Tes aplikasi | Video Ready:1001 unit/65 file full PASS +56 targeted/5 file PASS (16 baru), coverage full92.44/87.42;378 SQL PASS;102 browser unik hasil terakhir PASS melalui full+repair,26 kandidat+7 smoke PASS. Full verify awal exit1 tidak diubah menjadi exit0 |
+| Target rilis | Video Ready software lokal pada aplikasi utama; pilot/final fisik belum disetujui |
 | Kesiapan demo awal | Runnable dengan pnpm demo: 29 seed + 3 scan piksel → replay/displayed placement → 7/13/12 → pairing/board → Garis Bilangan. Kartu/HP fisik dan provider live NOT_RUN |
 | Gate pilot/final | Review pedagogi/konten, cakupan K01, privasi Bisik bebas, lokasi/izin, perangkat dan jadwal tetap terbuka; rincian audit di bagian 9.1 |
 | TRUE BLOCKER saat handoff | Tidak ada untuk implementasi berikutnya. Gate fisik/live/pedagogi tetap terbuka, tidak dinaikkan menjadi blocker coding |
-| Aksi berikutnya | M12-b: cetak/fotokopi kartu, ukur kamera HP dan digitizer papan; lalu staging hosted dan review konten/privasi/consent. Tidak ada deploy/pilot otomatis |
+| Aksi berikutnya | Rekaman lokal sesuai VIDEO_HANDOFF; origin HTTPS/target hosted yang sah dan uji perangkat M12-b untuk rekaman HP-papan fisik |
 
 Status task: NOT_STARTED, IN_PROGRESS, BLOCKED, DONE. Status tes: PASS, FAIL,
 NOT_RUN, NOT_IMPLEMENTED. Blocker perangkat bukan kegagalan kode, tetapi juga
@@ -2128,3 +2174,77 @@ responses/outbox, Ganti/Lewati and correction UI feeding existing replay.
   cetak/kamera/digitizer di perangkat nyata; lanjut staging dan gate manusia.
   Semua software FINAL MVP yang dapat dikerjakan lokal pada run ini selesai;
   continuous execution ditutup, bukan menganggap gate eksternal lulus.
+
+#### Penutupan artefak M17
+
+ZIP `artifacts/releases/papannalar-PNkhMiKARQZq0GwqdP6GJ.zip` dibuat dari allowlist:
+482 entry/8.202.977 byte; seluruh446 source hash cocok,0 file credential/DB/profil.
+SHA256 `b6f2978e67f90f473a6940a0f830b486550481c7b86af2dcee40ae3a797b1aa4`.
+`artifacts/releases/archive-check.json` menyimpan hasil; ZIP memuat snapshot PLAN
+sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
+
+### 9.49 Video Ready V1–V6 — DONE software lokal, gate hosted/fisik tetap terbuka
+
+- Instruksi pengguna `PapanNalar_Video_Ready_Codex.md` menggantikan corrective pass
+  sebelumnya. Baseline M00–M17 dan sumber00–07 dipertahankan, tidak scaffold ulang.
+- V1: empat bagian `/guru`, `/guru/kelas`, `/guru/soal`, `/guru/asesmen` memakai
+  sidebar desktop/bottom navigation HP; adaptif existing di `/guru/latihan`.
+  Akun contoh tunggal persisten, 7B/7C32 siswa, koleksi sistem/guru dan dua hasil
+  historis sintetis berada di PostgreSQL nyata. Login tidak membuat tenant/seed
+  baru. Nama/nickname/CSV dan catatan hadir tetap lokal; random UUID stabil.
+- V2: appearance schema/profil terpisah dari kemampuan/auth, tiga preset produksi,
+  resize/reload/fallback HDMI, auto-next1/2/4 pointer setelah release. QR hanya
+  challenge same-origin HTTPS; loopback memakai kode manual. Heartbeat/lease/CAS,
+  rebind menjaga presentation/soal3, logout/revoke/takeover tidak menghidupkan sesi.
+- V3/V4: `contracts/library.ts`, `app/api/v1/library/route.ts`, `features/library/`,
+  `features/guru/results.tsx`, `local/library.ts` dan custom-form menghubungkan
+  editor5 kartu/6 alat/Menulis, versi immutable, reuse7B/7C, roster/form beku,
+  PDF/OMR lokal, penilaian server, revisi/idempotency, filter kelas/tanggal/set
+  dan rincian hasil. Kunci/explanation tidak masuk board DTO; asesmen custom
+  tidak menjadi observasi BKT. Nama baru digabungkan pada UI guru.
+- SQL033–037 diterapkan pada cluster uji loopback setelah backup lokal;
+  library23+koneksi15 assertion tambahan, total378 bersama baseline. Tidak ada
+  migration/seed hosted. Operator seed/reset dibatasi target/owner/lease; tiga
+  penolakan reset PASS dan fingerprint data tetap. Reset sukses NOT_RUN.
+- V5: pemetaan C2/A4 per instance, alasan exit<=8 kata terpisah dari penjelasan,
+  tugas mandiri bermakna/refleksi materi aktual, chooser dua kelas cached dan
+  sync sekali, auto-capture stabil/cooldown/pause review serta input manual.
+  Tulisan/gambar tetap RAM. Cache model publik hanya hasil Jalankan tanpa ink,
+  roster, kunci atau identitas siswa; tidak diklaim sinkron HP-papan saat offline.
+- Validasi aktual: `pnpm verify` sekali **exit1** pada E2E:66 PASS/36 FAIL;
+  format/typecheck/lint, **1001 unit/65 file**, **378 SQL** dan build PASS.
+  Coverage92.44/87.42/96.26/93.44%. Tidak mengulang full verify atau mengubah log.
+  `playwright --last-failed` berturut-turut14/36,15/22,6/7 PASS, sisanya diperbaiki.
+- Dua defect auth/koneksi ditutup: cookie PKCE SSR0.12.7 per-flow dibaca/dihapus
+  sesuai surface; ACK memakai timestamp heartbeat presisi, bukan HTTP Date
+  yang dibulatkan detik. **56 targeted unit/5 file PASS**, termasuk16 tes baru.
+  Tidak melonggarkan syarat ACK, RLS atau teacher-vs-board auth.
+- Kompatibilitas tes UX lama disesuaikan dengan instruksi terbaru: wizard/preset,
+  label sambungan, menu tertutup dan allowlist storage appearance. Privacy/math/
+  historical assertions tetap dipertahankan. Timer tiga putaran31.7s membutuhkan
+  timeout90s; bukan klaim latency fisik. Refleksi memakai dua kolom/kanvas fleksibel
+  sehingga tombol hapus muat di3 viewport x3 preset; ink tetap tidak tersimpan.
+  Pembesaran objek1.5x diperbaiki relatif terhadap preset/zona, diuji tepat1.5x
+  dan kembali ke ukuran semula; tidak sekadar menurunkan assertion lama.
+- Kandidat build `8wosRzK9Zg6KTtOoogpnf`, cache `pn-shell-920000846a3f1f88`,
+  63 aset/3 shell publik. `pnpm build`, `pnpm typecheck`, `pnpm lint` terakhir
+  exit0. Kandidat terarah **26/26 browser PASS,2.0m**, mencakup14 display,9 library,
+  koneksi, pembesaran dan refleksi. Filter/rincian hasil nyata ditambah pada U11.
+  Ledger seluruh **102 skenario unik hasil terakhir PASS**,0 failure tersisa;
+  ini gabungan full+repair, bukan satu full run baru. Lihat `final-evidence.json`.
+- `pnpm video` berjalan pada sesi terkelola37723, `/masuk`/`/layar` HTTP200.
+  `PAPANNALAR_REUSE_LOCAL_DEMO=1 playwright` smoke **7/7 PASS,11.8s** pada server
+  itu: PKCE/logout, guru/board/font, fullscreen, teks130%, pencabutan per-tab
+  dan observer tidak mencabut perangkat lain. Screenshot guru390 dan refleksi
+  kosong diperiksa aktual; display fixture terpisah dari bukti DB/pairing nyata.
+- Warning non-blocking: launcher Node24.19.0 vs child24.14.1; NO_COLOR/FORCE_COLOR;
+  directive `use client` saat bundling fixture browser (bukan bundle Next).
+  QA meninggalkan koleksi/sesi sintetis tambahan; tidak dihapus/reset demi video.
+- `VIDEO_HANDOFF.md` memuat startup/URL, judul dataset awal, empat alur, matrix
+  U01–U16 dan bukti/gap. ZIP M17 lama bukan snapshot perubahan Video Ready.
+  TRUE BLOCKER coding: **tidak ada**. Hosted Auth/Realtime/TLS/native QR HP,
+  kamera/cetak/digitizer, live AI, reviewer/izin pilot tetap NOT_RUN/NEEDS_REVIEW.
+  Next exact: rekam lokal dua jendela; siapkan origin/target hosted yang sah dan
+  uji perangkat M12-b bila rekaman menggunakan HP/papan fisik. Tidak deploy/commit.
+- Gate penutupan: `pnpm format:check` dan `git diff --check` akhir exit0;
+  HTTP `/masuk`/`/layar` tetap200 setelah smoke, sesi server37723 masih berjalan.

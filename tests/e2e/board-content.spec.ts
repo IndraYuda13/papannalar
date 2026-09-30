@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { test, expect, type Page } from "@playwright/test";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import {
@@ -27,7 +28,7 @@ async function navigation(page: Page) {
 test("CACHE01 board content uses actual IndexedDB: empty, strict input, persistence, clear and no group data", async ({
   page,
 }) => {
-  await page.goto("/layar");
+  await openBoard(page);
   await packageFixture(page);
   expect(
     await page.evaluate(() => window.__packageFixture.exerciseBoardCache()),
@@ -80,7 +81,7 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
   await page
     .getByRole("button", { name: "Mulai sesi dari paket", exact: true })
     .click();
-  await board.goto("/layar");
+  await openBoard(board);
   await page
     .getByLabel("Kode pasangan", { exact: true })
     .fill(
@@ -124,7 +125,7 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
     "Kendali lokal",
   );
   await expect(page.getByTestId("pairing-status")).toContainText(
-    "Menunggu ACK",
+    "Menunggu layar menerapkan tampilan",
     { timeout: 15000 },
   );
   await context.setOffline(false);
@@ -142,7 +143,9 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
   await expect(
     board.getByRole("region", { name: "Soal cek paket", exact: true }),
   ).toContainText("Soal 2/10");
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   const second = await navigation(board);
   await second.getByRole("button", { name: "Lanjut", exact: true }).click();
   await expect(transfer).toContainText("Papan memakai kendali lokal");
@@ -165,14 +168,14 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
     })
     .click();
   await board
+    .getByText("Menu papan · kemampuan dan cadangan", { exact: true })
+    .click();
+  await board
     .getByRole("button", { name: "Buka paket tersimpan", exact: true })
     .click();
   await expect(board.getByTestId("board-connection")).toContainText(
     "daftar kelompok tidak disimpan",
   );
-  await board
-    .getByText("Menu papan · kemampuan dan cadangan", { exact: true })
-    .click();
   const selector = board.getByLabel("Aktivitas tanpa daftar kelompok", {
     exact: true,
   });

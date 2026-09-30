@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BOARD_MODES,
   publicPresentation,
@@ -8,7 +8,11 @@ import {
   type PresentationState,
 } from "@/contracts/presentation";
 import { MODE_LABELS } from "@/content/demo/board-content";
-import { pairingCall, watchPresentation } from "@/features/classroom/transport";
+import { pairingCall } from "@/features/classroom/transport";
+import { usePresentationTransport } from "@/features/classroom/presentation-transport";
+import { PairingCodeInput } from "@/features/classroom/pairing-scanner";
+import { boardAcknowledged } from "@/features/classroom/connection-transport";
+import { classroomNow } from "@/features/classroom/clock";
 import { Button } from "@/ui/components/button";
 import { rotationProjection, type PublicStation } from "@/contracts/stations";
 import { createRotation } from "@/core/stations/rotation";
@@ -20,6 +24,7 @@ import { publicTool, type PublicTool } from "@/contracts/tools";
 import { ToolControls } from "@/features/tools/teacher-controls";
 import type { Pattern } from "@/core/tools/patterns";
 import { demoOpening } from "@/core/package/opening";
+import { reflectionUsesForGroups } from "@/core/package/reflection";
 import { publicLesson, type PublicLesson } from "@/contracts/lesson";
 import { TurnControls } from "@/features/stations/turn-controls";
 import type { AssessmentContext } from "@/contracts/assessment";
@@ -40,6 +45,57 @@ import {
 import { splitProjection } from "./split-projection";
 import { PackageTransfer } from "./package-transfer";
 import { GuidanceControls } from "./guidance-controls";
+
+// Simple library runs reuse exactly the same claim/resume/heartbeat/revoke path.
+export function PresentationConnectionControls({
+  sessionId,
+  classId,
+  initialState,
+  onSnapshot,
+}: {
+  sessionId: string;
+  classId: string;
+  initialState: PresentationState;
+  onSnapshot?: (snapshot: PresentationSnapshot | undefined) => void;
+}) {
+  const connection = usePresentationTransport({
+    sessionId,
+    classId,
+    initialState: () => initialState,
+  });
+  useEffect(() => {
+    onSnapshot?.(connection.snapshot);
+  }, [connection.snapshot, onSnapshot]);
+  return (
+    <section
+      aria-label="Sambungkan Layar"
+      className="space-y-3 rounded-kartu border bg-white p-4"
+    >
+      {connection.snapshot ? (
+        <>
+          <p role="status" data-testid="pairing-status">
+            {connection.online
+              ? boardAcknowledged(connection.snapshot, classroomNow())
+                ? "Layar tersambung"
+                : "Menunggu layar menerapkan tampilan."
+              : "Koneksi terputus. Menyambungkan kembali…"}
+          </p>
+          <Button
+            variant="outline"
+            disabled={connection.busy}
+            onClick={() => void connection.revoke()}
+          >
+            Putuskan layar
+          </Button>
+        </>
+      ) : (
+        <PairingCodeInput onPair={connection.pair} disabled={connection.busy} />
+      )}
+      <p role="status">{connection.message}</p>
+    </section>
+  );
+}
+
 export function PresentationControls({
   sessionId,
   classId,
@@ -69,53 +125,11 @@ export function PresentationControls({
   sessionPackage?: TeacherPackage;
   onEvidenceSaved?: () => void;
 }) {
-  const [snapshot, setSnapshot] = useState<PresentationSnapshot>();
-  const latestSnapshot = useRef<PresentationSnapshot | undefined>(undefined);
-  const publishing = useRef(false);
-  function receive(value: PresentationSnapshot | undefined) {
-    const previous = latestSnapshot.current;
-    if (
-      previous &&
-      value &&
-      previous.envelope.presentationId === value.envelope.presentationId &&
-      previous.envelope.channelEpoch === value.envelope.channelEpoch &&
-      previous.envelope.revision > value.envelope.revision
-    )
-      return;
-    latestSnapshot.current = value;
-    setSnapshot(value);
-  }
-  const [online, setOnline] = useState(false),
-    [busy, setBusy] = useState(false),
-    [message, setMessage] = useState("");
-  const [checkedAt, setCheckedAt] = useState(0);
-  const [previewGrade, setPreviewGrade] = useState(grade);
-  const [spotGroup, setSpotGroup] = useState("");
-  const lesson = suppliedLesson ?? publicLesson(demoOpening(previewGrade));
-  const id = snapshot?.envelope.presentationId;
-  const verifiedTouches = usePairedTouches(id);
-  useEffect(() => {
-    if (!id) return;
-    return watchPresentation(
-      "teacher",
-      id,
-      (value) => {
-        setCheckedAt(Date.now());
-        if (!value) {
-          receive(undefined);
-          return;
-        }
-        receive(value);
-      },
-      setOnline,
-    );
-  }, [id]);
-  async function pair(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const code = String(new FormData(event.currentTarget).get("code"));
-    setBusy(true);
-    try {
-      const payload = publicPresentation({
+  const transport = usePresentationTransport({
+    sessionId,
+    classId,
+    initialState: () =>
+      publicPresentation({
         schemaVersion: 1,
         mode: "opening",
         question: 1,
@@ -130,27 +144,26 @@ export function PresentationControls({
               },
             }
           : {}),
-      });
-      receive(
-        snapshotSchema.parse(
-          await pairingCall("teacher", {
-            action: "claim",
-            code,
-            classId,
-            sessionId,
-            payload,
-          }),
-        ),
-      );
-      setMessage("Menunggu konfirmasi penerapan dari papan.");
-    } catch {
-      setMessage(
-        "Kode belum dapat dipakai. Periksa koneksi, masa berlaku, dan enam digit di papan.",
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
+      }),
+  });
+  const {
+    snapshot,
+    latestSnapshot,
+    receive,
+    online,
+    message,
+    setMessage,
+    pair,
+    revoke,
+  } = transport;
+  const publishing = useRef(false);
+  const [publishingBusy, setBusy] = useState(false);
+  const busy = publishingBusy || transport.busy;
+  const [previewGrade, setPreviewGrade] = useState(grade);
+  const [spotGroup, setSpotGroup] = useState("");
+  const lesson = suppliedLesson ?? publicLesson(demoOpening(previewGrade));
+  const id = snapshot?.envelope.presentationId;
+  const verifiedTouches = usePairedTouches(id);
   async function publish(
     mode: PresentationState["mode"],
     question = 1,
@@ -176,6 +189,16 @@ export function PresentationControls({
         return false;
       }
       const previous = env.payload;
+      const publishedLesson =
+        mode === "reflection" && sessionPackage
+          ? {
+              ...lesson,
+              objective:
+                reflectionUsesForGroups(sessionPackage, rotationGroups).join(
+                  " · ",
+                ) || "Ceritakan kegunaan materi yang baru kamu pelajari.",
+            }
+          : lesson;
       const sameTask =
         previous.mode === mode &&
         previous.question === question &&
@@ -184,7 +207,7 @@ export function PresentationControls({
         previous.exit?.row === exit?.row &&
         JSON.stringify(previous.tool) === JSON.stringify(tool) &&
         previous.pattern === pattern &&
-        JSON.stringify(previous.lesson) === JSON.stringify(lesson);
+        JSON.stringify(previous.lesson) === JSON.stringify(publishedLesson);
       const payload = publicPresentation(
         projection ?? {
           schemaVersion: 1,
@@ -207,7 +230,7 @@ export function PresentationControls({
           roles,
           tool,
           pattern,
-          lesson,
+          lesson: publishedLesson,
           exit,
           activity,
           layout: {
@@ -252,11 +275,11 @@ export function PresentationControls({
           }),
         ),
       );
-      setMessage("Perintah tersimpan; menunggu ACK papan.");
+      setMessage("Perintah tersimpan; menunggu layar menerapkan tampilan.");
       return true;
     } catch {
       setMessage(
-        "Perintah belum diterapkan. Sambungkan internet dan tunggu snapshot terbaru sebelum mencoba lagi.",
+        "Perintah belum diterapkan. Periksa koneksi lalu tunggu tampilan terbaru sebelum mencoba lagi.",
       );
       return false;
     } finally {
@@ -397,23 +420,8 @@ export function PresentationControls({
     )
       throw new Error("Station publication failed");
   }
-  async function revoke() {
-    if (!id) return;
-    try {
-      await pairingCall("teacher", { action: "revoke", presentationId: id });
-      receive(undefined);
-      setMessage("Sambungan papan diakhiri.");
-    } catch {
-      setMessage("Sambungan belum dapat diakhiri saat offline.");
-    }
-  }
   const connected =
-    online &&
-    snapshot &&
-    snapshot.ackRevision === snapshot.envelope.revision &&
-    snapshot.ackCommandId === snapshot.envelope.commandId &&
-    snapshot.ackAt &&
-    checkedAt - Date.parse(snapshot.ackAt) < 6000;
+    online && snapshot && boardAcknowledged(snapshot, classroomNow());
   return (
     <section
       aria-label="Kontrol Layar Kelas"
@@ -422,32 +430,15 @@ export function PresentationControls({
       <fieldset disabled={busy} className="space-y-3">
         <h4 className="text-lg font-bold">Layar Kelas</h4>
         {!snapshot ? (
-          <form onSubmit={pair} className="flex flex-wrap gap-2">
-            <label className="flex-1">
-              Kode dari papan
-              <input
-                name="code"
-                aria-label="Kode pasangan"
-                required
-                pattern="[0-9]{6}"
-                inputMode="numeric"
-                maxLength={6}
-                className="mt-1 min-h-12 w-full rounded-input border px-3"
-                autoComplete="off"
-              />
-            </label>
-            <Button disabled={busy} type="submit">
-              Hubungkan papan
-            </Button>
-          </form>
+          <PairingCodeInput onPair={pair} disabled={busy} />
         ) : (
           <>
             <p role="status" data-testid="pairing-status">
               {connected
-                ? "Terhubung · papan sudah menerapkan perintah"
+                ? "Layar tersambung · papan sudah menerapkan perintah"
                 : online
-                  ? "Menunggu ACK papan"
-                  : "Sambungan terputus. Scan dan hitung kelompok tetap lokal."}
+                  ? "Menunggu layar menerapkan tampilan."
+                  : "Koneksi terputus. Menyambungkan kembali…"}
             </p>
             {sessionPackage && (
               <PackageTransfer
@@ -620,7 +611,7 @@ export function PresentationControls({
               </div>
             )}
             <Button variant="outline" onClick={() => void revoke()}>
-              Akhiri sambungan
+              Putuskan layar
             </Button>
           </>
         )}

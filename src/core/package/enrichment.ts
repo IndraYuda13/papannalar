@@ -1,4 +1,8 @@
-import { allPackageQuestions, type TeacherPackage } from "./build";
+import {
+  allPackageQuestions,
+  prepareActivitySet,
+  type TeacherPackage,
+} from "./build";
 import {
   applyStory,
   type StoryChoice,
@@ -30,13 +34,15 @@ export function applyPackageStories(
   const next = {
     ...pkg,
     revision: pkg.revision + 1,
-    activities: pkg.activities.map((a) => ({
-      ...a,
-      independent: a.independent.map((q) => {
-        const suggestion = input.find((s) => s.questionId === q.id);
-        return suggestion ? applyStory(q, suggestion.choice) : q;
+    activities: pkg.activities.map((a) =>
+      prepareActivitySet({
+        ...a,
+        independent: a.independent.map((q) => {
+          const suggestion = input.find((s) => s.questionId === q.id);
+          return suggestion ? applyStory(q, suggestion.choice) : q;
+        }),
       }),
-    })),
+    ),
   };
   const { contentHash: previous, ...content } = next;
   void previous;

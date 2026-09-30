@@ -1,4 +1,20 @@
 import type { StudentDto } from "@/contracts/api";
+// Download stays on the teacher device. Quote all cells and neutralize spreadsheet formulas.
+export function exportLocalRosterCsv(
+  roster: readonly StudentDto[],
+  names: Readonly<Record<string, string>>,
+) {
+  const cell = (value: string) =>
+    `"${(/^[\s]*[=+@-]/.test(value) ? `'${value}` : value).replaceAll('"', '""')}"`;
+  return (
+    "\uFEFFabsen,nama\r\n" +
+    roster
+      .filter((s) => s.active)
+      .map((s) => `${s.attendanceNumber},${cell(names[s.id] ?? "")}`)
+      .join("\r\n") +
+    "\r\n"
+  );
+}
 // This parser and its output stay in the local teacher boundary. No network imports.
 export function parseLocalRosterCsv(
   text: string,

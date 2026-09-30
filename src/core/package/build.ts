@@ -5,11 +5,7 @@ import {
   type StepId,
 } from "../../content/ladder/registry";
 import { getClassTarget } from "../../content/ladder/targets";
-import {
-  CONTEXTS,
-  IMPLEMENTED_TOOLS,
-  type ToolId,
-} from "../../content/contexts/registry";
+import { CONTEXTS, type ToolId } from "../../content/contexts/registry";
 import { contentHash } from "../../content/templates/format";
 import type { GeneratedQuestion } from "../../content/templates/types";
 import { initialWindow, weeklyWindow } from "../placement/windows";
@@ -17,6 +13,9 @@ import type { ComputedLevel } from "../placement/computed-level";
 import { integer, randomId } from "../validation";
 import { generateQuestion } from "./question";
 import { withContext } from "../../content/contexts/question";
+import { activityToolSupport } from "./tool-task";
+import { independentQuestion, optionalQuestion } from "./independent";
+import { withPublicExitReasons } from "./exit-reasons";
 
 export type PackageVariant = "initial" | "weekly" | "oral" | "short";
 export type ActivitySet = Readonly<{
@@ -66,6 +65,21 @@ function rehash(value: TeacherPackage): TeacherPackage {
   const { contentHash: previous, ...content } = value;
   void previous;
   return { ...value, contentHash: contentHash(JSON.stringify(content)) };
+}
+/** Reuse at recipe hydration as well as generation/replacement; no schema delta. */
+export function prepareActivitySet(
+  activity: Omit<ActivitySet, "tool" | "interactiveSupport">,
+): ActivitySet {
+  return {
+    stepId: activity.stepId,
+    ...activityToolSupport(activity.board),
+    board: activity.board,
+    independent: activity.independent.map(independentQuestion),
+    optional: optionalQuestion(activity.optional),
+    guided: activity.guided,
+    exit: withPublicExitReasons(activity.exit),
+    exitContext: withPublicExitReasons(activity.exitContext),
+  };
 }
 export function buildPackage(input: PackageInput): TeacherPackage {
   const target = getClassTarget(input.grade, input.target).stepId;
@@ -119,14 +133,8 @@ export function buildPackage(input: PackageInput): TeacherPackage {
       exit.mathFingerprint,
       exitContext.mathFingerprint,
     ]);
-    const tool = CONTEXTS[stepId].tool;
-    return {
+    return prepareActivitySet({
       stepId,
-      tool,
-      interactiveSupport:
-        tool && IMPLEMENTED_TOOLS.includes(tool)
-          ? ("supported" as const)
-          : ("unavailable" as const),
       board: Array.from({ length: input.grade <= 6 ? 2 : 3 }, () =>
         draw(stepId, excluded),
       ),
@@ -135,7 +143,7 @@ export function buildPackage(input: PackageInput): TeacherPackage {
       guided: draw(stepId, excluded),
       exit,
       exitContext,
-    };
+    });
   });
   const openingStep = indices.length
     ? stepAtClampedIndex(Math.min(...indices))
@@ -234,15 +242,17 @@ export function replacePackageQuestion(
     ...pkg,
     revision: pkg.revision + 1,
     assessment: pkg.assessment.map(replace),
-    activities: pkg.activities.map((a) => ({
-      ...a,
-      board: a.board.map(replace),
-      independent: a.independent.map(replace),
-      optional: replace(a.optional),
-      guided: replace(a.guided),
-      exit: replace(a.exit),
-      exitContext: replace(a.exitContext),
-    })),
+    activities: pkg.activities.map((a) =>
+      prepareActivitySet({
+        ...a,
+        board: a.board.map(replace),
+        independent: a.independent.map(replace),
+        optional: replace(a.optional),
+        guided: replace(a.guided),
+        exit: replace(a.exit),
+        exitContext: replace(a.exitContext),
+      }),
+    ),
   });
 }
 export function freezePackage(pkg: TeacherPackage): TeacherPackage {

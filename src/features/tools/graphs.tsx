@@ -1,5 +1,12 @@
 "use client";
-import { useId, useReducer, useRef, useState, type PointerEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useReducer,
+  useRef,
+  useState,
+  type PointerEvent,
+} from "react";
 import {
   initialGraphs,
   reduceGraphs,
@@ -64,7 +71,7 @@ function GraphSlider({
     owner.current = null;
   }
   return (
-    <label className="grid grid-cols-[1fr_104px] items-center gap-x-3 text-[28px]">
+    <label className="board-graph-control grid grid-cols-[1fr_104px] items-center gap-x-3 text-[28px]">
       <span className="col-span-2">{label}</span>
       <input
         aria-label={`Geser ${label}`}
@@ -162,6 +169,17 @@ export function Graphs({
     top = 20,
     plotWidth = 890,
     plotHeight = 400;
+  const [axisFont, setAxisFont] = useState(22);
+  useEffect(() => {
+    const element = plot.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => {
+      if (element.clientWidth > 0)
+        setAxisFont((18 * width) / element.clientWidth);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [width]);
   const px = (x: number) =>
     left + ((x - d.minX) / (d.maxX - d.minX)) * plotWidth;
   const py = (y: number) =>
@@ -298,7 +316,11 @@ export function Graphs({
   const displayTick = (n: number) =>
     n.toLocaleString("id-ID", { maximumFractionDigits: 2 });
   return (
-    <section aria-label="Grafik Geser" className="space-y-4 text-left">
+    <section
+      aria-label="Grafik Geser"
+      data-tool="graphs"
+      className="board-tool space-y-4 text-left"
+    >
       <p className="text-[56px]" data-testid="graph-target">
         Susun: {graphModelText(modelForTask(task))}
       </p>
@@ -315,7 +337,7 @@ export function Graphs({
                 ? `Temukan x bilangan bulat ketika y = ${text(rational(task.goal.y.numerator, task.goal.y.denominator))}. Bandingkan dengan garis lurus.`
                 : `Bandingkan kurva dan garis lurus ketika x = ${task.goal.x}.`}
       </p>
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(350px,1fr)]">
+      <div className="board-graph-workspace grid items-start gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(350px,1fr)]">
         <div className="min-w-0 space-y-3">
           <div
             ref={plot}
@@ -339,7 +361,7 @@ export function Graphs({
                 </clipPath>
               </defs>
               {ticks.map((t) => (
-                <g key={t} fill="var(--pn-ink-900)" fontSize="22">
+                <g key={t} fill="var(--pn-ink-900)" fontSize={axisFont}>
                   <line
                     x1={left + t * plotWidth}
                     x2={left + t * plotWidth}
@@ -462,10 +484,10 @@ export function Graphs({
                     />
                   ))}
               </g>
-              <text x={width - 20} y={height - 5} fontSize="26">
+              <text x={width - axisFont} y={height - 5} fontSize={axisFont}>
                 x
               </text>
-              <text x="8" y="22" fontSize="26">
+              <text x="8" y={axisFont} fontSize={axisFont}>
                 y
               </text>
             </svg>
@@ -705,7 +727,7 @@ export function Graphs({
             ))}
         </div>
       </div>
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="board-graph-coordinates flex flex-wrap items-end gap-3">
         <label className="text-[28px]">
           Koordinat x
           <input
@@ -782,7 +804,7 @@ export function Graphs({
           ))}
         </div>
       )}
-      <div className="flex flex-wrap gap-3">
+      <div className="board-graph-actions flex flex-wrap gap-3">
         <Button
           size="board"
           variant="outline"

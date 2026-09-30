@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { expect, test } from "@playwright/test";
 import { readFile, mkdir } from "node:fs/promises";
 import {
@@ -19,7 +20,7 @@ test("manifest build hanya shell publik dan seluruh JS/CSS/font lokal", async ({
   );
   expect(manifest.assets.some((asset) => asset.endsWith(".woff2"))).toBe(true);
   expect(manifest.assets.some((asset) => asset.endsWith(".css"))).toBe(true);
-  await page.goto("/guru");
+  await page.goto("/guru/latihan");
   await injectFixture(page);
   await waitForShellCache(page);
   const paths = await page.evaluate(async (cacheName) => {
@@ -37,6 +38,7 @@ test("manifest build hanya shell publik dan seluruh JS/CSS/font lokal", async ({
         path.startsWith("/_next/static/") ||
         [
           "/offline/guru.html",
+          "/offline/guru-latihan.html",
           "/offline/layar.html",
           "/icon.svg",
           "/omr-worker.js",
@@ -50,7 +52,7 @@ test("tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap
   page,
   context,
 }) => {
-  await page.goto("/guru");
+  await page.goto("/guru/latihan");
   await injectFixture(page);
   await waitForShellCache(page);
   const ids = await page.evaluate(async () => {
@@ -70,7 +72,7 @@ test("tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap
     if (message.type() === "error") errors.push(message.text());
   });
   await fresh.setViewportSize({ width: 390, height: 844 });
-  await fresh.goto("/guru");
+  await fresh.goto("/guru/latihan");
   await expect(
     fresh.getByRole("heading", { name: "Beranda", exact: true }),
   ).toBeVisible();
@@ -96,7 +98,7 @@ test("tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap
     path: "artifacts/qa/M01/m01b/guru-offline.png",
     fullPage: true,
   });
-  await fresh.getByRole("link", { name: "Buka Layar Kelas" }).click();
+  await openBoard(fresh);
   await fresh.setViewportSize({ width: 1920, height: 1080 });
   await expect(
     fresh.getByRole("heading", { name: "Layar Kelas menunggu." }),
@@ -131,7 +133,7 @@ test("audit cache mendeteksi aset hilang; tidak mengklaim siap hanya karena onli
   const manifest: ShellManifest = JSON.parse(
     await readFile("public/offline/manifest.json", "utf8"),
   );
-  await page.goto("/guru");
+  await page.goto("/guru/latihan");
   await injectFixture(page);
   await waitForShellCache(page);
   const result = await page.evaluate(async ({ cacheName, assets }) => {

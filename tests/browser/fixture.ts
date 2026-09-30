@@ -4,6 +4,15 @@ import { readTeacherStudentView } from "../../src/features/guru/student-view";
 import { serializeStudent } from "../../src/contracts/api";
 import { serializeBoardState } from "../../src/contracts/board";
 import { auditShellCache } from "../../src/offline/shell-cache";
+import {
+  libraryCache,
+  pendingLibraryResponses,
+  queueLibraryResponse,
+  syncLibraryResponses,
+} from "../../src/local/library";
+import { classPresence } from "../../src/local/class-presence";
+import { boardToolProgress } from "../../src/local/library-board-progress";
+import { lockLocalAccess, readLocalAccess } from "../../src/local/access";
 
 const fixture = {
   createNameRepository,
@@ -12,6 +21,14 @@ const fixture = {
   serializeStudent,
   serializeBoardState,
   auditShellCache,
+  libraryCache,
+  pendingLibraryResponses,
+  queueLibraryResponse,
+  syncLibraryResponses,
+  classPresence,
+  boardToolProgress,
+  lockLocalAccess,
+  readLocalAccess,
 };
 declare global {
   interface Window {

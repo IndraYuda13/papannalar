@@ -123,7 +123,11 @@ export function AlgebraTiles({
   const label = (tile: Omit<Tile, "id">) =>
     `${tile.sign < 0 ? "−" : "+"}${tile.kind === "x" ? "x" : "1"}`;
   return (
-    <section aria-label="Ubin Aljabar" className="space-y-4 text-left">
+    <section
+      aria-label="Ubin Aljabar"
+      data-tool="algebra"
+      className="board-tool space-y-4 text-left"
+    >
       <p className="text-[32px]">
         Pilih kelompok lalu ketuk atau seret ubin. Satukan pasangan sejenis +
         dan − menjadi nol.

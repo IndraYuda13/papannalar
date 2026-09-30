@@ -3,6 +3,10 @@ import fontkit from "@pdf-lib/fontkit";
 import { toPublicQuestion } from "../../contracts/package";
 import type { ActivitySet } from "../../core/package/build";
 import { promptText } from "../../content/templates/format";
+import {
+  independentQuestion,
+  optionalQuestion,
+} from "../../core/package/independent";
 
 function lines(
   text: string,
@@ -48,37 +52,34 @@ export async function createIndependentPdf(
   doc.setLanguage("id-ID");
   let page = doc.addPage([595.28, 841.89]);
   let y = text(page, "PapanNalar · Tugas Mandiri", 790, font, 21);
-  y = text(
-    page,
-    "Satu lembar untuk dua siswa · 3 wajib + 1 boleh",
-    y - 10,
-    font,
-  );
+  y = text(page, "Untuk dua siswa · 3 wajib + 1 boleh", y - 10, font);
   y =
     text(
       page,
-      "Bicarakan caranya. Gambar model dan jelaskan alasanmu.",
+      "Kerjakan di buku bersama pasanganmu. Gambar model dan jelaskan alasanmu.",
       y - 8,
       font,
     ) - 22;
-  const questions = [...activity.independent, activity.optional];
+  const questions = [
+    ...activity.independent.map(independentQuestion),
+    optionalQuestion(activity.optional),
+  ];
   for (let i = 0; i < questions.length; i++) {
-    if (y < 230) {
+    const q = questions[i],
+      projected = toPublicQuestion(q);
+    const instruction = `${i + 1}. ${i === 3 ? "Boleh: " : "Wajib: "}${promptText(projected.prompt)}`;
+    const height =
+      lines(instruction, font, 15, 495).length * 21 +
+      (grade <= 3 ? 55 : 0) +
+      90;
+    if (y - height < 55) {
       page = doc.addPage([595.28, 841.89]);
       y = 790;
     }
-    const q = questions[i],
-      projected = toPublicQuestion(q);
-    y = text(
-      page,
-      `${i + 1}. ${i === 3 ? "Boleh: " : "Wajib: "}${promptText(projected.prompt)}`,
-      y,
-      font,
-      15,
-    );
+    y = text(page, instruction, y, font, 15);
     if (grade <= 3) {
-      const { a, b } = q.params;
-      if (["A4", "B4"].includes(q.stepId)) {
+      const { a, b, c, d } = q.params;
+      if (q.stepId === "B4" || (q.stepId === "A4" && !d)) {
         for (let j = 0; j < b; j++)
           page.drawRectangle({
             x: 50 + j * (180 / b),
@@ -90,7 +91,12 @@ export async function createIndependentPdf(
             color: grayscale(j < a ? 0.4 : 1),
           });
       } else {
-        const count = q.stepId === "A3" ? a : Math.min(20, Math.abs(a));
+        const count =
+          q.stepId === "A4" && d
+            ? c
+            : q.stepId === "A3"
+              ? a
+              : Math.min(20, Math.abs(a));
         for (let j = 0; j < count; j++)
           page.drawCircle({
             x: 57 + (j % 10) * 22,

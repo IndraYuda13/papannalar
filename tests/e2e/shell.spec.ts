@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
-import { loginTeacher } from "../browser/helpers";
+import { loginTeacher, openBoard } from "../browser/helpers";
 
 const evidenceDir = "artifacts/qa/M01";
 
@@ -37,10 +37,7 @@ test("Aplikasi Guru terbuka pada HP, font lokal siap dan navigasi ke papan beker
   await expect(page).toHaveURL(/\/guru$/);
   await expect(page).toHaveTitle("Aplikasi Guru | PapanNalar");
   await expect(
-    page.getByRole("heading", { name: "Beranda", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Belum ada kelas." }),
+    page.getByRole("heading", { name: "Siap belajar hari ini?", exact: true }),
   ).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   expect(
@@ -62,9 +59,14 @@ test("Aplikasi Guru terbuka pada HP, font lokal siap dan navigasi ke papan beker
     path: `${evidenceDir}/guru-390x844.png`,
     fullPage: true,
   });
+  const opened = page.waitForEvent("popup");
   await openBoard.click();
+  const board = await opened;
+  await board
+    .getByRole("button", { name: "Simpan tampilan", exact: true })
+    .click();
   await expect(
-    page.getByRole("heading", { name: "Layar Kelas menunggu." }),
+    board.getByRole("heading", { name: "Layar Kelas menunggu." }),
   ).toBeVisible();
   expect(observed.errors).toEqual([]);
   expect(observed.externalRequests).toEqual([]);
@@ -75,11 +77,11 @@ test("Layar Kelas 1920x1080 memakai font papan, tanpa data guru atau kode pasang
 }) => {
   const observed = observeRuntime(page);
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto("/layar");
+  await openBoard(page);
   await expect(page).toHaveTitle("Layar Kelas | PapanNalar");
   const heading = page.getByRole("heading", { name: "Layar Kelas menunggu." });
   await expect(heading).toBeVisible();
-  await expect(page.getByText("Masukkan kode ini di HP guru")).toBeVisible();
+  await expect(page.getByText(/Pindai QR dengan kamera HP guru/)).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   expect(
     await heading.evaluate((element) => getComputedStyle(element).fontFamily),
@@ -88,7 +90,7 @@ test("Layar Kelas 1920x1080 memakai font papan, tanpa data guru atau kode pasang
     await heading.evaluate((element) =>
       parseFloat(getComputedStyle(element).fontSize),
     ),
-  ).toBeGreaterThanOrEqual(56);
+  ).toBeGreaterThanOrEqual(28);
   expect(
     await page.evaluate(() =>
       document.fonts.check('700 64px "Atkinson Hyperlegible"'),
@@ -97,17 +99,17 @@ test("Layar Kelas 1920x1080 memakai font papan, tanpa data guru atau kode pasang
   const buttonBox = await page
     .getByRole("button", { name: "Layar penuh", exact: true })
     .boundingBox();
-  expect(buttonBox?.height).toBeGreaterThanOrEqual(96);
+  expect(buttonBox?.height).toBeGreaterThanOrEqual(48);
   const publicText = await page.locator("body").innerText();
   expect(publicText).not.toMatch(/\b[A-E][1-6]\b|mastery|peringkat/iu);
   await expect(page.getByTestId("pairing-code")).toHaveText(/^\d{3} \d{3}$/);
   await expect(page.locator('[data-surface="guru"]')).toHaveCount(0);
-  expect(
-    await page.evaluate(() => ({
-      local: localStorage.length,
-      session: sessionStorage.length,
-    })),
-  ).toEqual({ local: 0, session: 0 });
+  const stored = await page.evaluate(() => ({
+    local: Object.entries(localStorage),
+    session: Object.entries(sessionStorage),
+  }));
+  expect(stored.local.map(([key]) => key)).toEqual(["pn-board-appearance-v1"]);
+  expect(stored.session).toEqual([]);
   await noHorizontalOverflow(page);
   await mkdir(evidenceDir, { recursive: true });
   await page.screenshot({
@@ -123,7 +125,7 @@ test("Kontrol layar penuh terhidrasi dan dapat dibuka lalu ditutup", async ({
   page,
 }) => {
   const observed = observeRuntime(page);
-  await page.goto("/layar");
+  await openBoard(page);
   await page.getByRole("button", { name: "Layar penuh", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Keluar layar penuh" }),

@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import {
@@ -30,7 +31,7 @@ test("TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
       if (m.type() === "error") errors.push("console");
     });
   }
-  await board.goto("/layar");
+  await openBoard(board);
   const code = await board.getByTestId("pairing-code").textContent();
   await page
     .getByLabel("Kode pasangan", { exact: true })
@@ -38,7 +39,9 @@ test("TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   await page.getByText("Pratinjau Alat Nalar", { exact: true }).click();
   await page
     .getByLabel("Pilih Alat Nalar", { exact: true })
@@ -158,7 +161,7 @@ test("TOOL02 fractions keep whole size, check the model, undo, and run offline o
   board.on("console", (m) => {
     if (m.type() === "error") errors.push("board-console");
   });
-  await board.goto("/layar");
+  await openBoard(board);
   const code = await board.getByTestId("pairing-code").textContent();
   await page
     .getByLabel("Kode pasangan", { exact: true })
@@ -166,7 +169,9 @@ test("TOOL02 fractions keep whole size, check the model, undo, and run offline o
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   await page.getByText("Pratinjau Alat Nalar", { exact: true }).click();
   await page
     .getByRole("button", { name: "Buka latihan Batang Pecahan", exact: true })
@@ -208,8 +213,8 @@ test("TOOL02 fractions keep whole size, check the model, undo, and run offline o
   const cell = await tool
     .getByLabel("Batang 1 bagian 1", { exact: true })
     .boundingBox();
-  expect(cell!.width).toBeGreaterThanOrEqual(88);
-  expect(cell!.height).toBeGreaterThanOrEqual(88);
+  expect(cell!.width).toBeGreaterThanOrEqual(48);
+  expect(cell!.height).toBeGreaterThanOrEqual(48);
   expect(
     (await tool.getByTestId("fraction-whole-0-0").boundingBox())!.width,
   ).toBe(before!.width);

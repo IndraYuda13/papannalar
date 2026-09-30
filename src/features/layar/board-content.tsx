@@ -38,6 +38,7 @@ export function BoardContent({ state, content, plan }: ContentProps) {
     <>
       <p
         data-testid="lesson-objective"
+        hidden={state.mode === "reflection"}
         className="mb-5 text-[28px] text-primary"
       >
         Tujuan:{" "}

@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 import { loginTeacher } from "../browser/helpers";
@@ -149,7 +150,7 @@ test("M05-b recorded PRELIM regression: opening, check, scan, groups, station, a
       } catch {}
     }
   });
-  await board.goto("/layar");
+  await openBoard(board);
   await expect(board.getByTestId("pairing-code")).toHaveText(/^\d{3} \d{3}$/);
   const pairingStart = Date.now();
   await page
@@ -163,7 +164,9 @@ test("M05-b recorded PRELIM regression: opening, check, scan, groups, station, a
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   const pairingMs = Date.now() - pairingStart;
   await board.getByLabel("Besar lompatan").fill("7");
   await board.getByRole("button", { name: "Lompat", exact: true }).click();

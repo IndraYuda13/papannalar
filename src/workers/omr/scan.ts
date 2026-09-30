@@ -2,12 +2,17 @@ import jsQR from "jsqr";
 import {
   CARD_OPTIONS,
   cardLayout,
-  decodeLayout,
+  layoutPayload,
   type CardAnswer,
   type CardKind,
   type Point,
 } from "../../cards/layouts/layout-v1";
 import { cyclic, homography, project, type Homography } from "./geometry";
+import {
+  customFormPayload,
+  customFormBindingSchema,
+  type CustomFormBinding,
+} from "../../contracts/custom-form";
 
 export type Raster = Readonly<{
   width: number;
@@ -21,6 +26,7 @@ export type BubbleRead = Readonly<{
 export type ScanResult = Readonly<{
   status: "accepted" | "review" | "rejected";
   kind: CardKind;
+  form?: CustomFormBinding;
   attendanceNumber: number | null;
   answers: readonly Readonly<{
     result: CardAnswer | "missing";
@@ -229,6 +235,7 @@ export function scanCard(
   image: Raster,
   kind: CardKind,
   roster: readonly number[],
+  binding?: CustomFormBinding,
 ): ScanResult {
   const layout = cardLayout(kind);
   const fail = (issue: ScanResult["issues"][number]): ScanResult => ({
@@ -238,6 +245,13 @@ export function scanCard(
     answers: [],
     issues: [issue],
   });
+  const parsed =
+    binding === undefined
+      ? undefined
+      : customFormBindingSchema.safeParse(binding);
+  if (parsed && (!parsed.success || kind !== "weekly")) return fail("layout");
+  const form = parsed?.success ? parsed.data : undefined;
+  const expectedQr = form ? customFormPayload(form) : layoutPayload(kind);
   if (
     !Number.isInteger(image.width) ||
     !Number.isInteger(image.height) ||
@@ -340,7 +354,7 @@ export function scanCard(
             });
             if (!matchesMarkerScale) continue;
             const payload = readQr(gray, image.width, image.height, h, kind);
-            if (payload && decodeLayout(payload) === kind) candidates.push(h);
+            if (payload === expectedQr) candidates.push(h);
           }
         }
   if (candidates.length !== 1) return fail("layout");
@@ -387,18 +401,20 @@ export function scanCard(
     !roster.includes(attendanceNumber)
   )
     attendanceNumber = null;
-  const answers = layout.answers.map((points) => {
-    const read = row(points);
-    return {
-      result:
-        read.status === "accepted"
-          ? CARD_OPTIONS[read.index!]
-          : read.status === "blank"
-            ? ("?" as const)
-            : ("missing" as const),
-      status: read.status,
-    };
-  });
+  const answers = layout.answers
+    .slice(0, form?.rows ?? layout.rows)
+    .map((points) => {
+      const read = row(points);
+      return {
+        result:
+          read.status === "accepted"
+            ? CARD_OPTIONS[read.index!]
+            : read.status === "blank"
+              ? ("?" as const)
+              : ("missing" as const),
+        status: read.status,
+      };
+    });
   const issues: ScanResult["issues"][number][] = [];
   if (attendanceNumber === null) issues.push("attendance");
   if (answers.some((answer) => answer.result === "missing"))
@@ -406,6 +422,7 @@ export function scanCard(
   return {
     status: issues.length ? "review" : "accepted",
     kind,
+    ...(form ? { form } : {}),
     attendanceNumber,
     answers,
     issues,

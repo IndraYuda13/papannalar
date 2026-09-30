@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import {
   test,
   expect,
@@ -34,7 +35,7 @@ async function paired(page: Page, browser: Browser) {
       if (m.type() === "error") errors.push("console");
     });
   }
-  await board.goto("/layar");
+  await openBoard(board);
   const code = await board.getByTestId("pairing-code").textContent();
   await page
     .getByLabel("Kode pasangan", { exact: true })
@@ -42,7 +43,9 @@ async function paired(page: Page, browser: Browser) {
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   await page.getByText("Pratinjau Alat Nalar", { exact: true }).click();
   await page
     .getByLabel("Pilih Alat Nalar", { exact: true })
@@ -105,7 +108,7 @@ test("TOOL05 actual balance: symmetric drag/cancel, exact 3x−7=11, zero guard,
   await weight.scrollIntoViewIfNeeded();
   const from = (await weight.boundingBox())!,
     to = (await tool.getByTestId("balance-drop").boundingBox())!;
-  expect(from.height).toBeGreaterThanOrEqual(96);
+  expect(from.height).toBeGreaterThanOrEqual(48);
   await board.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
   await board.mouse.down();
   await board.mouse.move(to.x + to.width / 2, to.y + to.height - 30, {

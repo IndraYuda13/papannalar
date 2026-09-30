@@ -3,12 +3,20 @@ import { isLocalDemoEnvironment } from "../../contracts/local-demo";
 import { createHmac, randomInt } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { authContext, requireTeacher } from "../auth/client";
+import { applicationOrigin } from "../auth/origin";
+import {
+  requireSampleController,
+  sampleControllerToken,
+} from "../sample-controller";
+import { pairingUrl } from "../../features/classroom/pairing-url";
 import { readBody, handleError } from "../http";
 import {
   boardPairingSchema,
   teacherPairingSchema,
   snapshotSchema,
   challengeSchema,
+  connectionPulseSchema,
+  presentationResumeSchema,
 } from "../../contracts/presentation";
 
 export async function pairingRequest(
@@ -22,8 +30,11 @@ export async function pairingRequest(
       surface === "board"
         ? await readBody(request, boardPairingSchema)
         : await readBody(request, teacherPairingSchema);
-    if (surface === "teacher") await requireTeacher(ctx);
-    else {
+    if (surface === "teacher") {
+      await requireTeacher(ctx);
+      if (["claim", "publish", "revoke", "heartbeat"].includes(input.action))
+        await requireSampleController(request, ctx);
+    } else {
       const { data, error } = await ctx.client.auth.getUser();
       if (error || !data.user || data.user.is_anonymous !== true)
         throw new Error("UNAUTHENTICATED");
@@ -35,7 +46,11 @@ export async function pairingRequest(
     const rpc = async (action: string, params: object) => {
       const { data, error } = await ctx!.client.rpc("presentation_action", {
         p_action: action,
-        p_input: params,
+        p_input:
+          surface === "teacher" &&
+          ["claim", "publish", "revoke", "heartbeat"].includes(action)
+            ? { ...params, sampleController: sampleControllerToken(request) }
+            : params,
       });
       if (error) throw new Error("UNAVAILABLE");
       if (data?.error)
@@ -52,17 +67,31 @@ export async function pairingRequest(
       const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
       const data = await rpc("create", {
         codeHash: hash(code),
+        ...(input.presentationId
+          ? { presentationId: input.presentationId }
+          : {}),
         ipHash: hash(
           request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
             "unknown",
         ),
       });
+      const proto =
+        request.headers.get("x-forwarded-proto") ??
+        request.nextUrl.protocol.replace(":", "");
+      const host =
+        request.headers.get("x-forwarded-host") ??
+        request.headers.get("host") ??
+        request.nextUrl.host;
+      const effectiveOrigin = proto.startsWith("https")
+        ? `${proto}://${host}`
+        : applicationOrigin(request);
       return ctx.finish(
         NextResponse.json(
           challengeSchema.parse({
             id: data.id,
             code,
             expiresAt: data.expiresAt,
+            pairingUrl: pairingUrl(effectiveOrigin, code),
           }),
         ),
       );
@@ -73,6 +102,7 @@ export async function pairingRequest(
         classId: input.classId,
         sessionId: input.sessionId,
         payload: input.payload,
+        ...(input.controllerId ? { controllerId: input.controllerId } : {}),
         ipHash: hash(
           request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
             "unknown",
@@ -81,7 +111,7 @@ export async function pairingRequest(
       return ctx.finish(NextResponse.json(snapshotSchema.parse(data)));
     }
     if (input.action === "channel") {
-      await rpc("snapshot", { presentationId: input.presentationId });
+      await rpc("snapshot", input);
       const url = process.env["NEXT_PUBLIC_SUPABASE_URL"]!;
       if (
         isLocalDemoEnvironment(
@@ -120,7 +150,11 @@ export async function pairingRequest(
       NextResponse.json(
         input.action === "snapshot" || input.action === "publish"
           ? snapshotSchema.parse(data)
-          : data,
+          : input.action === "heartbeat"
+            ? connectionPulseSchema.parse(data)
+            : input.action === "resume"
+              ? presentationResumeSchema.parse(data)
+              : data,
       ),
     );
   } catch (error) {

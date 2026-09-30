@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { randomIdSchema } from "./domain";
 import { STEP_IDS } from "../content/ladder/registry";
-import { CONTEXTS, IMPLEMENTED_TOOLS } from "../content/contexts/registry";
+import { CONTEXTS } from "../content/contexts/registry";
 import { generateQuestion } from "../core/package/question";
 import { withContext } from "../content/contexts/question";
 import { contentHash } from "../content/templates/format";
@@ -10,7 +10,7 @@ import type { TeacherPackage } from "../core/package/build";
 import { parseTeacherPackage } from "./package";
 import { storyChoiceSchema } from "./enrichment";
 import { applyStory } from "../content/contexts/story-frames";
-import { allPackageQuestions } from "../core/package/build";
+import { allPackageQuestions, prepareActivitySet } from "../core/package/build";
 
 const question = z.strictObject({
   story: storyChoiceSchema.optional(),
@@ -125,21 +125,15 @@ export function fromPackageRecipe(
     },
     assessment: p.assessment.map((q) => hydrate(q)),
     activities: p.activities.map((a) => {
-      const tool = CONTEXTS[a.stepId].tool;
-      return {
+      return prepareActivitySet({
         stepId: a.stepId,
-        tool,
-        interactiveSupport:
-          tool && IMPLEMENTED_TOOLS.includes(tool)
-            ? ("supported" as const)
-            : ("unavailable" as const),
         board: a.board.map((q) => hydrate(q)),
         independent: a.independent.map((q) => hydrate(q, true)),
         optional: hydrate(a.optional),
         guided: hydrate(a.guided),
         exit: hydrate(a.exit),
         exitContext: withContext(hydrate(a.exitContext)),
-      };
+      });
     }),
     oralGeneralActivity:
       p.grade <= 3

@@ -26,5 +26,7 @@ export function openDataDatabase(scope: LocalScope) {
     syncMeta: "&key",
   });
   db.version(10).stores({ syncArchives: "&id,classId,sessionId" });
+  db.version(11).stores({ libraryCache: "&key", libraryPending: "&key" });
+  db.version(12).stores({ classPresence: "&key" });
   return db;
 }

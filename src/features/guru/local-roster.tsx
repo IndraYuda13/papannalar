@@ -2,7 +2,7 @@
 import { useState, type FormEvent } from "react";
 import type { StudentDto } from "@/contracts/api";
 import { createNameRepository } from "@/local/names";
-import { parseLocalRosterCsv } from "./local-csv";
+import { parseLocalRosterCsv, exportLocalRosterCsv } from "./local-csv";
 import { Button } from "@/ui/components/button";
 export function LocalRoster({
   ownerId,
@@ -54,6 +54,32 @@ export function LocalRoster({
       repo.close();
     }
   }
+  async function exportCsv() {
+    const repo = createNameRepository({ ownerId, mode });
+    try {
+      const names = Object.fromEntries(
+        (await repo.readAll()).map((n) => [n.studentId, n.displayName]),
+      );
+      const blob = new Blob([exportLocalRosterCsv(students, names)], {
+        type: "text/csv;charset=utf-8",
+      });
+      const url = URL.createObjectURL(blob),
+        link = document.createElement("a");
+      link.href = url;
+      link.download = "nama-lokal.csv";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setMessage(
+        "CSV diunduh dari perangkat ini. Simpan hanya pada perangkat guru.",
+      );
+    } catch {
+      setMessage(
+        "CSV belum dapat diunduh. Buka penyimpanan nama lokal terlebih dahulu.",
+      );
+    } finally {
+      repo.close();
+    }
+  }
   return (
     <details>
       <summary className="min-h-12 cursor-pointer font-semibold">
@@ -98,6 +124,9 @@ export function LocalRoster({
           }}
         />
       </label>
+      <Button type="button" variant="outline" onClick={() => void exportCsv()}>
+        Ekspor CSV lokal
+      </Button>
       <p role="status">{message}</p>
     </details>
   );

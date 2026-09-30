@@ -52,7 +52,11 @@ export function Fractions({
     });
   }
   return (
-    <section aria-label="Batang Pecahan" className="space-y-4 text-left">
+    <section
+      aria-label="Batang Pecahan"
+      data-tool="fractions"
+      className="board-tool space-y-4 text-left"
+    >
       <p className="text-[32px]">
         Satu utuh selalu sama panjang. Ketuk bagian untuk mewarnai; seret
         pegangan untuk membandingkan.
@@ -68,7 +72,7 @@ export function Fractions({
         return (
           <div
             key={i}
-            className="flex items-center gap-3 overflow-x-auto py-1"
+            className="fraction-row flex items-center gap-3 overflow-x-auto py-1"
             data-testid={`fraction-row-${i}`}
           >
             <div className="flex w-36 shrink-0 flex-col gap-1">
@@ -113,7 +117,9 @@ export function Fractions({
                   key={whole}
                   data-testid={`fraction-whole-${i}-${whole}`}
                   className="flex h-[92px] shrink-0 border-2 border-pn-ink-900"
-                  style={{ width: FRACTION_WHOLE_WIDTH }}
+                  style={{
+                    width: `var(--board-fraction-whole, ${FRACTION_WHOLE_WIDTH}px)`,
+                  }}
                 >
                   {Array.from({ length: bar.parts }, (_, cell) => {
                     const number = whole * bar.parts + cell,

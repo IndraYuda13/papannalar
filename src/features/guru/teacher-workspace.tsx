@@ -26,6 +26,7 @@ import { OralWorkspace } from "./oral-workspace";
 import { SyncControls } from "./sync-controls";
 import { purgeDeletedClass } from "@/local/delete-class";
 import { StorageStatus } from "./storage-status";
+import { logoutTeacher } from "@/features/classroom/logout-transport";
 
 const inputClass =
   "mt-1 min-h-12 w-full rounded-input border border-pn-ink-400 bg-white px-3 font-normal";
@@ -77,8 +78,7 @@ export function TeacherWorkspace() {
           }
         } else {
           if (await hasPendingLogout()) {
-            await fetch("/auth/logout", { method: "POST" });
-            await lockLocalAccess(false);
+            await logoutTeacher();
             window.location.replace("/masuk");
             return;
           }
@@ -239,16 +239,11 @@ export function TeacherWorkspace() {
     setClasses([]);
     setDetail(undefined);
     setLabels({});
-    if (navigator.onLine) {
-      try {
-        await fetch("/auth/logout", { method: "POST" });
-        await lockLocalAccess(false);
-        window.location.replace("/masuk");
-      } catch {
-        setMessage(
-          "Akses lokal dikunci. Keluar server dilanjutkan saat online.",
-        );
-      }
+    try {
+      await logoutTeacher();
+      window.location.replace("/masuk");
+    } catch {
+      setMessage("Akses lokal dikunci. Keluar server dilanjutkan saat online.");
     }
   }
 

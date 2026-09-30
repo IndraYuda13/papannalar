@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { expect, test, type Page } from "@playwright/test";
 import {
   injectFixture,
@@ -104,7 +105,13 @@ test("magic link PKCE, reload session, cookie HttpOnly dan logout bekerja", asyn
     local: Object.entries(localStorage),
     session: Object.entries(sessionStorage),
   }));
-  expect(browserStorage.session).toEqual([]);
+  expect(browserStorage.session.length).toBeLessThanOrEqual(1);
+  for (const [key, value] of browserStorage.session) {
+    expect(key).toBe("pn-presentation-controller-v1");
+    expect(value).toMatch(
+      /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/,
+    );
+  }
   // Only noncredential lock flags and eviction sentinels may live here.
   for (const [key, value] of browserStorage.local) {
     if (/^pn-access-(locked|logout)$/.test(key))
@@ -120,13 +127,19 @@ test("magic link PKCE, reload session, cookie HttpOnly dan logout bekerja", asyn
   await expect(
     page.getByRole("button", { name: "Buat kelas", exact: true }),
   ).toBeVisible();
+  const signedOut = page.waitForResponse((r) =>
+    r.url().endsWith("/auth/logout"),
+  );
   await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  expect((await signedOut).status()).toBe(200);
   await expect(page).toHaveURL(/\/masuk$/);
-  expect(
-    (await context.cookies()).some((cookie) =>
-      cookie.name.startsWith("pn-teacher-auth"),
-    ),
-  ).toBe(false);
+  await expect
+    .poll(async () =>
+      (await context.cookies())
+        .filter((c) => c.name.startsWith("pn-teacher-auth"))
+        .map((c) => c.name),
+    )
+    .toEqual([]);
   await page.goto("/guru");
   await expect(page).toHaveURL(/\/masuk$/);
   expect(errors).toEqual([]);
@@ -145,7 +158,7 @@ test("board memakai anonymous identity terpisah tanpa teacher API atau nama loka
   const identityResponse = page.waitForResponse((response) =>
     response.url().endsWith("/api/v1/board/identity"),
   );
-  await page.goto("/layar");
+  await openBoard(page);
   const response = await identityResponse;
   expect(response.status()).toBe(200);
   const board: { id: string; role: string } = await response.json();
@@ -171,7 +184,7 @@ test("board memakai anonymous identity terpisah tanpa teacher API atau nama loka
   const nextIdentity = page.waitForResponse((result) =>
     result.url().endsWith("/api/v1/board/identity"),
   );
-  await page.goto("/layar");
+  await openBoard(page);
   expect((await (await nextIdentity).json()).id).toBe(board.id);
   expect(teacher.id).not.toBe(board.id);
   expect(
@@ -274,6 +287,7 @@ test("nama local-only bergabung di UI guru; API baru dan papan tidak menerima ca
     )
     .toBe(true);
   await page.getByRole("link", { name: "Buka Layar Kelas" }).click();
+  await openBoard(page);
   await expect(
     page.getByRole("heading", { name: "Layar Kelas menunggu." }),
   ).toBeVisible();

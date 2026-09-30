@@ -5,6 +5,11 @@ import {
   layoutPayload,
   type CardKind,
 } from "./layouts/layout-v1";
+import {
+  customFormPayload,
+  parseCustomFormBinding,
+  type CustomFormBinding,
+} from "../contracts/custom-form";
 
 export type DrawCommand =
   | {
@@ -24,7 +29,14 @@ export type DrawCommand =
     }
   | { kind: "text"; x: number; y: number; size: number; text: string };
 
-export function cardDrawing(kind: CardKind): readonly DrawCommand[] {
+export function cardDrawing(
+  kind: CardKind,
+  binding?: CustomFormBinding,
+): readonly DrawCommand[] {
+  const form =
+    binding === undefined ? undefined : parseCustomFormBinding(binding);
+  if (form && kind !== "weekly")
+    throw new Error("Custom forms require the weekly layout");
   const l = cardLayout(kind);
   const commands: DrawCommand[] = [];
   const text = (x: number, y: number, size: number, text: string) =>
@@ -38,7 +50,10 @@ export function cardDrawing(kind: CardKind): readonly DrawCommand[] {
       height: l.markerSize,
       gray: 0,
     });
-  const qr = QRCode.create(layoutPayload(kind), { errorCorrectionLevel: "M" });
+  const qr = QRCode.create(
+    form ? customFormPayload(form) : layoutPayload(kind),
+    { errorCorrectionLevel: "M" },
+  );
   const moduleSize = l.qr.size / (qr.modules.size + 8);
   for (let y = 0; y < qr.modules.size; y++)
     for (let x = 0; x < qr.modules.size; x++)
@@ -52,7 +67,7 @@ export function cardDrawing(kind: CardKind): readonly DrawCommand[] {
           gray: 0,
         });
   text(12, 16, 4, "PapanNalar");
-  text(12, 23, 3.5, l.title);
+  text(12, 23, 3.5, form ? "Cek pemahaman" : l.title);
   text(12, 31, 2.4, "Nama: ................................................");
   text(12, 37, 2.2, "Nomor absen - puluhan");
   text(12, 49, 2.2, "Satuan");
@@ -89,6 +104,10 @@ export function cardDrawing(kind: CardKind): readonly DrawCommand[] {
   );
   l.answers.forEach((row, i) => {
     text(kind === "initial" ? 60 : 12, row[0].y + 0.8, 2.8, String(i + 1));
+    if (form && i >= form.rows) {
+      text(25, row[0].y + 0.8, 2.4, "Tidak digunakan — kosongkan.");
+      return;
+    }
     row.forEach((p) =>
       commands.push({
         kind: "circle",

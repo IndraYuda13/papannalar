@@ -3,9 +3,11 @@
 import { createServer } from "node:http";
 import { createHash, randomUUID, randomBytes } from "node:crypto";
 import { sql, literal, asUser } from "./postgres.mjs";
+import { SAMPLE_ID } from "../../scripts/sample-data.mjs";
 
 const users = new Map(),
   tokens = new Map(),
+  sessionTokens = new Map(),
   pending = new Map(),
   codes = new Map();
 function newUser(email, anonymous = false) {
@@ -39,6 +41,9 @@ function session(user) {
   const refresh_token = randomUUID();
   tokens.set(access_token, user);
   tokens.set(refresh_token, user);
+  const members = new Set([access_token, refresh_token]);
+  sessionTokens.set(access_token, members);
+  sessionTokens.set(refresh_token, members);
   return {
     access_token,
     refresh_token,
@@ -50,6 +55,36 @@ function session(user) {
 }
 function dataRequest(request, url, body, user) {
   if (!user) return { status: 401, body: { message: "unauthorized" } };
+  if (url.pathname === "/rest/v1/rpc/presentation_logout")
+    return {
+      body: asUser(
+        user,
+        `select public.presentation_logout(${body.p_controller_id ? literal(body.p_controller_id) + "::uuid" : "null"},${body.p_sample_controller ? literal(body.p_sample_controller) + "::uuid" : "null"})`,
+      ),
+    };
+  if (url.pathname === "/rest/v1/rpc/library_action")
+    return {
+      body: asUser(
+        user,
+        `select public.library_action(${literal(JSON.stringify(body.p_input))}::jsonb,${body.p_controller ? literal(body.p_controller) + "::uuid" : "null"})`,
+      ),
+    };
+  if (url.pathname === "/rest/v1/rpc/library_board")
+    return {
+      body: asUser(
+        user,
+        `select public.library_board(${literal(body.p_presentation)}::uuid)`,
+      ),
+    };
+  if (url.pathname === "/rest/v1/rpc/is_sample_teacher")
+    return { body: asUser(user, "select to_json(public.is_sample_teacher())") };
+  if (url.pathname === "/rest/v1/rpc/sample_control")
+    return {
+      body: asUser(
+        user,
+        `select public.sample_control(${body.p_token ? literal(body.p_token) + "::uuid" : "null"},${body.p_takeover === true},${body.p_acquire === true})`,
+      ),
+    };
   if (url.pathname === "/rest/v1/rpc/guidance_status")
     return {
       body: asUser(
@@ -180,7 +215,26 @@ createServer(async (request, response) => {
         redirect: url.searchParams.get("redirect_to"),
       });
     } else if (url.pathname === "/auth/v1/token") {
-      if (url.searchParams.get("grant_type") === "refresh_token") {
+      if (url.searchParams.get("grant_type") === "password") {
+        if (
+          body.email !== "recording@qa.invalid" ||
+          body.password !== "local-recording-test-password-only-2026"
+        )
+          throw new Error("invalid");
+        const existing = sql(
+          `select row_to_json(u) from auth.users u where id=${literal(SAMPLE_ID)}::uuid`,
+        );
+        if (!existing) throw new Error("unseeded");
+        const sample = {
+          ...JSON.parse(existing),
+          aud: "authenticated",
+          role: "authenticated",
+          app_metadata: { provider: "email" },
+          user_metadata: {},
+        };
+        users.set(sample.email, sample);
+        result.body = session(sample);
+      } else if (url.searchParams.get("grant_type") === "refresh_token") {
         const refreshUser = tokens.get(body.refresh_token);
         if (!refreshUser) throw new Error("invalid");
         tokens.delete(body.refresh_token);
@@ -204,8 +258,17 @@ createServer(async (request, response) => {
     else if (url.pathname === "/auth/v1/signup")
       result.body = session(newUser(undefined, true));
     else if (url.pathname === "/auth/v1/logout") {
-      for (const [token, owner] of tokens)
-        if (owner.id === user?.id) tokens.delete(token);
+      if (url.searchParams.get("scope") === "local") {
+        for (const token of sessionTokens.get(bearer) ?? []) {
+          tokens.delete(token);
+          sessionTokens.delete(token);
+        }
+      } else
+        for (const [token, owner] of tokens)
+          if (owner.id === user?.id) {
+            tokens.delete(token);
+            sessionTokens.delete(token);
+          }
       result = { status: 204 };
     } else if (url.pathname.startsWith("/rest/v1/"))
       result = dataRequest(request, url, body, user);

@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { expect, test } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
 import { loginTeacher } from "../browser/helpers";
@@ -73,7 +74,7 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
   board.on("console", (m) => {
     if (m.type() === "error") errors.push("board-console");
   });
-  await board.goto("/layar");
+  await openBoard(board);
   await page
     .getByLabel("Kode pasangan", { exact: true })
     .fill(
@@ -82,7 +83,9 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   const station = page.getByRole("region", {
     name: "Kendali Stasiun",
     exact: true,

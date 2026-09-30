@@ -38,6 +38,18 @@ if (mode === "prepare") {
   await writeFile("artifacts/qa/M01/m01c/rls-results.log", output + "\n");
   console.log(output);
   if (mode !== "ownership") {
+    const library = sql(await readFile("supabase/tests/library.sql", "utf8"));
+    await mkdir("artifacts/qa/video-ready", { recursive: true });
+    await writeFile("artifacts/qa/video-ready/library-sql.log", library + "\n");
+    console.log(library);
+    const videoConnection = sql(
+      await readFile("supabase/tests/video-connection.sql", "utf8"),
+    );
+    await writeFile(
+      "artifacts/qa/video-ready/connection-sql.log",
+      videoConnection + "\n",
+    );
+    console.log(videoConnection);
     const pairing = await readFile("supabase/tests/presentations.sql", "utf8");
     const result = sql(pairing);
     await mkdir("artifacts/qa/M04/m04a", { recursive: true });

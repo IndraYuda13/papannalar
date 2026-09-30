@@ -24,7 +24,8 @@ test("pairing HTTP uses separate board auth, owner checks, public schema, CAS, A
     baseURL: "http://127.0.0.1:3100",
   });
   const board = await context.newPage();
-  await board.goto("/layar", { waitUntil: "networkidle" });
+  // This is the HTTP protocol scenario. A mounted board would issue its own
+  // rotating challenge and ACK while these explicit protocol calls run.
   expect((await post(board, "/api/v1/board/identity", {})).ok()).toBe(true);
   const challenge = await (
     await post(board, "/api/v1/board/pairing", { action: "create" })
@@ -45,7 +46,19 @@ test("pairing HTTP uses separate board auth, owner checks, public schema, CAS, A
     payload,
   };
   const snapshot = await (await post(page, "/api/v1/pairing", claim)).json();
-  expect(snapshot.ackRevision).toBe(0);
+  expect(Object.keys(snapshot).sort()).toEqual(
+    ["envelope", "ackRevision", "ackCommandId", "ackAt"].sort(),
+  );
+  expect(
+    (
+      await (
+        await post(page, "/api/v1/pairing", {
+          action: "heartbeat",
+          presentationId: snapshot.envelope.presentationId,
+        })
+      ).json()
+    ).ackRevision,
+  ).toBe(0);
   expect((await post(page, "/api/v1/pairing", claim)).status()).toBe(404);
   const env = snapshot.envelope;
   expect(
@@ -94,7 +107,7 @@ test("pairing HTTP uses separate board auth, owner checks, public schema, CAS, A
   ).toBe(true);
   const ack = await (
     await post(page, "/api/v1/pairing", {
-      action: "snapshot",
+      action: "heartbeat",
       presentationId: ref.presentationId,
     })
   ).json();

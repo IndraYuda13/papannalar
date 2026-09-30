@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import {
   test,
   expect,
@@ -33,7 +34,7 @@ async function paired(page: Page, browser: Browser) {
       if (m.type() === "error") errors.push("console");
     });
   }
-  await board.goto("/layar");
+  await openBoard(board);
   const code = await board.getByTestId("pairing-code").textContent();
   await page
     .getByLabel("Kode pasangan", { exact: true })
@@ -41,7 +42,9 @@ async function paired(page: Page, browser: Browser) {
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   await page.getByText("Pratinjau Alat Nalar", { exact: true }).click();
   await page
     .getByLabel("Pilih Alat Nalar", { exact: true })

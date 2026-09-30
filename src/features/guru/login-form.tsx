@@ -1,7 +1,8 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/ui/components/button";
-import { hasPendingLogout, lockLocalAccess } from "@/local/access";
+import { hasPendingLogout } from "@/local/access";
+import { logoutTeacher } from "@/features/classroom/logout-transport";
 
 export function LoginForm() {
   const [message, setMessage] = useState("");
@@ -12,8 +13,7 @@ export function LoginForm() {
     setBusy(true);
     try {
       if (await hasPendingLogout()) {
-        await fetch("/auth/logout", { method: "POST" });
-        await lockLocalAccess(false);
+        await logoutTeacher();
       }
       const response = await fetch("/auth/login", {
         method: "POST",

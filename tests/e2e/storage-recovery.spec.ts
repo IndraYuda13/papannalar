@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { test, expect } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
 import {
@@ -24,12 +25,15 @@ test("OFF02 migration retains old records, quota aborts atomically, eviction is 
     window.__offlineFixture.migration(),
   );
   expect(migration).toMatchObject({
-    version: 10,
+    version: 12,
     student: true,
     cards: 1,
     outbox: 1,
   });
   expect(migration.stores).toContain("syncArchives");
+  expect(migration.stores).toEqual(
+    expect.arrayContaining(["libraryCache", "libraryPending", "classPresence"]),
+  );
   const ids = await page.evaluate(() => window.__syncFixture.initialize());
   const health = await page.evaluate(() => window.__offlineFixture.health());
   expect(health).toMatchObject({
@@ -193,7 +197,7 @@ test("PRIV03 paired roster exists only in board RAM and disappears on offline re
       baseURL: "http://127.0.0.1:3100",
     }),
     board = await context.newPage();
-  await board.goto("/layar");
+  await openBoard(board);
   await injectFixture(board);
   await waitForShellCache(board);
   const code = (await board.getByTestId("pairing-code").textContent())!.replace(
@@ -231,7 +235,9 @@ test("PRIV03 paired roster exists only in board RAM and disappears on offline re
     "Terhubung",
   );
   await expect(board.getByText("Segitiga Biru", { exact: true })).toBeVisible();
-  expect(await board.evaluate(() => Object.keys(localStorage))).toEqual([]);
+  expect(await board.evaluate(() => Object.keys(localStorage))).toEqual([
+    "pn-board-appearance-v1",
+  ]);
   expect(await board.evaluate(() => Object.keys(sessionStorage))).toEqual([]);
   const stored = await board.evaluate(async () => {
     const databases = await indexedDB.databases();
@@ -281,7 +287,7 @@ test("PRIV03 paired roster exists only in board RAM and disappears on offline re
   });
   expect(cached).not.toContain(groupId);
   await context.setOffline(true);
-  await board.reload();
+  await openBoard(board);
   await expect(
     board.getByRole("heading", { name: "Layar Kelas menunggu." }),
   ).toBeVisible();

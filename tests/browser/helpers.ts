@@ -6,15 +6,56 @@ export async function injectFixture(page: Page) {
     content: await readFile(".browser-tests/fixture.js", "utf8"),
   });
 }
+// Baseline functional scenarios accept the new first-use appearance screen.
+// The dedicated display/capability specs exercise the full wizard separately.
+export async function openBoard(
+  page: Page,
+  options?: Parameters<Page["goto"]>[1],
+) {
+  await page.goto("/layar", options);
+  const save = page.getByRole("button", {
+    name: "Simpan tampilan",
+    exact: true,
+  });
+  const check = page.getByRole("region", {
+    name: "Tes Kemampuan Papan",
+    exact: true,
+  });
+  await expect
+    .poll(
+      async () =>
+        (await save.isVisible()) ||
+        (await page.getByTestId("pairing-code").isVisible()) ||
+        (await page.getByTestId("board-connection").isVisible()) ||
+        (await check.isVisible()),
+    )
+    .toBe(true);
+  if (await save.isVisible()) await save.click();
+  await expect
+    .poll(async () => {
+      if (await check.isVisible())
+        await check
+          .getByRole("button", {
+            name: "Tutup tes · lanjut dengan cadangan",
+            exact: true,
+          })
+          .click();
+      return (
+        (await page.getByTestId("pairing-code").isVisible()) ||
+        (await page.getByTestId("board-connection").isVisible())
+      );
+    })
+    .toBe(true);
+}
 
 export async function loginTeacher(page: Page) {
   const email = `teacher-${crypto.randomUUID()}@qa.invalid`;
   await page.goto("/masuk");
   await page.getByLabel("Email guru").fill(email);
   await page.getByRole("button", { name: "Kirim tautan masuk" }).click();
-  await expect(page.getByRole("status")).toContainText(
-    "Tautan masuk sudah dikirim",
-  );
+  await expect(
+    page.getByRole("status").filter({ hasText: "Tautan masuk sudah dikirim" }),
+  ).toContainText("Tautan masuk sudah dikirim");
   // Test mailbox only: no real email. The test double checks the PKCE challenge.
   const response = await page.request.get(
     `http://127.0.0.1:54325/__test/link?email=${encodeURIComponent(email)}`,
@@ -22,6 +63,8 @@ export async function loginTeacher(page: Page) {
   const link: { url: string } = await response.json();
   await page.goto(link.url);
   await expect(page).toHaveURL(/\/guru$/);
+  // Adaptive baseline remains on its explicit secondary route after V1 navigation split.
+  await page.goto("/guru/latihan");
   await expect(
     page.getByRole("button", { name: "Buat kelas", exact: true }),
   ).toBeVisible();

@@ -1,0 +1,10 @@
+PapanNalar - Video Ready terbaru, 30 September 2026.
+
+Mulai dari VIDEO_HANDOFF.md untuk URL, dataset dan alur rekaman.
+Paket ini berisi kode sumber lengkap, termasuk pnpm-lock.yaml dan migration.
+Dependency dan build dibuat ulang: pnpm install --frozen-lockfile; pnpm build.
+Layanan/credential lokal atau hosted disiapkan sesuai handoff.
+Database asli, secret, node_modules dan profil browser tidak masuk ZIP.
+Dataset contoh bisa disiapkan memakai scripts seed yang disertakan.
+Validasi aplikasi sebelumnya ada di artifacts/qa/video-ready/final-evidence.json.
+Checksum setiap file paket ada di ARCHIVE_MANIFEST.json.

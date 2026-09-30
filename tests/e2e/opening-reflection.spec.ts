@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 import { loginTeacher } from "../browser/helpers";
@@ -33,7 +34,7 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
         errors.push(`console: ${m.text().slice(0, 180)}`);
     });
   }
-  await board.goto("/layar");
+  await openBoard(board);
   const code = await board.getByTestId("pairing-code").textContent();
   await page
     .getByLabel("Kode pasangan", { exact: true })
@@ -41,7 +42,9 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   await page
     .getByText("Pembuka bermakna dari katalog", { exact: true })
     .click();
@@ -104,6 +107,29 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
   await controls.getByRole("button", { name: "Refleksi", exact: true }).click();
   const canvas = board.getByLabel("Zona tulis sementara", { exact: true });
   await expect(canvas).toBeVisible();
+  for (const size of [
+    { width: 1280, height: 720 },
+    { width: 1366, height: 768 },
+    { width: 1920, height: 1080 },
+  ]) {
+    await board.setViewportSize(size);
+    for (const preset of ["compact", "balanced", "large"]) {
+      await board.locator(".board-surface").evaluate((el, value) => {
+        el.setAttribute("data-board-preset", value);
+      }, preset);
+      const bounds = await board
+        .getByRole("button", { name: "Bersihkan zona tulis", exact: true })
+        .boundingBox();
+      expect(bounds!.height).toBeGreaterThanOrEqual(48);
+      expect(bounds!.y).toBeGreaterThanOrEqual(0);
+      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(size.height);
+      expect(
+        await board.evaluate(
+          () => document.documentElement.scrollHeight <= innerHeight,
+        ),
+      ).toBe(true);
+    }
+  }
   for (const prompt of [
     "Hari ini aku belajar",
     "Ini berguna untuk",
@@ -201,7 +227,7 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
       revokedResponses.push(403);
   });
   await controls
-    .getByRole("button", { name: "Akhiri sambungan", exact: true })
+    .getByRole("button", { name: "Putuskan layar", exact: true })
     .click();
   await expect(canvas).toHaveCount(0);
   await board.reload();

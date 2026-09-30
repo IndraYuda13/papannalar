@@ -48,21 +48,51 @@ export function NumberLine({
     axisGroup = useRef<SVGGElement>(null),
     pointer = useRef<number | null>(null);
   const [radius, setRadius] = useState(vertical ? 68 : 64);
+  const [visibleRadius, setVisibleRadius] = useState(24);
+  const [axisText, setAxisText] = useState({ size: 36, x: -52, y: 12 });
   useEffect(() => {
     const svg = graph.current;
     if (!svg) return;
     const measure = () => {
-      // SVG user units shrink in split panels. Keep the visible handle at
-      // least 88 CSS px before the optional 1.5x accessibility enlargement.
+      // Visual marker and hit area have independent CSS-pixel sizes. One
+      // handle snaps along the rail; floor labels are never overlapping targets.
       const scale = Math.min(
         svg.clientWidth / (vertical ? 300 : 1320),
         svg.clientHeight / (vertical ? 600 : 300),
       );
-      if (scale > 0) setRadius(Math.max(vertical ? 68 : 64, 44 / scale));
+      if (scale > 0) {
+        const style = getComputedStyle(svg);
+        const marker =
+          parseFloat(style.getPropertyValue("--board-marker")) || 40;
+        const hit = parseFloat(style.getPropertyValue("--board-hit")) || 56;
+        setRadius(Math.max(48, hit) / 2 / scale);
+        // Include the two-pixel non-scaling border in the visible diameter.
+        setVisibleRadius((marker - 2) / 2 / scale);
+        setAxisText({
+          size: (vertical ? 18 : 22) / scale,
+          x: -(marker / 2 + 16) / scale,
+          y: 6 / scale,
+        });
+      }
     };
     const observer = new ResizeObserver(measure);
     observer.observe(svg);
-    return () => observer.disconnect();
+    const preset = svg.closest("[data-board-preset]");
+    const appearance = new MutationObserver(measure);
+    if (preset)
+      appearance.observe(preset, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: [
+          "data-board-preset",
+          "data-large-objects",
+          "data-board-height",
+        ],
+      });
+    return () => {
+      observer.disconnect();
+      appearance.disconnect();
+    };
   }, [vertical]);
   const [zoom, setZoom] = useState(1),
     [dragAt, setDragAt] = useState<number | null>(null);
@@ -136,7 +166,9 @@ export function NumberLine({
   return (
     <section
       aria-label={vertical ? "Model lift" : "Garis Bilangan Lompat"}
-      className="w-full space-y-4"
+      data-tool="number-line"
+      data-orientation={vertical ? "vertical" : "horizontal"}
+      className="board-tool w-full space-y-4"
     >
       <p className="text-[32px]">
         {suppliedTask
@@ -147,7 +179,9 @@ export function NumberLine({
       </p>
       <div
         className={
-          vertical ? "flex items-center justify-center gap-12" : "w-full"
+          vertical
+            ? "number-line-model flex items-center justify-center gap-12"
+            : "number-line-model w-full"
         }
       >
         <svg
@@ -180,10 +214,10 @@ export function NumberLine({
                 <line y1="-12" y2="12" stroke="currentColor" strokeWidth="3" />
                 <text
                   transform={vertical ? "rotate(90)" : undefined}
-                  x={vertical ? -52 : 0}
-                  y={vertical ? 12 : 65}
+                  x={vertical ? axisText.x : 0}
+                  y={vertical ? axisText.y : 65}
                   textAnchor="middle"
-                  fontSize={vertical ? 44 : 36}
+                  fontSize={axisText.size}
                 >
                   {label(n)}
                 </text>
@@ -206,9 +240,8 @@ export function NumberLine({
               cx={position(dragAt ?? current)}
               cy="150"
               r={radius}
-              fill="var(--color-pn-amber-500)"
-              stroke="var(--color-pn-ink-900)"
-              strokeWidth="4"
+              className="number-line-hit"
+              fill="transparent"
               onPointerDown={(e) => {
                 if (pointer.current !== null || e.width > 80 || e.height > 80)
                   return;
@@ -244,6 +277,18 @@ export function NumberLine({
                 }
               }}
             />
+            <circle
+              data-testid="number-marker-visual"
+              aria-hidden="true"
+              pointerEvents="none"
+              cx={position(dragAt ?? current)}
+              cy="150"
+              r={visibleRadius}
+              fill="var(--color-pn-amber-500)"
+              stroke="var(--color-pn-ink-900)"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
+            />
           </g>
         </svg>
         <output
@@ -256,7 +301,7 @@ export function NumberLine({
             : ""}
         </output>
       </div>
-      <div className="flex flex-wrap items-center justify-center gap-4 text-[28px]">
+      <div className="board-tool-actions flex flex-wrap items-center justify-center gap-4 text-[28px]">
         <label className="flex items-center gap-3">
           Lompatan
           <input

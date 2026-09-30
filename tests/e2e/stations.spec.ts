@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import { loginTeacher } from "../browser/helpers";
@@ -25,6 +26,8 @@ test("ROT01 teacher timer/three rounds and board projection preserve privacy", a
   page,
   browser,
 }) => {
+  // Three rounds publish and ACK multiple persistent commands, plus reload.
+  test.setTimeout(90000);
   const errors: string[] = [];
   page.on("pageerror", () => errors.push("teacher-runtime"));
   page.on("console", (m) => {
@@ -57,7 +60,7 @@ test("ROT01 teacher timer/three rounds and board projection preserve privacy", a
   board.on("console", (m) => {
     if (m.type() === "error") errors.push("board-console");
   });
-  await board.goto("/layar");
+  await openBoard(board);
   const code = await board.getByTestId("pairing-code").textContent();
   await page
     .getByLabel("Kode pasangan", { exact: true })
@@ -65,7 +68,9 @@ test("ROT01 teacher timer/three rounds and board projection preserve privacy", a
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   const control = page.getByRole("region", {
     name: "Kendali Stasiun",
     exact: true,

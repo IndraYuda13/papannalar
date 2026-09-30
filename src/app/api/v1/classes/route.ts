@@ -9,6 +9,7 @@ import {
   classDetail,
 } from "@/server/classes";
 import { handleError, readBody } from "@/server/http";
+import { requireSampleController } from "@/server/sample-controller";
 
 export async function GET(request: NextRequest) {
   let context: ReturnType<typeof authContext> | undefined;
@@ -37,6 +38,7 @@ export async function POST(request: NextRequest) {
     const input = await readBody(request, createClassSchema);
     context = authContext(request);
     await requireTeacher(context);
+    await requireSampleController(request, context);
     await createClass(context.client, input);
     return context.finish(
       NextResponse.json(await classDetail(context.client, input.id), {

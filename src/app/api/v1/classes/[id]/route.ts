@@ -5,6 +5,7 @@ import { randomIdSchema } from "@/contracts/domain";
 import { authContext, requireTeacher } from "@/server/auth/client";
 import { classColumns, classDetail, classDto } from "@/server/classes";
 import { handleError, readBody } from "@/server/http";
+import { requireSampleController } from "@/server/sample-controller";
 
 type Params = { params: Promise<{ id: string }> };
 async function getId(params: Params) {
@@ -31,6 +32,7 @@ export async function PATCH(request: NextRequest, params: Params) {
     const input = await readBody(request, updateClassSchema);
     context = authContext(request);
     await requireTeacher(context);
+    await requireSampleController(request, context);
     const { data, error } = await context.client
       .from("classes")
       .update({
@@ -59,6 +61,7 @@ export async function DELETE(request: NextRequest, params: Params) {
     );
     context = authContext(request);
     await requireTeacher(context);
+    await requireSampleController(request, context);
     const { data, error } = await context.client
       .from("classes")
       .delete()

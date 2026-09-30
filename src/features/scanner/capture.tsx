@@ -2,39 +2,68 @@
 import { useEffect, useRef, useState } from "react";
 import type { CardAnswer, CardKind } from "@/cards/layouts/layout-v1";
 import type { ScanResult } from "@/workers/omr/scan";
+import {
+  parseCustomFormBinding,
+  type CustomFormBinding,
+} from "@/contracts/custom-form";
 import { Button } from "@/ui/components/button";
 import {
   openCamera,
   readLocalPhoto,
   type ImageAcquisition,
 } from "./acquisition";
-import { createScanner, stableScan } from "./client";
+import { createAutoCapture, createScanner, stableCameraScan } from "./client";
 
-export function ScanCapture({
-  kind,
-  roster,
-  onRead,
-  onManual,
-  fixtures = [],
-}: {
+export type ScanCaptureProps = {
   kind: CardKind;
   roster: readonly number[];
+  formBinding?: CustomFormBinding;
   onRead: (result: ScanResult, source: "omr" | "demo") => void;
   onManual: () => void;
   fixtures?: readonly { attendance: number; answers: readonly CardAnswer[] }[];
-}) {
+};
+
+export function ScanCapture(props: ScanCaptureProps) {
+  // Changing the active form/roster tears down the old camera and worker, so an
+  // in-flight frame can never be delivered to a different assessment.
+  const scope = JSON.stringify([
+    props.kind,
+    props.formBinding ?? null,
+    props.roster,
+  ]);
+  return <CaptureSession key={scope} {...props} />;
+}
+
+function CaptureSession({
+  kind,
+  roster,
+  formBinding,
+  onRead,
+  onManual,
+  fixtures = [],
+}: ScanCaptureProps) {
+  const [binding] = useState(() =>
+    formBinding === undefined ? undefined : parseCustomFormBinding(formBinding),
+  );
   const video = useRef<HTMLVideoElement>(null);
   const camera = useRef<ImageAcquisition | null>(null);
   const scanner = useRef<ReturnType<typeof createScanner> | null>(null);
+  const automatic = useRef<ReturnType<typeof createAutoCapture> | null>(null);
+  const handleRead = useRef(onRead);
   const generation = useRef(0);
   const locked = useRef(false);
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [failures, setFailures] = useState(0);
+  useEffect(() => {
+    handleRead.current = onRead;
+  }, [onRead]);
   useEffect(
     () => () => {
       generation.current++;
+      automatic.current?.close();
       camera.current?.close();
       scanner.current?.close();
     },
@@ -46,11 +75,37 @@ export function ScanCapture({
   }
   function stop() {
     generation.current++;
+    automatic.current?.close();
+    automatic.current = null;
     camera.current?.close();
     camera.current = null;
+    scanner.current?.close();
+    scanner.current = null;
+    locked.current = false;
     setCameraOpen(false);
+    setPaused(false);
+    setBusy(false);
+  }
+  function received(result: ScanResult, source: "omr" | "demo") {
+    setPaused(true);
+    setFailures(0);
+    setMessage(
+      source === "demo"
+        ? "Fixture sintetis terbaca. Periksa hasil di bawah."
+        : "Kartu terbaca. Periksa hasil, lalu ketuk Lanjut pindai untuk kartu berikutnya.",
+    );
+    handleRead.current(result, source);
+  }
+  function failed() {
+    setFailures((n) => Math.min(2, n + 1));
+    setMessage(
+      "Kartu belum terbaca. Dekatkan kamera, ratakan cahaya, dan pastikan lembar sesuai.",
+    );
   }
   async function start() {
+    if (locked.current || camera.current) return;
+    locked.current = true;
+    setBusy(true);
     const ticket = ++generation.current;
     try {
       const acquisition = await openCamera(video.current!);
@@ -59,63 +114,98 @@ export function ScanCapture({
         return;
       }
       camera.current = acquisition;
+      const activeScanner = reader();
       setCameraOpen(true);
-      setMessage("Arahkan seluruh kartu, termasuk empat marker sudut.");
+      setPaused(false);
+      setMessage(
+        "Pindai otomatis aktif. Arahkan seluruh kartu dan tahan hingga terbaca.",
+      );
+      automatic.current = createAutoCapture({
+        read: async () =>
+          activeScanner.read(
+            await acquisition.capture(),
+            kind,
+            roster,
+            binding,
+          ),
+        onRead: (result) => {
+          if (ticket === generation.current) received(result, "omr");
+        },
+        onFailure: () => {
+          if (ticket === generation.current) failed();
+        },
+      });
+      automatic.current.resume();
     } catch {
+      if (ticket !== generation.current) return;
+      camera.current?.close();
+      camera.current = null;
+      scanner.current?.close();
+      scanner.current = null;
+      setCameraOpen(false);
       setMessage(
         "Kamera belum tersedia. Izinkan kamera pada HTTPS, pilih foto lokal, atau masukkan jawaban manual.",
       );
       setFailures((n) => n + 1);
+    } finally {
+      if (ticket === generation.current) {
+        locked.current = false;
+        setBusy(false);
+      }
     }
   }
   async function process(
-    operation: () => Promise<ScanResult>,
+    operation: (
+      activeScanner: ReturnType<typeof createScanner>,
+    ) => Promise<ScanResult>,
     source: "omr" | "demo",
   ) {
     if (locked.current) return;
+    const ticket = generation.current;
     locked.current = true;
     setBusy(true);
+    setPaused(Boolean(camera.current));
     try {
-      const result = await operation();
+      await automatic.current?.pause();
+      if (ticket !== generation.current) return;
+      const result = await operation(reader());
+      if (ticket !== generation.current) return;
       if (result.status === "rejected") {
-        setFailures((n) => n + 1);
-        setMessage(
-          "Kartu belum terbaca. Dekatkan kamera, ratakan cahaya, dan pastikan jenis kartu sesuai.",
-        );
+        failed();
       } else {
-        setMessage(
-          source === "demo"
-            ? "Fixture sintetis terbaca. Periksa hasil di bawah."
-            : "Kartu terbaca. Periksa hasil di bawah.",
-        );
-        onRead(result, source);
+        received(result, source);
       }
     } catch {
+      if (ticket !== generation.current) return;
       setFailures((n) => n + 1);
       setMessage(
         "Pembacaan belum berhasil. Pilih foto PNG/JPEG/WebP maksimal 16 MB, atau gunakan input manual.",
       );
     } finally {
-      locked.current = false;
-      setBusy(false);
+      if (ticket === generation.current) {
+        locked.current = false;
+        setBusy(false);
+      }
     }
   }
   async function capture() {
     const acquisition = camera.current;
     if (!acquisition) return;
-    await process(async () => {
-      const first = await reader().read(
+    await process(async (activeScanner) => {
+      const first = await activeScanner.read(
         await acquisition.capture(),
         kind,
         roster,
+        binding,
       );
       await new Promise((resolve) => setTimeout(resolve, 150));
-      const second = await reader().read(
+      const second = await activeScanner.read(
         await acquisition.capture(),
         kind,
         roster,
+        binding,
       );
-      if (first.status === "accepted" && !stableScan(first, second))
+      if (second.status !== "rejected" && !stableCameraScan(first, second))
         throw new Error("FRAME_UNSTABLE");
       return second;
     }, "omr");
@@ -145,6 +235,20 @@ export function ScanCapture({
           </Button>
         ) : (
           <>
+            {paused && (
+              <Button
+                disabled={busy}
+                onClick={() => {
+                  automatic.current?.resume();
+                  setPaused(false);
+                  setMessage(
+                    "Arahkan kartu berikutnya dan tahan hingga terbaca.",
+                  );
+                }}
+              >
+                Lanjut pindai
+              </Button>
+            )}
             <Button disabled={busy} onClick={() => void capture()}>
               Baca kartu
             </Button>
@@ -165,14 +269,27 @@ export function ScanCapture({
               e.target.value = "";
               if (file)
                 void process(
-                  async () =>
-                    reader().read(await readLocalPhoto(file), kind, roster),
+                  async (activeScanner) =>
+                    activeScanner.read(
+                      await readLocalPhoto(file),
+                      kind,
+                      roster,
+                      binding,
+                    ),
                   "omr",
                 );
             }}
           />
         </label>
-        <Button variant="outline" disabled={busy} onClick={onManual}>
+        <Button
+          variant="outline"
+          disabled={busy}
+          onClick={() => {
+            void automatic.current?.pause();
+            setPaused(Boolean(camera.current));
+            onManual();
+          }}
+        >
           Input manual
         </Button>
       </div>
@@ -194,18 +311,20 @@ export function ScanCapture({
                 variant="outline"
                 disabled={busy}
                 onClick={() =>
-                  void process(async () => {
+                  void process(async (activeScanner) => {
                     const { syntheticCard } = await import("@/cards/synthetic");
-                    return reader().read(
+                    return activeScanner.read(
                       syntheticCard({
                         kind,
                         attendance: fixture.attendance,
                         answers: fixture.answers,
+                        binding,
                         skew: 6,
                         scale: 5,
                       }),
                       kind,
                       roster,
+                      binding,
                     );
                   }, "demo")
                 }

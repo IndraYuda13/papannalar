@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { loginTeacher } from "../browser/helpers";
@@ -102,7 +103,7 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
     if (m.type() === "error")
       errors.push(`board-console:${m.text().slice(0, 140)}`);
   });
-  await board.goto("/layar");
+  await openBoard(board);
   const code = await board.getByTestId("pairing-code").textContent();
   await cycle
     .getByLabel("Kode pasangan", { exact: true })
@@ -110,7 +111,9 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
   await cycle
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(cycle.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(cycle.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   await cycle.getByRole("button", { name: "Cek Level", exact: true }).click();
   for (const n of [1, 10]) {
     await cycle.getByRole("button", { name: `Soal ${n}`, exact: true }).click();

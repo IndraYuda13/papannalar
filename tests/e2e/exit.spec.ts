@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 import {
@@ -84,7 +85,7 @@ test("EXIT01 teacher freezes package, board gets each public row, manual review 
       if (m.type() === "error") errors.push("console");
     });
   }
-  await board.goto("/layar");
+  await openBoard(board);
   const code = await board.getByTestId("pairing-code").textContent();
   await page
     .getByLabel("Kode pasangan", { exact: true })
@@ -92,7 +93,9 @@ test("EXIT01 teacher freezes package, board gets each public row, manual review 
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   const exit = page.getByRole("region", {
     name: "Hasil Kartu Keluar",
     exact: true,

@@ -21,12 +21,18 @@ for (const touches of [0, 1, 2, 4])
       errors: string[] = [];
     page.on("pageerror", () => errors.push("runtime"));
     await page.goto("/layar");
+    await page
+      .getByRole("button", { name: "Simpan tampilan", exact: true })
+      .click();
     const panel = page.getByRole("region", {
         name: "Tes Kemampuan Papan",
         exact: true,
       }),
       cdp = await context.newCDPSession(page);
-    for (const n of [1, 2, 4]) {
+    for (const [stage, n] of [1, 2, 4].entries()) {
+      await expect(panel.getByLabel("Progres tes")).toHaveText(
+        `Tahap ${stage + 1} dari 6`,
+      );
       if (touches >= n) {
         const points = [];
         await panel
@@ -53,26 +59,32 @@ for (const touches of [0, 1, 2, 4])
           type: "touchEnd",
           touchPoints: [],
         });
-        await panel
-          .getByRole("button", { name: "Lanjut", exact: true })
-          .click();
-      } else
+        await expect(panel.getByLabel("Progres tes")).toHaveText(
+          `Tahap ${stage + 2} dari 6`,
+        );
+      } else {
         await panel
           .getByRole("button", {
-            name: "Tidak tersedia · gunakan cadangan",
+            name:
+              touches === 0
+                ? "Gunakan tanpa sentuhan"
+                : `Lanjut dengan ${touches} sentuhan`,
             exact: true,
           })
           .click();
+        break;
+      }
     }
-    await expect(panel).toContainText("Pointer Events: tersedia");
-    await panel.getByRole("button", { name: "Lanjut", exact: true }).click();
+    await expect(panel.getByLabel("Progres tes")).toHaveText("Tahap 5 dari 6");
     for (let i = 1; i <= 5; i++) {
       await panel
         .getByRole("button", { name: "Ketuk untuk ukur", exact: true })
         .click();
-      await expect(panel.getByRole("status")).toContainText(`${i} sampel`);
+      await expect(panel.getByRole("status")).toContainText(
+        i < 5 ? `${i} dari 5 ketukan` : "Pemeriksaan selesai",
+      );
     }
-    await panel.getByRole("button", { name: "Lanjut", exact: true }).click();
+    await expect(panel.getByLabel("Progres tes")).toHaveText("Tahap 6 dari 6");
     await expect(
       panel.getByRole("button", { name: "Simpan profil papan", exact: true }),
     ).toBeDisabled();
@@ -117,6 +129,15 @@ for (const touches of [0, 1, 2, 4])
     expect(sent.p95Ms).toBeGreaterThanOrEqual(sent.medianMs);
     await page.reload();
     await expect(panel).toHaveCount(0);
+    const menu = page.getByText("Menu papan · kemampuan dan cadangan", {
+      exact: true,
+    });
+    if (
+      !(await menu.evaluate(
+        (summary) => (summary.parentElement as HTMLDetailsElement).open,
+      ))
+    )
+      await menu.click();
     if (touches === 0)
       await expect(
         page.getByText(/Papan ini belum bisa disentuh/),
@@ -211,10 +232,16 @@ for (const touches of [0, 1, 2, 4])
         .click();
       await teacherContext.close();
     }
+    if (
+      !(await menu.evaluate(
+        (summary) => (summary.parentElement as HTMLDetailsElement).open,
+      ))
+    )
+      await menu.click();
     await page
       .getByRole("button", { name: "Tes Kemampuan Papan", exact: true })
       .click();
-    await expect(panel).toContainText("1/6");
+    await expect(panel.getByLabel("Progres tes")).toHaveText("Tahap 1 dari 6");
     await page.screenshot({
       path: `artifacts/qa/M12/capability-${touches}.png`,
       fullPage: false,
@@ -258,6 +285,15 @@ test("REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot
   for (const surface of [page, board])
     surface.on("pageerror", () => errors.push("runtime"));
   await board.goto("/layar");
+  await board
+    .getByRole("button", { name: "Simpan tampilan", exact: true })
+    .click();
+  await board
+    .getByRole("button", {
+      name: "Tutup tes · lanjut dengan cadangan",
+      exact: true,
+    })
+    .click();
   const code = (await board.getByTestId("pairing-code").textContent())!.replace(
     /\s/g,
     "",
@@ -266,7 +302,9 @@ test("REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   await page.getByText("Pratinjau Alat Nalar", { exact: true }).click();
   await page
     .getByLabel("Pilih Alat Nalar", { exact: true })
@@ -418,6 +456,15 @@ test("REMOTE02 fractions, ratio, algebra, balance and graphs use the bounded inp
     if (m.type() === "error") errors.push("console");
   });
   await board.goto("/layar");
+  await board
+    .getByRole("button", { name: "Simpan tampilan", exact: true })
+    .click();
+  await board
+    .getByRole("button", {
+      name: "Tutup tes · lanjut dengan cadangan",
+      exact: true,
+    })
+    .click();
   const code = (await board.getByTestId("pairing-code").textContent())!.replace(
     /\s/g,
     "",

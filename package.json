@@ -8,6 +8,8 @@
     "node": "24.14.1"
   },
   "scripts": {
+    "video": "node scripts/demo.mjs --video",
+    "video:dev": "node scripts/demo.mjs --video --dev",
     "dev": "node scripts/prepare-assets.mjs && next dev --hostname 127.0.0.1",
     "build": "node scripts/prepare-assets.mjs && next build && node scripts/build-offline.mjs",
     "start": "next start --hostname 127.0.0.1",

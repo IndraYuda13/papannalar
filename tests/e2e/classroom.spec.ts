@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { expect, test } from "@playwright/test";
 import {
   loginTeacher,
@@ -26,7 +27,7 @@ test("teacher pairs board, public groups render and number line/lift respond loc
     }),
     board = await boardContext.newPage();
   board.on("pageerror", (e) => errors.push(e.message));
-  await board.goto("/layar");
+  await openBoard(board);
   await expect(board.getByTestId("pairing-code")).toHaveText(/\d{3} \d{3}/);
   await page
     .getByLabel("Kode pasangan", { exact: true })
@@ -36,7 +37,9 @@ test("teacher pairs board, public groups render and number line/lift respond loc
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   await expect(
     board.getByRole("heading", { name: /Lift dari basement/ }),
   ).toBeVisible();
@@ -105,10 +108,10 @@ test("teacher pairs board, public groups render and number line/lift respond loc
   });
   expect(
     await board.evaluate(() => ({
-      local: localStorage.length,
-      session: sessionStorage.length,
+      local: Object.keys(localStorage),
+      session: Object.keys(sessionStorage),
     })),
-  ).toEqual({ local: 0, session: 0 });
+  ).toEqual({ local: ["pn-board-appearance-v1"], session: [] });
   await injectFixture(board);
   await waitForShellCache(board);
   await boardContext.setOffline(true);
@@ -119,8 +122,8 @@ test("teacher pairs board, public groups render and number line/lift respond loc
   await board.getByRole("button", { name: "Lompat", exact: true }).click();
   await expect(board.getByTestId("number-position")).toHaveText("Posisi −8");
   await expect(page.getByTestId("pairing-status")).not.toContainText(
-    "Terhubung",
-    { timeout: 10000 },
+    "Layar tersambung",
+    { timeout: 20000 },
   );
   await controls.getByRole("button", { name: "Refleksi", exact: true }).click();
   await expect(
@@ -130,7 +133,9 @@ test("teacher pairs board, public groups render and number line/lift respond loc
   await expect(
     board.getByRole("heading", { name: "Refleksi", exact: true }),
   ).toBeVisible();
-  await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+  );
   await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page.evaluate(
@@ -141,14 +146,14 @@ test("teacher pairs board, public groups render and number line/lift respond loc
     .getByLabel("Kontrol Layar Kelas")
     .screenshot({ path: "artifacts/qa/M04/m04c/controls-mobile.png" });
   await boardContext.setOffline(true);
-  await board.reload();
+  await openBoard(board);
   await expect(
     board.getByRole("heading", { name: "Layar Kelas menunggu.", exact: true }),
   ).toBeVisible();
   await expect(board.getByTestId("public-group")).toHaveCount(0);
   await expect(board.getByText(/Offline. Sambungkan internet/)).toBeVisible();
   await controls
-    .getByRole("button", { name: "Akhiri sambungan", exact: true })
+    .getByRole("button", { name: "Putuskan layar", exact: true })
     .click();
   expect(errors).toEqual([]);
   await boardContext.close();

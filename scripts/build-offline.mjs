@@ -9,6 +9,7 @@ const prerender = JSON.parse(
 );
 const shells = {
   "/guru": "/offline/guru.html",
+  "/guru/latihan": "/offline/guru-latihan.html",
   "/layar": "/offline/layar.html",
 };
 await mkdir("public/offline", { recursive: true });

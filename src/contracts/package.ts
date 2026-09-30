@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { exitReasonCopy } from "../core/package/exit-reasons";
 import { parseBoundary, randomIdSchema } from "./domain";
 import type { GeneratedQuestion } from "../content/templates/types";
 import { STEP_IDS } from "../content/ladder/registry";
@@ -189,9 +190,10 @@ export function toPublicQuestion(
                   denominator: n.denominator,
                 },
           ),
-    options: (kind === "reason" ? question.reasons : question.options).map(
-      (o) => ({ label: o.label, text: o.text }),
-    ),
+    options: (kind === "reason"
+      ? exitReasonCopy(question)
+      : question.options
+    ).map((o) => ({ label: o.label, text: o.text })),
     unknownLabel: "?",
   });
 }

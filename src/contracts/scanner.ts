@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { attendanceNumberSchema } from "./domain";
+import { customFormBindingSchema } from "./custom-form";
 export const scanResultSchema = z.strictObject({
   status: z.enum(["accepted", "review", "rejected"]),
   kind: z.enum(["initial", "weekly", "exit"]),
+  form: customFormBindingSchema.optional(),
   attendanceNumber: attendanceNumberSchema.nullable(),
   answers: z
     .array(

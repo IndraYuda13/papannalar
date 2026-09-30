@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { expect, test } from "@playwright/test";
 import { injectFixture, loginTeacher } from "../browser/helpers";
 
@@ -5,7 +6,7 @@ test.use({ trace: "off" }); // Identity canaries must not enter trace/screenshot
 
 test.beforeEach(async ({ page }) => {
   await loginTeacher(page);
-  await page.goto("/guru");
+  await page.goto("/guru/latihan");
   await injectFixture(page);
 });
 
@@ -279,7 +280,7 @@ test("browser canary: hanya DTO eksplisit masuk request, nama tidak di URL/log/c
   expect(observed.some((value) => value.includes("LOCAL_ONLY_CANARY"))).toBe(
     false,
   );
-  await page.goto("/layar");
+  await openBoard(page);
   expect(
     (await page.locator("body").innerText()).includes("LOCAL_ONLY_CANARY"),
   ).toBe(false);

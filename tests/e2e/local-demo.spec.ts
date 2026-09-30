@@ -8,6 +8,7 @@ test("explicit local demo uses the normal PKCE callback and grants only teacher 
     .getByRole("button", { name: "Masuk demo lokal", exact: true })
     .click();
   await expect(page).toHaveURL(/\/guru$/);
+  await page.goto("/guru/latihan");
   await expect(
     page.getByRole("button", { name: "Buat kelas", exact: true }),
   ).toBeVisible();

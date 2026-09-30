@@ -59,7 +59,11 @@ export function RatioTable({
     }
   }
   return (
-    <section aria-label="Tabel Rasio" className="space-y-6 text-left">
+    <section
+      aria-label="Tabel Rasio"
+      data-tool="ratio"
+      className="board-tool space-y-6 text-left"
+    >
       <p className="text-[40px]">
         Pengali yang sama bekerja pada kedua baris. Apa yang tetap?
       </p>

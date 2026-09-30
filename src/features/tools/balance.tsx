@@ -151,7 +151,11 @@ export function Balance({
       act({ type: "operate", operation: drag.operation });
   }
   return (
-    <section aria-label="Timbangan Persamaan" className="space-y-4 text-left">
+    <section
+      aria-label="Timbangan Persamaan"
+      data-tool="balance"
+      className="board-tool space-y-4 text-left"
+    >
       <p className="text-[32px]">
         Kantong x belum diketahui. Ubah kedua ruas dengan operasi yang sama.
       </p>
@@ -190,7 +194,7 @@ export function Balance({
         </div>
         <div className="mx-auto h-6 w-8 bg-primary" aria-hidden="true" />
       </div>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="board-balance-weights flex flex-wrap items-center gap-3">
         {weightChoices.map(({ term, sign }) => {
           const operation: BalanceOperation = {
             kind: "add",
@@ -216,7 +220,7 @@ export function Balance({
           );
         })}
       </div>
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="board-balance-operations flex flex-wrap items-end gap-3">
         <label className="text-[28px]">
           Nilai operasi
           <input
@@ -276,7 +280,7 @@ export function Balance({
           </ol>
         </details>
       )}
-      <div className="flex flex-wrap gap-4">
+      <div className="board-balance-actions flex flex-wrap gap-4">
         <Button
           size="board"
           variant="outline"

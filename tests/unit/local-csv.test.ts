@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { parseLocalRosterCsv } from "../../src/features/guru/local-csv";
+import {
+  parseLocalRosterCsv,
+  exportLocalRosterCsv,
+} from "../../src/features/guru/local-csv";
 import { seededGroupId } from "../../src/core/math/seed";
 const roster = Array.from({ length: 40 }, (_, i) => ({
   schemaVersion: 1 as const,
@@ -9,6 +12,21 @@ const roster = Array.from({ length: 40 }, (_, i) => ({
   active: true,
 }));
 describe("C01 local CSV identity boundary", () => {
+  it("quotes local-only exports and neutralizes spreadsheet formulas", () => {
+    const csv = exportLocalRosterCsv(roster.slice(0, 3), {
+      [roster[0].id]: 'LOCAL "A", B',
+      [roster[1].id]: '=IMPORTXML("https://invalid")',
+      [roster[2].id]: "@formula",
+    });
+    expect(csv).not.toContain(roster[0].id);
+    const rows = parseLocalRosterCsv(csv, roster);
+    expect(rows[0].displayName).toBe('LOCAL "A", B');
+    expect(rows[1].displayName).toBe('\'=IMPORTXML("https://invalid")');
+    expect(rows[2].displayName).toBe("'@formula");
+    expect(exportLocalRosterCsv([{ ...roster[0], active: false }], {})).toBe(
+      "\uFEFFabsen,nama\r\n\r\n",
+    );
+  });
   it("maps attendance to random IDs locally, accepts UTF8 BOM/quotes/empty deletion", () => {
     expect(
       parseLocalRosterCsv(

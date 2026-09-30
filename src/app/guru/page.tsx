@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { TeacherShell } from "@/features/guru/teacher-shell";
+import { TeacherHome } from "@/features/guru/home";
 
 export const metadata: Metadata = { title: "Aplikasi Guru" };
 
 export default function TeacherPage() {
-  return <TeacherShell />;
+  return <TeacherHome />;
 }

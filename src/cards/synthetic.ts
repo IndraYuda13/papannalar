@@ -7,11 +7,16 @@ import {
 } from "./layouts/layout-v1";
 import { homography, project } from "../workers/omr/geometry";
 import type { Raster } from "../workers/omr/scan";
+import {
+  parseCustomFormBinding,
+  type CustomFormBinding,
+} from "../contracts/custom-form";
 
 export type SyntheticCard = Readonly<{
   kind: CardKind;
   attendance: number;
   answers: readonly (CardAnswer | readonly CardAnswer[] | null)[];
+  binding?: CustomFormBinding;
   rotation?: 0 | 1 | 2 | 3;
   skew?: number;
   shade?: number;
@@ -22,12 +27,18 @@ export type SyntheticCard = Readonly<{
 // Explicit SYNTHETIC input adapter for demo/QA. Output is a real raster sent to
 // the same scanner. No scan result or mastery is supplied to the production path.
 export function syntheticCard(input: SyntheticCard): Raster {
+  const binding =
+    input.binding === undefined
+      ? undefined
+      : parseCustomFormBinding(input.binding);
   const layout = cardLayout(input.kind),
     scale = input.scale ?? 4;
+  if (input.answers.length > (binding?.rows ?? layout.rows))
+    throw new RangeError("Answers exceed the printed form rows");
   const width = Math.ceil(layout.width * scale),
     height = Math.ceil(layout.height * scale);
   const canonical = new Uint8Array(width * height).fill(255);
-  const commands: DrawCommand[] = [...cardDrawing(input.kind)];
+  const commands: DrawCommand[] = [...cardDrawing(input.kind, binding)];
   const fill = (x: number, y: number, gray = 0) =>
     commands.push({ kind: "circle", x, y, radius: 1.8, gray });
   for (const [row, digit] of [

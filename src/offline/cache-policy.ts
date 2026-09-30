@@ -1,7 +1,7 @@
 export type ShellManifest = {
   cacheName: string;
   assets: string[];
-  shells: Record<"/guru" | "/layar", string>;
+  shells: Record<"/guru" | "/layar", string> & { "/guru/latihan"?: string };
 };
 
 export function cacheTarget(
@@ -22,6 +22,8 @@ export function cacheTarget(
     if (url.pathname === "/" || url.pathname === "/guru")
       return manifest.shells["/guru"];
     if (url.pathname === "/layar") return manifest.shells["/layar"];
+    if (url.pathname === "/guru/latihan")
+      return manifest.shells["/guru/latihan"];
     return undefined;
   }
   return manifest.assets.includes(url.pathname) ? url.pathname : undefined;

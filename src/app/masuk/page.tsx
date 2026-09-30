@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Brand } from "@/ui/components/brand";
 import { LoginForm } from "@/features/guru/login-form";
+import { SampleLogin } from "@/features/guru/sample-login";
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Masuk" };
 export default function LoginPage() {
@@ -15,6 +17,11 @@ export default function LoginPage() {
         sekali.
       </p>
       <LoginForm />
+      {process.env["SAMPLE_ENABLED"] === "true" && (
+        <SampleLogin
+          requiresCode={Boolean(process.env["SAMPLE_ACCESS_CODE"])}
+        />
+      )}
       <a
         className="mt-8 inline-flex min-h-12 items-center font-semibold text-primary underline"
         href="/layar"

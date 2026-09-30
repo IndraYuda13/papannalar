@@ -1,3 +1,4 @@
+import { openBoard } from "../browser/helpers";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import {
@@ -74,7 +75,7 @@ for (const run of [1, 2, 3]) {
       .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
       .click();
     await expect(page.getByTestId("scan-count")).toContainText("29/32");
-    await board.goto("/layar");
+    await openBoard(board);
     await expect(board.getByTestId("pairing-code")).toHaveText(/^\d{3} \d{3}$/);
     await page
       .getByLabel("Kode pasangan", { exact: true })
@@ -87,7 +88,9 @@ for (const run of [1, 2, 3]) {
     await page
       .getByRole("button", { name: "Hubungkan papan", exact: true })
       .click();
-    await expect(page.getByTestId("pairing-status")).toContainText("Terhubung");
+    await expect(page.getByTestId("pairing-status")).toContainText(
+      "Layar tersambung",
+    );
     await board.getByLabel("Besar lompatan").fill("7");
     await board.getByRole("button", { name: "Lompat", exact: true }).click();
     await board.getByRole("button", { name: "Jalankan", exact: true }).click();

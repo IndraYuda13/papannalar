@@ -3,6 +3,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isTeacherIdentity } from "../../contracts/auth";
 import { applicationOrigin } from "./origin";
+import { isSurfaceAuthCookie } from "./cookies";
 
 type Surface = "teacher" | "board";
 export function authContext(
@@ -28,12 +29,7 @@ export function authContext(
       getAll: () =>
         request.cookies
           .getAll()
-          .filter(
-            (cookie) =>
-              cookie.name === cookieName ||
-              cookie.name.startsWith(cookieName + ".") ||
-              cookie.name === cookieName + "-code-verifier",
-          ),
+          .filter((cookie) => isSurfaceAuthCookie(cookie.name, cookieName)),
       setAll(cookies, headers) {
         for (const cookie of cookies) {
           request.cookies.set(cookie.name, cookie.value);

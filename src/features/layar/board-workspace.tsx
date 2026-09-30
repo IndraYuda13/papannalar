@@ -1,12 +1,17 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   challengeSchema,
   pairingStatusSchema,
+  presentationResumeSchema,
   type PresentationEnvelope,
+  type PresentationState,
 } from "@/contracts/presentation";
 import { boardIdentitySchema } from "@/contracts/auth";
 import { pairingCall, watchPresentation } from "@/features/classroom/transport";
+import type { PresentationConnection } from "@/features/classroom/connection-transport";
+import { PairingQrCode } from "@/features/classroom/pairing-scanner";
+import { LibraryBoard } from "@/features/library/board";
 import { BoardContent } from "./board-content";
 import { Button } from "@/ui/components/button";
 import { registerUpdateGuard } from "@/offline/update-safety";
@@ -29,10 +34,34 @@ export function BoardWorkspace() {
   const [presentationId, setPresentationId] = useState<string>();
   const [envelope, setEnvelope] = useState<PresentationEnvelope>();
   const packageView = useBoardPackage(envelope);
-  const displayed = packageView.state ?? envelope?.payload;
-  const locallyControlled = Boolean(packageView.state);
+  const [heldLocal, setHeldLocal] = useState<{
+    payload: PresentationState;
+    revision: number;
+  }>();
+  const displayed =
+    packageView.state ?? heldLocal?.payload ?? envelope?.payload;
+  const locallyControlled = Boolean(packageView.state || heldLocal);
+  const localView = useRef<PresentationState | undefined>(undefined);
+  useEffect(() => {
+    localView.current = locallyControlled ? displayed : undefined;
+  }, [locallyControlled, displayed]);
+  const [connection, setConnection] = useState<PresentationConnection>();
+  const [showPairing, setShowPairing] = useState(false);
+  const creating = useRef(false);
   const [online, setOnline] = useState(false),
     [message, setMessage] = useState("Menyiapkan kode pasangan…");
+  const [browserOnline, setBrowserOnline] = useState(true);
+  useEffect(() => {
+    const refresh = () => setBrowserOnline(navigator.onLine);
+    const timer = window.setTimeout(refresh, 0);
+    window.addEventListener("online", refresh);
+    window.addEventListener("offline", refresh);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("online", refresh);
+      window.removeEventListener("offline", refresh);
+    };
+  }, []);
   const rendered = useRef<PresentationEnvelope | undefined>(undefined);
   const initialized = useRef(false);
   const [profile, setProfile] = useState<BoardProfile>(),
@@ -70,38 +99,69 @@ export function BoardWorkspace() {
     }
   }
   useEffect(() => registerUpdateGuard("board", () => !rendered.current), []);
-  async function start() {
-    if (!navigator.onLine) {
-      setMessage(
-        "Offline. Sambungkan internet untuk membuat pasangan; model yang sudah terbuka tetap dapat digunakan.",
-      );
-      return;
-    }
-    try {
-      const response = await fetch("/api/v1/board/identity", {
-        method: "POST",
-        cache: "no-store",
-      });
-      if (!response.ok) throw new Error("identity");
-      boardIdentitySchema.parse(await response.json());
-      setChallenge(
-        challengeSchema.parse(await pairingCall("board", { action: "create" })),
-      );
-      setMessage("Masukkan kode ini di HP guru");
-    } catch {
-      setMessage(
-        "Kode pasangan belum tersedia. Periksa koneksi dan konfigurasi server.",
-      );
-    }
-  }
+  const start = useCallback(
+    async (resume = false) => {
+      if (creating.current) return;
+      if (!navigator.onLine) {
+        setMessage(
+          "Offline. Sambungkan internet untuk membuat pasangan; model yang sudah terbuka tetap dapat digunakan.",
+        );
+        return;
+      }
+      creating.current = true;
+      try {
+        const response = await fetch("/api/v1/board/identity", {
+          method: "POST",
+          cache: "no-store",
+        });
+        if (!response.ok) throw new Error("identity");
+        boardIdentitySchema.parse(await response.json());
+        if (resume) {
+          const restored = presentationResumeSchema.parse(
+            await pairingCall("board", { action: "resume" }),
+          );
+          if (restored.snapshot) {
+            setEnvelope(restored.snapshot.envelope);
+            setPresentationId(restored.snapshot.envelope.presentationId);
+            return;
+          }
+        }
+        setChallenge(
+          challengeSchema.parse(
+            await pairingCall("board", {
+              action: "create",
+              ...(presentationId ? { presentationId } : {}),
+            }),
+          ),
+        );
+        setShowPairing(true);
+        setMessage(
+          "Pindai QR dengan kamera HP guru, atau masukkan kode di Sambungkan Layar.",
+        );
+      } catch {
+        setMessage("Kode belum tersedia. Periksa koneksi lalu coba lagi.");
+      } finally {
+        creating.current = false;
+      }
+    },
+    [presentationId],
+  );
   useEffect(() => {
     if (!initialized.current) {
       initialized.current = true;
-      void start();
+      void start(true);
     }
-  }, []);
+  }, [start]);
   useEffect(() => {
-    if (!challenge || presentationId) return;
+    const recover = () => {
+      if (!presentationId && !challenge && connection?.session !== "closed")
+        void start(true);
+    };
+    window.addEventListener("online", recover);
+    return () => window.removeEventListener("online", recover);
+  }, [start, presentationId, challenge, connection?.session]);
+  useEffect(() => {
+    if (!challenge || !showPairing) return;
     let stopped = false,
       busy = false;
     async function poll() {
@@ -114,10 +174,14 @@ export function BoardWorkspace() {
             challengeId: challenge!.id,
           }),
         );
-        if (!stopped && typeof response.presentationId === "string")
+        if (!stopped && typeof response.presentationId === "string") {
           setPresentationId(response.presentationId);
-        else if (!stopped && response.expired === true)
-          setMessage("Kode kedaluwarsa. Buat kode baru.");
+          setChallenge(undefined);
+          setShowPairing(false);
+        } else if (!stopped && response.expired === true) {
+          setChallenge(undefined);
+          void start();
+        }
       } catch {
         if (!stopped) setMessage("Pairing memerlukan koneksi internet.");
       } finally {
@@ -130,7 +194,7 @@ export function BoardWorkspace() {
       stopped = true;
       clearInterval(timer);
     };
-  }, [challenge, presentationId]);
+  }, [challenge, showPairing, start]);
   useEffect(() => {
     if (!presentationId) return;
     return watchPresentation(
@@ -141,45 +205,76 @@ export function BoardWorkspace() {
           setEnvelope(undefined);
           setPresentationId(undefined);
           setChallenge(undefined);
+          setHeldLocal(undefined);
+          setShowPairing(false);
           setMessage(
             "Sambungan berakhir. Buat kode baru untuk sesi berikutnya.",
           );
           return;
         }
         if (!rendered.current) setTesting(false);
-        setEnvelope((old) =>
-          old && old.revision >= snapshot.envelope.revision
-            ? old
+        const old = rendered.current;
+        if (
+          old &&
+          old.channelEpoch !== snapshot.envelope.channelEpoch &&
+          localView.current
+        )
+          setHeldLocal({
+            payload: localView.current,
+            revision: snapshot.envelope.revision,
+          });
+        setHeldLocal((held) =>
+          held && snapshot.envelope.revision > held.revision ? undefined : held,
+        );
+        setEnvelope((previous) =>
+          previous &&
+          previous.channelEpoch === snapshot.envelope.channelEpoch &&
+          previous.revision >= snapshot.envelope.revision
+            ? previous
             : snapshot.envelope,
         );
       },
       setOnline,
+      setConnection,
     );
   }, [presentationId]);
   useEffect(() => {
-    rendered.current = locallyControlled ? undefined : envelope;
+    rendered.current = envelope;
     if (!envelope || locallyControlled) return;
+    const controller = new AbortController();
+    let pending = false;
     const ack = async () => {
       const applied = rendered.current;
-      if (!applied || !navigator.onLine) return;
+      if (!applied || !navigator.onLine || pending || controller.signal.aborted)
+        return;
+      pending = true;
       try {
-        await pairingCall("board", {
-          action: "ack",
-          presentationId: applied.presentationId,
-          channelEpoch: applied.channelEpoch,
-          commandId: applied.commandId,
-          appliedRevision: applied.revision,
-        });
+        await pairingCall(
+          "board",
+          {
+            action: "ack",
+            presentationId: applied.presentationId,
+            channelEpoch: applied.channelEpoch,
+            commandId: applied.commandId,
+            appliedRevision: applied.revision,
+          },
+          controller.signal,
+        );
       } catch {
         /* Recovery handles revoke and newer revisions. */
+      } finally {
+        pending = false;
       }
     };
     void ack();
     const timer = setInterval(() => void ack(), 2000);
-    return () => clearInterval(timer);
+    return () => {
+      controller.abort();
+      clearInterval(timer);
+    };
   }, [envelope, locallyControlled]);
   return (
-    <div className="w-full">
+    <div className="board-workspace w-full">
       {!displayed || testing ? (
         <>
           {testing && (
@@ -190,10 +285,7 @@ export function BoardWorkspace() {
           )}
         </>
       ) : null}
-      <details
-        open={!displayed || testing}
-        className="my-4 space-y-3 text-[26px]"
-      >
+      <details className="board-menu my-4 space-y-3 text-[26px]">
         <summary className="min-h-24 cursor-pointer p-6">
           Menu papan · kemampuan dan cadangan
         </summary>
@@ -283,11 +375,40 @@ export function BoardWorkspace() {
             ? "Kendali lokal di papan. Pilih tampilan papan atau HP dari HP guru saat tersambung kembali."
             : "Paket offline · daftar kelompok tidak disimpan. Guru membacakan kelompok dan memilih aktivitas."
           : envelope
-            ? online
-              ? "Terhubung ke HP guru"
-              : "Offline · model lokal tetap dapat digunakan. HP tidak menyinkronkan perubahan."
+            ? !browserOnline
+              ? "Offline di papan. Soal tetap dapat digunakan."
+              : online && connection?.controller === "present"
+                ? "Terhubung ke HP guru"
+                : "Sambungan guru sedang dipulihkan. Soal tetap dapat digunakan."
             : "Belum tersambung"}
       </p>
+      {displayed && connection?.controller !== "present" && (
+        <Button variant="outline" onClick={() => void start()}>
+          Sambungkan kembali
+        </Button>
+      )}
+      {showPairing && displayed && (
+        <div
+          className="my-4 space-y-3 rounded-kartu border p-4"
+          aria-label="Sambungkan kembali ke sesi yang sama"
+        >
+          {challenge?.pairingUrl && (
+            <PairingQrCode url={challenge.pairingUrl} />
+          )}
+          {challenge && (
+            <p
+              data-testid="pairing-code"
+              className="text-[48px] tracking-widest"
+            >
+              {challenge.code.slice(0, 3)} {challenge.code.slice(3)}
+            </p>
+          )}
+          <p role="status">{message}</p>
+          <Button variant="outline" onClick={() => setShowPairing(false)}>
+            Tutup kode
+          </Button>
+        </div>
+      )}
       {packageView.stale && (
         <p role="alert" className="my-4 text-[32px]">
           Paket atau kelompok berubah saat papan offline. Buka navigasi dan
@@ -303,6 +424,7 @@ export function BoardWorkspace() {
           }}
         >
           <div
+            className="board-stage"
             hidden={testing}
             data-board-height={
               ["check", "continuation", "groups", "exit"].includes(
@@ -323,10 +445,16 @@ export function BoardWorkspace() {
             <HintReporting env={envelope} enabled={!locallyControlled}>
               {envelope ? (
                 <RemoteBoard env={envelope} enabled={!locallyControlled}>
-                  <BoardContent
-                    state={displayed}
-                    content={packageView.content}
-                    plan={packageView.plan}
+                  <LibraryBoard
+                    presentationId={envelope.presentationId}
+                    revision={envelope.revision}
+                    fallback={
+                      <BoardContent
+                        state={displayed}
+                        content={packageView.content}
+                        plan={packageView.plan}
+                      />
+                    }
                   />
                 </RemoteBoard>
               ) : (
@@ -357,6 +485,9 @@ export function BoardWorkspace() {
             Layar Kelas menunggu.
           </h1>
           <p className="mb-8 text-[32px]">Belum ada sesi yang ditampilkan.</p>
+          {challenge?.pairingUrl && (
+            <PairingQrCode url={challenge.pairingUrl} />
+          )}
           {challenge && (
             <p
               data-testid="pairing-code"
