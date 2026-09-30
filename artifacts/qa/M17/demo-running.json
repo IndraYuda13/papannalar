@@ -1,0 +1,10 @@
+{
+  "processMode": "managed PTY terminal",
+  "actualProvider": "isolated local adapter",
+  "buildId": "PNkhMiKARQZq0GwqdP6GJ",
+  "route": "http://127.0.0.1:3100/demo",
+  "checkedAt": "2026-09-30T06:39:15.0534948+07:00",
+  "http": 200,
+  "sessionId": 63220,
+  "status": "PASS"
+}

@@ -1,0 +1,101 @@
+@import "tailwindcss";
+@import "@fontsource/plus-jakarta-sans/latin-400.css";
+@import "@fontsource/plus-jakarta-sans/latin-600.css";
+@import "@fontsource/plus-jakarta-sans/latin-700.css";
+@import "@fontsource/plus-jakarta-sans/latin-800.css";
+@import "@fontsource/atkinson-hyperlegible/latin-400.css";
+@import "@fontsource/atkinson-hyperlegible/latin-700.css";
+@import "../ui/tokens.css";
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  body {
+    @apply bg-background font-sans text-base leading-6 text-foreground antialiased;
+  }
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:not(:disabled),
+  a {
+    touch-action: manipulation;
+  }
+  ::selection {
+    background: var(--pn-teal-100);
+    color: var(--pn-ink-900);
+  }
+  :focus-visible {
+    outline: 3px solid var(--pn-teal-700);
+    outline-offset: 4px;
+  }
+}
+
+@layer components {
+  .graph-slider {
+    appearance: none;
+    background: transparent;
+  }
+  .graph-slider::-webkit-slider-runnable-track {
+    height: 8px;
+    background: var(--pn-teal-100);
+    border: 1px solid var(--pn-teal-700);
+  }
+  .graph-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 88px;
+    height: 88px;
+    margin-top: -41px;
+    border-radius: 50%;
+    border: 4px solid white;
+    outline: 2px solid var(--pn-teal-700);
+    background: var(--pn-teal-700);
+  }
+  .graph-slider::-moz-range-track {
+    height: 8px;
+    background: var(--pn-teal-100);
+    border: 1px solid var(--pn-teal-700);
+  }
+  .graph-slider::-moz-range-thumb {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: 4px solid white;
+    outline: 2px solid var(--pn-teal-700);
+    background: var(--pn-teal-700);
+  }
+  .board-surface {
+    --tw-leading: 1.25;
+    line-height: 1.25;
+  }
+  .skip-link {
+    @apply fixed top-4 left-4 z-50 flex min-h-12 -translate-y-32 items-center rounded-tombol bg-primary px-6 font-semibold text-primary-foreground focus:translate-y-0;
+  }
+  .board-surface .skip-link {
+    @apply min-h-24 text-[26px];
+  }
+  [data-board-height="high"],
+  [data-board-height="sd"] {
+    position: fixed;
+    inset: 50dvh 16px 8px;
+    overflow: auto;
+    background: var(--pn-kertas);
+    border: 2px solid var(--pn-teal-700);
+    padding: 16px;
+    z-index: 10;
+  }
+  [data-board-height="sd"] {
+    top: 33.333333dvh;
+  }
+  [data-large-objects="true"] .board-tool-object-scale {
+    zoom: 1.5;
+  }
+  [data-reduced-motion="true"] *,
+  [data-reduced-motion="true"] *::before,
+  [data-reduced-motion="true"] *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

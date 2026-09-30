@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "run": 1,
+  "elapsedMs": 17967,
+  "buildId": "PNkhMiKARQZq0GwqdP6GJ",
+  "environment": "LOCAL Chromium + PostgreSQL auth/realtime emulator",
+  "input": "29 seed observations + 3 synthetic pixel cards; real deterministic core",
+  "groups": [
+    7,
+    13,
+    12
+  ],
+  "rotations": 3,
+  "toolPreviews": [
+    "ratio",
+    "number-line/predict",
+    "fractions/find-error"
+  ],
+  "actualStarts": 2,
+  "previewChangesCountedAsStarts": false,
+  "exitReceived": 1,
+  "exitExpected": 32,
+  "pendingExit": 31,
+  "offlineDuplicateAddsEvidence": false,
+  "runtimeOrUnexpectedConsoleErrors": 0,
+  "expectedOfflineNetworkErrors": 0,
+  "physicalCamera": "NOT_RUN",
+  "physicalTouch": "NOT_RUN",
+  "sixMinuteStageTiming": "NOT_RUN",
+  "liveAI": "NOT_RUN; static strategy shown"
+}

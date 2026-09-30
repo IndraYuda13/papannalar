@@ -1,0 +1,51 @@
+{
+  "commands": [
+    "pnpm install --frozen-lockfile",
+    "pnpm format:check",
+    "pnpm typecheck",
+    "pnpm lint",
+    "pnpm test",
+    "pnpm test:integration",
+    "pnpm build",
+    "pnpm test:e2e",
+    "pnpm verify",
+    "git diff --check"
+  ],
+  "unitTests": 778,
+  "activeDemoSmoke": 5,
+  "sourceSha256": "e3e2aa0f95821fa806028e32488d98354a6d8b5b185bc069e2d96971d7765363",
+  "sqlAssertions": 340,
+  "baseCommit": "47aa60d729b293a53365a780c0d1cd9485ec6f95",
+  "limitations": {
+    "physicalCameraPrintTouchLatency": "NOT_RUN",
+    "hostedAuthRealtimeStaging": "NOT_RUN",
+    "liveAI": "NOT_RUN",
+    "contentAndPrivacyReview": "NEEDS_REVIEW",
+    "schoolParentConsentPilot": "NOT_RUN",
+    "stageSixMinuteRehearsalFlashDrive": "NOT_RUN",
+    "scheduledOctoberSubmissionFreeze": "NOT_RUN; current snapshot is September 30"
+  },
+  "buildId": "PNkhMiKARQZq0GwqdP6GJ",
+  "execution": "Commands in verify ran sequentially with &&; separate frozen install and diff check also exit0",
+  "exitCode": 0,
+  "timestamp": "2026-09-30T06:40:53.8361988+07:00",
+  "evidence": [
+    "final-install.log",
+    "final-verify.log",
+    "browser-full-76.json",
+    "running-demo-browser.log",
+    "demo-running.json",
+    "diff-check.log"
+  ],
+  "repeatedRehearsals": 3,
+  "status": "PASS_LOCAL_SOFTWARE",
+  "browserStats": {
+    "startTime": "2026-09-29T23:29:34.445Z",
+    "duration": 464788.67000000004,
+    "expected": 76,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "unitFiles": 48
+}

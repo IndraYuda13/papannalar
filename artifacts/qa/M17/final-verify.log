@@ -1,0 +1,987 @@
+[WARN] Unsupported engine: wanted: {"node":"24.14.1"} (current: {"node":"v24.19.0","pnpm":"11.19.0"})
+$ pnpm format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm test:integration && pnpm build && pnpm test:e2e
+[WARN] Unsupported engine: wanted: {"node":"24.14.1"} (current: {"node":"v24.19.0","pnpm":"11.19.0"})
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+[WARN] Unsupported engine: wanted: {"node":"24.14.1"} (current: {"node":"v24.19.0","pnpm":"11.19.0"})
+$ next typegen && tsc --noEmit
+Generating route types...
+✓ Types generated successfully
+[WARN] Unsupported engine: wanted: {"node":"24.14.1"} (current: {"node":"v24.19.0","pnpm":"11.19.0"})
+$ eslint . --max-warnings=0
+[WARN] Unsupported engine: wanted: {"node":"24.14.1"} (current: {"node":"v24.19.0","pnpm":"11.19.0"})
+$ vitest run --coverage
+
+ RUN  v5.0.2 E:/Lomba/repo-papannalar
+      Coverage enabled with v8
+
+
+ Test Files  48 passed (48)
+      Tests  778 passed (778)
+   Start at  06:27:54
+   Duration  76.30s (tests 92%, import 6%, transform 1%, worker 1%)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   92.06 |    86.83 |   96.06 |   93.02 |                   
+ core/assessment   |   95.55 |     92.3 |     100 |    97.6 |                   
+  binding.ts       |   98.03 |    96.36 |     100 |   97.95 | 76                
+  exit.ts          |   88.88 |    76.31 |     100 |   94.44 | 38,48,53          
+ core/groups       |   99.03 |    98.07 |     100 |     100 |                   
+  grouping.ts      |   99.03 |    98.07 |     100 |     100 | 252               
+ core/oral         |      80 |    78.88 |   73.33 |   83.13 |                   
+  replay.ts        |      40 |       40 |      20 |   38.88 | 16,21-41          
+  state.ts         |   91.42 |       90 |     100 |   95.38 | 101,111,147       
+ core/package      |   96.65 |    94.24 |      98 |    96.8 |                   
+  build.ts         |   97.22 |    94.33 |     100 |   96.82 | 100,225           
+  enrichment.ts    |    91.3 |     92.3 |    90.9 |      90 | 25,29             
+  opening.ts       |   92.85 |    93.75 |     100 |    92.3 | 38                
+  ...ic-diagram.ts |     100 |     97.1 |     100 |     100 | 22,90             
+  question.ts      |   94.28 |    86.36 |     100 |   96.77 | 28                
+  tool-task.ts     |     100 |    94.44 |     100 |     100 | 34                
+ core/placement    |   99.11 |     96.4 |     100 |   99.08 |                   
+  replay.ts        |   98.95 |       95 |     100 |   98.94 | 182               
+  state.ts         |   98.48 |    97.18 |     100 |   98.43 | 245               
+  ...her-events.ts |     100 |    93.33 |     100 |     100 | 96                
+ core/session      |    92.1 |    93.33 |     100 |   93.54 |                   
+  cycle.ts         |   88.46 |    88.46 |     100 |    91.3 | 54,60             
+ core/stations     |    95.6 |    94.17 |     100 |   96.29 |                   
+  hold.ts          |   95.23 |    93.93 |     100 |   97.22 | 27                
+  rotation.ts      |   95.55 |    93.84 |     100 |   95.12 | 66,108            
+ core/tools        |    86.7 |     80.9 |   92.12 |    87.9 |                   
+  algebra.ts       |   89.65 |       90 |     100 |   89.36 | 31,56,66,78,98    
+  balance.ts       |   89.32 |    89.13 |     100 |   90.62 | ...83,190,235-236 
+  fractions.ts     |   92.95 |     92.7 |     100 |   93.84 | 51,60,110,164     
+  graph-tasks.ts   |     100 |    72.72 |     100 |     100 | 55,62,69,77-80    
+  graphs.ts        |   84.83 |    81.51 |   92.45 |   86.31 | ...48,653,791,802 
+  patterns.ts      |    81.1 |    66.66 |   72.72 |    82.5 | ...80-591,607-644 
+  ratio.ts         |   90.32 |     90.9 |     100 |    93.1 | 37,95             
+ core/turns        |   94.33 |     91.3 |     100 |   93.87 |                   
+  scheduler.ts     |   94.33 |     91.3 |     100 |   93.87 | 87,97,151         
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 92.06% ( 1846/2005 )
+Branches     : 86.83% ( 1734/1997 )
+Functions    : 96.06% ( 439/457 )
+Lines        : 93.02% ( 1707/1835 )
+================================================================================
+[WARN] Unsupported engine: wanted: {"node":"24.14.1"} (current: {"node":"v24.19.0","pnpm":"11.19.0"})
+$ node scripts/test-db.mjs rls
+20000000-0000-4000-8000-000000000001
+
+
+
+
+
+
+
+
+
+20000000-0000-4000-8000-000000000002
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PASS 34 real PostgreSQL ownership/security assertions
+ok - classes RLS enabled
+ok - students RLS enabled
+ok - server roster has no names
+ok - A reads own class
+ok - A reads generated roster
+ok - roster attendance 1..N
+ok - student IDs are random UUID v4
+ok - A updates own class
+ok - database validates grade/count
+ok - invalid create leaves no partial class
+ok - owner immutable
+ok - class mode immutable
+ok - B reads own class only
+ok - B reads own roster only
+ok - B cannot read A class
+ok - B cannot read A roster
+ok - B cannot update A
+ok - B cannot delete A
+ok - B cannot insert student into A class
+ok - forged owner relation denied
+ok - B cannot update A roster
+ok - B cannot delete A roster
+ok - own delete cascades roster
+ok - A class survives attacks
+ok - A roster survives attacks
+ok - mid-roster failure aborts RPC
+ok - no half-created class
+ok - no partial roster
+ok - board cannot list classes
+ok - board cannot query roster
+ok - board cannot create class
+ok - missing permanent claim fails closed
+ok - public cannot query classes
+ok - public cannot query students
+pn:state:890b8787-5ff2-4c61-88ee-edfc72ce2513:542f1a19-70f2-47f7-8730-85e5ee3dc04e
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{"error": "NOT_FOUND"}
+{"error": "NOT_FOUND"}
+
+PASS pairing/Realtime SQL assertions: 35
+PASS 11 station/role SQL guards
+PASS 22 public tool SQL guards
+
+
+
+
+
+
+PASS 6 opening/reflection SQL guards
+
+
+
+
+
+
+
+
+PASS 8 balance SQL guards
+PASS 20 graph SQL guards (five source descriptors)
+PASS 22 board mode SQL guards
+PASS 15 guidance SQL assertions
+PASS 10 exit SQL guards
+PASS 17 package presentation SQL guards
+PASS 32 board capability/remote SQL assertions
+ok - profile private table denied
+ok - remote table direct write denied
+ok - malformed schema fails closed
+ok - oneOf requires exactly one branch
+ok - profile name rejected
+ok - board profile saved
+ok - board cannot query teacher profiles
+ok - board joins current task
+ok - board cannot send remote command
+ok - paired board input topic
+ok - other board no input topic
+ok - other board cannot read input
+ok - other teacher cannot query profile
+ok - other teacher cannot send input
+ok - owner reads paired profile
+ok - teacher cannot impersonate board profile
+ok - remote extra field denied by SQL
+ok - remote reveal denied
+ok - remote coordinate range checked
+ok - owner remote command accepted
+ok - same input retry idempotent
+ok - same command changed payload denied
+ok - terminal input waits for ACK
+ok - board ACK accepted
+ok - move accepted after terminal ACK
+ok - moves capped at ten Hz
+ok - expired input not replayed
+ok - board reload rotates instance and clears mailbox
+ok - old board instance command denied
+ok - old task epoch denied
+ok - reflection never accepts remote input
+ok - revoked input topic denied
+PASS 27 LLM budget/privacy SQL assertions
+ok - client cannot activate policy or budget
+ok - usage not readable across tenants
+ok - all LLM tables have RLS
+ok - normal client without gateway cannot reserve
+ok - extra identity field rejected
+ok - migration disabled by default
+ok - cross teacher denied even with gateway proof
+ok - board identity cannot spend
+ok - account budget absent fails closed
+ok - Bisik scope must be an owned canonical session
+ok - frozen canonical package cannot enrich
+ok - owned request reserves conservative budget
+ok - same ID never runs provider twice
+ok - one active per session across server instances
+ok - raw prompt never enters usage
+ok - closed metadata receipt accepted
+ok - receipt retry idempotent
+ok - usage receipt cannot be rewritten
+ok - feedback boolean only
+ok - conservative reservation is charged once without refund
+ok - account hard cap enforced
+ok - environment hard cap enforced
+ok - five per minute across scopes enforced
+ok - fifty per session remains after minute window
+ok - expired active lease cannot deadlock future requests
+ok - class deletion purges usage and feedback
+ok - deleting class cannot refund or reset account cap
+PASS 35 board content SQL assertions
+PASS 25 sync SQL assertions
+ok - generated SQL schema accepts complete strict DTO
+ok - sync RLS enabled
+ok - direct writes denied
+ok - first snapshot accepted
+ok - retry returns original revision
+ok - same ID changed payload rejected
+ok - top-level private field rejected
+ok - nested private field rejected at RPC
+ok - owner reads canonical state
+ok - stale base never last-write-wins
+ok - second writer held
+ok - frozen roster cannot be swapped
+ok - same card revision different choice rejected
+ok - response cannot silently disappear
+ok - frozen package immutable
+ok - teacher B cannot read A
+ok - teacher B cannot write A
+ok - board cannot read teacher sync
+ok - board cannot write teacher sync
+ok - session tombstone accepted
+ok - stale snapshot cannot resurrect deleted session
+ok - deleted class rejects old outbox
+ok - class deletion removes private responses
+ok - class deletion removes event receipts
+ok - class tombstone retained without response payload
+PASS 12 writer SQL assertions
+ok - old RPC cannot bypass writer wrapper
+ok - first writer allocated
+ok - initial board channel permitted
+ok - takeover strict allowlist
+ok - other teacher takeover forbidden
+ok - board takeover forbidden
+ok - explicit takeover advances epoch
+ok - takeover invalidates old controller board channel
+ok - lost takeover ACK retry idempotent
+ok - stale concurrent takeover held
+ok - old writer epoch cannot publish even with current revision
+ok - new writer can publish
+PASS 9 history SQL assertions
+ok - old writer RPC cannot bypass history validation
+ok - oral cross-student link forbidden
+ok - turn cross-student link forbidden
+ok - client mastery checkpoint rejected
+ok - oral and role evidence accepted
+ok - history retry remains same revision
+ok - oral history cannot silently disappear
+ok - counted role event immutable
+ok - same oral revision altered result rejected
+[WARN] Unsupported engine: wanted: {"node":"24.14.1"} (current: {"node":"v24.19.0","pnpm":"11.19.0"})
+$ node scripts/prepare-assets.mjs && next build && node scripts/build-offline.mjs
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 6 modules transformed.
+rendering chunks...
+computing gzip size...
+public/omr-worker.js  136.92 kB │ gzip: 50.77 kB
+
+✓ built in 171ms
+▲ Next.js 16.3.6 (Turbopack)
+✓ Running next.config.ts took 42ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1813ms
+  Running TypeScript ...
+  Finished TypeScript in 3.6s ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/30) ...
+  Generating static pages using 15 workers (7/30) 
+  Generating static pages using 15 workers (14/30) 
+  Generating static pages using 15 workers (22/30) 
+✓ Generating static pages using 15 workers (30/30) in 491ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/v1/board-profiles
+├ ƒ /api/v1/board/content
+├ ƒ /api/v1/board/guidance
+├ ƒ /api/v1/board/identity
+├ ƒ /api/v1/board/pairing
+├ ƒ /api/v1/board/profile
+├ ƒ /api/v1/board/remote
+├ ƒ /api/v1/classes
+├ ƒ /api/v1/classes/[id]
+├ ƒ /api/v1/llm/bisik
+├ ƒ /api/v1/llm/enrich
+├ ƒ /api/v1/llm/feedback
+├ ƒ /api/v1/llm/status
+├ ƒ /api/v1/pairing
+├ ƒ /api/v1/presentation-content
+├ ƒ /api/v1/presentation-guidance
+├ ƒ /api/v1/remote
+├ ƒ /api/v1/sync
+├ ƒ /api/v1/sync/takeover
+├ ƒ /api/v1/teacher
+├ ƒ /auth/callback
+├ ƒ /auth/demo
+├ ƒ /auth/login
+├ ƒ /auth/logout
+├ ƒ /demo
+├ ○ /guru
+├ ○ /icon.svg
+├ ○ /layar
+└ ○ /masuk
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 3 modules transformed.
+rendering chunks...
+computing gzip size...
+public/sw.js  4.30 kB │ gzip: 1.68 kB
+
+✓ built in 172ms
+Offline manifest: 48 static assets, 2 public shells (pn-shell-aa2ffced9dadca37).
+[WARN] Unsupported engine: wanted: {"node":"24.14.1"} (current: {"node":"v24.19.0","pnpm":"11.19.0"})
+$ playwright test
+[WebServer] (node:126276) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:119704) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] $ next start --hostname 127.0.0.1 "--port" "3100"
+[WebServer] (node:124912) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 157 modules transformed.
+rendering chunks...
+computing gzip size...
+.browser-tests/offline-fixture.js  280.60 kB │ gzip: 85.09 kB
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/offline/update-safety.ts" may not be preserved when bundling.
+   ╭─[ src/offline/update-safety.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/data-database.ts" may not be preserved when bundling.
+   ╭─[ src/local/data-database.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/db.ts" may not be preserved when bundling.
+   ╭─[ src/local/db.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/assessments.ts" may not be preserved when bundling.
+   ╭─[ src/local/assessments.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/storage-health.ts" may not be preserved when bundling.
+   ╭─[ src/local/storage-health.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/access.ts" may not be preserved when bundling.
+   ╭─[ src/local/access.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/writer.ts" may not be preserved when bundling.
+   ╭─[ src/local/writer.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/sync.ts" may not be preserved when bundling.
+   ╭─[ src/local/sync.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+✓ built in 222ms
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 156 modules transformed.
+rendering chunks...
+computing gzip size...
+.browser-tests/sync-fixture.js  265.89 kB │ gzip: 80.70 kB
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/features/session/sync-client.ts" may not be preserved when bundling.
+   ╭─[ src/features/session/sync-client.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/delete-class.ts" may not be preserved when bundling.
+   ╭─[ src/local/delete-class.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/packages.ts" may not be preserved when bundling.
+   ╭─[ src/local/packages.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/assessments.ts" may not be preserved when bundling.
+   ╭─[ src/local/assessments.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/cycles.ts" may not be preserved when bundling.
+   ╭─[ src/local/cycles.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/sync.ts" may not be preserved when bundling.
+   ╭─[ src/local/sync.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/writer.ts" may not be preserved when bundling.
+   ╭─[ src/local/writer.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/access.ts" may not be preserved when bundling.
+   ╭─[ src/local/access.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/data-database.ts" may not be preserved when bundling.
+   ╭─[ src/local/data-database.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+✓ built in 81ms
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 34 modules transformed.
+rendering chunks...
+computing gzip size...
+.browser-tests/card-photo.js  29.05 kB │ gzip: 11.19 kB
+
+✓ built in 25ms
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 135 modules transformed.
+rendering chunks...
+computing gzip size...
+.browser-tests/exit-fixture.js  238.92 kB │ gzip: 74.40 kB
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/exit.ts" may not be preserved when bundling.
+   ╭─[ src/local/exit.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/assessments.ts" may not be preserved when bundling.
+   ╭─[ src/local/assessments.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/writer.ts" may not be preserved when bundling.
+   ╭─[ src/local/writer.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/data-database.ts" may not be preserved when bundling.
+   ╭─[ src/local/data-database.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+✓ built in 71ms
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 113 modules transformed.
+rendering chunks...
+computing gzip size...
+.browser-tests/turn-fixture.js  191.94 kB │ gzip: 59.32 kB
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/turns.ts" may not be preserved when bundling.
+   ╭─[ src/local/turns.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/rotations.ts" may not be preserved when bundling.
+   ╭─[ src/local/rotations.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/data-database.ts" may not be preserved when bundling.
+   ╭─[ src/local/data-database.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+✓ built in 61ms
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 144 modules transformed.
+rendering chunks...
+computing gzip size...
+.browser-tests/oral-fixture.js  245.66 kB │ gzip: 75.20 kB
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/oral.ts" may not be preserved when bundling.
+   ╭─[ src/local/oral.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/data-database.ts" may not be preserved when bundling.
+   ╭─[ src/local/data-database.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/oral.ts" may not be preserved when bundling.
+   ╭─[ src/local/oral.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/cycles.ts" may not be preserved when bundling.
+   ╭─[ src/local/cycles.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/writer.ts" may not be preserved when bundling.
+   ╭─[ src/local/writer.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+✓ built in 72ms
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 136 modules transformed.
+rendering chunks...
+computing gzip size...
+.browser-tests/package-fixture.js  241.95 kB │ gzip: 75.43 kB
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/packages.ts" may not be preserved when bundling.
+   ╭─[ src/local/packages.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/data-database.ts" may not be preserved when bundling.
+   ╭─[ src/local/data-database.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+✓ built in 72ms
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 137 modules transformed.
+rendering chunks...
+computing gzip size...
+.browser-tests/assessment-fixture.js  236.60 kB │ gzip: 72.72 kB
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/data-database.ts" may not be preserved when bundling.
+   ╭─[ src/local/data-database.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/db.ts" may not be preserved when bundling.
+   ╭─[ src/local/db.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/assessments.ts" may not be preserved when bundling.
+   ╭─[ src/local/assessments.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/access.ts" may not be preserved when bundling.
+   ╭─[ src/local/access.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/writer.ts" may not be preserved when bundling.
+   ╭─[ src/local/writer.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+✓ built in 70ms
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 134 modules transformed.
+rendering chunks...
+computing gzip size...
+.browser-tests/omr-fixture.js  104.78 kB │ gzip: 33.70 kB
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/offline/shell-cache.ts" may not be preserved when bundling.
+   ╭─[ src/offline/shell-cache.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/features/scanner/acquisition.ts" may not be preserved when bundling.
+   ╭─[ src/features/scanner/acquisition.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/features/scanner/client.ts" may not be preserved when bundling.
+   ╭─[ src/features/scanner/client.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+✓ built in 47ms
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 108 modules transformed.
+rendering chunks...
+computing gzip size...
+.browser-tests/fixture.js  185.55 kB │ gzip: 56.93 kB
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/features/guru/student-view.ts" may not be preserved when bundling.
+   ╭─[ src/features/guru/student-view.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/offline/shell-cache.ts" may not be preserved when bundling.
+   ╭─[ src/offline/shell-cache.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/db.ts" may not be preserved when bundling.
+   ╭─[ src/local/db.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/names.ts" may not be preserved when bundling.
+   ╭─[ src/local/names.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+[MODULE_LEVEL_DIRECTIVE] The semantics of the module level directive "use client" in "src/local/data-database.ts" may not be preserved when bundling.
+   ╭─[ src/local/data-database.ts:1:1 ]
+   │
+ 1 │ "use client";
+   │ ──────┬──────  
+   │       ╰──────── module level directive may not be preserved
+   │ 
+   │ Help: For more information, see https://rolldown.rs/in-depth/directives#other-directives
+───╯
+
+✓ built in 60ms
+
+Running 76 tests using 1 worker
+
+(node:125624) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 tests\e2e\assessments.spec.ts:9:1 › IndexedDB v1 migration, CAS, duplicate, reopen, atomic rollback and deletion (977ms)
+  ok  2 tests\e2e\assessments.spec.ts:51:1 › scan review / Ganti / Lewati / manual fallback and offline durable reload (3.3s)
+  ok  3 tests\e2e\auth-ownership.spec.ts:12:1 › refresh session mempertahankan cookie dan no-store meski resource tidak ditemukan (816ms)
+  ok  4 tests\e2e\auth-ownership.spec.ts:65:1 › visitor dialihkan; cookie palsu dan callback invalid tidak mengautentikasi (345ms)
+  ok  5 tests\e2e\auth-ownership.spec.ts:86:1 › magic link PKCE, reload session, cookie HttpOnly dan logout bekerja (1.2s)
+  ok  6 tests\e2e\auth-ownership.spec.ts:141:1 › board memakai anonymous identity terpisah tanpa teacher API atau nama lokal (845ms)
+  ok  7 tests\e2e\auth-ownership.spec.ts:182:1 › CRUD kelas A/B melalui API tetap dibatasi RLS PostgreSQL (4.9s)
+  ok  8 tests\e2e\auth-ownership.spec.ts:244:1 › nama local-only bergabung di UI guru; API baru dan papan tidak menerima canary (1.8s)
+  ok  9 tests\e2e\auth-ownership.spec.ts:288:1 › logout offline mengunci akses lokal dan dicabut saat online kembali (918ms)
+  ok 10 tests\e2e\auth-ownership.spec.ts:306:1 › CSRF dan field tambahan ditolak pada endpoint mutasi (697ms)
+  ok 11 tests\e2e\balance.spec.ts:91:1 › TOOL05 actual balance: symmetric drag/cancel, exact 3x−7=11, zero guard, offline undo (6.5s)
+  ok 12 tests\e2e\balance.spec.ts:170:1 › TOOL05 seven patterns: predictions, distinct twin, Nala repair, open paths and separate models (14.8s)
+  ok 13 tests\e2e\board-capabilities.spec.ts:12:3 › BOARD01 six checks, 0 touch fallback, local profile and public payload (3.6s)
+  ok 14 tests\e2e\board-capabilities.spec.ts:12:3 › BOARD01 six checks, 1 touch fallback, local profile and public payload (1.2s)
+  ok 15 tests\e2e\board-capabilities.spec.ts:12:3 › BOARD01 six checks, 2 touch fallback, local profile and public payload (2.9s)
+  ok 16 tests\e2e\board-capabilities.spec.ts:12:3 › BOARD01 six checks, 4 touch fallback, local profile and public payload (1.4s)
+  ok 17 tests\e2e\board-capabilities.spec.ts:238:1 › REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot control reflection and stops offline (10.5s)
+  ok 18 tests\e2e\board-capabilities.spec.ts:394:1 › REMOTE02 fractions, ratio, algebra, balance and graphs use the bounded input channel (38.7s)
+  ok 19 tests\e2e\board-modes.spec.ts:121:1 › UI01 SD public questions, independent work and exit reasons render their given models without assessment keys (17.4s)
+  ok 20 tests\e2e\board-modes.spec.ts:216:1 › UI01 teacher hint controls report board progress and target reveal needs explicit HP confirmation without replacing the student model (14.0s)
+  ok 21 tests\e2e\board-modes.spec.ts:283:1 › UI01 Sorot uses a twin, permits Nala repair, and returns the same station model/undo after a fresh input epoch (9.3s)
+  ok 22 tests\e2e\board-modes.spec.ts:327:1 › UI01 four public panels paginate with 72px prompts, independent model state and offline resume (8.3s)
+  ok 23 tests\e2e\board-modes.spec.ts:467:1 › UI01 SD5 lower touch zone, 1.5x objects, SMA10 tariffs and explicit Berdua fallback (9.1s)
+  ok 24 tests\e2e\cards.spec.ts:6:1 › teacher downloads all three real A4 PDFs locally without runtime errors (1.6s)
+  ok 25 tests\e2e\classroom.spec.ts:7:1 › teacher pairs board, public groups render and number line/lift respond locally (14.4s)
+  ok 26 tests\e2e\exit.spec.ts:8:1 › exit storage is atomic, frozen, idempotent, isolated and can reopen offline (809ms)
+  ok 27 tests\e2e\exit.spec.ts:45:1 › EXIT01 teacher freezes package, board gets each public row, manual review and correction survive offline (8.7s)
+  ok 28 tests\e2e\freshclass.spec.ts:40:1 › E2E02 fresh 32-student class uses UI/photo inputs through check, rotations, late exit, finalization and next session (40.1s)
+  ok 29 tests\e2e\graphs.spec.ts:132:1 › TOOL06 D6 linear slider is one undo step; point, exact table, and wrong guess are checked (6.6s)
+  ok 30 tests\e2e\graphs.spec.ts:178:1 › TOOL06 SPLDV two lines intersect at 5 GB / 25 and share exact table values (6.2s)
+  ok 31 tests\e2e\graphs.spec.ts:201:1 › TOOL06 E2 shades intersection of all inequalities, detects empty region, and works offline (5.5s)
+  ok 32 tests\e2e\graphs.spec.ts:230:1 › TOOL06 E3 parabola roots 2 and 3; reversed roots and undo are real model changes (5.4s)
+  ok 33 tests\e2e\graphs.spec.ts:266:1 › TOOL06 E4 exponent is multiplicative and compared with a line; no overflow or off-domain point (6.1s)
+  ok 34 tests\e2e\graphs.spec.ts:296:1 › TOOL06 all seven patterns share graph engine, retain independent turns and deduplicate points (13.7s)
+  ok 35 tests\e2e\local-demo.spec.ts:2:1 › explicit local demo uses the normal PKCE callback and grants only teacher session (596ms)
+  ok 36 tests\e2e\offline.spec.ts:14:1 › manifest build hanya shell publik dan seluruh JS/CSS/font lokal (772ms)
+  ok 37 tests\e2e\offline.spec.ts:49:1 › tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap bekerja (1.3s)
+  ok 38 tests\e2e\offline.spec.ts:128:1 › audit cache mendeteksi aset hilang; tidak mengklaim siap hanya karena online (824ms)
+  ok 39 tests\e2e\omr.spec.ts:5:1 › real worker scans pixels/printed text, stays local and works offline after reload (886ms)
+  ok 40 tests\e2e\oral.spec.ts:8:1 › oral CAS/frozen baseline/reopen/undo/skip/resume use real IndexedDB (690ms)
+  ok 41 tests\e2e\oral.spec.ts:28:1 › oral grade 2 goes down on first wrong, skips without evidence, and resumes offline (2.5s)
+  ok 42 tests\e2e\package.spec.ts:9:1 › package cache survives reopen with CAS, freeze and tenant isolation (819ms)
+  ok 43 tests\e2e\package.spec.ts:27:1 › teacher prepares and replaces offline package, reloads its cache and sees tool gaps (2.4s)
+  ok 44 tests\e2e\package.spec.ts:92:1 › C01 CSV stays local, invalid batch changes nothing, and empty name deletes identity (1.9s)
+  ok 45 tests\e2e\package.spec.ts:140:1 › static Bisik and printable independent tasks work offline (2.7s)
+  ok 46 tests\e2e\pairing.spec.ts:6:1 › pairing HTTP uses separate board auth, owner checks, public schema, CAS, ACK and revoke (3.2s)
+  ok 47 tests\e2e\prelim.spec.ts:29:1 › M05-a reset reproduces canonical inputs/groups, excluding three cards until actual pixel scan (3.4s)
+  ok 48 tests\e2e\prelim.spec.ts:87:1 › M05-b recorded PRELIM regression: opening, check, scan, groups, station, actual exit and reflection (12.4s)
+  ok 49 tests\e2e\rehearsal.spec.ts:14:3 › M17 software rehearsal 1: three rotations, source tools, exit, reflection and offline scan (18.0s)
+  ok 50 tests\e2e\rehearsal.spec.ts:14:3 › M17 software rehearsal 2: three rotations, source tools, exit, reflection and offline scan (17.8s)
+  ok 51 tests\e2e\rehearsal.spec.ts:14:3 › M17 software rehearsal 3: three rotations, source tools, exit, reflection and offline scan (17.9s)
+  ok 52 tests\e2e\shell.spec.ts:30:1 › Aplikasi Guru terbuka pada HP, font lokal siap dan navigasi ke papan bekerja (1.1s)
+  ok 53 tests\e2e\shell.spec.ts:73:1 › Layar Kelas 1920x1080 memakai font papan, tanpa data guru atau kode pasangan palsu (637ms)
+  ok 54 tests\e2e\shell.spec.ts:122:1 › Kontrol layar penuh terhidrasi dan dapat dibuka lalu ditutup (456ms)
+  ok 55 tests\e2e\shell.spec.ts:138:1 › Ukuran teks guru 130% tetap dapat dibaca tanpa scroll horizontal (810ms)
+  ok 56 tests\e2e\stations.spec.ts:4:1 › TURN01 real IndexedDB records actual start once, isolates semester/owner and rejects rewritten history (744ms)
+  ok 57 tests\e2e\stations.spec.ts:24:1 › ROT01 teacher timer/three rounds and board projection preserve privacy (14.4s)
+  ok 58 tests\e2e\storage-recovery.spec.ts:16:1 › OFF02 migration retains old records, quota aborts atomically, eviction is detected and canonical pseudonyms can be restored (2.3s)
+  ok 59 tests\e2e\storage-recovery.spec.ts:100:1 › OFF03 a new service worker stays waiting during class and activates only after local data is safe (2.1s)
+  ok 60 tests\e2e\storage-recovery.spec.ts:177:1 › PRIV03 paired roster exists only in board RAM and disappears on offline reload (2.6s)
+  ok 61 tests\e2e\sync.spec.ts:5:1 › SYNC01 offline queue survives restart, lost ACK retry is idempotent and late correction stays pending until accepted (2.9s)
+  ok 62 tests\e2e\sync.spec.ts:120:1 › SYNC02 401/409/429/503 retain durable data; class deletion purges the local dependency group (1.8s)
+  ok 63 tests\e2e\sync.spec.ts:179:1 › SYNC03 two teacher devices enforce read-only import, explicit takeover and reviewed conflict (6.0s)
+  ok 64 tests\e2e\tool-patterns.spec.ts:9:1 › Seven patterns use actual paired board, distinct examples, repairs, unique models and independent turns (12.6s)
+  ok 65 tests\e2e\tools.spec.ts:8:1 › TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo (6.9s)
+  ok 66 tests\e2e\tools.spec.ts:134:1 › TOOL02 fractions keep whole size, check the model, undo, and run offline on actual board route (5.9s)
+(node:126632) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 67 tests\e2e\board-content.spec.ts:27:1 › CACHE01 board content uses actual IndexedDB: empty, strict input, persistence, clear and no group data (361ms)
+  ok 68 tests\e2e\board-content.spec.ts:42:1 › CACHE02 teacher uploads package, board navigates offline, explicit handoff reconciles, reload loses roster and retains content (19.3s)
+  ok 69 tests\e2e\llm.spec.ts:7:1 › LLM01 real teacher UI keeps name/raw question local, shows honest fallback, stores feedback and preserves board privacy (6.1s)
+  ok 70 tests\e2e\llm.spec.ts:208:1 › LLM API rejects unowned/extra fields and remains disabled without credentials (2.1s)
+  ok 71 tests\e2e\privacy-storage.spec.ts:12:1 › IndexedDB kosong aman; nama optional dan operasi delete/update tidak crash (793ms)
+  ok 72 tests\e2e\privacy-storage.spec.ts:42:1 › nama lokal dan referensi selamat setelah tutup/reload; join hanya di teacher view (1.0s)
+  ok 73 tests\e2e\privacy-storage.spec.ts:101:1 › namespace dua akun dan demo/pilot terpisah; clear hanya database nama aktif (804ms)
+  ok 74 tests\e2e\privacy-storage.spec.ts:143:1 › transaksi bulk roster rollback penuh pada absen bentrok; schema menolak nama (782ms)
+  ok 75 tests\e2e\privacy-storage.spec.ts:189:1 › browser canary: hanya DTO eksplisit masuk request, nama tidak di URL/log/cache/papan (817ms)
+(node:124488) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 76 tests\e2e\opening-reflection.spec.ts:10:1 › OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective and ephemeral reflection (11.5s)
+
+  76 passed (7.7m)

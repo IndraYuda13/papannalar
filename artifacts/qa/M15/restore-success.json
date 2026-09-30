@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "scope": "isolated local PostgreSQL auth/realtime emulator, not hosted Supabase",
+  "backupSha256": "c5ebff5cb57a42892cbf84e00678ebae318a67e5c3e80699880db72628a1553a",
+  "migrations": 32,
+  "validatorSchemas": 7,
+  "boardPackets": 3,
+  "invalidBoardPackets": 0,
+  "tablesWithoutRls": 0
+}

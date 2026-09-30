@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-09-30T06:30:01.1941925+07:00",
+  "sourceDocsUnchanged": true,
+  "findings": [],
+  "scope": "src scripts tests; string search, not a substitute for review",
+  "query": "TODO/FIXME/HACK/skip/only/TS suppression/ESLint suppression"
+}
