@@ -1,0 +1,22 @@
+node_modules/
+.next/
+pnpm-lock.yaml
+next-env.d.ts
+playwright-report/
+test-results/
+coverage/
+artifacts/
+public/sw.js
+public/omr-worker.js
+public/offline/
+.browser-tests/
+.local/
+supabase/.temp/
+# Baseline pengguna dipertahankan; formatter hanya mengatur implementasi.
+AGENTS.md
+PLAN.md
+docs/
+# Instruksi terbaru pengguna adalah baseline, bukan output formatter.
+PapanNalar_Video_Ready_Codex.md
+PapanNalar_Checklist_Rekaman.md
+PapanNalar_Audit.md

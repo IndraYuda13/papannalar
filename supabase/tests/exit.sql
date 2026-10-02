@@ -1,0 +1,16 @@
+begin;
+create function pg_temp.ok(value boolean,label text) returns void language plpgsql as $$begin if value is distinct from true then raise exception 'FAILED: %',label;end if;end$$;
+create temp table exit_fixture(v jsonb);
+insert into exit_fixture values('{"id":"10000000-0000-4000-8000-000000000001","row":2,"groups":[{"id":"10000000-0000-4000-8000-000000000002","label":"Segitiga Biru","attendanceNumbers":[1,2,3],"question":{"id":"10000000-0000-4000-8000-000000000003","prompt":[{"kind":"text","text":"Kenapa?"}],"options":[{"label":"A","text":"A"},{"label":"B","text":"B"},{"label":"C","text":"C"},{"label":"D","text":"D"}],"unknownLabel":"?"}}]}');
+select pg_temp.ok(pn_private.valid_public_exit(v),'exit projection accepted') from exit_fixture;
+select pg_temp.ok(not pn_private.valid_public_exit(v||'{"name":"CANARY"}'),'exit name rejected') from exit_fixture;
+select pg_temp.ok(not pn_private.valid_public_exit(jsonb_set(v,'{groups,0,question,answerKey}','"A"')),'key rejected') from exit_fixture;
+select pg_temp.ok(not pn_private.valid_public_exit(jsonb_set(v,'{groups,0,question,stepId}','"D1"')),'level rejected') from exit_fixture;
+select pg_temp.ok(not pn_private.valid_public_exit(jsonb_set(v,'{groups,0,question,options,0,name}','"CANARY"')),'nested name rejected') from exit_fixture;
+select pg_temp.ok(not pn_private.valid_public_exit(jsonb_set(v,'{groups,0,attendanceNumbers}','[1,1]')),'duplicate attendance rejected') from exit_fixture;
+select pg_temp.ok(not pn_private.valid_public_exit(jsonb_set(v,'{groups,0,question,options,0,label}','null')),'null label rejected') from exit_fixture;
+select pg_temp.ok(not pn_private.valid_public_exit(jsonb_set(v,'{groups,0,question,unknownLabel}','null')),'null unknown rejected') from exit_fixture;
+select pg_temp.ok(pn_private.valid_public_state(jsonb_build_object('schemaVersion',1,'mode','exit','question',2,'taskEpoch','10000000-0000-4000-8000-000000000004','groups','[]'::jsonb,'exit',v)),'exit state accepted') from exit_fixture;
+select pg_temp.ok(not pn_private.valid_public_state(jsonb_build_object('schemaVersion',1,'mode','station','question',2,'taskEpoch','10000000-0000-4000-8000-000000000004','groups','[]'::jsonb,'exit',v)),'exit payload cannot masquerade as station') from exit_fixture;
+select 'PASS 10 exit SQL guards';
+rollback;

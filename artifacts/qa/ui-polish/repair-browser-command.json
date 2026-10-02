@@ -1,0 +1,7 @@
+{
+  "command": "PAPANNALAR_REUSE_LOCAL_DEMO=1 pnpm exec playwright test tests/e2e/board-capabilities.spec.ts:12 tests/e2e/exit.spec.ts:46 tests/e2e/offline.spec.ts:51 tests/e2e/prelim.spec.ts:88 tests/e2e/storage-recovery.spec.ts:181 tests/e2e/tool-patterns.spec.ts:10 tests/e2e/video-display.spec.ts tests/e2e/shell.spec.ts --reporter=list,json --output=artifacts/qa/ui-polish/repair-browser",
+  "started": "2026-10-01T02:19:20.7726004+07:00",
+  "completed": "2026-10-01T02:21:37.4541884+07:00",
+  "exitCode": 0,
+  "target": "managed production loopback3100 / isolated SQL55432; no build/reset in browser setup"
+}

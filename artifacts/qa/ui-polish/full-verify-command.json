@@ -1,0 +1,8 @@
+{
+  "command": "pnpm verify",
+  "started": "2026-10-01T01:51:23.9373947+07:00",
+  "completed": "2026-10-01T02:07:53.5757099+07:00",
+  "exitCode": 1,
+  "baseCommit": "47aa60d729b293a53365a780c0d1cd9485ec6f95",
+  "target": "isolated local PostgreSQL pn_m01c_test loopback55432; Chromium loopback3100"
+}

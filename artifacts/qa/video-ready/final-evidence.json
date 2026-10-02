@@ -1,0 +1,981 @@
+{
+  "recordedAt": "2026-09-30T15:16:53.330Z",
+  "baseCommit": "47aa60d729b293a53365a780c0d1cd9485ec6f95",
+  "workingTree": "uncommitted; existing user/baseline work preserved",
+  "buildId": "8wosRzK9Zg6KTtOoogpnf",
+  "runtime": "v24.14.1",
+  "packageManager": "pnpm 11.19.0",
+  "environment": "Windows; production Next build; loopback-only Auth/PostgREST test provider; real PostgreSQL17 / RLS",
+  "fullVerify": {
+    "command": "pnpm verify",
+    "exitCode": 1,
+    "evidence": "final-verify.log",
+    "format": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "unit": {
+      "passed": 1001,
+      "files": 65,
+      "statements": 92.44,
+      "branches": 87.42
+    },
+    "sqlAssertions": 378,
+    "build": "PASS",
+    "browser": {
+      "passed": 66,
+      "failed": 36
+    },
+    "disposition": "Failures repaired with targeted tests. Full verify was not repeated or relabelled as exit0."
+  },
+  "repairs": {
+    "unit": {
+      "passed": 56,
+      "files": 5,
+      "newUniqueTests": 16,
+      "exitCode": 0,
+      "evidence": "auth-clock-unit.log"
+    },
+    "build": {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "evidence": "recording-candidate-build.log"
+    },
+    "typecheck": {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "evidence": "recording-candidate-typecheck.log"
+    },
+    "lint": {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "evidence": "final-candidate-lint.log"
+    },
+    "format": {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "evidence": "final-format-check.log"
+    },
+    "diff": {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "evidence": "final-diff-check.log"
+    }
+  },
+  "browser": {
+    "uniqueScenarios": 102,
+    "allLatestOutcomes": "PASS",
+    "failedRemaining": 0,
+    "runs": [
+      {
+        "evidence": "full-playwright-first.json",
+        "exitCode": 1,
+        "startTime": "2026-09-30T14:07:38.032Z",
+        "durationMs": 555494.7420000001,
+        "passed": 66,
+        "failed": 36,
+        "skipped": 0,
+        "flaky": 0
+      },
+      {
+        "evidence": "regression-playwright.json",
+        "exitCode": 1,
+        "startTime": "2026-09-30T14:20:48.894Z",
+        "durationMs": 550950.5950000001,
+        "passed": 14,
+        "failed": 22,
+        "skipped": 0,
+        "flaky": 0
+      },
+      {
+        "evidence": "regression-final-playwright.json",
+        "exitCode": 1,
+        "startTime": "2026-09-30T14:34:19.143Z",
+        "durationMs": 406439.47500000003,
+        "passed": 15,
+        "failed": 7,
+        "skipped": 0,
+        "flaky": 0
+      },
+      {
+        "evidence": "regression-last-playwright.json",
+        "exitCode": 1,
+        "startTime": "2026-09-30T14:53:14.105Z",
+        "durationMs": 120387.105,
+        "passed": 6,
+        "failed": 1,
+        "skipped": 0,
+        "flaky": 0
+      },
+      {
+        "evidence": "candidate-browser-playwright.json",
+        "exitCode": 0,
+        "startTime": "2026-09-30T14:59:45.021Z",
+        "durationMs": 122226.046,
+        "passed": 26,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0
+      },
+      {
+        "evidence": "running-server-smoke-playwright.json",
+        "exitCode": 0,
+        "startTime": "2026-09-30T15:05:10.650Z",
+        "durationMs": 11848.556,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0
+      }
+    ],
+    "cases": [
+      {
+        "id": "8ea4daa14b82f1edf62d-c74e27cf4ad59be8f167",
+        "file": "assessments.spec.ts",
+        "title": "IndexedDB v1 migration, CAS, duplicate, reopen, atomic rollback and deletion",
+        "status": "passed",
+        "durationMs": 1173,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "8ea4daa14b82f1edf62d-dc5c523e3e17d2ddcf9f",
+        "file": "assessments.spec.ts",
+        "title": "scan review / Ganti / Lewati / manual fallback and offline durable reload",
+        "status": "passed",
+        "durationMs": 3563,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "2abf6f3306367ace8af5-a8306d6657f3434e2536",
+        "file": "auth-ownership.spec.ts",
+        "title": "board memakai anonymous identity terpisah tanpa teacher API atau nama lokal",
+        "status": "passed",
+        "durationMs": 1318,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "2abf6f3306367ace8af5-dd946f85f6384a3ae571",
+        "file": "auth-ownership.spec.ts",
+        "title": "CRUD kelas A/B melalui API tetap dibatasi RLS PostgreSQL",
+        "status": "passed",
+        "durationMs": 5886,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "2abf6f3306367ace8af5-d2c383a243a3689a2172",
+        "file": "auth-ownership.spec.ts",
+        "title": "CSRF dan field tambahan ditolak pada endpoint mutasi",
+        "status": "passed",
+        "durationMs": 793,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "2abf6f3306367ace8af5-6306c536fade3d44a97f",
+        "file": "auth-ownership.spec.ts",
+        "title": "logout offline mengunci akses lokal dan dicabut saat online kembali",
+        "status": "passed",
+        "durationMs": 1347,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "2abf6f3306367ace8af5-7fe05ad93d781611a0c4",
+        "file": "auth-ownership.spec.ts",
+        "title": "magic link PKCE, reload session, cookie HttpOnly dan logout bekerja",
+        "status": "passed",
+        "durationMs": 1621,
+        "evidence": "running-server-smoke-playwright.json"
+      },
+      {
+        "id": "2abf6f3306367ace8af5-c808c4c2b2a22fc3a607",
+        "file": "auth-ownership.spec.ts",
+        "title": "nama local-only bergabung di UI guru; API baru dan papan tidak menerima canary",
+        "status": "passed",
+        "durationMs": 2465,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "2abf6f3306367ace8af5-8c58111777a7e8a15111",
+        "file": "auth-ownership.spec.ts",
+        "title": "refresh session mempertahankan cookie dan no-store meski resource tidak ditemukan",
+        "status": "passed",
+        "durationMs": 795,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "2abf6f3306367ace8af5-672e5692afbcaf562b55",
+        "file": "auth-ownership.spec.ts",
+        "title": "visitor dialihkan; cookie palsu dan callback invalid tidak mengautentikasi",
+        "status": "passed",
+        "durationMs": 372,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "50759d9ccdefa0f61531-7a6d1c9b772b52c2f1e7",
+        "file": "balance.spec.ts",
+        "title": "TOOL05 actual balance: symmetric drag/cancel, exact 3x−7=11, zero guard, offline undo",
+        "status": "passed",
+        "durationMs": 8044,
+        "evidence": "regression-last-playwright.json"
+      },
+      {
+        "id": "50759d9ccdefa0f61531-db085e31ba6c74e1ff7e",
+        "file": "balance.spec.ts",
+        "title": "TOOL05 seven patterns: predictions, distinct twin, Nala repair, open paths and separate models",
+        "status": "passed",
+        "durationMs": 25940,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "95874e0bebb65e057ea9-c4ac37749105c12cb73d",
+        "file": "board-capabilities.spec.ts",
+        "title": "BOARD01 six checks, 0 touch fallback, local profile and public payload",
+        "status": "passed",
+        "durationMs": 5458,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "95874e0bebb65e057ea9-37caadbbabcebdabd683",
+        "file": "board-capabilities.spec.ts",
+        "title": "BOARD01 six checks, 1 touch fallback, local profile and public payload",
+        "status": "passed",
+        "durationMs": 3732,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "95874e0bebb65e057ea9-db5bec5e5c6374893025",
+        "file": "board-capabilities.spec.ts",
+        "title": "BOARD01 six checks, 2 touch fallback, local profile and public payload",
+        "status": "passed",
+        "durationMs": 7108,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "95874e0bebb65e057ea9-259b758593c132a076cb",
+        "file": "board-capabilities.spec.ts",
+        "title": "BOARD01 six checks, 4 touch fallback, local profile and public payload",
+        "status": "passed",
+        "durationMs": 5385,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "95874e0bebb65e057ea9-2875de48cd2632966472",
+        "file": "board-capabilities.spec.ts",
+        "title": "REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot control reflection and stops offline",
+        "status": "passed",
+        "durationMs": 16618,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "95874e0bebb65e057ea9-6582da6efde2445dd384",
+        "file": "board-capabilities.spec.ts",
+        "title": "REMOTE02 fractions, ratio, algebra, balance and graphs use the bounded input channel",
+        "status": "passed",
+        "durationMs": 39312,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "a41f94ea4b40ce926622-0a4b414764122ac975a0",
+        "file": "board-content.spec.ts",
+        "title": "CACHE01 board content uses actual IndexedDB: empty, strict input, persistence, clear and no group data",
+        "status": "passed",
+        "durationMs": 567,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "a41f94ea4b40ce926622-bf91cca0625cfeeb956f",
+        "file": "board-content.spec.ts",
+        "title": "CACHE02 teacher uploads package, board navigates offline, explicit handoff reconciles, reload loses roster and retains content",
+        "status": "passed",
+        "durationMs": 34822,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "4d649830458b8b22c4b3-8e040180c8da7e309c0c",
+        "file": "board-modes.spec.ts",
+        "title": "UI01 four public panels paginate with 72px prompts, independent model state and offline resume",
+        "status": "passed",
+        "durationMs": 19185,
+        "evidence": "regression-last-playwright.json"
+      },
+      {
+        "id": "4d649830458b8b22c4b3-df6dcb8f0c6cf6767bda",
+        "file": "board-modes.spec.ts",
+        "title": "UI01 SD public questions, independent work and exit reasons render their given models without assessment keys",
+        "status": "passed",
+        "durationMs": 30244,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "4d649830458b8b22c4b3-0303d9f8a4b401679c34",
+        "file": "board-modes.spec.ts",
+        "title": "UI01 SD5 lower touch zone, 1.5x objects, SMA10 tariffs and explicit Berdua fallback",
+        "status": "passed",
+        "durationMs": 21599,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "4d649830458b8b22c4b3-ac5e0715a774ca8e1e84",
+        "file": "board-modes.spec.ts",
+        "title": "UI01 Sorot uses a twin, permits Nala repair, and returns the same station model/undo after a fresh input epoch",
+        "status": "passed",
+        "durationMs": 13978,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "4d649830458b8b22c4b3-51b4caf8fb62cddf1854",
+        "file": "board-modes.spec.ts",
+        "title": "UI01 teacher hint controls report board progress and target reveal needs explicit HP confirmation without replacing the student model",
+        "status": "passed",
+        "durationMs": 21494,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "bcd05545df9e4f3c3981-912b04afee39c80607df",
+        "file": "cards.spec.ts",
+        "title": "teacher downloads all three real A4 PDFs locally without runtime errors",
+        "status": "passed",
+        "durationMs": 2741,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "ee123a1e90c2c71e0969-576409018208511e9d63",
+        "file": "classroom.spec.ts",
+        "title": "teacher pairs board, public groups render and number line/lift respond locally",
+        "status": "passed",
+        "durationMs": 15709,
+        "evidence": "regression-last-playwright.json"
+      },
+      {
+        "id": "905dd2bb59557fa8a826-fc524620946ecb1b20b3",
+        "file": "exit.spec.ts",
+        "title": "exit storage is atomic, frozen, idempotent, isolated and can reopen offline",
+        "status": "passed",
+        "durationMs": 1005,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "905dd2bb59557fa8a826-c10a4a7421979f35943c",
+        "file": "exit.spec.ts",
+        "title": "EXIT01 teacher freezes package, board gets each public row, manual review and correction survive offline",
+        "status": "passed",
+        "durationMs": 14391,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "aea87be0294f135f050f-e794dcaf830566154638",
+        "file": "freshclass.spec.ts",
+        "title": "E2E02 fresh 32-student class uses UI/photo inputs through check, rotations, late exit, finalization and next session",
+        "status": "passed",
+        "durationMs": 69420,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "a693ab500b96115b4ff7-c8be90909714f4ed80a5",
+        "file": "graphs.spec.ts",
+        "title": "TOOL06 all seven patterns share graph engine, retain independent turns and deduplicate points",
+        "status": "passed",
+        "durationMs": 24038,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "a693ab500b96115b4ff7-fc43c6f82709f2cb903e",
+        "file": "graphs.spec.ts",
+        "title": "TOOL06 D6 linear slider is one undo step; point, exact table, and wrong guess are checked",
+        "status": "passed",
+        "durationMs": 7873,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "a693ab500b96115b4ff7-7594eec5a44ac5845871",
+        "file": "graphs.spec.ts",
+        "title": "TOOL06 E2 shades intersection of all inequalities, detects empty region, and works offline",
+        "status": "passed",
+        "durationMs": 11004,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "a693ab500b96115b4ff7-b11eb32f38e7809d785c",
+        "file": "graphs.spec.ts",
+        "title": "TOOL06 E3 parabola roots 2 and 3; reversed roots and undo are real model changes",
+        "status": "passed",
+        "durationMs": 10846,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "a693ab500b96115b4ff7-7935999b3e8cf888bfa4",
+        "file": "graphs.spec.ts",
+        "title": "TOOL06 E4 exponent is multiplicative and compared with a line; no overflow or off-domain point",
+        "status": "passed",
+        "durationMs": 7685,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "a693ab500b96115b4ff7-91aa74bd5b16c9c1fc4b",
+        "file": "graphs.spec.ts",
+        "title": "TOOL06 SPLDV two lines intersect at 5 GB / 25 and share exact table values",
+        "status": "passed",
+        "durationMs": 7644,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "632ddc8b75e75246d02f-8d08fa303e003990fcb9",
+        "file": "llm.spec.ts",
+        "title": "LLM API rejects unowned/extra fields and remains disabled without credentials",
+        "status": "passed",
+        "durationMs": 2417,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "632ddc8b75e75246d02f-df340ec3271fb87f0ada",
+        "file": "llm.spec.ts",
+        "title": "LLM01 real teacher UI keeps name/raw question local, shows honest fallback, stores feedback and preserves board privacy",
+        "status": "passed",
+        "durationMs": 9065,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "6461788d6cd74d45c135-41a26ec8d933b38ded60",
+        "file": "local-demo.spec.ts",
+        "title": "explicit local demo uses the normal PKCE callback and grants only teacher session",
+        "status": "passed",
+        "durationMs": 740,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "586fc5283fd8ec7c7982-ae47b3ca699d081deefd",
+        "file": "offline.spec.ts",
+        "title": "audit cache mendeteksi aset hilang; tidak mengklaim siap hanya karena online",
+        "status": "passed",
+        "durationMs": 781,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "586fc5283fd8ec7c7982-bd995963b58d196e685b",
+        "file": "offline.spec.ts",
+        "title": "manifest build hanya shell publik dan seluruh JS/CSS/font lokal",
+        "status": "passed",
+        "durationMs": 862,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "586fc5283fd8ec7c7982-8aa34e64b0425b5fa39d",
+        "file": "offline.spec.ts",
+        "title": "tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap bekerja",
+        "status": "passed",
+        "durationMs": 1512,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "f49e0151ad01ae85d136-6f595d6e7bd8f1925fb6",
+        "file": "omr.spec.ts",
+        "title": "real worker scans pixels/printed text, stays local and works offline after reload",
+        "status": "passed",
+        "durationMs": 1076,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "931bea52af298b73a596-8740a0381fd9b93cf955",
+        "file": "opening-reflection.spec.ts",
+        "title": "OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective and ephemeral reflection",
+        "status": "passed",
+        "durationMs": 24770,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "e56d5c16cf068689f378-edb8f383282da924ddca",
+        "file": "oral.spec.ts",
+        "title": "oral CAS/frozen baseline/reopen/undo/skip/resume use real IndexedDB",
+        "status": "passed",
+        "durationMs": 858,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "e56d5c16cf068689f378-1c0ddf0a5e11dc28d70f",
+        "file": "oral.spec.ts",
+        "title": "oral grade 2 goes down on first wrong, skips without evidence, and resumes offline",
+        "status": "passed",
+        "durationMs": 2558,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "ea01a303febe52cc7ec6-6b6a390152aa44773f24",
+        "file": "package.spec.ts",
+        "title": "C01 CSV stays local, invalid batch changes nothing, and empty name deletes identity",
+        "status": "passed",
+        "durationMs": 2009,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "ea01a303febe52cc7ec6-a570264510dda8f6d4fb",
+        "file": "package.spec.ts",
+        "title": "package cache survives reopen with CAS, freeze and tenant isolation",
+        "status": "passed",
+        "durationMs": 899,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "ea01a303febe52cc7ec6-2feae0d3c31779b8b9d4",
+        "file": "package.spec.ts",
+        "title": "static Bisik and printable independent tasks work offline",
+        "status": "passed",
+        "durationMs": 2912,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "ea01a303febe52cc7ec6-1a73807c0628789c824b",
+        "file": "package.spec.ts",
+        "title": "teacher prepares and replaces offline package, reloads its cache and sees tool gaps",
+        "status": "passed",
+        "durationMs": 2524,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "520aa2bb3acfd1058645-816c4a51ed2722062588",
+        "file": "pairing.spec.ts",
+        "title": "pairing HTTP uses separate board auth, owner checks, public schema, CAS, ACK and revoke",
+        "status": "passed",
+        "durationMs": 3163,
+        "evidence": "regression-last-playwright.json"
+      },
+      {
+        "id": "c6a29aa6db6fcd2686f6-2e523ae41e7cdbb29e61",
+        "file": "prelim.spec.ts",
+        "title": "M05-a reset reproduces canonical inputs/groups, excluding three cards until actual pixel scan",
+        "status": "passed",
+        "durationMs": 3444,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "c6a29aa6db6fcd2686f6-ed39079275f24735104d",
+        "file": "prelim.spec.ts",
+        "title": "M05-b recorded PRELIM regression: opening, check, scan, groups, station, actual exit and reflection",
+        "status": "passed",
+        "durationMs": 29554,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "fd999b24afb1d3adfb68-f0f9596d105ccfe0d580",
+        "file": "privacy-storage.spec.ts",
+        "title": "browser canary: hanya DTO eksplisit masuk request, nama tidak di URL/log/cache/papan",
+        "status": "passed",
+        "durationMs": 1009,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "fd999b24afb1d3adfb68-128e2e50f5339da2a130",
+        "file": "privacy-storage.spec.ts",
+        "title": "IndexedDB kosong aman; nama optional dan operasi delete/update tidak crash",
+        "status": "passed",
+        "durationMs": 988,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "fd999b24afb1d3adfb68-ebd7cd6ac5f3c33ac9c1",
+        "file": "privacy-storage.spec.ts",
+        "title": "nama lokal dan referensi selamat setelah tutup/reload; join hanya di teacher view",
+        "status": "passed",
+        "durationMs": 1097,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "fd999b24afb1d3adfb68-69cdfa61f8ab94ac6adf",
+        "file": "privacy-storage.spec.ts",
+        "title": "namespace dua akun dan demo/pilot terpisah; clear hanya database nama aktif",
+        "status": "passed",
+        "durationMs": 898,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "fd999b24afb1d3adfb68-4eb36ba10c4623ffc1dc",
+        "file": "privacy-storage.spec.ts",
+        "title": "transaksi bulk roster rollback penuh pada absen bentrok; schema menolak nama",
+        "status": "passed",
+        "durationMs": 863,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "5a688984f7417d6db555-72c14310e491a3fdd391",
+        "file": "rehearsal.spec.ts",
+        "title": "M17 software rehearsal 1: three rotations, source tools, exit, reflection and offline scan",
+        "status": "passed",
+        "durationMs": 35465,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "5a688984f7417d6db555-952e6aed33824587c0ba",
+        "file": "rehearsal.spec.ts",
+        "title": "M17 software rehearsal 2: three rotations, source tools, exit, reflection and offline scan",
+        "status": "passed",
+        "durationMs": 35551,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "5a688984f7417d6db555-072f7c027e127e0fd3de",
+        "file": "rehearsal.spec.ts",
+        "title": "M17 software rehearsal 3: three rotations, source tools, exit, reflection and offline scan",
+        "status": "passed",
+        "durationMs": 35592,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "3420664513cb0bae123e-a433aa2856deb124f1f9",
+        "file": "shell.spec.ts",
+        "title": "Aplikasi Guru terbuka pada HP, font lokal siap dan navigasi ke papan bekerja",
+        "status": "passed",
+        "durationMs": 1490,
+        "evidence": "running-server-smoke-playwright.json"
+      },
+      {
+        "id": "3420664513cb0bae123e-8e9031af07418dbab3d4",
+        "file": "shell.spec.ts",
+        "title": "Kontrol layar penuh terhidrasi dan dapat dibuka lalu ditutup",
+        "status": "passed",
+        "durationMs": 671,
+        "evidence": "running-server-smoke-playwright.json"
+      },
+      {
+        "id": "3420664513cb0bae123e-e964f5b1aad293415126",
+        "file": "shell.spec.ts",
+        "title": "Layar Kelas 1920x1080 memakai font papan, tanpa data guru atau kode pasangan palsu",
+        "status": "passed",
+        "durationMs": 875,
+        "evidence": "running-server-smoke-playwright.json"
+      },
+      {
+        "id": "3420664513cb0bae123e-7e79d431286d73cebce2",
+        "file": "shell.spec.ts",
+        "title": "Ukuran teks guru 130% tetap dapat dibaca tanpa scroll horizontal",
+        "status": "passed",
+        "durationMs": 1064,
+        "evidence": "running-server-smoke-playwright.json"
+      },
+      {
+        "id": "eb2ad51e734e6eca5859-da39fdf56213170a96f6",
+        "file": "stations.spec.ts",
+        "title": "ROT01 teacher timer/three rounds and board projection preserve privacy",
+        "status": "passed",
+        "durationMs": 31720,
+        "evidence": "regression-last-playwright.json"
+      },
+      {
+        "id": "eb2ad51e734e6eca5859-19442082369c74d0e1bc",
+        "file": "stations.spec.ts",
+        "title": "TURN01 real IndexedDB records actual start once, isolates semester/owner and rejects rewritten history",
+        "status": "passed",
+        "durationMs": 865,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "695384c4e23ea1a150cf-1050f2b0122d6358eeb5",
+        "file": "storage-recovery.spec.ts",
+        "title": "OFF02 migration retains old records, quota aborts atomically, eviction is detected and canonical pseudonyms can be restored",
+        "status": "passed",
+        "durationMs": 2408,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "695384c4e23ea1a150cf-afa46071d1cc6d9dc1e9",
+        "file": "storage-recovery.spec.ts",
+        "title": "OFF03 a new service worker stays waiting during class and activates only after local data is safe",
+        "status": "passed",
+        "durationMs": 2331,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "695384c4e23ea1a150cf-5ae2501ceea1e61a5f62",
+        "file": "storage-recovery.spec.ts",
+        "title": "PRIV03 paired roster exists only in board RAM and disappears on offline reload",
+        "status": "passed",
+        "durationMs": 3292,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "0cc518b4e81cfdbffc61-b64517eda6cd68f96e9d",
+        "file": "sync.spec.ts",
+        "title": "SYNC01 offline queue survives restart, lost ACK retry is idempotent and late correction stays pending until accepted",
+        "status": "passed",
+        "durationMs": 3266,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "0cc518b4e81cfdbffc61-60617e8576b2a83ff75f",
+        "file": "sync.spec.ts",
+        "title": "SYNC02 401/409/429/503 retain durable data; class deletion purges the local dependency group",
+        "status": "passed",
+        "durationMs": 1962,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "0cc518b4e81cfdbffc61-920c437c7b44248102fd",
+        "file": "sync.spec.ts",
+        "title": "SYNC03 two teacher devices enforce read-only import, explicit takeover and reviewed conflict",
+        "status": "passed",
+        "durationMs": 6324,
+        "evidence": "full-playwright-first.json"
+      },
+      {
+        "id": "e152635f98e763fdb533-c562e21716f5392ee823",
+        "file": "tool-patterns.spec.ts",
+        "title": "Seven patterns use actual paired board, distinct examples, repairs, unique models and independent turns",
+        "status": "passed",
+        "durationMs": 21722,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "28ac77d690f1704d1b07-c2f7d69ea0e93e47cea5",
+        "file": "tools.spec.ts",
+        "title": "TOOL02 fractions keep whole size, check the model, undo, and run offline on actual board route",
+        "status": "passed",
+        "durationMs": 10821,
+        "evidence": "regression-final-playwright.json"
+      },
+      {
+        "id": "28ac77d690f1704d1b07-1d451e0392eda9f4a694",
+        "file": "tools.spec.ts",
+        "title": "TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
+        "status": "passed",
+        "durationMs": 14034,
+        "evidence": "regression-playwright.json"
+      },
+      {
+        "id": "f35692cf5413af948fc0-5c1154d209ee8d11fe98",
+        "file": "video-connection-logout.spec.ts",
+        "title": "displaced sample observer logout cannot revoke the active device even if the tab UUID is known",
+        "status": "passed",
+        "durationMs": 1618,
+        "evidence": "running-server-smoke-playwright.json"
+      },
+      {
+        "id": "f35692cf5413af948fc0-b772f24748a4495c0239",
+        "file": "video-connection-logout.spec.ts",
+        "title": "logout revokes only this controller across independent logins of the same teacher; retired UUID cannot re-claim",
+        "status": "passed",
+        "durationMs": 2169,
+        "evidence": "running-server-smoke-playwright.json"
+      },
+      {
+        "id": "c4e858dff59158f341b2-c3323a8923b8cf756326",
+        "file": "video-connection.spec.ts",
+        "title": "V2 re-scan keeps question 3 and presentation identity; displaced controller, replay and revoked QR are blocked",
+        "status": "passed",
+        "durationMs": 4892,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-caa1c9914292790e25f7",
+        "file": "video-display.spec.ts",
+        "title": "V1 400-character prompt and four options remain complete and bounded at 1280x720",
+        "status": "passed",
+        "durationMs": 2058,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-fa49b034fe82c5f70450",
+        "file": "video-display.spec.ts",
+        "title": "V1 400-character prompt and four options remain complete and bounded at 1366x768",
+        "status": "passed",
+        "durationMs": 2059,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-d0ecefd2da74ceffc8cd",
+        "file": "video-display.spec.ts",
+        "title": "V1 400-character prompt and four options remain complete and bounded at 1920x1080",
+        "status": "passed",
+        "durationMs": 2181,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-8753541769ff11d4a8aa",
+        "file": "video-display.spec.ts",
+        "title": "V1 all six production tools fit the board after reading a long prompt",
+        "status": "passed",
+        "durationMs": 4423,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-6f15c543c78412fac3d8",
+        "file": "video-display.spec.ts",
+        "title": "V1 model and temporary ink survive reading pages and appearance edits",
+        "status": "passed",
+        "durationMs": 1189,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-5927d82df5b9731141f6",
+        "file": "video-display.spec.ts",
+        "title": "V1 teacher preview uses Atkinson and readable pages at 1280x720",
+        "status": "passed",
+        "durationMs": 1053,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-3e0571035764f02122b8",
+        "file": "video-display.spec.ts",
+        "title": "V1 teacher preview uses Atkinson and readable pages at 390x844",
+        "status": "passed",
+        "durationMs": 1115,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-f7758aa8defcd4f7d41a",
+        "file": "video-display.spec.ts",
+        "title": "V1/V2 presets use production previews and bounded controls at 1280x720",
+        "status": "passed",
+        "durationMs": 1885,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-f8b10d114a75da3fa99d",
+        "file": "video-display.spec.ts",
+        "title": "V1/V2 presets use production previews and bounded controls at 1366x768",
+        "status": "passed",
+        "durationMs": 1843,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-31497ca481ad3cb6102c",
+        "file": "video-display.spec.ts",
+        "title": "V1/V2 presets use production previews and bounded controls at 1920x1080",
+        "status": "passed",
+        "durationMs": 1891,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-b3e4352779754110d402",
+        "file": "video-display.spec.ts",
+        "title": "V2 legacy capabilities migrate to balanced appearance without another wizard",
+        "status": "passed",
+        "durationMs": 439,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-b7c9cdf16a0cea3baee8",
+        "file": "video-display.spec.ts",
+        "title": "V2 profile survives resize, reload and failed metadata upload; local fields stay off the wire",
+        "status": "passed",
+        "durationMs": 1640,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-1a65f37a3990733e3ab9",
+        "file": "video-display.spec.ts",
+        "title": "V2 rejected storage retains settings during the tab without a repeated wizard",
+        "status": "passed",
+        "durationMs": 536,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "a56739071d3b2e851ca7-5d2303bee95e8b0a67a3",
+        "file": "video-display.spec.ts",
+        "title": "V2 touch result waits for release and fresh one/two/four contacts; mouse never passes",
+        "status": "passed",
+        "durationMs": 3677,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "6aad48763c72aef6a745-16c8710c4561dbe3a525",
+        "file": "video-library.spec.ts",
+        "title": "U01 sample login uses persistent teacher/classes/results on main routes",
+        "status": "passed",
+        "durationMs": 2769,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "6aad48763c72aef6a745-3e215280a5d84d62c99f",
+        "file": "video-library.spec.ts",
+        "title": "U02 local class identity, attendance and export persist; student UUID and network remain private",
+        "status": "passed",
+        "durationMs": 3872,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "6aad48763c72aef6a745-64fc71188357d05c8412",
+        "file": "video-library.spec.ts",
+        "title": "U03-U05 system session plays, recovers question3 automatically and stored model survives reload",
+        "status": "passed",
+        "durationMs": 7328,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "6aad48763c72aef6a745-7ffda605b5cf86514bf7",
+        "file": "video-library.spec.ts",
+        "title": "U08-U13 author five cards, reuse across classes, store revise and retain historical keys",
+        "status": "passed",
+        "durationMs": 9878,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "6aad48763c72aef6a745-364a1ee40b394a3ea81f",
+        "file": "video-library.spec.ts",
+        "title": "U10 teacher creates real interactive/writing collection and preview retains form",
+        "status": "passed",
+        "durationMs": 1775,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "6aad48763c72aef6a745-c7b467eb9633626590a5",
+        "file": "video-library.spec.ts",
+        "title": "U12 actual custom-card pixels are bound to frozen form, and rescan is idempotent",
+        "status": "passed",
+        "durationMs": 2735,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "6aad48763c72aef6a745-d8632d8838658a625687",
+        "file": "video-library.spec.ts",
+        "title": "U14 sample, another teacher, board and visitor cannot read each other's private data",
+        "status": "passed",
+        "durationMs": 2798,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "6aad48763c72aef6a745-5ee2a3dfd461f0386654",
+        "file": "video-library.spec.ts",
+        "title": "U15 two cached classes open offline; revised pending response syncs once and logout locks cache",
+        "status": "passed",
+        "durationMs": 3930,
+        "evidence": "candidate-browser-playwright.json"
+      },
+      {
+        "id": "6aad48763c72aef6a745-a8e6856b37dc03fd39fb",
+        "file": "video-library.spec.ts",
+        "title": "U16 teacher navigation fits phone and desktop with no runtime errors",
+        "status": "passed",
+        "durationMs": 3157,
+        "evidence": "candidate-browser-playwright.json"
+      }
+    ],
+    "qualification": "102 unique scenarios across one full run and targeted repairs; latest build additionally passed 26 candidate cases and 7 running-server smoke cases. This is not a single new 102-case run."
+  },
+  "reset": {
+    "guardChecks": 3,
+    "result": "PASS; data fingerprint unchanged",
+    "successReset": "NOT_RUN"
+  },
+  "trueBlockerCoding": null,
+  "notRun": [
+    "Hosted Supabase Auth/Realtime and staging migration/seed",
+    "Phone-native QR / shared HTTPS origin on two physical devices",
+    "Physical camera, printed card, photocopy and multitouch digitizer",
+    "Independent pedagogical/privacy review and pilot consent",
+    "Paid/live LLM (sample uses static fallback)"
+  ],
+  "server": {
+    "launcher": "pnpm video",
+    "managedSession": 37723,
+    "status": "RUNNING",
+    "teacherUrl": "http://127.0.0.1:3100/masuk",
+    "boardUrl": "http://127.0.0.1:3100/layar",
+    "evidence": "recording-server.log",
+    "http": [
+      {
+        "Route": "/masuk",
+        "Status": 200
+      },
+      {
+        "Route": "/layar",
+        "Status": 200
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+begin;
+create function pg_temp.ok(value boolean,label text) returns void language plpgsql as $$begin if value is distinct from true then raise exception 'FAILED: %',label;end if;raise notice 'PASS %',label;end$$;
+create temp table station_fixture(v jsonb);
+insert into station_fixture values('{"schemaVersion":1,"mode":"station","question":1,"taskEpoch":"44000000-0000-4000-8000-000000000090","groups":[{"id":"44000000-0000-4000-8000-000000000099","label":"Segitiga Biru","attendanceNumbers":[7]}],"station":{"round":1,"total":3,"phase":"work","deadlineAt":1800000000000,"reserveSeconds":0,"assignments":[{"groupId":"44000000-0000-4000-8000-000000000099","station":"Guru"}]}}');
+select pg_temp.ok(pn_private.valid_public_state(v),'station allowlist') from station_fixture;
+select pg_temp.ok(not pn_private.valid_public_state(jsonb_set(v,'{station,name}','"CANARY"')),'station identity denied') from station_fixture;
+select pg_temp.ok(not pn_private.valid_public_state(jsonb_set(v,'{station,assignments,0,level}','"D1"')),'nested level denied') from station_fixture;
+select pg_temp.ok(not pn_private.valid_public_state(jsonb_set(v,'{station,assignments,0,groupId}','"44000000-0000-4000-8000-000000000095"')),'unknown group denied') from station_fixture;
+select pg_temp.ok(not pn_private.valid_public_state(jsonb_set(v,'{station,deadlineAt}','"1800000000000"')),'numeric coercion denied') from station_fixture;
+select pg_temp.ok(not pn_private.valid_public_state(jsonb_set(v,'{station,round}','4')),'round past total denied') from station_fixture;
+select pg_temp.ok(not pn_private.valid_public_state(jsonb_set(jsonb_set(v,'{groups}',v->'groups'||'[{"id":"44000000-0000-4000-8000-000000000098","label":"Kotak Hijau","attendanceNumbers":[8]}]'),'{station,assignments}',v#>'{station,assignments}'||'[{"groupId":"44000000-0000-4000-8000-000000000098","station":"Guru"}]')),'teacher collision denied') from station_fixture;
+update station_fixture set v=jsonb_set(v,'{station,assignments,0,station}','"Papan"')||'{"roles":{"taskId":"44000000-0000-4000-8000-000000000088","pilots":[7],"navigators":[]}}';
+select pg_temp.ok(pn_private.valid_public_state(v),'public role accepted') from station_fixture;
+select pg_temp.ok(not pn_private.valid_public_state(jsonb_set(v,'{roles,pilots}','[8]')),'foreign group role denied') from station_fixture;
+select pg_temp.ok(not pn_private.valid_public_state(jsonb_set(v,'{roles,navigators}','[7]')),'duplicate roles denied') from station_fixture;
+select pg_temp.ok(not pn_private.valid_public_state(jsonb_set(v,'{roles,names}','["CANARY"]')),'role name denied') from station_fixture;
+select 'PASS 11 station/role SQL guards';
+rollback;
