@@ -5,8 +5,11 @@ software yang dapat diuji lokal. Gerbang upgrade awal serial **PASS, exit 0**;
 hasil historis ada di `artifacts/qa/ui-ai-v2/summary.json`. Koreksi UI terbaru
 berdasarkan dua screenshot pengguna diuji terarah seperti dicatat di bawah.
 Baseline HEAD `efcdd36b318cb84654a12f0dd698dd6bc0e05b94` (branch `work`).
-Perubahan workspace belum dipublikasikan atau di-deploy. M00–M17 dan jurnal lama
-dipertahankan. Bukti fixture lokal tidak menyatakan kesiapan production.
+Snapshot implementasi [5eef21f](https://github.com/IndraYuda13/papannalar/commit/5eef21f9c2aea0c9217c4fb376c44e6aaacf792e)
+berhasil dipush ke `main` pada 3 Oktober 2026 (WIB) atas permintaan pengguna.
+Belum di-deploy. M00–M17 dan jurnal lama dipertahankan. Bukti fixture lokal tidak
+menyatakan kesiapan production. Catatan publikasi lengkap ada pada PLAN bagian9.57;
+hasil CI sesudah push belum diperiksa.
 
 `SOURCE_FINDINGS.md` berasal dari arsip sebelum HEAD ini. Lokasi UI/provider/ledger
 dicocokkan dengan kode aktual; perbaikan timeout dua simulasi 500 sampel pada HEAD
