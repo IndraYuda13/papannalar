@@ -39,6 +39,7 @@ describe("PKG01 offline package", () => {
   );
   it.each([1, 2, 3])(
     "initial repeated top for grade %i uses different mathematical parameters",
+    { timeout: 30_000 },
     (grade) => {
       for (let seed = 0; seed < 500; seed++) {
         const pkg = buildPackage({

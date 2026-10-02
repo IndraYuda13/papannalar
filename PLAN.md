@@ -2379,3 +2379,16 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
   push ini. CI GitHub perlu diperiksa tersendiri; tidak mengklaim PASS sebelum hasil.
   TRUE BLOCKER publikasi: tidak ada. Next exact: periksa Actions dan lanjut rekaman
   sesuai VIDEO_HANDOFF; gate perangkat/hosted/pilot tetap seperti9.51.
+- CI awal pada GitHub gagal setelah install/format/typecheck/lint PASS:
+  1037 unit PASS,2 timeout default5s (500 paket grade3 dan500 kelas simulasi).
+  Batch simulasi bukan uji latency interaksi. Hanya dua tes batch diberi timeout30s;
+  seluruh500 sampel/assertion serta ambang coverage/latency lain tetap sama.
+- Commit lokal/remote `4cecd1a49e7047e6f706d13b9dc8ef81343eb567` telah cocok hash;
+  branch lokal `codex/github-publish` mengikuti origin/main, master dokumen lama
+  dipertahankan. Folder upgrade yang muncul selama publikasi tetap untracked;
+  tidak dicampur ke snapshot aplikasi yang sudah diuji.
+- Perbaikan timeout: `pnpm exec vitest run tests/unit/package.test.ts
+  tests/unit/turns-simulation.test.ts` **20/20 PASS,2 file,6.93s**; typecheck exit0.
+  Lint/format kedua file dan typecheck exit0; tes terarah ini tidak menggantikan
+  hasil CI penuh. Source/core/boundary tidak diubah, commit repair dipublikasikan
+  setelah validasi terarah; CI penuh menunggu hasil run baru.
