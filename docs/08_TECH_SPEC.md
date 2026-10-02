@@ -1,5 +1,17 @@
 # 08_TECH_SPEC - PapanNalar
 
+<!-- BEGIN PN_UI_AI_V2 -->
+## Spesifikasi tambahan AI dan rendering
+
+Untuk perubahan ini gunakan [konektor dua protokol](12_AI_COMPAT_SPEC.md) dan [blueprint UI](11_UI_BLUEPRINT.md).
+Provider native Anthropic yang hardcoded dimigrasikan melalui factory/profile;
+Chat Completions adalah adapter terpisah. Ledger Zod/store/RPC/schema SQL dan
+price reservation ikut berubah melalui migration baru; histori tidak ditimpa.
+Unknown usage bukan 0; key server-only; review dan data minimization tetap.
+3D lazy Client Component terpisah dari core/scanner, on-demand dengan poster
+fallback. Dokumen lama tetap referensi domain yang tidak diubah oleh addendum.
+<!-- END PN_UI_AI_V2 -->
+
 Versi: 1.0 | Tanggal penyusunan: 29 September 2026 | Bahasa produk: Indonesia
 Status: spesifikasi implementasi yang diusulkan, bukan bukti aplikasi sudah dibangun.
 Target awal: prototipe penyisihan kelas 7B. Target final: seluruh fitur wajib sumber.

@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
 });
 import type { ShellManifest } from "../../src/offline/cache-policy";
 
-test("manifest build hanya shell publik dan seluruh JS/CSS/font lokal", async ({
+test("manifest build hanya shell publik, JS belajar, CSS/font dan poster lokal", async ({
   page,
 }) => {
   const manifest: ShellManifest = JSON.parse(
@@ -43,6 +43,9 @@ test("manifest build hanya shell publik dan seluruh JS/CSS/font lokal", async ({
           "/icon.svg",
           "/omr-worker.js",
           "/fonts/atkinson-card.woff",
+          "/assets/pn-ui-v2/posters/learning-board.webp",
+          "/assets/pn-ui-v2/posters/balance-scale.webp",
+          "/assets/pn-ui-v2/posters/algebra-kit.webp",
         ].includes(path),
     ),
   ).toBe(true);
@@ -67,6 +70,10 @@ test("tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap
   await context.setOffline(true);
   const fresh = await context.newPage();
   const errors: string[] = [];
+  const failedPaths: string[] = [];
+  fresh.on("requestfailed", (request) =>
+    failedPaths.push(new URL(request.url()).pathname),
+  );
   fresh.on("pageerror", () => errors.push("pageerror"));
   fresh.on("console", (message) => {
     if (message.type() === "error") errors.push(message.text());
@@ -124,6 +131,11 @@ test("tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap
       "LOCAL_ONLY_OFFLINE_CANARY",
     ),
   ).toBe(false);
+  if (errors.length)
+    await test.info().attach("offline-request-failures", {
+      body: Buffer.from(JSON.stringify(failedPaths)),
+      contentType: "application/json",
+    });
   expect(errors).toEqual([]);
 });
 

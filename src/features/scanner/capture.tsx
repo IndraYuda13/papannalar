@@ -212,10 +212,7 @@ function CaptureSession({
     }, "omr");
   }
   return (
-    <section
-      aria-label="Pindai Kartu"
-      className="space-y-3 rounded-kartu border border-pn-ink-400/40 bg-white p-4"
-    >
+    <section aria-label="Pindai Kartu" className="studio-scanner space-y-3">
       <h3 className="flex items-center gap-2 text-lg font-bold">
         <ScanLine size={22} className="text-primary" aria-hidden />
         Pindai Kartu

@@ -14,6 +14,8 @@ import {
   type UsageStore,
   type Feature,
 } from "../../src/server/llm/usage";
+import { legacyProfile } from "../../src/server/llm/profile";
+import { parseProviderReply } from "../../src/server/llm/wire";
 import { withDeadline } from "../../src/server/llm/deadline";
 import { logUsage } from "../../src/server/llm/store";
 import {
@@ -108,14 +110,18 @@ describe("LLM01 Bisik privacy and output", () => {
   });
 });
 
+const fixtureReply = (value: unknown, inputTokens = 30, outputTokens = 20) =>
+  parseProviderReply(legacyProfile, {
+    model: LLM_MODEL,
+    stop_reason: "end_turn",
+    content: [{ type: "text", text: JSON.stringify(value) }],
+    usage: { input_tokens: inputTokens, output_tokens: outputTokens },
+  });
 const fake: TeachingAssistantProvider = {
   model: LLM_MODEL,
-  enrichPackage: async () => ({
-    value: answer,
-    inputTokens: 30,
-    outputTokens: 20,
-  }),
-  askBisik: async () => ({ value: answer, inputTokens: 30, outputTokens: 20 }),
+  profile: legacyProfile,
+  enrichPackage: async () => fixtureReply(answer),
+  askBisik: async () => fixtureReply(answer),
 };
 function setup(feature: Feature = "bisik") {
   const store: UsageStore = {
@@ -151,16 +157,27 @@ describe("bounded end-to-end request budget", () => {
     expect(input.call).toHaveBeenCalledTimes(1);
     expect(input.store.complete).toHaveBeenCalledTimes(1);
     const usage = input.log.mock.calls[0][0];
-    expect(Object.keys(usage).sort()).toEqual([
-      "durationMs",
-      "fallback",
-      "feature",
-      "inputTokens",
-      "model",
-      "outputTokens",
-      "promptVersion",
-      "timestamp",
-    ]);
+    expect(Object.keys(usage).sort()).toEqual(
+      [
+        "schemaVersion",
+        "feature",
+        "profileId",
+        "protocol",
+        "requestedModel",
+        "reportedModel",
+        "configVersion",
+        "promptVersion",
+        "inputTokens",
+        "outputTokens",
+        "cacheReadInputTokens",
+        "cacheCreationInputTokens",
+        "usageKnown",
+        "durationMs",
+        "fallback",
+        "errorCategory",
+        "timestamp",
+      ].sort(),
+    );
     const log = vi.spyOn(console, "info").mockImplementation(() => {});
     logUsage({ ...usage, question: "CANARY" });
     expect(log.mock.calls[0][0]).not.toMatch(
@@ -228,11 +245,7 @@ describe("bounded end-to-end request budget", () => {
   });
   it("malformed provider and provider failure fall back, one call each", async () => {
     const invalid = setup();
-    invalid.call.mockResolvedValue({
-      value: { answer: "bad" },
-      inputTokens: 10,
-      outputTokens: 1,
-    });
+    invalid.call.mockResolvedValue(fixtureReply({ answer: "bad" }, 10, 1));
     expect(await runAssistant(invalid)).toEqual({
       value: null,
       reason: "invalid",

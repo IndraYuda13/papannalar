@@ -31,6 +31,6 @@ export function jakartaDate(now = new Date()) {
   return `${get("year")}-${get("month")}-${get("day")}`;
 }
 export const field =
-  "mt-1 min-h-12 w-full rounded-input border border-pn-ink-400 bg-white px-3 py-2 font-normal";
+  "studio-field mt-1 min-h-12 w-full rounded-input border border-pn-ink-400 bg-white px-3 py-2 font-normal";
 export const panel =
-  "space-y-4 rounded-kartu border border-pn-ink-400/30 bg-card p-4 sm:p-6";
+  "studio-panel space-y-4 rounded-kartu border border-pn-ink-400/30 bg-card p-4 sm:p-6";

@@ -35,7 +35,9 @@
   --accent: var(--pn-teal-100);
   --accent-foreground: var(--pn-ink-900);
   --destructive: var(--pn-bahaya);
-  --border: var(--pn-ink-400);
+  --pn-line: #d3ded8;
+  --pn-shadow: 0 2px 8px #14212b06;
+  --border: var(--pn-line);
   --input: var(--pn-ink-400);
   --ring: var(--pn-teal-700);
   --radius: 0.75rem;

@@ -1,5 +1,15 @@
 # UX dan Layar
 
+<!-- BEGIN PN_UI_AI_V2 -->
+## Pembaruan seluruh route dan state
+
+Gunakan [peta halaman dan motion](11_UI_BLUEPRINT.md) serta [tes Q01-Q10](13_EXECUTION_QA.md).
+Perubahan mencakup masuk, beranda, kelas, editor, asesmen, hasil, controller,
+latihan dan seluruh mode layar. QR/profil/reconnect/state lama tidak boleh hilang.
+Library 3D tidak masuk scanner; fallback, reduced motion, keyboard dan status
+belum tersinkron tetap bekerja. Ini arah baru, bukan laporan usability guru.
+<!-- END PN_UI_AI_V2 -->
+
 ## Ringkasan
 
 PapanNalar punya tiga permukaan, dan siswa berhadapan dengan dua: papan interaktif yang mereka lihat dan sentuh secara bergiliran, dan Kartu Nalar di tangan (kelas 1 sampai 3 menjawab lisan). Aplikasi Guru di HP adalah satu-satunya tempat nama, level, dan saran tampil.

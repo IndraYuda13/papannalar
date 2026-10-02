@@ -1,0 +1,313 @@
+{
+  "baselineHead": "efcdd36b318cb84654a12f0dd698dd6bc0e05b94",
+  "branch": "work",
+  "candidate": "uncommitted workspace; baseline HEAD unchanged",
+  "implementationFingerprintSha256": "b62cc3ae73b684eddd9cadd9219c29b53cbe7a66d272a101edae8587f2bf47dd",
+  "buildId": "g4UViW8Y3PMr1kvczW2E4",
+  "routeInventory": [
+    "/",
+    "/masuk",
+    "/guru",
+    "/guru/kelas",
+    "/guru/kelas/[id]",
+    "/guru/soal",
+    "/guru/soal/[id]",
+    "/guru/soal/baru",
+    "/guru/mulai",
+    "/guru/asesmen",
+    "/guru/hasil/[id]",
+    "/guru/sesi/[id]",
+    "/guru/latihan",
+    "/demo",
+    "/layar"
+  ],
+  "implementationBatches": {
+    "U0": "DONE",
+    "U1": "DONE",
+    "U2": "DONE",
+    "U3": "DONE_LOCAL",
+    "U4": "DONE_LOCAL",
+    "U5": "DONE_LOCAL"
+  },
+  "verification": {
+    "command": "pnpm verify",
+    "startedAt": "2026-10-02T19:59:21.155Z",
+    "baselineHead": "efcdd36b318cb84654a12f0dd698dd6bc0e05b94",
+    "serial": true,
+    "completedObservedAt": "2026-10-02T20:17:44.689Z",
+    "exitCode": 0,
+    "unitTests": 1086,
+    "unitFiles": 70,
+    "integrationTests": 7,
+    "integrationFiles": 1,
+    "sqlRls": "PASS isolated PostgreSQL17.11 only",
+    "sqlGroupSummaries": [
+      "PASS 34 real PostgreSQL ownership/security assertions",
+      "23 library SQL assertions PASS",
+      "15 video connection SQL assertions PASS",
+      "PASS 11 station/role SQL guards",
+      "PASS 22 public tool SQL guards",
+      "PASS 6 opening/reflection SQL guards",
+      "PASS 8 balance SQL guards",
+      "PASS 20 graph SQL guards (five source descriptors)",
+      "PASS 22 board mode SQL guards",
+      "PASS 15 guidance SQL assertions",
+      "PASS 10 exit SQL guards",
+      "PASS 17 package presentation SQL guards",
+      "PASS 32 board capability/remote SQL assertions",
+      "PASS 27 LLM budget/privacy SQL assertions",
+      "PASS 28 dual-protocol profile/ledger SQL assertions",
+      "PASS 35 board content SQL assertions",
+      "PASS 25 sync SQL assertions",
+      "PASS 12 writer SQL assertions",
+      "PASS 9 history SQL assertions"
+    ],
+    "ledgerV1Assertions": 27,
+    "ledgerV2Assertions": 28,
+    "build": "PASS",
+    "e2e": {
+      "command": "pnpm test:e2e",
+      "startTime": "2026-10-02T20:01:56.468Z",
+      "duration": 925563.796,
+      "expected": 122,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "coverage": {
+      "lines": {
+        "total": 1937,
+        "covered": 1810,
+        "skipped": 0,
+        "pct": 93.44
+      },
+      "statements": {
+        "total": 2118,
+        "covered": 1958,
+        "skipped": 0,
+        "pct": 92.44
+      },
+      "functions": {
+        "total": 482,
+        "covered": 464,
+        "skipped": 0,
+        "pct": 96.26
+      },
+      "branches": {
+        "total": 2092,
+        "covered": 1830,
+        "skipped": 0,
+        "pct": 87.47
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "log": "/workspace/.papannalar-cloud/logs/ui-ai-final-verify.log",
+    "priorGateAttempts": [
+      {
+        "log": "/workspace/.papannalar-cloud/logs/ui-ai-final-verify-attempt1.log",
+        "exitCode": 1,
+        "stoppedAt": "format; tests not run"
+      },
+      {
+        "log": "/workspace/.papannalar-cloud/logs/ui-ai-final-verify-attempt2.log",
+        "exitCode": 1,
+        "stoppedAt": "lint; tests not run"
+      },
+      {
+        "log": "/workspace/.papannalar-cloud/logs/ui-ai-final-verify-attempt3.log",
+        "exitCode": 1,
+        "unitPassed": 1086,
+        "integrationPassed": 7,
+        "e2ePassed": 120,
+        "e2eFailed": 2,
+        "reason": "Editor question selection test + home primary CTA below mobile viewport; targeted repairs passed; not a passing gate"
+      },
+      {
+        "log": "/workspace/.papannalar-cloud/logs/ui-ai-final-verify-attempt4.log",
+        "exitCode": 1,
+        "unitPassed": 1086,
+        "integrationPassed": 7,
+        "e2ePassed": 120,
+        "e2eFailed": 2,
+        "reason": "Remote coordinates sampled before stable hit geometry; late QR fixture route.fetch leaked during teardown. Targeted repair3/3PASS; not a passing gate"
+      }
+    ]
+  },
+  "targeted": {
+    "referenceCodec": {
+      "command": "node --test <uploaded-kit>/reference/compat-wire.test.mjs",
+      "passed": 34,
+      "applicationIntegration": false
+    },
+    "compatHttpUnit": {
+      "command": "pnpm exec vitest run tests/unit/llm-compat.test.ts",
+      "passed": 35
+    },
+    "diagnosticPolicyAndCLI": {
+      "passed": 11,
+      "defaultVendorRequests": 0
+    },
+    "routeHttpLedger": {
+      "passed": 7,
+      "authAndReviewHooks": "explicit synthetic test hooks; real routes/adapters/HTTP/store/SQL",
+      "localDatabase": "pn_m01c_test loopback55432"
+    },
+    "uiBrowser": {
+      "finalResult": "covered by final122/122; raw batch failures and repairs retained in ui-ai-* logs"
+    },
+    "visualPolicy": {
+      "kind": "synthetic-browser-visual-policy",
+      "browser": "managed Chromium headless",
+      "buildId": "g4UViW8Y3PMr1kvczW2E4",
+      "initialDraws": 12,
+      "idleDraws": 12,
+      "hiddenDraws": 12,
+      "restoredDraws": 24,
+      "offscreen": true,
+      "offscreenDrawsBefore": 24,
+      "offscreenDrawsAfter": 24,
+      "reducedMotionDrawsBefore": 72,
+      "reducedMotionDrawsAfter": 72,
+      "lightCanvasCount": 0,
+      "visibilityFixture": "document.hidden is explicitly stubbed; physical tab/GPU power not measured",
+      "pass": true
+    }
+  },
+  "providers": [
+    {
+      "protocol": "openai-chat-completions",
+      "requestedFixtureModels": [
+        "configured-model",
+        "fixture-requested-alias"
+      ],
+      "reportedFixtureModels": [
+        "reported-snapshot-20261001",
+        "fixture-reported-snapshot"
+      ],
+      "nativeHttpLocal": "PASS",
+      "bisikAndEnrichmentWithLocalLedger": "PASS",
+      "live": "NOT_RUN"
+    },
+    {
+      "protocol": "anthropic-messages",
+      "requestedFixtureModels": [
+        "configured-model",
+        "fixture-requested-alias"
+      ],
+      "reportedFixtureModels": [
+        "reported-snapshot-20261001",
+        "fixture-reported-snapshot"
+      ],
+      "nativeHttpLocal": "PASS",
+      "bisikAndEnrichmentWithLocalLedger": "PASS",
+      "live": "NOT_RUN"
+    }
+  ],
+  "assets": {
+    "assets": [
+      {
+        "id": "learning-board",
+        "modelPath": "/assets/pn-ui-v2/models/learning-board.glb",
+        "posterPath": "/assets/pn-ui-v2/posters/learning-board.webp",
+        "modelBytes": 75540,
+        "posterBytes": 30606,
+        "modelSha256": "38d65350414ec296fd7c92daa2d3eb0ac8e183892b2a7e2b17ec77a79afad077",
+        "posterSha256": "e5da2837380ea0d78a6e8b79997086118714c9d026249ebac8be42bf5352f876",
+        "license": "CC0-1.0",
+        "sourceMatchesKit": true,
+        "externalResources": false,
+        "maxModelBytes": 500000
+      },
+      {
+        "id": "balance-scale",
+        "modelPath": "/assets/pn-ui-v2/models/balance-scale.glb",
+        "posterPath": "/assets/pn-ui-v2/posters/balance-scale.webp",
+        "modelBytes": 45456,
+        "posterBytes": 37962,
+        "modelSha256": "d13f1a465ad197404f9acbc0ca4438d9d1ac9940d22e3503979d782e3e6a7833",
+        "posterSha256": "bd84e6be280a09b31b7c46c4ca5ac906d2ba1d23fac825d8e6442f22d3f73a35",
+        "license": "CC0-1.0",
+        "sourceMatchesKit": true,
+        "externalResources": false,
+        "maxModelBytes": 500000
+      },
+      {
+        "id": "algebra-kit",
+        "modelPath": "/assets/pn-ui-v2/models/algebra-kit.glb",
+        "posterPath": "/assets/pn-ui-v2/posters/algebra-kit.webp",
+        "modelBytes": 43568,
+        "posterBytes": 37278,
+        "modelSha256": "02b748ce74dbbf48a73416c18a63e3ce2feb4acd95e58bf4872fd820022f5b6f",
+        "posterSha256": "6f6d4cbee4373f5d7d4bb4a81cf55469bfb66753d77650e56adadb0328fff55c",
+        "license": "CC0-1.0",
+        "sourceMatchesKit": true,
+        "externalResources": false,
+        "maxModelBytes": 500000
+      }
+    ],
+    "modelTotalBytes": 164564,
+    "posterTotalBytes": 105846,
+    "totalBytes": 270410,
+    "assetPurchaseCostUSD": 0,
+    "rendererLicense": "MIT (Three.js 0.186.1)",
+    "remoteAssetHosts": [],
+    "canvasLimit": 1,
+    "firstModelLimitBytes": 500000,
+    "allSourceFilesMatchKit": true
+  },
+  "bundle": {
+    "buildId": "g4UViW8Y3PMr1kvczW2E4",
+    "optionalVisualChunks": [
+      {
+        "path": "/_next/static/chunks/31jsqfowrcokd.js",
+        "bytes": 618939,
+        "gzipBytes": 154113
+      }
+    ],
+    "optionalVisualGzipBytes": 154113,
+    "budgetGzipBytes": 250000,
+    "excludedFromOfflinePrecache": true,
+    "precachedPosters": [
+      "/assets/pn-ui-v2/posters/learning-board.webp",
+      "/assets/pn-ui-v2/posters/balance-scale.webp",
+      "/assets/pn-ui-v2/posters/algebra-kit.webp"
+    ],
+    "incremental3DGzipBytes": 154113,
+    "totalSharedRouteBundleDelta": "NOT_MEASURED; no baseline build byte capture"
+  },
+  "costs": {
+    "paidVendorCalls": 0,
+    "vendorCostUSD": 0,
+    "assetPurchaseUSD": 0,
+    "ledgerPrices": "synthetic fixture prices; not live billing",
+    "infraCost": "not measured"
+  },
+  "preservation": {
+    "oldDocumentBodies": "PASS backup hashes + body-prefix check, doc-idempotency.json",
+    "oldJournal": "preserved; new addendum + journal entry only",
+    "oldMigrations001to037": "unchanged",
+    "coreMathContentAuthLocalDataSources": "unchanged",
+    "database": "no real/hosted DB changes; isolated local synthetic data; seed preserved",
+    "rlsAndSampleRestrictions": "PASS SQL/browser",
+    "realApprovalsAdded": 0
+  },
+  "externalBlocked": [
+    "Live vendor access/model credentials and authorized spend",
+    "Real content/privacy reviewer decisions and hosted price/cap provisioning",
+    "Hosted Supabase/Auth/Realtime/HTTPS",
+    "Native HP camera/QR and physical touch/digitizer/latency"
+  ],
+  "deployment": "NOT_RUN",
+  "hostedMigration": "NOT_RUN",
+  "run": [
+    "source /workspace/.papannalar-cloud/activate.sh",
+    "pnpm build",
+    "pnpm video"
+  ],
+  "handoff": "UI_AI_HANDOFF.md"
+}

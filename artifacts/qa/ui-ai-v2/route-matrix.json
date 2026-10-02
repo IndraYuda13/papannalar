@@ -1,0 +1,277 @@
+{
+  "baselineHead": "efcdd36b318cb84654a12f0dd698dd6bc0e05b94",
+  "buildId": "g4UViW8Y3PMr1kvczW2E4",
+  "routes": [
+    {
+      "route": "/",
+      "change": "Redirect tetap ke beranda yang ditata ulang",
+      "before": {
+        "http": 200,
+        "heading": "Siap belajar hari ini?",
+        "screenshot": "before/00.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Siap belajar hari ini?",
+        "overflow": false,
+        "screenshot": "after/00.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/masuk",
+      "change": "Split masuk, form mobile-first, poster + opt-in scene",
+      "before": {
+        "http": 200,
+        "heading": "Masuk tanpa kata sandi",
+        "screenshot": "before/01.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Masuk tanpa kata sandi",
+        "overflow": false,
+        "screenshot": "after/01.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru",
+      "change": "Sesi aktif lebih dahulu dan Jelajahi alat",
+      "before": {
+        "http": 200,
+        "heading": "Siap belajar hari ini?",
+        "screenshot": "before/02.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Siap belajar hari ini?",
+        "overflow": false,
+        "screenshot": "after/02.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru/kelas",
+      "change": "Daftar kelas, pencarian, empty state",
+      "before": {
+        "http": 200,
+        "heading": "Kelas",
+        "screenshot": "before/03.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Kelas",
+        "overflow": false,
+        "screenshot": "after/03.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru/kelas/[id]",
+      "change": "Konteks kelas, roster dan retry",
+      "before": {
+        "http": 200,
+        "heading": "Kelas 7B",
+        "screenshot": "before/04.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Kelas 7B",
+        "overflow": false,
+        "screenshot": "after/04.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru/soal",
+      "change": "Tab/katalog/poster dan empty CTA",
+      "before": {
+        "http": 200,
+        "heading": "Soal & Presentasi",
+        "screenshot": "before/05.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Soal & Presentasi",
+        "overflow": false,
+        "screenshot": "after/05.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru/soal/[id]",
+      "change": "Navigator soal, form terpilih, preview/undo contoh",
+      "before": {
+        "http": 200,
+        "heading": "Mengenal Pecahan",
+        "screenshot": "before/06.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Mengenal Pecahan",
+        "overflow": false,
+        "screenshot": "after/06.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru/soal/baru",
+      "change": "Form baru konsisten dan navigator soal",
+      "before": {
+        "http": 200,
+        "heading": "Buat kumpulan soal",
+        "screenshot": "before/07.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Buat kumpulan soal",
+        "overflow": false,
+        "screenshot": "after/07.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru/mulai",
+      "change": "Tiga langkah + ringkasan pilihan",
+      "before": {
+        "http": 200,
+        "heading": "Mulai mengajar",
+        "screenshot": "before/08.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Mulai mengajar",
+        "overflow": false,
+        "screenshot": "after/08.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru/asesmen",
+      "change": "Filter/tab dan daftar hasil",
+      "before": {
+        "http": 200,
+        "heading": "Asesmen & Hasil",
+        "screenshot": "before/09.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Asesmen & Hasil",
+        "overflow": false,
+        "screenshot": "after/09.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru/hasil/[id]",
+      "change": "Ringkasan hasil aktual + expand roster",
+      "before": {
+        "http": 200,
+        "heading": "Hasil · Kelas 7C",
+        "screenshot": "before/10.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Hasil · Kelas 7C",
+        "overflow": false,
+        "screenshot": "after/10.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru/sesi/[id]",
+      "change": "Question-first controller + pairing/scan yang jelas",
+      "before": {
+        "http": 200,
+        "heading": "Latihan rekaman 1ee2b427",
+        "screenshot": "before/11.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Latihan rekaman 1ee2b427",
+        "overflow": false,
+        "screenshot": "after/11.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/guru/latihan",
+      "change": "Shell Studio bersama dengan adaptive workflow existing",
+      "before": {
+        "http": 200,
+        "heading": "Beranda",
+        "screenshot": "before/12.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Beranda",
+        "overflow": false,
+        "screenshot": "after/12.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/demo",
+      "change": "Header/panel dan label fixture",
+      "before": {
+        "http": 200,
+        "heading": "Demo lokal 7B",
+        "screenshot": "before/13.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Demo lokal 7B",
+        "overflow": false,
+        "screenshot": "after/13.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    },
+    {
+      "route": "/layar",
+      "change": "Idle dua kolom, QR/kode kontras; model soal/preset existing",
+      "before": {
+        "http": 200,
+        "heading": "Layar Kelas menunggu.",
+        "screenshot": "before/layar-idle.png"
+      },
+      "after": {
+        "http": 200,
+        "heading": "Layar Kelas menunggu.",
+        "overflow": false,
+        "screenshot": "after/layar-idle.png"
+      },
+      "status": "PASS_LOCAL",
+      "states": "normal + shared loading/error/offline; empty/retry tested in e2e/ui-ai-v2 and existing suites"
+    }
+  ],
+  "viewportTests": {
+    "teacher": [
+      360,
+      390,
+      1366
+    ],
+    "board": [
+      1280,
+      1366,
+      1920
+    ],
+    "textScale": "130%",
+    "physicalHardware": "NOT_RUN"
+  },
+  "runtimeErrors": [],
+  "engineOrGLBRequestsWithoutOptIn": []
+}

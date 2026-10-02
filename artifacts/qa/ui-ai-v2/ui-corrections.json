@@ -1,0 +1,388 @@
+{
+  "kind": "local-software-corrections-receipt",
+  "observedAt": "2026-10-02T21:13:35.276Z",
+  "head": "efcdd36b318cb84654a12f0dd698dd6bc0e05b94",
+  "branch": "work",
+  "buildId": "JJ8Ophp65UWCGJ7KT-ntf",
+  "sourceSha256": "d06a480ff4f3ef0c4ee5622edcf09bc8c611d649150cc1db32bac712816249e2",
+  "newestApplicationSourceModifiedAt": "2026-10-02T21:06:42.425Z",
+  "sourceUnchangedSinceBuildStarted": true,
+  "checks": [
+    {
+      "command": "pnpm format:check",
+      "exitCode": 0,
+      "status": "PASS",
+      "startedAt": "2026-10-02T21:07:23Z",
+      "completedAt": "2026-10-02T21:07:31Z",
+      "log": "/workspace/.papannalar-cloud/logs/ui-corrections-final-fit-format.log"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "status": "PASS",
+      "startedAt": "2026-10-02T21:07:31Z",
+      "completedAt": "2026-10-02T21:07:37Z",
+      "log": "/workspace/.papannalar-cloud/logs/ui-corrections-final-fit-typecheck.log"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "status": "PASS",
+      "startedAt": "2026-10-02T21:07:37Z",
+      "completedAt": "2026-10-02T21:07:54Z",
+      "log": "/workspace/.papannalar-cloud/logs/ui-corrections-final-fit-lint.log"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "status": "PASS",
+      "startedAt": "2026-10-02T21:07:54Z",
+      "completedAt": "2026-10-02T21:08:03Z",
+      "log": "/workspace/.papannalar-cloud/logs/ui-corrections-final-fit-build.log"
+    },
+    {
+      "command": "pnpm exec playwright test tests/e2e/ui-ai-v2.spec.ts tests/e2e/ui-polish-editor.spec.ts tests/e2e/video-library.spec.ts tests/e2e/offline.spec.ts --grep 'U2|U1 |Polish T01|Polish T03|U08-U13|U16|tab baru offline' --reporter=list,json",
+      "exitCode": 0,
+      "status": "PASS",
+      "startedAt": "2026-10-02T21:08:03Z",
+      "completedAt": "2026-10-02T21:09:31Z",
+      "log": "/workspace/.papannalar-cloud/logs/ui-corrections-final-fit-e2e.log"
+    }
+  ],
+  "browser": {
+    "startTime": "2026-10-02T21:08:04.947Z",
+    "duration": 86657.824,
+    "expected": 21,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0,
+    "workers": 1,
+    "retries": 0,
+    "scope": "targeted UI, editor, pairing, scanner and offline regressions"
+  },
+  "beforeAfter": {
+    "beforeBuildId": "g4UViW8Y3PMr1kvczW2E4",
+    "afterBuildId": "JJ8Ophp65UWCGJ7KT-ntf",
+    "login": {
+      "before": {
+        "scene": "poster",
+        "captions": 1,
+        "modeButtons": 1,
+        "overflow": false
+      },
+      "after": {
+        "scene": "3d",
+        "captions": 0,
+        "modeButtons": 0,
+        "overflow": false
+      }
+    },
+    "questionNavigator": {
+      "maximumOverflowBeforePx": 20,
+      "maximumOverflowAfterPx": 0,
+      "widths": [
+        360,
+        390,
+        1024,
+        1280,
+        1366
+      ],
+      "textScalePercent": [
+        100,
+        130
+      ],
+      "minimumTouchTargetPx": 48,
+      "documentOverflow": false
+    },
+    "runtimeErrors": [],
+    "measurements": "corrections/{before,after}/metrics.json"
+  },
+  "blender": {
+    "tool": "Blender",
+    "version": "4.3.2",
+    "renderEngine": "Cycles CPU",
+    "samples": 96,
+    "denoising": false,
+    "posterSize": [
+      720,
+      540
+    ],
+    "license": "CC0-1.0",
+    "externalAssetDownloads": 0,
+    "models": [
+      {
+        "id": "learning-board",
+        "bytes": 68160,
+        "triangles": 4260,
+        "meshes": 12,
+        "sha256": "94cabd59012543917201e80c50fd215adc6311536513a67ebabae96777827112",
+        "sourceSha256": "38d65350414ec296fd7c92daa2d3eb0ac8e183892b2a7e2b17ec77a79afad077",
+        "blendFile": "design/pn-ui-v2/learning-board.blend",
+        "dimensionsBlenderZUp": [
+          2.9,
+          1.45,
+          2.815
+        ]
+      },
+      {
+        "id": "balance-scale",
+        "bytes": 121472,
+        "triangles": 8196,
+        "meshes": 12,
+        "sha256": "35b5ea5b3b7b0d5c29d2e7de5d3e8d30a7c1ac50640c13ddd1bb113ddc748a1c",
+        "sourceSha256": "d13f1a465ad197404f9acbc0ca4438d9d1ac9940d22e3503979d782e3e6a7833",
+        "blendFile": "design/pn-ui-v2/balance-scale.blend",
+        "dimensionsBlenderZUp": [
+          3.2,
+          1.15,
+          2.005
+        ]
+      },
+      {
+        "id": "algebra-kit",
+        "bytes": 55672,
+        "triangles": 3360,
+        "meshes": 9,
+        "sha256": "0bbc295d95e8254cf85e19418e8fcc29e07b9c04d4fbb96873c60d5c9dcc4e65",
+        "sourceSha256": "02b748ce74dbbf48a73416c18a63e3ce2feb4acd95e58bf4872fd820022f5b6f",
+        "blendFile": "design/pn-ui-v2/algebra-kit.blend",
+        "dimensionsBlenderZUp": [
+          2.85,
+          2.15,
+          1.005
+        ]
+      }
+    ]
+  },
+  "assetBudget": {
+    "buildId": "JJ8Ophp65UWCGJ7KT-ntf",
+    "authoring": {
+      "tool": "Blender",
+      "version": "4.3.2",
+      "renderEngine": "Cycles CPU",
+      "script": "scripts/refine-ui-assets.py",
+      "posterEncoder": "scripts/encode-ui-posters.py",
+      "originals": "design/pn-ui-v2/originals/",
+      "paidApiCalls": 0,
+      "license": "CC0-1.0"
+    },
+    "assets": [
+      {
+        "id": "learning-board",
+        "modelPath": "/assets/pn-ui-v2/models/learning-board.glb",
+        "posterPath": "/assets/pn-ui-v2/posters/learning-board.webp",
+        "modelBytes": 68160,
+        "posterBytes": 116794,
+        "modelSha256": "94cabd59012543917201e80c50fd215adc6311536513a67ebabae96777827112",
+        "posterSha256": "ebf1724d67628e6bcd46e58760c7fbdaa34c2a65bfec4e720f763e2772e88766",
+        "license": "CC0-1.0",
+        "sourceMatchesKit": false,
+        "derivedFromSuppliedKit": true,
+        "originalSourceSha256": "38d65350414ec296fd7c92daa2d3eb0ac8e183892b2a7e2b17ec77a79afad077",
+        "preservedOriginalsMatchKit": true,
+        "blendFile": "design/pn-ui-v2/learning-board.blend",
+        "blendBytes": 148783,
+        "triangles": 4260,
+        "externalResources": false,
+        "maxModelBytes": 500000
+      },
+      {
+        "id": "balance-scale",
+        "modelPath": "/assets/pn-ui-v2/models/balance-scale.glb",
+        "posterPath": "/assets/pn-ui-v2/posters/balance-scale.webp",
+        "modelBytes": 121472,
+        "posterBytes": 139374,
+        "modelSha256": "35b5ea5b3b7b0d5c29d2e7de5d3e8d30a7c1ac50640c13ddd1bb113ddc748a1c",
+        "posterSha256": "7bab1ed1df0d69c59fab290ca58c589991b9f107f768393e82b66b22f51b8b69",
+        "license": "CC0-1.0",
+        "sourceMatchesKit": false,
+        "derivedFromSuppliedKit": true,
+        "originalSourceSha256": "d13f1a465ad197404f9acbc0ca4438d9d1ac9940d22e3503979d782e3e6a7833",
+        "preservedOriginalsMatchKit": true,
+        "blendFile": "design/pn-ui-v2/balance-scale.blend",
+        "blendBytes": 159097,
+        "triangles": 8196,
+        "externalResources": false,
+        "maxModelBytes": 500000
+      },
+      {
+        "id": "algebra-kit",
+        "modelPath": "/assets/pn-ui-v2/models/algebra-kit.glb",
+        "posterPath": "/assets/pn-ui-v2/posters/algebra-kit.webp",
+        "modelBytes": 55672,
+        "posterBytes": 85140,
+        "modelSha256": "0bbc295d95e8254cf85e19418e8fcc29e07b9c04d4fbb96873c60d5c9dcc4e65",
+        "posterSha256": "3813613c0ffea0f22c96eb0d9d20e2a916438bc0b2c4754b103a6b64b76c49a5",
+        "license": "CC0-1.0",
+        "sourceMatchesKit": false,
+        "derivedFromSuppliedKit": true,
+        "originalSourceSha256": "02b748ce74dbbf48a73416c18a63e3ce2feb4acd95e58bf4872fd820022f5b6f",
+        "preservedOriginalsMatchKit": true,
+        "blendFile": "design/pn-ui-v2/algebra-kit.blend",
+        "blendBytes": 134096,
+        "triangles": 3360,
+        "externalResources": false,
+        "maxModelBytes": 500000
+      }
+    ],
+    "modelTotalBytes": 245304,
+    "posterTotalBytes": 341308,
+    "assetPurchaseCostUSD": 0,
+    "rendererLicense": "MIT (Three.js 0.186.1)",
+    "remoteAssetHosts": [],
+    "canvasLimit": 1,
+    "firstModelLimitBytes": 500000,
+    "allSourceFilesMatchKit": false,
+    "allPreservedOriginalsMatchKit": true,
+    "totalBytes": 586612
+  },
+  "optionalVisualBundle": {
+    "buildId": "JJ8Ophp65UWCGJ7KT-ntf",
+    "optionalVisualChunks": [
+      {
+        "path": "/_next/static/chunks/04k5u0w-m-_mq.js",
+        "bytes": 619413,
+        "gzipBytes": 154313
+      }
+    ],
+    "optionalVisualGzipBytes": 154313,
+    "budgetGzipBytes": 250000,
+    "excludedFromOfflinePrecache": true,
+    "precachedPosters": [
+      "/assets/pn-ui-v2/posters/learning-board.webp",
+      "/assets/pn-ui-v2/posters/balance-scale.webp",
+      "/assets/pn-ui-v2/posters/algebra-kit.webp"
+    ]
+  },
+  "renderPolicy": {
+    "kind": "synthetic-browser-visual-policy",
+    "browser": "managed Chromium headless",
+    "buildId": "JJ8Ophp65UWCGJ7KT-ntf",
+    "initialDraws": 105,
+    "idleDraws": 105,
+    "hiddenDraws": 105,
+    "restoredDraws": 117,
+    "offscreen": true,
+    "offscreenDrawsBefore": 117,
+    "offscreenDrawsAfter": 117,
+    "reducedMotionDrawsBefore": 165,
+    "reducedMotionDrawsAfter": 165,
+    "lightCanvasCount": 0,
+    "visibilityFixture": "document.hidden is explicitly stubbed; physical tab/GPU power not measured",
+    "pass": true
+  },
+  "preservation": {
+    "documentBodies": 9,
+    "addendumMarkers": "one per file; unchanged dry run",
+    "protectedMathContentLocalAuthReviewAnd37OldMigrations": "unchanged"
+  },
+  "historicalFullVerification": {
+    "buildId": "g4UViW8Y3PMr1kvczW2E4",
+    "command": "pnpm verify",
+    "exitCode": 0,
+    "unit": 1086,
+    "integration": 7,
+    "e2e": 122,
+    "evidence": "summary.json",
+    "rerunForLatestVisualCorrections": false
+  },
+  "priorCorrectionCandidates": [
+    {
+      "buildId": "UoI1Yvm5SQ70SRXgQDM8A",
+      "targetedPass": 21
+    },
+    {
+      "buildId": "IkhBHkmpfpUgukitM_cjf",
+      "targetedPass": 21,
+      "reasonForNewCandidate": "Visual review found excessive camera padding; adjusted framing and retested."
+    }
+  ],
+  "costs": {
+    "paidApiCalls": 0,
+    "assetPurchaseUSD": 0,
+    "infrastructureCost": "NOT_MEASURED"
+  },
+  "limitations": {
+    "liveAi": "NOT_RUN; both native protocols were exercised on local HTTP fixtures and real PostgreSQL in the earlier upgrade gate",
+    "hostedDeployment": "NOT_RUN",
+    "realDatabaseMigration": "NOT_RUN",
+    "physicalDevices": "NOT_RUN",
+    "humanReviewOrPilotApproval": "NOT_GRANTED"
+  },
+  "screenshots": {
+    "login": "corrections/after/login.png",
+    "editorDesktop": "corrections/after/editor-1366.png",
+    "editorPhone": "corrections/after/editor-390.png",
+    "webglModels": [
+      "corrections/after/learning-board-webgl.png",
+      "corrections/after/balance-scale-webgl.png",
+      "corrections/after/algebra-kit-webgl.png"
+    ]
+  },
+  "authoringVerification": {
+    "blender": {
+      "command": "blender --background --factory-startup --python-exit-code 1 --python scripts/refine-ui-assets.py",
+      "exitCode": 0,
+      "log": "/workspace/.papannalar-cloud/logs/ui-blender-refine-final.log"
+    },
+    "posterEncoder": {
+      "command": "python3 scripts/encode-ui-posters.py",
+      "status": "PASS; all three outputs and hashes audited"
+    },
+    "priorAttempt": {
+      "status": "FAILED",
+      "reason": "System Blender lacks OpenImageDenoise; rerendered with 96 CPU samples and denoising disabled.",
+      "log": "/workspace/.papannalar-cloud/logs/ui-blender-refine.log"
+    }
+  },
+  "savedEnvironmentConfiguration": {
+    "draftStatus": "saved",
+    "field": "start_skill",
+    "installScript": "preserved",
+    "published": false,
+    "freshTaskRestoration": "NOT_RUN"
+  },
+  "serverCheck": {
+    "checkedAt": "2026-10-02T21:14:11.394Z",
+    "origin": "http://127.0.0.1:3100",
+    "buildId": "JJ8Ophp65UWCGJ7KT-ntf",
+    "routes": [
+      {
+        "route": "/masuk",
+        "httpStatus": 200,
+        "location": null,
+        "authenticated": false,
+        "expectedContent": true
+      },
+      {
+        "route": "/guru",
+        "httpStatus": 307,
+        "location": "/masuk",
+        "authenticated": false,
+        "expectedContent": null
+      },
+      {
+        "route": "/layar",
+        "httpStatus": 200,
+        "location": null,
+        "authenticated": false,
+        "expectedContent": true
+      },
+      {
+        "route": "/demo",
+        "httpStatus": 200,
+        "location": null,
+        "authenticated": false,
+        "expectedContent": true
+      }
+    ],
+    "provider": {
+      "origin": "http://127.0.0.1:54325",
+      "httpStatus": 200,
+      "kind": "loopback Auth/transport fixture; real isolated PostgreSQL"
+    },
+    "deployment": "NOT_RUN",
+    "persistentSeed": "existing dataset preserved (ui-corrections-final-fit-demo.log)",
+    "paidVendorCalls": 0
+  }
+}

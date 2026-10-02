@@ -6,6 +6,7 @@ import { useTeacher } from "@/features/guru/app-context";
 import { runSchema, publicLibraryItem } from "@/contracts/library";
 import { Button } from "@/ui/components/button";
 import { field, panel, libraryCall, jakartaDate } from "./client";
+import { PageHeader } from "@/ui/components/studio";
 import { LibraryItemView } from "./item-view";
 export function StartLesson({
   classId = "",
@@ -77,11 +78,16 @@ export function StartLesson({
   }
   return (
     <div className="space-y-5">
-      <h1 className="text-[28px] font-extrabold">
-        {mode === "teach" ? "Mulai mengajar" : "Buat asesmen"}
-      </h1>
-      <section className={panel}>
+      <PageHeader
+        eyebrow="Siapkan sesi"
+        title={mode === "teach" ? "Mulai mengajar" : "Buat asesmen"}
+        description="Pilih kelas dan materi. Sesi yang sudah berjalan dapat dilanjutkan."
+      />
+      <section className={`${panel} studio-start-form`}>
         <label className="block">
+          <span className="studio-step" aria-hidden>
+            1
+          </span>{" "}
           Kelas
           <select
             className={field}
@@ -105,7 +111,11 @@ export function StartLesson({
             required
           />
         </label>
-        <div role="tablist" className="flex gap-2">
+        <div
+          role="tablist"
+          aria-label="Sumber soal"
+          className="studio-tabs flex gap-2"
+        >
           {(["system", "teacher"] as const).map((t) => (
             <Button
               key={t}
@@ -119,6 +129,9 @@ export function StartLesson({
           ))}
         </div>
         <label className="block">
+          <span className="studio-step" aria-hidden>
+            2
+          </span>{" "}
           Kumpulan soal
           <select
             className={field}
@@ -146,7 +159,11 @@ export function StartLesson({
         )}
         {selected && (
           <>
-            <p>
+            <p className="studio-start-summary">
+              <span className="studio-step" aria-hidden>
+                3
+              </span>{" "}
+              {classes.find((c) => c.id === cls)?.label} ·{" "}
               {selected.document.items.length} soal ·{" "}
               {selected.document.kind === "cards"
                 ? "Kartu Nalar"

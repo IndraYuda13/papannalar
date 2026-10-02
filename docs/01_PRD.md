@@ -1,5 +1,16 @@
 # PRD PapanNalar
 
+<!-- BEGIN PN_UI_AI_V2 -->
+## Addendum kebutuhan yang berlaku untuk upgrade ini
+
+Baca [PRD UI/AI v2](10_PRD_UI_AI_V2.md) untuk acceptance UI-01..UI-05 dan AI-01..AI-06.
+Ini perubahan resmi yang diminta pengguna: UI seluruh route, motion terarah,
+3D pendukung dengan fallback, serta OpenAI Chat Completions dan Anthropic Messages
+dengan profile/model/base URL konfigurabel. Batas fitur matematika, nama lokal,
+versi soal, review, data contoh dan hasil tetap berlaku. Konflik visual/provider
+yang spesifik mengikuti addendum; kebutuhan lain pada PRD ini tetap sah.
+<!-- END PN_UI_AI_V2 -->
+
 ## 1. Latar dan pernyataan masalah
 
 **Pernyataan masalah:** guru yang mengajar matematika, dari SD kelas 1 sampai SMA, menghadapi satu kelas yang kemampuan siswanya terpaut beberapa tingkat kelas. Tidak ada cara cepat untuk mengetahui level tiap siswa dan mengajar sesuai level itu, sehingga siswa yang tertinggal terus tertinggal dan kesenjangannya terbawa dari SD ke SMP lalu ke SMA. Di saat yang sama, papan interaktif yang sudah dikirim ke sekolah baru dipakai seperti proyektor.

@@ -12,7 +12,8 @@ import { libraryCache } from "@/local/library";
 import { createNameRepository } from "@/local/names";
 import { Button } from "@/ui/components/button";
 import { mathText } from "@/features/library/item-view";
-import { ClipboardCheck, FileCheck2 } from "lucide-react";
+import { PageHeader, StateNotice } from "@/ui/components/studio";
+import { FileCheck2 } from "lucide-react";
 export function AssessmentsPage() {
   const { state, classes } = useTeacher(),
     [tab, setTab] = useState<"sessions" | "results">("sessions"),
@@ -31,17 +32,21 @@ export function AssessmentsPage() {
   );
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="flex items-center gap-3 text-[28px] font-extrabold">
-          <ClipboardCheck size={28} className="text-primary" aria-hidden />
-          Asesmen & Hasil
-        </h1>
-        <Button asChild>
-          <Link href="/guru/mulai?mode=assessment">Buat asesmen</Link>
-        </Button>
-      </div>
-      <p>Periksa jawaban siswa dan lihat hasilnya.</p>
-      <div role="tablist" className="flex gap-2">
+      <PageHeader
+        eyebrow="Dari jawaban ke langkah berikutnya"
+        title="Asesmen & Hasil"
+        description="Periksa jawaban siswa dan lihat hasilnya."
+        actions={
+          <Button asChild>
+            <Link href="/guru/mulai?mode=assessment">Buat asesmen</Link>
+          </Button>
+        }
+      />
+      <div
+        role="tablist"
+        aria-label="Asesmen dan hasil"
+        className="studio-tabs flex gap-2"
+      >
         <Button
           role="tab"
           aria-selected={tab === "sessions"}
@@ -59,7 +64,7 @@ export function AssessmentsPage() {
           Hasil
         </Button>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="studio-filter grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <label>
           Kelas
           <select
@@ -111,7 +116,7 @@ export function AssessmentsPage() {
           />
         </label>
       </div>
-      <ul className="space-y-3">
+      <ul className="studio-row-list">
         {runs.map((r) => (
           <li key={r.id}>
             <Link
@@ -120,7 +125,7 @@ export function AssessmentsPage() {
                   ? `/guru/sesi/${r.id}`
                   : `/guru/hasil/${r.id}`
               }
-              className={`${panel} flex flex-wrap items-center justify-between gap-3`}
+              className="studio-row justify-between"
             >
               <span>
                 <b>
@@ -180,7 +185,18 @@ export function ResultPage({ id }: { id: string }) {
     const t = setTimeout(() => void load(), 0);
     return () => clearTimeout(t);
   }, [load]);
-  if (!detail) return <p role="status">{message || "Memuat hasil…"}</p>;
+  if (!detail)
+    return (
+      <StateNotice
+        kind={message ? "error" : "loading"}
+        title={message || "Memuat hasil…"}
+        action={
+          message ? (
+            <Button onClick={() => void load()}>Coba lagi</Button>
+          ) : undefined
+        }
+      />
+    );
   const { run, responses } = detail,
     student = run.roster.find((s) => s.id === selected),
     answer = responses.find((r) => r.studentId === selected);
@@ -192,12 +208,27 @@ export function ResultPage({ id }: { id: string }) {
       >
         ← Asesmen & Hasil
       </Link>
-      <h1 className="text-[28px] font-extrabold">
-        Hasil · Kelas {run.classLabel}
-      </h1>
-      <p>
-        {run.document.title} · {run.date.split("-").reverse().join("/")}
-      </p>
+      <PageHeader
+        eyebrow="Catatan pemahaman kelas"
+        title={`Hasil · Kelas ${run.classLabel}`}
+        description={`${run.document.title} · ${run.date.split("-").reverse().join("/")}`}
+      />
+      <div className="studio-result-summary" aria-label="Ringkasan hasil">
+        <div>
+          <b>
+            {responses.length}/{run.roster.length}
+          </b>
+          <span>Lembar masuk</span>
+        </div>
+        <div>
+          <b>{responses.filter((r) => r.status === "review").length}</b>
+          <span>Lembar perlu dicek</span>
+        </div>
+        <div>
+          <b>{run.document.items.length}</b>
+          <span>Soal · Versi {run.version}</span>
+        </div>
+      </div>
       {run.synthetic && (
         <p className="text-sm">Hasil contoh, bukan data siswa nyata.</p>
       )}
@@ -219,7 +250,8 @@ export function ResultPage({ id }: { id: string }) {
               <li key={s.id}>
                 <button
                   className="flex min-h-16 w-full items-center justify-between gap-2 text-left"
-                  onClick={() => setSelected(s.id)}
+                  aria-expanded={selected === s.id}
+                  onClick={() => setSelected(selected === s.id ? "" : s.id)}
                 >
                   <span>
                     <b className="mr-2">

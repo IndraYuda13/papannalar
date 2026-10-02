@@ -484,11 +484,23 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
         .getByLabel(`Pilihan ${c}`, { exact: true })
         .fill(String(i + 1 + n));
   }
+  // The v2 editor keeps all fields but displays the selected question.
+  await page.getByRole("button", { name: /^Soal 1/ }).click();
   await page
     .getByRole("button", { name: "Preview soal 1", exact: true })
     .click();
   await expect(page.getByLabel("Pratinjau soal")).toBeVisible();
   await page.getByRole("button", { name: "Tutup preview" }).click();
+  const firstQuestion = page.getByRole("article", {
+    name: "Soal 1",
+    exact: true,
+  });
+  await expect(
+    firstQuestion.getByRole("textbox", { name: "Pertanyaan", exact: true }),
+  ).toHaveValue("Soal 1: 1 + 1 = …");
+  await expect(
+    firstQuestion.getByLabel("Pilihan A", { exact: true }),
+  ).toHaveValue("2");
   await expect(page.getByLabel("Nama kumpulan", { exact: true })).toHaveValue(
     title,
   );

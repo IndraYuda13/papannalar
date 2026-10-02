@@ -1,0 +1,43 @@
+{
+  "checkedAt": "2026-10-02T21:14:11.394Z",
+  "origin": "http://127.0.0.1:3100",
+  "buildId": "JJ8Ophp65UWCGJ7KT-ntf",
+  "routes": [
+    {
+      "route": "/masuk",
+      "httpStatus": 200,
+      "location": null,
+      "authenticated": false,
+      "expectedContent": true
+    },
+    {
+      "route": "/guru",
+      "httpStatus": 307,
+      "location": "/masuk",
+      "authenticated": false,
+      "expectedContent": null
+    },
+    {
+      "route": "/layar",
+      "httpStatus": 200,
+      "location": null,
+      "authenticated": false,
+      "expectedContent": true
+    },
+    {
+      "route": "/demo",
+      "httpStatus": 200,
+      "location": null,
+      "authenticated": false,
+      "expectedContent": true
+    }
+  ],
+  "provider": {
+    "origin": "http://127.0.0.1:54325",
+    "httpStatus": 200,
+    "kind": "loopback Auth/transport fixture; real isolated PostgreSQL"
+  },
+  "deployment": "NOT_RUN",
+  "persistentSeed": "existing dataset preserved (ui-corrections-final-fit-demo.log)",
+  "paidVendorCalls": 0
+}

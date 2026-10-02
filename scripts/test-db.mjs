@@ -99,6 +99,12 @@ if (mode === "prepare") {
     await mkdir("artifacts/qa/M13", { recursive: true });
     await writeFile("artifacts/qa/M13/llm-sql.log", llm + "\n");
     console.log(llm);
+    const llmProfiles = sql(
+      await readFile("supabase/tests/llm-profiles.sql", "utf8"),
+    );
+    await mkdir("artifacts/qa/ui-ai-v2", { recursive: true });
+    await writeFile("artifacts/qa/ui-ai-v2/ledger-sql.log", llmProfiles + "\n");
+    console.log(llmProfiles);
     const vite = await createServer({
       configFile: false,
       server: { middlewareMode: true },

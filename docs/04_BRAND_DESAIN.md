@@ -1,5 +1,16 @@
 # Brand dan Desain
 
+<!-- BEGIN PN_UI_AI_V2 -->
+## Pembaruan desain visual
+
+[Blueprint UI](11_UI_BLUEPRINT.md) berlaku pada upgrade ini. Warna/font/nama PapanNalar tetap.
+Larangan 3D dekoratif dan gradient mutlak diubah menjadi penggunaan terbatas:
+scene matte ringan pada pengantar/katalog, kedalaman halus, motion bermakna.
+Model matematika tetap akurat dan mudah dibandingkan; tidak ada perspective
+distortion pada jawaban. No global scroll hijack, no effect yang menutupi soal.
+Ukuran adaptif mengikuti preset, hit-area dan uji viewport, bukan skala global.
+<!-- END PN_UI_AI_V2 -->
+
 ## 1. Nama, arti, dan tagline
 
 **PapanNalar** menggabungkan dua kata. *Papan* adalah papan interaktif dan papan tulis, pusat perhatian di kelas. *Nalar* adalah kemampuan bernalar yang menjadi inti numerasi, sekaligus menjaga jejak nama PindaiNalar.

@@ -1,0 +1,18 @@
+{
+  "buildId": "JJ8Ophp65UWCGJ7KT-ntf",
+  "optionalVisualChunks": [
+    {
+      "path": "/_next/static/chunks/04k5u0w-m-_mq.js",
+      "bytes": 619413,
+      "gzipBytes": 154313
+    }
+  ],
+  "optionalVisualGzipBytes": 154313,
+  "budgetGzipBytes": 250000,
+  "excludedFromOfflinePrecache": true,
+  "precachedPosters": [
+    "/assets/pn-ui-v2/posters/learning-board.webp",
+    "/assets/pn-ui-v2/posters/balance-scale.webp",
+    "/assets/pn-ui-v2/posters/algebra-kit.webp"
+  ]
+}

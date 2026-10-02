@@ -180,10 +180,10 @@ export function BisikControls({
   return (
     <div
       aria-label="Kendali Bisik"
-      className="min-w-0 space-y-3 [&_button]:w-full [&_button]:max-w-full"
+      className="studio-panel bg-white p-4 min-w-0 space-y-3 [&_button]:w-full [&_button]:max-w-full"
     >
       <Button disabled={busy} onClick={() => void ask()}>
-        Sesuaikan kartu Bisik online
+        Sesuaikan saran
       </Button>
       {busy && (
         <Button variant="outline" onClick={() => active.current?.abort()}>

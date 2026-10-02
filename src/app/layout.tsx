@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { OfflineBootstrap } from "@/ui/components/offline-bootstrap";
 import "./globals.css";
+import { VisualPreferencesProvider } from "@/ui/components/visual-preferences";
 
 export const metadata: Metadata = {
   title: { default: "PapanNalar", template: "%s | PapanNalar" },
@@ -14,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body>
-        {children}
+        <VisualPreferencesProvider>{children}</VisualPreferencesProvider>
         <OfflineBootstrap />
       </body>
     </html>

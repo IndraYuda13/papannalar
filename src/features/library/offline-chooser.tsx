@@ -5,6 +5,7 @@ import { libraryCache } from "@/local/library";
 import type { LibraryRun, LibraryResponse } from "@/contracts/library";
 import { SessionWorkspace } from "./session";
 import { field, panel } from "./client";
+import { StateNotice } from "@/ui/components/studio";
 import { Button } from "@/ui/components/button";
 type Detail = { run: LibraryRun; responses: LibraryResponse[] };
 export function OfflineChooser() {
@@ -65,10 +66,10 @@ export function OfflineChooser() {
         Buka sesi tersimpan
       </Button>
       {!cached.length && (
-        <p>
-          Belum ada sesi tersimpan. Buka materi dan asesmen saat online terlebih
-          dahulu.
-        </p>
+        <StateNotice title="Belum ada sesi tersimpan">
+          Buka materi dan asesmen saat online terlebih dahulu. Setelah itu, sesi
+          yang tersimpan dapat dibuka di perangkat ini.
+        </StateNotice>
       )}
     </section>
   );

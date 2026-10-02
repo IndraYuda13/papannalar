@@ -26,19 +26,25 @@ import {
   enrichmentInput,
   validateStories,
 } from "./enrichment";
-import { usageStore, logUsage, llmRpc } from "./store";
-import { runAssistant } from "./usage";
+import { usageStore, logUsage, llmRpc, profileReference } from "./store";
+import { BISIK_PRIVACY_REVIEW } from "./reviews";
+import { MISCONCEPTION_CODES } from "../../content/strategies/registry";
+import { runAssistant, usageMetadata } from "./usage";
 import { withDeadline } from "./deadline";
 import type { FallbackReason } from "../../contracts/bisik";
 function logStatic(
   feature: "bisik" | "enrichment",
-  model: string,
+  provider: ReturnType<typeof llmConfiguration>["provider"],
   start: number,
   reason: FallbackReason,
 ) {
   logUsage({
     feature,
-    model,
+    ...usageMetadata(provider),
+    usageKnown: false,
+    cacheReadInputTokens: null,
+    cacheCreationInputTokens: null,
+    errorCategory: null,
     promptVersion: feature === "bisik" ? "bisik-v1" : "enrichment-v1",
     inputTokens: null,
     outputTokens: null,
@@ -51,11 +57,53 @@ function logStatic(
 export async function llmStatus(request: NextRequest) {
   try {
     const ctx = authContext(request);
-    await requireTeacher(ctx);
+    const teacher = await requireTeacher(ctx);
     const cfg = llmConfiguration();
+    let budgetEnabled = false,
+      budgetReason: FallbackReason = "disabled";
+    if (
+      cfg.enabled &&
+      cfg.provider.profile &&
+      teacher.id !== process.env["SAMPLE_TEACHER_ID"]
+    ) {
+      try {
+        const value = await withDeadline(2000, request.signal, (signal) =>
+          llmRpc(
+            ctx.client,
+            {
+              action: "status",
+              schemaVersion: 2,
+              profile: profileReference(cfg.provider.profile!),
+            },
+            signal,
+          ),
+        );
+        const parsed = value as { allowed?: unknown; reason?: unknown };
+        budgetEnabled = parsed.allowed === true;
+        budgetReason = budgetEnabled
+          ? "none"
+          : parsed.reason === "budget"
+            ? "budget"
+            : "disabled";
+      } catch {
+        budgetReason = "unavailable";
+      }
+    }
     return ctx.finish(
       NextResponse.json(
-        llmStatusSchema.parse({ enabled: cfg.enabled, freeText: cfg.freeText }),
+        llmStatusSchema.parse({
+          enabled: cfg.enabled,
+          freeText: cfg.freeText && budgetEnabled,
+          configuration: cfg.configuration,
+          configured: cfg.enabled,
+          connectionTested: false,
+          contentEligible: [...MISCONCEPTION_CODES, "generic-error"].some(
+            (code) => approvedStrategy(code) !== null,
+          ),
+          privacyReviewed: BISIK_PRIVACY_REVIEW !== null,
+          budgetEnabled,
+          budgetReason,
+        }),
       ),
     );
   } catch (error) {
@@ -73,7 +121,7 @@ export async function bisikRequest(request: NextRequest) {
       const cfg = llmConfiguration(),
         strategy = approvedStrategy(input.code);
       const fallback = (reason: "privacy" | "disabled" | "unreviewed") => {
-        logStatic("bisik", cfg.provider.model, start, reason);
+        logStatic("bisik", cfg.provider, start, reason);
         return ctx.finish(
           NextResponse.json(
             bisikResponseSchema.parse({
@@ -103,12 +151,16 @@ export async function bisikRequest(request: NextRequest) {
         start,
         signal,
         provider: cfg.provider,
-        store: usageStore(ctx.client, {
-          requestId: input.requestId,
-          classId: input.classId,
-          scopeId: input.sessionId,
-          feature: "bisik",
-        }),
+        store: usageStore(
+          ctx.client,
+          {
+            requestId: input.requestId,
+            classId: input.classId,
+            scopeId: input.sessionId,
+            feature: "bisik",
+          },
+          cfg.provider.profile!,
+        ),
         call: (s) =>
           cfg.provider.askBisik(bisikInput(strategy, input.question), s),
         validate: (v) => validateBisik(v, [strategy.code]),
@@ -148,7 +200,7 @@ export async function enrichmentRequest(request: NextRequest) {
       }
       const cfg = llmConfiguration();
       const fallback = (reason: "disabled" | "unreviewed" | "frozen") => {
-        logStatic("enrichment", cfg.provider.model, start, reason);
+        logStatic("enrichment", cfg.provider, start, reason);
         return ctx.finish(
           NextResponse.json(
             enrichResponseSchema.parse({
@@ -176,12 +228,16 @@ export async function enrichmentRequest(request: NextRequest) {
         start,
         signal,
         provider: cfg.provider,
-        store: usageStore(ctx.client, {
-          requestId: input.requestId,
-          classId: pkg.classId,
-          scopeId: pkg.id,
-          feature: "enrichment",
-        }),
+        store: usageStore(
+          ctx.client,
+          {
+            requestId: input.requestId,
+            classId: pkg.classId,
+            scopeId: pkg.id,
+            feature: "enrichment",
+          },
+          cfg.provider.profile!,
+        ),
         call: (s) => cfg.provider.enrichPackage(enrichmentInput(slots), s),
         validate: (v) => validateStories(v, slots),
         log: logUsage,

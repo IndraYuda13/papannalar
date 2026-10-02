@@ -13,6 +13,32 @@ const manifest: ShellManifest = {
 const request = { method: "GET", mode: "navigate", rsc: false };
 
 describe("Cache shell hanya allowlist build", () => {
+  it("normalizes only the Next build icon hash, never private query strings", () => {
+    expect(
+      cacheTarget(
+        {
+          ...request,
+          mode: "cors",
+          url: origin + "/icon.svg?icon.3yiq978yr91_f.svg",
+        },
+        origin,
+        manifest,
+      ),
+    ).toBe("/icon.svg");
+    for (const query of [
+      "?student=CANARY",
+      "?icon.safe.svg&student=CANARY",
+      "?icon.safe.svg=CANARY",
+      "?other.svg",
+    ])
+      expect(
+        cacheTarget(
+          { ...request, mode: "cors", url: origin + "/icon.svg" + query },
+          origin,
+          manifest,
+        ),
+      ).toBeUndefined();
+  });
   it.each(["/", "/guru", "/layar"])(
     "navigasi %s punya fallback shell statis",
     (route) => {

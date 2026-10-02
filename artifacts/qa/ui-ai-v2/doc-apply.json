@@ -1,0 +1,60 @@
+{
+  "mode": "apply",
+  "applicationCodeChanged": false,
+  "results": [
+    {
+      "file": "AGENTS.md",
+      "status": "APPLIED",
+      "beforeSha256": "64292296a50d9346bd2f78defc6c6c0666b0330f70bd3220c3c4dcd70b7e24dd",
+      "afterSha256": "67dbe406bf49d48513a61e04266e182a6a5b58ec3d00a171f5d044a876d012af"
+    },
+    {
+      "file": "PLAN.md",
+      "status": "APPLIED",
+      "beforeSha256": "d3ad986cb83381aba5f663b9ae29a1986d33753da64e80d77cdd02b6c038f69d",
+      "afterSha256": "aabf34e8f95317fe214a4d7dbd7f1976794abac52d86c2a98c09dd9d08ef733e"
+    },
+    {
+      "file": "docs/00_RINGKASAN_RUBRIK.md",
+      "status": "APPLIED",
+      "beforeSha256": "f08b3a2210beede406e05cb7a7708458fd65e00ff31f47ef655fead46e6bf7d7",
+      "afterSha256": "7ab76594ad85c040c9b8b45bd833c6457d9b6f6642e2383328390d2ec0801731"
+    },
+    {
+      "file": "docs/01_PRD.md",
+      "status": "APPLIED",
+      "beforeSha256": "e48d0fcf779c53f5f41b67449fb03d71f9186fdb7166876a9525d6c5af57d654",
+      "afterSha256": "9b399163b23e229377b84efb1644dd8488584d29b2433bd9ab5737626d92388d"
+    },
+    {
+      "file": "docs/04_BRAND_DESAIN.md",
+      "status": "APPLIED",
+      "beforeSha256": "ba27e9b7a882b4bafd5db7dd12fa650ff771d6a7e051b6a033e5296a15075ed2",
+      "afterSha256": "d0c466125edab5f050ff3addcda7459fd4ea4976e78e285ec0802f2f0870dd78"
+    },
+    {
+      "file": "docs/05_UX_LAYAR.md",
+      "status": "APPLIED",
+      "beforeSha256": "b1ebb294f7dc991177c1a0fe66171f26809000889740ca87b7eb1a3e151bb10c",
+      "afterSha256": "f9a907a78f71614c0b03e764a5b5720e5bf37162d684d0086515d9a0e8274c16"
+    },
+    {
+      "file": "docs/06_RENCANA_BISNIS.md",
+      "status": "APPLIED",
+      "beforeSha256": "4bb3c4feea51ad11cf4ce42766e8510fdd62415a018ff329def8d9d8fddb7721",
+      "afterSha256": "35b2edc0f5a556503f1a71d16ddb1a8297fcf84edd361aa098f77d86d0323913"
+    },
+    {
+      "file": "docs/07_BUILD_QA_PITCH.md",
+      "status": "APPLIED",
+      "beforeSha256": "81f9f60a9451e058681baadb8cee1522a85339893176b73be68f4227fc3037d0",
+      "afterSha256": "b370ae710156f714019b039b561390ff9fac20f2979bcbe2740034c91aa196be"
+    },
+    {
+      "file": "docs/08_TECH_SPEC.md",
+      "status": "APPLIED",
+      "beforeSha256": "cc3753a2050c95e1290d0d82c636a4a8ea238d671782bc302e97fe48ce590503",
+      "afterSha256": "ac327cd8f3ea26f3bc15b9ac6153be7679a51e509af784706ed1119da81234a1"
+    }
+  ]
+}

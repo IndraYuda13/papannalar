@@ -496,30 +496,38 @@ export function BoardWorkspace() {
           </div>
         </BoardCapabilities>
       ) : (
-        <>
-          <h1 className="mb-6 text-[64px] leading-tight font-bold">
-            Layar Kelas menunggu.
-          </h1>
-          <p className="mb-8 text-[32px]">Belum ada sesi yang ditampilkan.</p>
-          {challenge?.pairingUrl && (
-            <PairingQrCode url={challenge.pairingUrl} />
-          )}
-          {challenge && (
-            <p
-              data-testid="pairing-code"
-              aria-label="Kode pasangan papan"
-              className="my-8 font-mono text-[96px] tracking-widest"
-            >
-              {challenge.code.slice(0, 3)} {challenge.code.slice(3)}
+        <section className="board-idle board-idle-grid">
+          <div>
+            <p className="studio-eyebrow">Belajar bersama dimulai di sini</p>
+            <h1 className="mb-6 text-[64px] leading-tight font-bold">
+              Layar Kelas menunggu.
+            </h1>
+            <p className="mb-8 text-[32px]">Belum ada sesi yang ditampilkan.</p>
+            <p role="status" className="mb-6">
+              {message}
             </p>
-          )}
-          <p role="status" className="mb-8 text-[32px]">
-            {message}
-          </p>
-          <Button size="board" variant="outline" onClick={() => void start()}>
-            Buat kode baru
-          </Button>
-        </>
+            <Button size="board" variant="outline" onClick={() => void start()}>
+              Buat kode baru
+            </Button>
+          </div>
+          <div className="board-idle-code">
+            {challenge?.pairingUrl && (
+              <PairingQrCode url={challenge.pairingUrl} />
+            )}
+            {challenge && (
+              <p
+                data-testid="pairing-code"
+                aria-label="Kode pasangan papan"
+                className="my-8 font-mono text-[96px] tracking-widest"
+              >
+                {challenge.code.slice(0, 3)} {challenge.code.slice(3)}
+              </p>
+            )}
+            <p className="text-sm text-muted-foreground">
+              Kode papan · masukkan dari sesi mengajar
+            </p>
+          </div>
+        </section>
       )}
     </div>
   );

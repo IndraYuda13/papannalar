@@ -30,6 +30,7 @@ import { ScanCapture } from "@/features/scanner/capture";
 import type { CardAnswer } from "@/cards/layouts/layout-v1";
 import type { CustomFormBinding } from "@/contracts/custom-form";
 import { field, panel, libraryCall } from "./client";
+import { StateNotice } from "@/ui/components/studio";
 import { LibraryItemView } from "./item-view";
 type Detail = { run: LibraryRun; responses: LibraryResponse[] };
 export function SessionPage({ id }: { id: string }) {
@@ -54,7 +55,18 @@ export function SessionPage({ id }: { id: string }) {
     const t = setTimeout(() => void load(), 0);
     return () => clearTimeout(t);
   }, [load]);
-  if (!detail) return <p role="status">{message || "Memuat sesi…"}</p>;
+  if (!detail)
+    return (
+      <StateNotice
+        kind={message ? "error" : "loading"}
+        title={message || "Memuat sesi…"}
+        action={
+          message ? (
+            <Button onClick={() => void load()}>Coba lagi</Button>
+          ) : undefined
+        }
+      />
+    );
   return <SessionWorkspace key={id} initial={detail} reload={load} />;
 }
 function projection(run: LibraryRun): PresentationState {
@@ -303,85 +315,98 @@ export function SessionWorkspace({
           {run.document.items.length}
         </p>
       </div>
-      {run.status === "active" ? (
-        <section className={panel} aria-label="Sambungan layar">
-          <h2 className="font-bold">
-            {transport.snapshot && transport.online
-              ? "Layar tersambung"
-              : "Sambungkan Layar"}
-          </h2>
-          <p role="status" className="text-sm">
-            {transport.connection?.transport === "offline"
-              ? "Koneksi terputus. Menyambungkan kembali…"
-              : transport.message ||
-                "Buka Layar Kelas di papan. Pindai QR atau masukkan kodenya."}
+      <div
+        className="studio-session-progress"
+        aria-label={`Soal ${run.position + 1} dari ${run.document.items.length}`}
+      >
+        {run.document.items.map((q, i) => (
+          <span key={q.id} data-current={i <= run.position} />
+        ))}
+      </div>
+      <div className="studio-session-grid">
+        {run.status === "active" ? (
+          <section
+            className={`${panel} studio-session-pairing`}
+            aria-label="Sambungan layar"
+          >
+            <h2 className="font-bold">
+              {transport.snapshot && transport.online
+                ? "Layar tersambung"
+                : "Sambungkan Layar"}
+            </h2>
+            <p role="status" className="text-sm">
+              {transport.connection?.transport === "offline"
+                ? "Koneksi terputus. Menyambungkan kembali…"
+                : transport.message ||
+                  "Buka Layar Kelas di papan. Pindai QR atau masukkan kodenya."}
+            </p>
+            <PairingCodeInput
+              onPair={transport.pair}
+              disabled={transport.busy || busy}
+            />
+            {transport.snapshot && (
+              <Button variant="outline" onClick={() => void transport.revoke()}>
+                Putuskan layar
+              </Button>
+            )}
+          </section>
+        ) : (
+          <p>
+            Sesi selesai. Anda masih bisa membuka hasil atau mencatat lembar
+            yang terlambat.
           </p>
-          <PairingCodeInput
-            onPair={transport.pair}
-            disabled={transport.busy || busy}
-          />
-          {transport.snapshot && (
-            <Button variant="outline" onClick={() => void transport.revoke()}>
-              Putuskan layar
+        )}
+        <section className={`${panel} studio-session-question`}>
+          <p className="text-lg font-semibold">{item.prompt}</p>
+          {item.kind === "card" && (
+            <>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {item.options.map((o, i) => (
+                  <li key={i}>
+                    {"ABCD"[i]}. {o}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-sm text-primary">
+                Kunci untuk guru: {item.key} · Baris kartu {run.position + 1}
+              </p>
+            </>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={busy || run.position === 0 || run.status !== "active"}
+              onClick={() => void move(run.position - 1)}
+            >
+              Sebelumnya
             </Button>
+            <Button
+              disabled={
+                busy ||
+                run.position === run.document.items.length - 1 ||
+                run.status !== "active"
+              }
+              onClick={() => void move(run.position + 1)}
+            >
+              Soal berikutnya
+            </Button>
+            <Button variant="outline" onClick={() => setPreview(!preview)}>
+              Preview papan
+            </Button>
+          </div>
+          {preview && (
+            <div data-library-preview className="rounded-input border p-3">
+              <LibraryItemView
+                item={publicLibraryItem(item)}
+                row={run.position + 1}
+              />
+            </div>
+          )}
+          {transport.snapshot && item.kind === "interactive" && (
+            <RemoteControls key={item.id} env={transport.snapshot.envelope} />
           )}
         </section>
-      ) : (
-        <p>
-          Sesi selesai. Anda masih bisa membuka hasil atau mencatat lembar yang
-          terlambat.
-        </p>
-      )}
-      <section className={panel}>
-        <p className="text-lg font-semibold">{item.prompt}</p>
-        {item.kind === "card" && (
-          <>
-            <ul className="grid gap-2 sm:grid-cols-2">
-              {item.options.map((o, i) => (
-                <li key={i}>
-                  {"ABCD"[i]}. {o}
-                </li>
-              ))}
-            </ul>
-            <p className="text-sm text-primary">
-              Kunci untuk guru: {item.key} · Baris kartu {run.position + 1}
-            </p>
-          </>
-        )}
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            disabled={busy || run.position === 0 || run.status !== "active"}
-            onClick={() => void move(run.position - 1)}
-          >
-            Sebelumnya
-          </Button>
-          <Button
-            disabled={
-              busy ||
-              run.position === run.document.items.length - 1 ||
-              run.status !== "active"
-            }
-            onClick={() => void move(run.position + 1)}
-          >
-            Soal berikutnya
-          </Button>
-          <Button variant="outline" onClick={() => setPreview(!preview)}>
-            Preview papan
-          </Button>
-        </div>
-        {preview && (
-          <div data-library-preview className="rounded-input border p-3">
-            <LibraryItemView
-              item={publicLibraryItem(item)}
-              row={run.position + 1}
-            />
-          </div>
-        )}
-        {transport.snapshot && item.kind === "interactive" && (
-          <RemoteControls key={item.id} env={transport.snapshot.envelope} />
-        )}
-      </section>
+      </div>
       {run.mode === "assessment" && (
         <section className={panel} aria-label="Lembar jawaban">
           <h2 className="text-xl font-bold">

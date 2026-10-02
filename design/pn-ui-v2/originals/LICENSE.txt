@@ -1,0 +1,14 @@
+PapanNalar UI AI v2 original asset pack
+
+All original geometry and rendered posters in this assets directory were generated
+specifically for this package, without incorporating downloaded third-party models,
+textures, fonts or trademark logos.
+
+To the extent possible under law, the contributor waives copyright and related
+rights in these original assets under CC0 1.0 Universal. The assets may be copied,
+modified and used commercially without attribution. No warranty is provided.
+
+License reference: https://creativecommons.org/publicdomain/zero/1.0/
+
+This notice applies only to original files in assets/models and assets/posters,
+not to PapanNalar application code, fonts, dependencies, user data or vendor APIs.

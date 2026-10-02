@@ -56,6 +56,13 @@ export const enrichResponseSchema = z.strictObject({
 export const llmStatusSchema = z.strictObject({
   enabled: z.boolean(),
   freeText: z.boolean(),
+  configuration: z.enum(["disabled", "valid", "invalid"]),
+  configured: z.boolean(),
+  connectionTested: z.literal(false),
+  contentEligible: z.boolean(),
+  privacyReviewed: z.boolean(),
+  budgetEnabled: z.boolean(),
+  budgetReason: fallbackReasonSchema,
 });
 export const feedbackSchema = z.strictObject({
   classId: randomIdSchema,

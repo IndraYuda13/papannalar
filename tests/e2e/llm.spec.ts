@@ -97,7 +97,7 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
   await expect(bisik).toBeVisible();
   const start = Date.now();
   await bisik
-    .getByRole("button", { name: "Sesuaikan kartu Bisik online", exact: true })
+    .getByRole("button", { name: "Sesuaikan saran", exact: true })
     .click();
   await expect(bisik).toContainText("AI belum tersedia untuk kartu ini");
   const bisikMs = Date.now() - start;
@@ -178,7 +178,7 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
   await bisik.screenshot({ path: "artifacts/qa/M13/bisik-controls.png" });
   await page.context().setOffline(true);
   await bisik
-    .getByRole("button", { name: "Sesuaikan kartu Bisik online", exact: true })
+    .getByRole("button", { name: "Sesuaikan saran", exact: true })
     .click();
   await expect(bisik).toContainText(
     "Tanpa internet: menampilkan kartu strategi yang tersimpan",

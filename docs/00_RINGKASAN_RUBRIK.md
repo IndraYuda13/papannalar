@@ -1,5 +1,14 @@
 # PapanNalar: Dokumen Rancangan Aplikasi
 
+<!-- BEGIN PN_UI_AI_V2 -->
+## Addendum produk UI/AI v2
+
+Permintaan terbaru memperluas visual aplikasi dan pilihan penyedia AI.
+[PRD aktif tambahan](10_PRD_UI_AI_V2.md) menentukan scope; isi historis di bawah dipertahankan.
+Pembaruan belum merupakan klaim fitur selesai atau dampak belajar. Inovasi tetap
+pada alur guru/siswa; motion/3D tidak menggantikan fungsi atau bukti pengujian.
+<!-- END PN_UI_AI_V2 -->
+
 Sep 29, 2026 · @Azka
 
 ## Ringkasan produk dan keputusan kunci

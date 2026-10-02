@@ -6,6 +6,8 @@ import { Home, UsersRound, Layers, ClipboardCheck, LogOut } from "lucide-react";
 import { Brand } from "@/ui/components/brand";
 import { TeacherProvider } from "./app-context";
 import { logoutTeacher } from "@/features/classroom/logout-transport";
+import { VisualSettings } from "@/ui/components/visual-preferences";
+import { Presentation } from "lucide-react";
 const entries = [
   ["/guru", "Beranda", Home],
   ["/guru/kelas", "Kelas", UsersRound],
@@ -26,18 +28,18 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
     }
   }
   // Existing adaptive/rehearsal workspace remains an explicit secondary route.
-  if (pathname === "/guru/latihan") return children;
+  const adaptive = pathname === "/guru/latihan";
   return (
     <div
       data-surface="guru"
-      className="min-h-dvh md:grid md:grid-cols-[220px_1fr]"
+      className="studio-shell min-h-dvh md:grid md:grid-cols-[232px_1fr]"
     >
       <a className="skip-link" href="#konten">
         Langsung ke isi
       </a>
-      <aside className="border-pn-ink-400/30 bg-card md:sticky md:top-0 md:h-dvh md:border-r">
+      <aside className="studio-sidebar md:sticky md:top-0 md:h-dvh md:border-r">
         <div className="flex items-center justify-between p-4 md:p-6">
-          <Link href="/guru" aria-label="Beranda PapanNalar">
+          <Link href="/guru" prefetch={false} aria-label="Beranda PapanNalar">
             <Brand />
           </Link>
           <button
@@ -63,6 +65,7 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
               <Link
                 key={href}
                 href={href}
+                prefetch={false}
                 aria-current={active ? "page" : undefined}
                 className={`flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-input px-1 py-2 text-center text-[11px] font-semibold md:flex-row md:justify-start md:gap-3 md:px-3 md:text-sm ${active ? "bg-pn-teal-100 text-primary" : "text-muted-foreground"}`}
               >
@@ -74,17 +77,37 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        <button
-          className="mx-6 mt-8 hidden min-h-12 items-center gap-2 text-sm text-muted-foreground md:flex"
-          onClick={() => void logout()}
-        >
-          <LogOut size={18} />
-          Keluar akun
-        </button>
+        <div className="studio-sidebar-foot">
+          <p className="studio-eyebrow">PapanNalar Studio</p>
+          <p className="text-sm text-muted-foreground">
+            Siapkan. Ajarkan. Pahami.
+          </p>
+          <VisualSettings />
+          <button
+            className="mt-4 hidden min-h-12 items-center gap-2 text-sm text-muted-foreground md:flex"
+            onClick={() => void logout()}
+          >
+            <LogOut size={18} />
+            Keluar akun
+          </button>
+        </div>
       </aside>
-      <main id="konten" className="min-w-0 px-4 pt-5 pb-28 sm:px-8 md:py-8">
+      <main
+        id="konten"
+        className="studio-workspace min-w-0 px-4 pt-5 pb-28 sm:px-8 md:py-8"
+      >
         <div className="mx-auto max-w-5xl">
-          <TeacherProvider>{children}</TeacherProvider>
+          <div className="studio-context">
+            <span>Ruang mengajar Anda</span>
+            <Link href="/layar" prefetch={false} target="_blank">
+              <Presentation size={18} aria-hidden />
+              Layar Kelas
+            </Link>
+          </div>
+          <div className="mb-4 md:hidden">
+            <VisualSettings />
+          </div>
+          {adaptive ? children : <TeacherProvider>{children}</TeacherProvider>}
         </div>
       </main>
     </div>

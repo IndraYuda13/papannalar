@@ -21,21 +21,26 @@ import { createNameRepository } from "@/local/names";
 import { libraryCache } from "@/local/library";
 import { LocalRoster } from "./local-roster";
 import { classPresence } from "@/local/class-presence";
-import { UsersRound } from "lucide-react";
+import { PageHeader, StateNotice } from "@/ui/components/studio";
+import { Search, UsersRound } from "lucide-react";
 export function ClassesPage() {
   const { classes, scope, refresh } = useTeacher(),
     [adding, setAdding] = useState(false),
     [message, setMessage] = useState(""),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [search, setSearch] = useState("");
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="flex items-center gap-3 text-[28px] font-extrabold">
-          <UsersRound size={28} className="text-primary" aria-hidden />
-          Kelas
-        </h1>
-        <Button onClick={() => setAdding(!adding)}>Tambah kelas</Button>
-      </div>
+      <PageHeader
+        eyebrow="Kelola ruang belajar"
+        title="Kelas"
+        description="Daftar kelas dan siswa Anda. Nama siswa tetap di perangkat ini."
+        actions={
+          <Button onClick={() => setAdding(!adding)}>
+            {adding ? "Batal menambah" : "Tambah kelas"}
+          </Button>
+        }
+      />
       {adding && (
         <form
           className={panel}
@@ -104,22 +109,49 @@ export function ClassesPage() {
           <Button disabled={busy}>Simpan kelas</Button>
         </form>
       )}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {classes.map((c) => (
-          <Link href={`/guru/kelas/${c.id}`} key={c.id} className={panel}>
-            <h2 className="text-2xl font-bold">{c.label}</h2>
-            <p>
-              {c.count} siswa · Tingkat {c.grade}
-            </p>
-            <span className="inline-flex min-h-12 items-center font-semibold text-primary">
-              Buka kelas →
-            </span>
-          </Link>
-        ))}
-      </div>
+      <label className="studio-filter flex items-center gap-3">
+        <Search size={20} aria-hidden />
+        <span className="sr-only">Cari kelas</span>
+        <input
+          className={field}
+          value={search}
+          placeholder="Cari kelas…"
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </label>
+      <ul className="studio-row-list">
+        {classes
+          .filter((c) => c.label.toLowerCase().includes(search.toLowerCase()))
+          .map((c) => (
+            <li key={c.id}>
+              <Link href={`/guru/kelas/${c.id}`} className="studio-row">
+                <span className="studio-row-icon" aria-hidden>
+                  <UsersRound size={24} />
+                </span>
+                <div className="studio-row-content">
+                  <h2>{c.label}</h2>
+                  <p>
+                    {c.count} siswa · Tingkat {c.grade}
+                  </p>
+                </div>
+                <span className="studio-row-action">Buka kelas →</span>
+              </Link>
+            </li>
+          ))}
+      </ul>
       {!classes.length && (
-        <p>Belum ada kelas. Tambahkan rombel pertama Anda.</p>
+        <StateNotice title="Belum ada kelas">
+          Tambahkan rombel pertama untuk mulai mengajar.
+        </StateNotice>
       )}
+      {classes.length > 0 &&
+        !classes.some((c) =>
+          c.label.toLowerCase().includes(search.toLowerCase()),
+        ) && (
+          <StateNotice title="Kelas belum ditemukan">
+            Coba nama kelas lain atau kosongkan pencarian.
+          </StateNotice>
+        )}
       <p role="status">{message}</p>
     </div>
   );
@@ -199,7 +231,18 @@ export function ClassPage({ id }: { id: string }) {
     const t = setTimeout(() => void load(), 0);
     return () => clearTimeout(t);
   }, [load]);
-  if (!detail) return <p role="status">{message || "Memuat kelas…"}</p>;
+  if (!detail)
+    return (
+      <StateNotice
+        kind={message ? "error" : "loading"}
+        title={message || "Memuat kelas…"}
+        action={
+          message ? (
+            <Button onClick={() => void load()}>Coba lagi</Button>
+          ) : undefined
+        }
+      />
+    );
   const classroom = detail.class;
   return (
     <div className="space-y-5">
@@ -209,7 +252,11 @@ export function ClassPage({ id }: { id: string }) {
       >
         ← Kelas
       </Link>
-      <h1 className="text-[28px] font-extrabold">Kelas {classroom.label}</h1>
+      <PageHeader
+        eyebrow="Ruang kelas"
+        title={`Kelas ${classroom.label}`}
+        description={`${classroom.count} siswa · Tingkat ${classroom.grade} · Catatan hadir hari ini`}
+      />
       <div className="flex flex-wrap gap-3">
         <Button asChild>
           <Link href={`/guru/mulai?class=${id}`}>Mulai mengajar</Link>

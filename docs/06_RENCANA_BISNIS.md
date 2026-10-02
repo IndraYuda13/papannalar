@@ -1,5 +1,16 @@
 # Rencana Bisnis
 
+<!-- BEGIN PN_UI_AI_V2 -->
+## Pembaruan asumsi biaya AI
+
+Dukungan endpoint/model baru membuat harga Haiku di bawah menjadi skenario
+historis, bukan harga seluruh AI aplikasi. [Spesifikasi ledger](12_AI_COMPAT_SPEC.md) mewajibkan
+profil/harga/cap terkonfigurasi dan reservasi konservatif. Harga token, reasoning,
+cache dan biaya gateway diisi operator dari kontrak aktual. Usage tidak tersedia
+tidak berarti nol biaya. Rencana harga layanan tetap usulan, bukan pembayaran
+yang sudah aktif. Tidak ada pembelian atau paid API otomatis pada upgrade.
+<!-- END PN_UI_AI_V2 -->
+
 ## Ringkasan
 
 Guru memakai PapanNalar gratis; sekolah atau dinas membayar fitur yang memakai LLM, laporan, dan pendampingan. Model ini dipilih karena biaya per pemakaian hampir seluruhnya datang dari LLM, sedangkan inti aplikasi (kartu, pindai, kelompok, Alat Nalar) berjalan di HP dan papan tanpa biaya tambahan.

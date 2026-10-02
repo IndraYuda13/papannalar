@@ -1,5 +1,18 @@
 # AGENTS.md - PapanNalar
 
+<!-- BEGIN PN_UI_AI_V2 -->
+## Instruksi tambahan aktif: UI dan AI v2
+
+Pengguna mengotorisasi implementasi UI seluruh halaman dan dua protokol AI.
+Baca [instruksi upgrade](EXECUTE_UI_AI_UPGRADE.md) dan [PRD tambahan](docs/10_PRD_UI_AI_V2.md) seperlunya.
+Aturan continuous U0-U5 menggantikan berhenti setelah setiap task pada run ini.
+3D dekoratif/motion terbatas diizinkan; model matematika, privasi, RLS, review,
+idempotensi dan histori tetap dijaga. Jangan mengubah baseline atau mengulang
+M00-M17. Dua adapter wajib disambungkan ke config, validators, ledger dan SQL.
+Satu final verify serial yang lulus; fixture bukan live. Jangan melakukan paid API,
+deploy atau migration DB nyata tanpa otorisasi. Jangan menimpa perubahan pengguna.
+<!-- END PN_UI_AI_V2 -->
+
 ## Misi dan cara mulai
 
 Bangun PapanNalar sesuai sumber produk, bukan aplikasi edukasi generik.

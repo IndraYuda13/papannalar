@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { isLocalDemoEnvironment } from "@/contracts/local-demo";
+import { PageHeader } from "@/ui/components/studio";
 import { Brand } from "@/ui/components/brand";
 export const dynamic = "force-dynamic";
 export default function DemoPage() {
@@ -12,9 +13,13 @@ export default function DemoPage() {
   )
     notFound();
   return (
-    <main className="mx-auto max-w-xl space-y-6 p-8">
+    <main className="studio-panel mx-auto my-8 max-w-2xl space-y-6 bg-card p-6 sm:p-10">
       <Brand />
-      <h1 className="text-3xl font-bold">Demo lokal 7B</h1>
+      <PageHeader
+        eyebrow="Ruang latihan sintetis"
+        title="Demo lokal 7B"
+        description="Latihan terpisah dari kelas sungguhan. Mulai dari langkah pertama di bawah."
+      />
       <p>
         Provider autentikasi uji di komputer ini. Data simulasi; tidak mengirim
         email atau memakai Supabase live.

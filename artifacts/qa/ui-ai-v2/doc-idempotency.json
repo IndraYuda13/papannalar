@@ -1,0 +1,116 @@
+{
+  "mode": "dry-run",
+  "applicationCodeChanged": false,
+  "results": [
+    {
+      "file": "AGENTS.md",
+      "status": "UNCHANGED",
+      "beforeSha256": "67dbe406bf49d48513a61e04266e182a6a5b58ec3d00a171f5d044a876d012af",
+      "afterSha256": "67dbe406bf49d48513a61e04266e182a6a5b58ec3d00a171f5d044a876d012af"
+    },
+    {
+      "file": "PLAN.md",
+      "status": "UNCHANGED",
+      "beforeSha256": "3d429e6373640d79afe2d956d269fce61d3f7d43b88f0fce4ef9bac11085ddee",
+      "afterSha256": "3d429e6373640d79afe2d956d269fce61d3f7d43b88f0fce4ef9bac11085ddee"
+    },
+    {
+      "file": "docs/00_RINGKASAN_RUBRIK.md",
+      "status": "UNCHANGED",
+      "beforeSha256": "7ab76594ad85c040c9b8b45bd833c6457d9b6f6642e2383328390d2ec0801731",
+      "afterSha256": "7ab76594ad85c040c9b8b45bd833c6457d9b6f6642e2383328390d2ec0801731"
+    },
+    {
+      "file": "docs/01_PRD.md",
+      "status": "UNCHANGED",
+      "beforeSha256": "9b399163b23e229377b84efb1644dd8488584d29b2433bd9ab5737626d92388d",
+      "afterSha256": "9b399163b23e229377b84efb1644dd8488584d29b2433bd9ab5737626d92388d"
+    },
+    {
+      "file": "docs/04_BRAND_DESAIN.md",
+      "status": "UNCHANGED",
+      "beforeSha256": "d0c466125edab5f050ff3addcda7459fd4ea4976e78e285ec0802f2f0870dd78",
+      "afterSha256": "d0c466125edab5f050ff3addcda7459fd4ea4976e78e285ec0802f2f0870dd78"
+    },
+    {
+      "file": "docs/05_UX_LAYAR.md",
+      "status": "UNCHANGED",
+      "beforeSha256": "f9a907a78f71614c0b03e764a5b5720e5bf37162d684d0086515d9a0e8274c16",
+      "afterSha256": "f9a907a78f71614c0b03e764a5b5720e5bf37162d684d0086515d9a0e8274c16"
+    },
+    {
+      "file": "docs/06_RENCANA_BISNIS.md",
+      "status": "UNCHANGED",
+      "beforeSha256": "35b2edc0f5a556503f1a71d16ddb1a8297fcf84edd361aa098f77d86d0323913",
+      "afterSha256": "35b2edc0f5a556503f1a71d16ddb1a8297fcf84edd361aa098f77d86d0323913"
+    },
+    {
+      "file": "docs/07_BUILD_QA_PITCH.md",
+      "status": "UNCHANGED",
+      "beforeSha256": "b370ae710156f714019b039b561390ff9fac20f2979bcbe2740034c91aa196be",
+      "afterSha256": "b370ae710156f714019b039b561390ff9fac20f2979bcbe2740034c91aa196be"
+    },
+    {
+      "file": "docs/08_TECH_SPEC.md",
+      "status": "UNCHANGED",
+      "beforeSha256": "ac327cd8f3ea26f3bc15b9ac6153be7679a51e509af784706ed1119da81234a1",
+      "afterSha256": "ac327cd8f3ea26f3bc15b9ac6153be7679a51e509af784706ed1119da81234a1"
+    }
+  ],
+  "preservationChecks": [
+    {
+      "file": "AGENTS.md",
+      "backupHashMatchesDryRun": true,
+      "oldBodyPreserved": true,
+      "markerCount": 1
+    },
+    {
+      "file": "PLAN.md",
+      "backupHashMatchesDryRun": true,
+      "oldBodyPreserved": true,
+      "markerCount": 1
+    },
+    {
+      "file": "docs/00_RINGKASAN_RUBRIK.md",
+      "backupHashMatchesDryRun": true,
+      "oldBodyPreserved": true,
+      "markerCount": 1
+    },
+    {
+      "file": "docs/01_PRD.md",
+      "backupHashMatchesDryRun": true,
+      "oldBodyPreserved": true,
+      "markerCount": 1
+    },
+    {
+      "file": "docs/04_BRAND_DESAIN.md",
+      "backupHashMatchesDryRun": true,
+      "oldBodyPreserved": true,
+      "markerCount": 1
+    },
+    {
+      "file": "docs/05_UX_LAYAR.md",
+      "backupHashMatchesDryRun": true,
+      "oldBodyPreserved": true,
+      "markerCount": 1
+    },
+    {
+      "file": "docs/06_RENCANA_BISNIS.md",
+      "backupHashMatchesDryRun": true,
+      "oldBodyPreserved": true,
+      "markerCount": 1
+    },
+    {
+      "file": "docs/07_BUILD_QA_PITCH.md",
+      "backupHashMatchesDryRun": true,
+      "oldBodyPreserved": true,
+      "markerCount": 1
+    },
+    {
+      "file": "docs/08_TECH_SPEC.md",
+      "backupHashMatchesDryRun": true,
+      "oldBodyPreserved": true,
+      "markerCount": 1
+    }
+  ]
+}

@@ -104,6 +104,31 @@ async function paired(page: Page, browser: Browser) {
     });
     expect(response.status()).toBe(200);
     snapshot = snapshotSchema.parse(await response.json());
+    // Canonical receipt for this revision, not a briefly retained status from
+    // the previous question. Polling fallback can take two recovery cycles.
+    await expect
+      .poll(
+        async () => {
+          const receipt = snapshotSchema.parse(
+            await (
+              await page.request.post("/api/v1/pairing", {
+                headers,
+                data: {
+                  action: "snapshot",
+                  controllerId,
+                  presentationId: snapshot.envelope.presentationId,
+                },
+              })
+            ).json(),
+          );
+          return (
+            receipt.ackRevision === snapshot.envelope.revision &&
+            receipt.ackCommandId === snapshot.envelope.commandId
+          );
+        },
+        { timeout: 15000 },
+      )
+      .toBe(true);
     await expect(controls.getByTestId("pairing-status")).toContainText(
       "Layar tersambung",
     );

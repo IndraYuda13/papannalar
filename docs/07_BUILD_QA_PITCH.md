@@ -1,5 +1,15 @@
 # Build, QA, dan Pitch
 
+<!-- BEGIN PN_UI_AI_V2 -->
+## Rencana tambahan implementasi dan validasi
+
+Ikuti [U0-U5](13_EXECUTION_QA.md) dan [instruksi implementasi](../EXECUTE_UI_AI_UPGRADE.md) tanpa mengulang milestone
+lama. Targeted tests tiap batch; satu gerbang verify serial pada candidate final
+yang lulus. Jika gate gagal lalu kode berubah, ulang gate setelah perbaikan.
+Pisahkan local fixtures, live endpoint dan hardware. Screenshot bukan bukti API
+aktif, dan concept paper tidak menyebut kebutuhan baru sebagai fitur selesai.
+<!-- END PN_UI_AI_V2 -->
+
 ## Ringkasan
 
 Ada tiga gerbang: berkas penyisihan 1 Oktober, berkas finalis 12 sampai 25 Oktober, dan final 31 Oktober 2026 (tanggal dari guidebook, dikonfirmasi ulang ke panitia). Di penyisihan, targetnya prototipe inti yang jalan: kartu, pindai, kelompok, dan Garis Bilangan untuk kelas 7B; yang belum sempat jalan ditampilkan sebagai desain berlabel. Semua 13 fitur wajib harus jalan di final.

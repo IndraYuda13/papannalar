@@ -1,0 +1,42 @@
+{
+  "tool": "Blender",
+  "version": "4.3.2",
+  "renderEngine": "Cycles CPU",
+  "samples": 96,
+  "denoising": false,
+  "posterSize": [720, 540],
+  "license": "CC0-1.0",
+  "externalAssetDownloads": 0,
+  "models": [
+    {
+      "id": "learning-board",
+      "bytes": 68160,
+      "triangles": 4260,
+      "meshes": 12,
+      "sha256": "94cabd59012543917201e80c50fd215adc6311536513a67ebabae96777827112",
+      "sourceSha256": "38d65350414ec296fd7c92daa2d3eb0ac8e183892b2a7e2b17ec77a79afad077",
+      "blendFile": "design/pn-ui-v2/learning-board.blend",
+      "dimensionsBlenderZUp": [2.9, 1.45, 2.815]
+    },
+    {
+      "id": "balance-scale",
+      "bytes": 121472,
+      "triangles": 8196,
+      "meshes": 12,
+      "sha256": "35b5ea5b3b7b0d5c29d2e7de5d3e8d30a7c1ac50640c13ddd1bb113ddc748a1c",
+      "sourceSha256": "d13f1a465ad197404f9acbc0ca4438d9d1ac9940d22e3503979d782e3e6a7833",
+      "blendFile": "design/pn-ui-v2/balance-scale.blend",
+      "dimensionsBlenderZUp": [3.2, 1.15, 2.005]
+    },
+    {
+      "id": "algebra-kit",
+      "bytes": 55672,
+      "triangles": 3360,
+      "meshes": 9,
+      "sha256": "0bbc295d95e8254cf85e19418e8fcc29e07b9c04d4fbb96873c60d5c9dcc4e65",
+      "sourceSha256": "02b748ce74dbbf48a73416c18a63e3ce2feb4acd95e58bf4872fd820022f5b6f",
+      "blendFile": "design/pn-ui-v2/algebra-kit.blend",
+      "dimensionsBlenderZUp": [2.85, 2.15, 1.005]
+    }
+  ]
+}

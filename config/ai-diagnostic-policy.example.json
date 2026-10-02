@@ -1,0 +1,15 @@
+{
+  "profile_id": "teaching-primary",
+  "config_version": "1",
+  "protocol": "openai-chat-completions",
+  "requested_model": "OPERATOR_MODEL_REQUIRED",
+  "price_version": "OPERATOR_PRICE_VERSION_REQUIRED",
+  "currency": "USD",
+  "pricing_date": null,
+  "configured_free": false,
+  "input_per_million_microusd": null,
+  "output_per_million_microusd": null,
+  "cache_read_per_million_microusd": null,
+  "cache_creation_per_million_microusd": null,
+  "diagnostic_cap_microusd": 0
+}

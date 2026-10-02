@@ -18,8 +18,9 @@ import { LibraryItemView } from "./item-view";
 import { defaultTool, ToolFields, TOOL_LABELS } from "./tool-fields";
 import { InteractiveHelp } from "./interactive-help";
 import { templateItem } from "./templates";
-import { ActivityIcon } from "@/ui/components/activity-icon";
-import { FileQuestion, Layers, Plus } from "lucide-react";
+import { PageHeader, StateNotice } from "@/ui/components/studio";
+import { ToolPoster } from "@/ui/components/decorative-scene";
+import { FileQuestion, Plus } from "lucide-react";
 export function CollectionsPage() {
   const { state } = useTeacher(),
     [tab, setTab] = useState<"system" | "teacher">("system");
@@ -28,22 +29,24 @@ export function CollectionsPage() {
   );
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="flex items-center gap-3 text-[28px] font-extrabold">
-          <Layers size={28} className="text-primary" aria-hidden />
-          Soal & Presentasi
-        </h1>
-        <Button asChild>
-          <Link href="/guru/soal/baru">
-            <Plus size={20} aria-hidden />
-            Buat kumpulan soal
-          </Link>
-        </Button>
-      </div>
-      <p className="text-muted-foreground">
-        Simpan sekali, gunakan di berbagai kelas.
-      </p>
-      <div role="tablist" className="flex gap-2">
+      <PageHeader
+        eyebrow="Rak ide mengajar"
+        title="Soal & Presentasi"
+        description="Simpan sekali, gunakan di berbagai kelas."
+        actions={
+          <Button asChild>
+            <Link href="/guru/soal/baru">
+              <Plus size={20} aria-hidden />
+              Buat kumpulan soal
+            </Link>
+          </Button>
+        }
+      />
+      <div
+        role="tablist"
+        aria-label="Sumber soal"
+        className="studio-tabs flex gap-2"
+      >
         {(["system", "teacher"] as const).map((t) => (
           <Button
             key={t}
@@ -61,15 +64,25 @@ export function CollectionsPage() {
           <Link
             key={c.id}
             href={`/guru/soal/${c.id}`}
-            className={`${panel} friendly-card`}
+            className={`${panel} friendly-card studio-catalog-card`}
           >
             {c.document.kind === "cards" ? (
               <FileQuestion size={28} className="text-primary" aria-hidden />
             ) : (
-              <ActivityIcon
-                kind={
-                  c.document.items.find((i) => i.kind === "interactive")?.tool
-                    .kind ?? "writing"
+              <ToolPoster
+                asset={
+                  c.document.items.some(
+                    (i) =>
+                      i.kind === "interactive" && i.tool.kind === "balance",
+                  )
+                    ? "balance-scale"
+                    : c.document.items.some(
+                          (i) =>
+                            i.kind === "interactive" &&
+                            i.tool.kind === "algebra",
+                        )
+                      ? "algebra-kit"
+                      : "learning-board"
                 }
               />
             )}
@@ -92,14 +105,34 @@ export function CollectionsPage() {
           </Link>
         ))}
       </div>
-      {!sets.length && <p>Belum ada kumpulan. Mulai dari satu soal.</p>}
+      {!sets.length && (
+        <StateNotice
+          title="Belum ada kumpulan"
+          action={
+            <Button asChild>
+              <Link href="/guru/soal/baru">Buat soal pertama</Link>
+            </Button>
+          }
+        >
+          Mulai dari satu pertanyaan, lalu tambahkan contoh atau alat belajar.
+        </StateNotice>
+      )}
     </div>
   );
 }
 export function CollectionPage({ id }: { id: string }) {
   const { state } = useTeacher();
   const existing = state.collections.find((c) => c.id === id);
-  if (id !== "baru" && !existing) return <p>Kumpulan tidak ditemukan.</p>;
+  if (id !== "baru" && !existing)
+    return (
+      <StateNotice
+        kind="error"
+        title="Kumpulan tidak ditemukan"
+        action={<Link href="/guru/soal">Kembali ke daftar soal</Link>}
+      >
+        Kumpulan mungkin diarsipkan. Pilih kumpulan lain dari daftar.
+      </StateNotice>
+    );
   return <CollectionEditor key={id} initial={existing} />;
 }
 function CollectionEditor({ initial }: { initial?: Collection }) {
@@ -116,7 +149,12 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
     [message, setMessage] = useState(""),
     [errors, setErrors] = useState<Record<string, string>>({}),
     [busy, setBusy] = useState(false),
-    [saved, setSaved] = useState(initial?.status === "ready");
+    [saved, setSaved] = useState(initial?.status === "ready"),
+    [activeItem, setActiveItem] = useState(initial?.document.items[0]?.id),
+    [templateUndo, setTemplateUndo] = useState<{
+      index: number;
+      item: DraftDocument["items"][number];
+    }>();
   const readonly = source === "system";
   function change(next: DraftDocument) {
     setDocument(next);
@@ -189,6 +227,7 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
             tool: defaultTool("number-line"),
           };
     change({ ...document, items: [...document.items, next] });
+    setActiveItem(next.id);
   }
   function errorAt(prefix: string) {
     const found = Object.entries(errors).filter(([key]) =>
@@ -216,13 +255,17 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
       >
         ← Soal & Presentasi
       </Link>
-      <h1 className="text-[28px] font-extrabold">
-        {readonly
-          ? document.title
-          : initial
-            ? "Edit kumpulan soal"
-            : "Buat kumpulan soal"}
-      </h1>
+      <PageHeader
+        eyebrow={readonly ? "Materi sistem" : "Studio soal"}
+        title={
+          readonly
+            ? document.title
+            : initial
+              ? "Edit kumpulan soal"
+              : "Buat kumpulan soal"
+        }
+        description="Susun pertanyaan, isi alat, lalu periksa tampilan yang akan dilihat kelas."
+      />
       {readonly && (
         <p>Materi sistem dapat dipakai langsung. Salin untuk mengubah soal.</p>
       )}
@@ -262,229 +305,282 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
       <p className="text-sm text-muted-foreground">
         Maksimal 5 soal. Untuk Kartu Nalar, satu soal memakai satu baris.
       </p>
-      {document.items.map((item, index) => (
-        <article
-          key={item.id}
-          className={panel}
-          aria-label={`Soal ${index + 1}`}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-bold">Soal {index + 1}</h2>
-            {!readonly && (
-              <div className="flex gap-1">
-                <Button
-                  variant="outline"
-                  disabled={index === 0}
-                  aria-label={`Naikkan soal ${index + 1}`}
-                  onClick={() => {
-                    const items = [...document.items];
-                    [items[index - 1], items[index]] = [
-                      items[index],
-                      items[index - 1],
-                    ];
-                    change({ ...document, items });
-                  }}
-                >
-                  ↑
-                </Button>
-                <Button
-                  variant="outline"
-                  aria-label={`Hapus soal ${index + 1}`}
-                  onClick={() =>
-                    change({
-                      ...document,
-                      items: document.items.filter((_, i) => i !== index),
-                    })
-                  }
-                >
-                  Hapus
-                </Button>
-              </div>
-            )}
-          </div>
-          <label className="block">
-            Pertanyaan
-            <textarea
-              className={field}
-              rows={2}
-              value={item.prompt}
-              maxLength={400}
-              readOnly={readonly}
-              onChange={(e) =>
-                changeItem(index, { ...item, prompt: e.target.value })
+      <div className="studio-editor-layout">
+        <aside className="studio-editor-index" aria-label="Daftar soal">
+          <p>{document.items.length}/5 soal · Pilih soal untuk mengedit</p>
+          <nav>
+            {document.items.map((item, index) => (
+              <button
+                type="button"
+                key={item.id}
+                aria-pressed={activeItem === item.id}
+                onClick={() => {
+                  setActiveItem(item.id);
+                  setPreview(null);
+                }}
+              >
+                Soal {index + 1}
+                <small>{item.prompt || "Belum ada pertanyaan"}</small>
+              </button>
+            ))}
+          </nav>
+          {!document.items.length && (
+            <p>Tambahkan soal pertama untuk mulai menyusun.</p>
+          )}
+        </aside>
+        <div className="studio-editor-body space-y-5">
+          {document.items.map((item, index) => (
+            <article
+              key={item.id}
+              className={`${panel} studio-editor-item`}
+              hidden={
+                activeItem !== item.id &&
+                document.items.some((i) => i.id === activeItem)
               }
-            />
-            {errorAt(`items.${index}.prompt`)}
-          </label>
-          {item.kind === "card" ? (
-            <>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {CHOICES.map((label, n) => (
-                  <label key={label}>
-                    Pilihan {label}
-                    <input
-                      className={field}
-                      value={item.options[n]}
-                      maxLength={400}
-                      readOnly={readonly}
-                      onChange={(e) => {
-                        const options = [...item.options] as [
-                          string,
-                          string,
-                          string,
-                          string,
+              aria-label={`Soal ${index + 1}`}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-bold">Soal {index + 1}</h2>
+                {!readonly && (
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      disabled={index === 0}
+                      aria-label={`Naikkan soal ${index + 1}`}
+                      onClick={() => {
+                        const items = [...document.items];
+                        [items[index - 1], items[index]] = [
+                          items[index],
+                          items[index - 1],
                         ];
-                        options[n] = e.target.value;
-                        changeItem(index, { ...item, options });
+                        change({ ...document, items });
                       }}
-                    />
-                  </label>
-                ))}
+                    >
+                      ↑
+                    </Button>
+                    <Button
+                      variant="outline"
+                      aria-label={`Hapus soal ${index + 1}`}
+                      onClick={() =>
+                        change({
+                          ...document,
+                          items: document.items.filter((_, i) => i !== index),
+                        })
+                      }
+                    >
+                      Hapus
+                    </Button>
+                  </div>
+                )}
               </div>
-              {errorAt(`items.${index}.options`)}
               <label className="block">
-                Kunci jawaban
-                <select
-                  className={field}
-                  value={item.key}
-                  disabled={readonly}
-                  onChange={(e) =>
-                    changeItem(index, {
-                      ...item,
-                      key: CHOICES.find((c) => c === e.target.value) ?? "A",
-                    })
-                  }
-                >
-                  {CHOICES.map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="block">
-                Penjelasan guru (opsional)
+                Pertanyaan
                 <textarea
                   className={field}
                   rows={2}
-                  value={item.explanation}
-                  maxLength={600}
+                  value={item.prompt}
+                  maxLength={400}
                   readOnly={readonly}
                   onChange={(e) =>
-                    changeItem(index, { ...item, explanation: e.target.value })
+                    changeItem(index, { ...item, prompt: e.target.value })
                   }
                 />
+                {errorAt(`items.${index}.prompt`)}
               </label>
-              <p className="text-sm">
-                Pilihan ? / Belum tahu sudah disediakan.
-              </p>
-            </>
-          ) : (
-            <>
-              <label className="block">
-                Aktivitas
-                <select
-                  className={field}
-                  disabled={readonly}
-                  value={item.kind === "writing" ? "writing" : item.tool.kind}
-                  onChange={(e) =>
-                    changeItem(
-                      index,
-                      e.target.value === "writing"
-                        ? { id: item.id, prompt: item.prompt, kind: "writing" }
-                        : {
-                            id: item.id,
-                            prompt: item.prompt,
-                            kind: "interactive",
-                            tool: defaultTool(e.target.value),
-                          },
-                    )
-                  }
-                >
-                  {TOOL_LABELS.map(([kind, label]) => (
-                    <option key={kind} value={kind}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {!readonly && (
-                <InteractiveHelp
-                  key={item.kind === "writing" ? "writing" : item.tool.kind}
-                  kind={item.kind === "writing" ? "writing" : item.tool.kind}
-                  onApply={(template) => {
-                    changeItem(index, templateItem(item.id, template));
-                    setPreview(null);
-                  }}
-                />
+              {item.kind === "card" ? (
+                <>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {CHOICES.map((label, n) => (
+                      <label key={label}>
+                        Pilihan {label}
+                        <input
+                          className={field}
+                          value={item.options[n]}
+                          maxLength={400}
+                          readOnly={readonly}
+                          onChange={(e) => {
+                            const options = [...item.options] as [
+                              string,
+                              string,
+                              string,
+                              string,
+                            ];
+                            options[n] = e.target.value;
+                            changeItem(index, { ...item, options });
+                          }}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  {errorAt(`items.${index}.options`)}
+                  <label className="block">
+                    Kunci jawaban
+                    <select
+                      className={field}
+                      value={item.key}
+                      disabled={readonly}
+                      onChange={(e) =>
+                        changeItem(index, {
+                          ...item,
+                          key: CHOICES.find((c) => c === e.target.value) ?? "A",
+                        })
+                      }
+                    >
+                      {CHOICES.map((c) => (
+                        <option key={c}>{c}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block">
+                    Penjelasan guru (opsional)
+                    <textarea
+                      className={field}
+                      rows={2}
+                      value={item.explanation}
+                      maxLength={600}
+                      readOnly={readonly}
+                      onChange={(e) =>
+                        changeItem(index, {
+                          ...item,
+                          explanation: e.target.value,
+                        })
+                      }
+                    />
+                  </label>
+                  <p className="text-sm">
+                    Pilihan ? / Belum tahu sudah disediakan.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <label className="block">
+                    Aktivitas
+                    <select
+                      className={field}
+                      disabled={readonly}
+                      value={
+                        item.kind === "writing" ? "writing" : item.tool.kind
+                      }
+                      onChange={(e) =>
+                        changeItem(
+                          index,
+                          e.target.value === "writing"
+                            ? {
+                                id: item.id,
+                                prompt: item.prompt,
+                                kind: "writing",
+                              }
+                            : {
+                                id: item.id,
+                                prompt: item.prompt,
+                                kind: "interactive",
+                                tool: defaultTool(e.target.value),
+                              },
+                        )
+                      }
+                    >
+                      {TOOL_LABELS.map(([kind, label]) => (
+                        <option key={kind} value={kind}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {!readonly && (
+                    <InteractiveHelp
+                      key={item.kind === "writing" ? "writing" : item.tool.kind}
+                      kind={
+                        item.kind === "writing" ? "writing" : item.tool.kind
+                      }
+                      onApply={(template) => {
+                        setTemplateUndo({ index, item });
+                        changeItem(index, templateItem(item.id, template));
+                        setPreview(null);
+                      }}
+                    />
+                  )}
+                  {item.kind === "interactive" && !readonly && (
+                    <ToolFields
+                      tool={item.tool}
+                      onChange={(tool) => changeItem(index, { ...item, tool })}
+                    />
+                  )}{" "}
+                  {errorAt(`items.${index}.tool`)}
+                </>
               )}
-              {item.kind === "interactive" && !readonly && (
-                <ToolFields
-                  tool={item.tool}
-                  onChange={(tool) => changeItem(index, { ...item, tool })}
-                />
-              )}{" "}
-              {errorAt(`items.${index}.tool`)}
-            </>
+              {templateUndo?.index === index && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    changeItem(index, templateUndo.item);
+                    setTemplateUndo(undefined);
+                  }}
+                >
+                  Batalkan contoh
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const single = collectionDocumentSchema.safeParse({
+                    ...document,
+                    title: document.title || "Pratinjau",
+                    items: [item],
+                  });
+                  if (!single.success) {
+                    setMessage("Lengkapi soal sebelum membuka preview.");
+                    return;
+                  }
+                  setPreview(index);
+                }}
+              >
+                Preview soal {index + 1}
+              </Button>
+            </article>
+          ))}
+          {!readonly && (
+            <Button
+              variant="outline"
+              disabled={document.items.length >= 5}
+              onClick={add}
+            >
+              Tambah soal
+            </Button>
           )}
-          <Button
-            variant="outline"
-            onClick={() => {
-              const single = collectionDocumentSchema.safeParse({
-                ...document,
-                title: document.title || "Pratinjau",
-                items: [item],
-              });
-              if (!single.success) {
-                setMessage("Lengkapi soal sebelum membuka preview.");
-                return;
-              }
-              setPreview(index);
-            }}
-          >
-            Preview soal {index + 1}
-          </Button>
-        </article>
-      ))}
-      {!readonly && (
-        <Button
-          variant="outline"
-          disabled={document.items.length >= 5}
-          onClick={add}
-        >
-          Tambah soal
-        </Button>
-      )}
-      {previewItem && preview !== null && (
-        <section className={panel} aria-label="Pratinjau soal">
-          <Button variant="outline" onClick={() => setPreview(null)}>
-            Tutup preview
-          </Button>
-          <div
-            data-library-preview
-            className="min-h-0 rounded-input bg-pn-board p-4"
-          >
-            <LibraryItemView
-              key={
-                previewItem.kind === "interactive"
-                  ? `${previewItem.id}:${JSON.stringify(previewItem.tool)}`
-                  : previewItem.id
-              }
-              item={publicLibraryItem(previewItem)}
-              row={preview + 1}
-            />
-          </div>
-        </section>
-      )}
-      {preview !== null && !previewItem && (
-        <section className={panel} aria-label="Pratinjau soal">
-          <Button variant="outline" onClick={() => setPreview(null)}>
-            Tutup preview
-          </Button>
-          <p role="status">
-            Periksa isian yang diubah untuk melanjutkan preview.
-          </p>
-        </section>
-      )}
-      <div className="flex flex-wrap gap-3 border-t pt-4">
+          {previewItem && preview !== null && (
+            <section className={panel} aria-label="Pratinjau soal">
+              <Button variant="outline" onClick={() => setPreview(null)}>
+                Tutup preview
+              </Button>
+              <div
+                data-library-preview
+                className="min-h-0 rounded-input bg-pn-board p-4"
+              >
+                <LibraryItemView
+                  key={
+                    previewItem.kind === "interactive"
+                      ? `${previewItem.id}:${JSON.stringify(previewItem.tool)}`
+                      : previewItem.id
+                  }
+                  item={publicLibraryItem(previewItem)}
+                  row={preview + 1}
+                />
+              </div>
+            </section>
+          )}
+          {preview !== null && !previewItem && (
+            <section className={panel} aria-label="Pratinjau soal">
+              <Button variant="outline" onClick={() => setPreview(null)}>
+                Tutup preview
+              </Button>
+              <p role="status">
+                Periksa isian yang diubah untuk melanjutkan preview.
+              </p>
+            </section>
+          )}
+        </div>
+      </div>
+      <div className="studio-action-bar flex flex-wrap gap-3">
         {readonly ? (
           <Button
             variant="outline"

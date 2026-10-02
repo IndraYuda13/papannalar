@@ -534,16 +534,58 @@ test("REMOTE02 fractions, ratio, algebra, balance and graphs use the bounded inp
   }
   async function activate(target: Locator) {
     await target.scrollIntoViewIfNeeded();
-    const p = await target.evaluate((el) => {
-      const b = el.getBoundingClientRect(),
-        r = el.closest('[data-remote-area="tool"]')!.getBoundingClientRect();
-      const l = Math.max(0, r.left),
-        t = Math.max(0, r.top);
-      return {
-        x: (b.x + b.width / 2 - l) / (Math.min(innerWidth, r.right) - l),
-        y: (b.y + b.height / 2 - t) / (Math.min(innerHeight, r.bottom) - t),
-      };
-    });
+    await expect(target).toBeEnabled();
+    // The transport applies normalized coordinates on the next board poll.
+    // History/weights change the tool's height; require stable geometry and a
+    // real hit target rather than sampling an intermediate React layout.
+    let signature = "",
+      stableSince = 0,
+      p = { x: 0, y: 0 };
+    await expect
+      .poll(
+        async () => {
+          const sample = await target.evaluate((el) => {
+            const b = el.getBoundingClientRect(),
+              r = el
+                .closest('[data-remote-area="tool"]')!
+                .getBoundingClientRect();
+            const l = Math.max(0, r.left),
+              t = Math.max(0, r.top),
+              cx = b.x + b.width / 2,
+              cy = b.y + b.height / 2;
+            return {
+              x: (cx - l) / (Math.min(innerWidth, r.right) - l),
+              y: (cy - t) / (Math.min(innerHeight, r.bottom) - t),
+              hit:
+                document
+                  .elementFromPoint(cx, cy)
+                  ?.closest('button,input,select,[role="button"]') === el,
+              signature: [
+                b.x,
+                b.y,
+                b.width,
+                b.height,
+                r.x,
+                r.y,
+                r.width,
+                r.height,
+              ]
+                .map((n) => Math.round(n * 100))
+                .join(","),
+              now: performance.now(),
+            };
+          });
+          if (!sample.hit || sample.signature !== signature) {
+            signature = sample.signature;
+            stableSince = sample.now;
+            return false;
+          }
+          p = { x: sample.x, y: sample.y };
+          return sample.now - stableSince >= 300;
+        },
+        { timeout: 7000, intervals: [50, 100] },
+      )
+      .toBe(true);
     await send({ kind: "activate", ...p });
   }
   async function open(tool: PublicTool) {

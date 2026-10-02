@@ -20,6 +20,7 @@ import { logoutTeacher } from "@/features/classroom/logout-transport";
 import { libraryCache, syncLibraryResponses } from "@/local/library";
 import { libraryCall } from "@/features/library/client";
 import type { LocalScope } from "@/local/scope";
+import { StateNotice } from "@/ui/components/studio";
 import { Button } from "@/ui/components/button";
 type Data = {
   scope: LocalScope;
@@ -154,11 +155,26 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
   }, [owner, mode, sample, refresh]);
   if (locked)
     return (
-      <p>
-        Akses guru terkunci. <a href="/masuk">Masuk kembali</a>
-      </p>
+      <StateNotice
+        kind="error"
+        title="Akses guru terkunci"
+        action={<a href="/masuk">Masuk kembali</a>}
+      >
+        Masuk kembali untuk membuka kelas yang sesuai dengan akun Anda.
+      </StateNotice>
     );
-  if (!data) return <p role="status">{message || "Memuat kelas…"}</p>;
+  if (!data)
+    return (
+      <StateNotice
+        kind={message ? "error" : "loading"}
+        title={message || "Memuat kelas…"}
+        action={
+          message ? (
+            <Button onClick={() => void refresh()}>Coba lagi</Button>
+          ) : undefined
+        }
+      />
+    );
   return (
     <Context.Provider value={{ ...data, refresh }}>
       {data.state.sample && (

@@ -13,7 +13,12 @@ export function cacheTarget(
   if (
     request.method !== "GET" ||
     url.origin !== origin ||
-    url.search ||
+    (url.search &&
+      !(
+        request.mode !== "navigate" &&
+        url.pathname === "/icon.svg" &&
+        /^\?icon\.[A-Za-z0-9_-]{1,80}\.svg$/.test(url.search)
+      )) ||
     request.rsc
   )
     return undefined;

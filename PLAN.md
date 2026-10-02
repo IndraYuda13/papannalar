@@ -1,5 +1,24 @@
 # PLAN - Eksekusi Codex PapanNalar
 
+<!-- BEGIN PN_UI_AI_V2 -->
+## Antrean tambahan UI/AI - bukan pengganti histori M00-M17
+
+Rencana rinci: [U0-U5 dan QA](docs/13_EXECUTION_QA.md). Status implementasi cloud 2 Oktober 2026:
+
+| Batch | Scope | Status | Bukti |
+| --- | --- | --- | --- |
+| U0 | Cocokkan HEAD, update dokumen dan route inventory | DONE | HEAD efcdd36; dry run/apply 9 addendum, backup; 15 route baseline |
+| U1 | Shared UI dan seluruh halaman guru | DONE | Walkthrough 360/390/1366, editor/preview, empty/error/retry; screenshot before/after |
+| U2 | Board, motion, aset 3D dan fallback | DONE | 3 GLB render nyata, poster/no-WebGL/save-data; 3D dikecualikan dari precache |
+| U3 | Konektor OpenAI/Anthropic dan konfigurasi | DONE LOCAL | 35 contract/HTTP fixtures + diagnostic default tanpa call |
+| U4 | Ledger/RPC/policy dan integrasi routes | DONE LOCAL | Migration038 di PostgreSQL terisolasi; SQL v1/v2 + 7 route/ledger/concurrency tests |
+| U5 | Final verification dan handoff | DONE LOCAL | pnpm verify exit0: 1086 unit, 7 integrasi, SQL/RLS dan 122 browser; walkthrough produksi15/15 |
+
+Live AI, hosted Supabase/Auth/Realtime/HTTPS serta perangkat native tetap
+EXTERNAL_BLOCKED/NOT_RUN; konfigurasi/review/budget bukan approval live.
+Hasil akhir dan batas bukti: [UI_AI_HANDOFF.md](UI_AI_HANDOFF.md).
+<!-- END PN_UI_AI_V2 -->
+
 Versi 1.0 | Disusun 29 September 2026
 Status terkini (2 Oktober 2026): kode dipublikasikan ke GitHub main; UI/UX polish
 P1–P3 DONE software lokal sesuai prompt
@@ -2392,3 +2411,110 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
   Lint/format kedua file dan typecheck exit0; tes terarah ini tidak menggantikan
   hasil CI penuh. Source/core/boundary tidak diubah, commit repair dipublikasikan
   setelah validasi terarah; CI penuh menunggu hasil run baru.
+
+### 9.54 UI + AI v2 — U0–U5 DONE software lokal (2 Oktober 2026)
+
+- Permintaan terbaru dieksekusi pada repo existing `IndraYuda13/papannalar`,
+  HEAD `efcdd36b318cb84654a12f0dd698dd6bc0e05b94`, branch `work`.
+  SOURCE_FINDINGS dicocokkan dengan HEAD; perbaikan timeout CI tetap utuh.
+  Tidak scaffold, mengulang implementasi M00–M17, reset data atau menimpa histori.
+- Script docs dry run lalu apply9 addendum; backup `docs/baseline/ui-ai-v2`.
+  Marker idempoten dan body/jurnal lama dipertahankan. PRD/brand/UX/biaya/QA/tech
+  aktif melalui addendum; dokumen pembelajaran02/katalog03 tidak diubah.
+- Semua15 tujuan navigasi dibenahi: shell/navigasi, beranda, kelas/detail, katalog,
+  editor terpilih/preview, mulai, hasil/detail, controller/scanner, latihan, demo
+  dan idle papan. Viewport360/390/1366, board1280/1366/1920 dan teks130% diuji.
+  CTA mulai berada pada header meski sesi aktif banyak; form/historical key tetap.
+- Tiga GLB/poster asli digunakan, CC0,270410byte total. Three0.186.1 MIT lazy;
+  chunk154113byte gzip opsional, terpisah dari precache/scanner. Poster/no-WebGL/
+  save-data/reduced motion/context atau chunk gagal menjaga fungsi. Render browser
+  idle/hidden/offscreen tidak bertambah; tampilan ringan melepas canvas.
+  Hidden adalah fixture eksplisit, bukan bukti konsumsi daya GPU fisik.
+- Dua adapter native OpenAI Chat Completions/Anthropic Messages tersambung ke
+  trusted profile/env, limit, validator, reserve/complete store dan SQL038 baru.
+  Model/base/protocol konfigurabel; alias sah, usage hilang tetap nullable,
+  reservasi konservatif, harga/cap/version snapshot dan idempotensi dijaga.
+  Review kosong/null dan sample restriction tetap; model coding bukan default.
+- Migration038 hanya diterapkan pada `pn_m01c_test` loopback55432 PostgreSQL17.11;
+  migration001–037/core/content/local/auth/review unchanged. Seed7B/7C existing
+  dipertahankan. Tidak ada migration DB hosted, paid API, deploy atau approval baru.
+- Batch actual:35 contract/HTTP,11 diagnostic-policy/CLI,34 reference codec,
+  7 route/native HTTP/ledger/concurrency tests PASS. Reference bukan integration;
+  hook Auth/review route test sintetis, RLS nyata diuji SQL secara terpisah.
+- Gate awal berhenti format/lint; dua full gate120PASS/2FAIL masing-masing.
+  Perbaikan editor/CTA dan sinkronisasi koordinat/teardown fixture QR diuji terarah;
+  math/receipt/privacy/offline assertion tidak dilemahkan. Semua log dipertahankan.
+- Gerbang akhir serial `pnpm verify` **exit0**: format/typecheck/lint PASS,
+  **1086 unit/70file**, coverage92.44/87.47/96.26/93.44%, SQL/RLS PASS termasuk
+  LLMv1 **27** dan v2 **28** assertions, **7 integration**, build PASS,
+  **122/122 E2E**,1worker,0retry/skip/flaky,15.4menit. Build
+  `g4UViW8Y3PMr1kvczW2E4`. Walkthrough produksi15/15 HTTP200;0overflow,
+  0runtimeerror,0engine/GLB request sebelum opt-in. Before/after memakai entitas
+  sintetis baseline yang sama. Pengeluaran vendor/aset USD0; infra tidak diukur.
+- Evidence aman `artifacts/qa/ui-ai-v2/{summary,route-matrix,bundle,asset-budget,
+  doc-idempotency,server-check}.json`; log `/workspace/.papannalar-cloud/logs/ui-ai-*`.
+  Detail before/after, config, biaya, diagnosis, batas bukti dan rollback ada di
+  [UI_AI_HANDOFF.md](UI_AI_HANDOFF.md). Screenshot mentah hanya lokal/sintetis.
+- Implementasi tidak memiliki blocker lokal. Kebutuhan live/hosted/review/perangkat
+  dicatat tepat pada handoff; tetap EXTERNAL_BLOCKED/NOT_RUN, bukan production-ready.
+  Perubahan workspace belum commit/push. Server lokal build akhir tersedia3100;
+  jalankan `source /workspace/.papannalar-cloud/activate.sh`, `pnpm build`,
+  `pnpm video`; jangan dua launcher pada port sama. Next exact: review/run build
+  lokal dan lakukan gate eksternal hanya sesudah resource serta otorisasi tersedia.
+
+### 9.55 Koreksi UI dari screenshot pengguna — DONE (2 Oktober 2026)
+
+- Caption “Papan dan benda belajar” serta tombol mode Jelajahi3D/Lihat poster
+  dihapus. Scene tampil3D otomatis saat terlihat; import/render tetap terpisah,
+  preferences dibaca dahulu, no-WebGL/save-data/light/chunk gagal memakai poster.
+  Panel login tersembunyi pada HP tidak memicu download3D; scanner tetap terpisah.
+- Navigator soal tadinya memakai min-content160px ditambah padding/border26px
+  pada ruang166px, sehingga kartu meluber20px tanpa scroll horizontal halaman.
+  Grid/min-width0/lebar100% dan ellipsis sesuai ruang memperbaiki batas kartu;
+  tidak memakai clipping panel untuk menyembunyikan masalah.
+- Regresi browser kini memeriksa setiap kartu+teks terhadap inner panel pada
+  360/390/1024/1366 dan teks130%; proof visual tambahan1280 dan teks100/130%.
+- Format/typecheck/lint/build PASS. Build `UoI1Yvm5SQ70SRXgQDM8A`;
+  **21/21 targeted E2E PASS**,1worker,0retry/skip/flaky,80.892s:3D default/lazy,
+  preferensi tersimpan/save-data/fallback, cache/scanner/offline, walkthrough,
+  editor/template/preview/reuse/history/pairing dan navigasi.
+- Full verify1086+7+122 pada9.54 tetap evidence historis buildg4, tidak diklaim
+  dijalankan ulang pada koreksi kecil ini. AI/SQL/auth/data/core tidak berubah.
+  Bukti baru `artifacts/qa/ui-ai-v2/ui-corrections.json`, screenshot before/after
+  pada `corrections/`, log `/workspace/.papannalar-cloud/logs/ui-corrections-*`.
+  Handoff mencatat perilaku3D terbaru. Server demo tetap lokal, seed dipertahankan;
+  tidak melakukan paid API, hosted migration, deploy atau push.
+
+### 9.56 Authoring Blender dan kandidat koreksi final — DONE (2 Oktober 2026)
+
+- Permintaan tambahan pengguna diterapkan dengan Blender4.3.2 yang sudah ada:
+  tiga geometri kit di-refine (bevel/normals, bola halus, warna linear glTF,
+  roughness matte), GLB dan poster Cycles CPU720×540 diekspor lokal. Tiga sumber
+  `.blend`, script reproduksi dan provenance disimpan pada `design/pn-ui-v2`
+  serta `scripts`. Original enam GLB/poster tetap byte-identical dengan kit.
+  Percobaan denoising pertama gagal karena build Blender tidak memiliki OIDN;
+  render96samples tanpa denoising kemudian PASS, dengan `--python-exit-code1`.
+- Kamera diperbaiki setelah pemeriksaan visual agar seluruh model/alas lebih
+  besar namun tetap dalam viewport saat tilt pointer. Tidak ada RAF/auto-orbit,
+  scene WebGL pada soal atau download engine di scanner; preferensi/fallback utuh.
+- Kandidat final `JJ8Ophp65UWCGJ7KT-ntf`: serial format/typecheck/lint/build dan
+  **21/21 targeted E2E PASS**,86.658detik,1worker,0retry/skip/flaky. Scope meliputi
+  default3D/all3GLB, no-WebGL/save-data/preferensi/chunk gagal, offline/scanner,
+  walkthrough/editor/preview/pairing/histori/navigasi. Full verify pada9.54 adalah
+  hasil historis buildg4; tidak diklaim dijalankan ulang untuk koreksi visual.
+- Screenshot login/editor/ketiga model diperiksa visual. Navigator **20px→0px**
+  pada360/390/1024/1280/1366 dan teks100/130%;0runtimeerror. Policy browser:
+  idle105→105, hidden105→105 (stub eksplisit), offscreen117→117,
+  reduced165→165, light0canvas. Bukan bukti GPU/perangkat fisik.
+- Model245304byte + poster341308byte =586612byte; first-model68160byte,
+  maksimum121472byte<500KB. Chunkopsional154313bytegzip<250KB dan tidak masuk
+  precache; tiga poster saja masuk. LisensiCC0/ThreeMIT; aset/paidAPI USD0.
+- Proof aman `artifacts/qa/ui-ai-v2/ui-corrections.json`; log terbaru
+  `/workspace/.papannalar-cloud/logs/ui-corrections-final-fit-*`. Core/content/
+  local/auth/review/37migration lama tetap unchanged;9body dokumen+marker dijaga.
+  Auth/transport sintetis, SQL/RLS loopback nyata. Seed7B/7C dipertahankan.
+- Handoff memuat seluruh route sebelum/sesudah, dua protokol AI yang diuji lokal,
+  batas live dan cara run. Draft start_skill cloud diperbarui tanpa publish/deploy.
+  Tidak ada blocker implementasi lokal; gap eksternal tetap mengikuti handoff.
+  Next exact: run `source /workspace/.papannalar-cloud/activate.sh`, `pnpm build`,
+  `pnpm video` setelah menghentikan launcher sendiri yang sudah berjalan.

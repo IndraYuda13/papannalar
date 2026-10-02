@@ -41,7 +41,7 @@ export function LoginForm() {
           autoComplete="email"
           required
           maxLength={254}
-          className="mt-2 min-h-12 w-full rounded-input border border-pn-ink-400 bg-white px-3 font-normal"
+          className="studio-field mt-2 min-h-12 w-full rounded-input border border-pn-ink-400 bg-white px-3 font-normal"
         />
       </label>
       <Button type="submit" disabled={busy} className="w-full">

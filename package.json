@@ -25,11 +25,12 @@
     "test:omr": "vitest run tests/unit/omr.test.ts tests/unit/cards.test.ts",
     "test:db:prepare": "node scripts/test-db.mjs prepare",
     "test:rls": "node scripts/test-db.mjs rls",
-    "test:integration": "node scripts/test-db.mjs rls",
+    "test:integration": "node scripts/test-db.mjs rls && vitest run --config vitest.ai-integration.config.ts",
     "test:privacy": "vitest run tests/unit/privacy.test.ts tests/unit/dependency-boundaries.test.ts && playwright test tests/e2e/privacy-storage.spec.ts",
     "test:offline": "playwright test tests/e2e/offline.spec.ts",
     "test:e2e": "playwright test",
-    "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm test:integration && pnpm build && pnpm test:e2e"
+    "verify": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm test && pnpm test:integration && pnpm build && pnpm test:e2e",
+    "ai:diagnose": "node scripts/ai-diagnostic.mjs"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "5.3.0",
@@ -50,6 +51,7 @@
     "react-dom": "19.3.0",
     "server-only": "0.0.1",
     "tailwind-merge": "3.7.0",
+    "three": "0.186.1",
     "zod": "4.6.5"
   },
   "devDependencies": {
@@ -59,6 +61,7 @@
     "@types/qrcode": "1.5.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@types/three": "0.186.0",
     "@vitest/coverage-v8": "5.0.2",
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.6",

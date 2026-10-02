@@ -7,6 +7,7 @@ test-results/
 *.tsbuildinfo
 .env*
 !.env.example
+!config/.env.ui-ai.example
 public/sw.js
 public/offline/
 .browser-tests/
@@ -17,6 +18,18 @@ artifacts/*
 artifacts/qa/*
 !artifacts/qa/video-ready/
 !artifacts/qa/ui-polish/
+!artifacts/qa/ui-ai-v2/
+artifacts/qa/ui-ai-v2/*
+!artifacts/qa/ui-ai-v2/summary.json
+!artifacts/qa/ui-ai-v2/route-matrix.json
+!artifacts/qa/ui-ai-v2/bundle.json
+!artifacts/qa/ui-ai-v2/asset-budget.json
+!artifacts/qa/ui-ai-v2/doc-dry-run.json
+!artifacts/qa/ui-ai-v2/doc-apply.json
+!artifacts/qa/ui-ai-v2/doc-idempotency.json
+!artifacts/qa/ui-ai-v2/server-check.json
+!artifacts/qa/ui-ai-v2/ui-corrections.json
+design/pn-ui-v2/renders/
 artifacts/qa/video-ready/*
 !artifacts/qa/video-ready/final-evidence.json
 !artifacts/qa/video-ready/server-http-check.json

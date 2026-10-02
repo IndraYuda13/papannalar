@@ -65,6 +65,17 @@ test("Aplikasi Guru terbuka pada HP, font lokal siap dan navigasi ke papan beker
   await board
     .getByRole("button", { name: "Simpan tampilan", exact: true })
     .click();
+  const capability = board.getByRole("region", {
+    name: "Tes Kemampuan Papan",
+    exact: true,
+  });
+  await expect(capability).toBeVisible();
+  await capability
+    .getByRole("button", {
+      name: "Tutup tes · lanjut dengan cadangan",
+      exact: true,
+    })
+    .click();
   await expect(
     board.getByRole("heading", { name: "Layar Kelas menunggu." }),
   ).toBeVisible();
