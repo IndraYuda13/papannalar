@@ -1,7 +1,8 @@
 # PLAN - Eksekusi Codex PapanNalar
 
 Versi 1.0 | Disusun 29 September 2026
-Status terkini (1 Oktober 2026): UI/UX polish P1–P3 DONE software lokal sesuai prompt
+Status terkini (2 Oktober 2026): kode dipublikasikan ke GitHub main; UI/UX polish
+P1–P3 DONE software lokal sesuai prompt
 pengguna `E:/ASUS/Downloads/PapanNalar_UI_UX_Polish_Prompt.md` dan jawaban
 “Jalankan perubahan di repo”. V1–V6 Video Ready DONE software lokal sesuai
 `PapanNalar_Video_Ready_Codex.md`; menggantikan prioritas corrective pass lama.
@@ -94,8 +95,8 @@ Ubah status hanya berdasarkan pekerjaan yang benar-benar dilakukan.
 | Field | Nilai terkini |
 | --- | --- |
 | Milestone aktif | UI/UX polish P1–P3 DONE software lokal; Video Ready V1–V6 dan baseline dipertahankan |
-| Task aktif | P1–P3 selesai: microcopy/status/kendali/pairing, template editor, ikon dan motion ringan; handoff untuk walkthrough/rekaman |
-| Commit aplikasi terakhir | Implementasi masih working tree; base dokumen `47aa60d729b293a53365a780c0d1cd9485ec6f95` |
+| Task aktif | Publikasi GitHub main selesai; berikutnya periksa CI/walkthrough rekaman |
+| Commit aplikasi terakhir | GitHub main `e10e27e478d5f3154e6c8bbd92b8a06e0e4ed15b` (aplikasi); base dokumen lokal tetap dipertahankan |
 | Repository diperiksa | Ya, 29 Sep 2026; satu Next app di root, pnpm-lock.yaml; perubahan baseline terdahulu dipertahankan |
 | Package manager / versi runtime | Node 24.14.1 + pnpm 11.19.0 dipin pada .node-version/package.json; lockfile tersedia. Launcher pnpm alat memakai Node 24.19.0, child app tetap 24.14.1 |
 | Dependency baseline | Next 16.3.6, React 19.3.0, TypeScript 5.9.3 strict; versi lengkap, kompatibilitas dan lisensi di bagian 9.2 |
@@ -2353,7 +2354,7 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
   Kode, DB dan server tidak diubah. TRUE BLOCKER packaging: tidak ada.
   Next exact: ekstrak ZIP, buka BUKA_DULU.txt lalu VIDEO_HANDOFF.md untuk setup.
 
-### 9.53 Publikasi GitHub — IN_PROGRESS (2 Oktober 2026, permintaan pengguna)
+### 9.53 Publikasi GitHub — DONE (2 Oktober 2026, permintaan pengguna)
 
 - Target diotorisasi pengguna: `IndraYuda13/papannalar`, private, default branch
   main; inspeksi GitHub melalui connector menyatakan repo kosong dan akses push.
@@ -2364,6 +2365,17 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
   DB/profil/env terisi/build/ZIP dan laporan mentah dikecualikan lewat `.gitignore`.
 - Histori dokumen lokal dan perubahan pengguna dipertahankan. Tidak mengubah kode
   aplikasi/schema atau menjalankan ulang suite yang sudah lulus untuk publikasi.
-  Next exact: cek index/tree, unggah commit main dan verifikasi SHA/tree di GitHub.
+  Publikasi menggunakan Git Data API connector, tanpa force update atau deploy.
 - Pemeriksaan index awal menemukan satu baris kosong ekstra di akhir migration017;
   hanya whitespace akhir dirapikan, tanpa perubahan SQL/DDL/perilaku database.
+- Validasi index akhir PASS;549 file (548 UTF-8+1 font berlisensi),37 migration.
+  Satu blob binary dan13 batch tree diunggah; tree GitHub cocok tepat dengan
+  `git write-tree`: `ff3428a77461e8086ea1e915a8f8170b2424d5dc`.
+- Commit aplikasi `e10e27e478d5f3154e6c8bbd92b8a06e0e4ed15b` berhasil menjadi
+  heads/main dan diverifikasi melalui GitHub API. Commit awal repo hanya .gitignore;
+  repo private dan riwayat remote tidak ditimpa. Remote lokal menunjuk URL HTTPS
+  repo pengguna; metadata commit akan dicocokkan hash sebelum sinkronisasi lokal.
+- Hasil unit/browser/build9.51 tetap evidence sebelumnya, bukan tes baru pada run
+  push ini. CI GitHub perlu diperiksa tersendiri; tidak mengklaim PASS sebelum hasil.
+  TRUE BLOCKER publikasi: tidak ada. Next exact: periksa Actions dan lanjut rekaman
+  sesuai VIDEO_HANDOFF; gate perangkat/hosted/pilot tetap seperti9.51.
