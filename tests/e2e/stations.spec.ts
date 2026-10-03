@@ -37,7 +37,7 @@ test("ROT01 teacher timer/three rounds and board projection preserve privacy", a
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7R");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7R");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7R/ }).click();
   await openTeacherExample(page);
@@ -74,7 +74,7 @@ test("ROT01 teacher timer/three rounds and board projection preserve privacy", a
     "Layar tersambung",
   );
   const control = page.getByRole("region", {
-    name: "Kendali Stasiun",
+    name: "Kegiatan kelompok",
     exact: true,
   });
   const commandStarted = Date.now();

@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { classListSchema } from "../../src/contracts/classes";
 import {
   loginTeacher,
   injectFixture,
@@ -71,15 +72,37 @@ for (const width of [360, 390])
     await expect(
       page.getByRole("button", { name: "Sinkronkan jawaban", exact: true }),
     ).toBeHidden();
-    await page
-      .getByRole("link", { name: "Buka latihan & AI", exact: true })
-      .click();
+    const practiceLink = page.getByRole("link", {
+      name: "Buka latihan & AI",
+      exact: true,
+    });
+    const selectedId = new URL(
+      (await practiceLink.getAttribute("href"))!,
+      origin,
+    ).searchParams.get("class");
+    const classList = classListSchema.parse(
+      await (await page.request.get("/api/v1/classes?mode=demo")).json(),
+    );
+    const selectedClass = classList.classes.find((c) => c.id === selectedId);
+    expect(selectedClass).toBeDefined();
+    await practiceLink.click();
     await expect(
       page.getByRole("heading", { name: "Latihan & bantuan AI", exact: true }),
     ).toBeVisible();
     await expect(
       menu.getByRole("link", { name: "Latihan & AI", exact: true }),
     ).toHaveAttribute("aria-current", "page");
+    // Home resumes the latest class; shared sample history need not end in 7B.
+    await expect(
+      page.getByRole("button", {
+        name: `Buka kelas ${selectedClass!.label} ${selectedClass!.count} siswa`,
+        exact: true,
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
+    if (selectedClass!.label !== "7B") {
+      await page.getByText("Ganti kelas", { exact: true }).click();
+      await page.getByRole("button", { name: /Buka kelas 7B/ }).click();
+    }
     await expect(
       page.getByRole("button", { name: /Buka kelas 7B/ }),
     ).toHaveAttribute("aria-pressed", "true");
@@ -239,7 +262,7 @@ test("FLOW02 empty pages offer a next action; personal and example classes remai
     .click();
   await page.getByLabel("Gunakan kelas").selectOption("demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7UX");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7UX");
   await page.getByLabel("Jumlah siswa", { exact: true }).fill("3");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await expect(
@@ -304,7 +327,7 @@ test("FLOW04 selected class reopens offline through canonical shell; essential s
   await loginTeacher(page, { guided: true });
   await page.getByLabel("Gunakan kelas").selectOption("demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7OFF");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7OFF");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await expect(
     page.getByRole("button", { name: /Buka kelas 7OFF/ }),
@@ -408,9 +431,7 @@ test("FLOW03 AI status never claims tested readiness; changing source clears the
   await expect(
     page.getByRole("button", { name: /^Mulai sesi$|^Lanjutkan sesi$/ }),
   ).toBeEnabled();
-  await expect(page.getByRole("tablist", { name: "Sumber soal" })).toHaveCount(
-    0,
-  );
+  await expect(page.getByRole("group", { name: "Sumber soal" })).toHaveCount(0);
   await collection.selectOption("");
   await expect(collection).toHaveValue("");
   await expect(

@@ -62,7 +62,7 @@ export function ExitWorkspace({
         }
       })
       .catch(() => {
-        if (active) setMessage("Kartu Keluar lokal belum dapat dibuka.");
+        if (active) setMessage("Kartu cek akhir lokal belum dapat dibuka.");
       })
       .finally(() => {
         exits.close();
@@ -170,10 +170,10 @@ export function ExitWorkspace({
     );
   return (
     <section
-      aria-label="Hasil Kartu Keluar"
+      aria-label="Hasil Kartu cek akhir"
       className="space-y-4 rounded-kartu border-2 border-primary/30 bg-white p-4"
     >
-      <h4 className="text-xl font-bold">Kartu Keluar · benar dan paham</h4>
+      <h4 className="text-xl font-bold">Kartu cek akhir · benar dan paham</h4>
       {plan?.delivery === "card" && (
         <PrintCards compact fixedKind="exit" count={parent.roster.length} />
       )}
@@ -182,14 +182,14 @@ export function ExitWorkspace({
           disabled={busy || !groups.length || scope.mode !== "demo"}
           onClick={() => void prepare()}
         >
-          Bekukan Kartu Keluar dari paket
+          Siapkan pertanyaan penutup
         </Button>
       ) : (
         <>
           <p>
             {plan.delivery === "oral"
-              ? "Cek lisan: satu soal dan kenapa di Stasiun Guru."
-              : "Tiga baris, satu panel per kelompok. Jawaban dan alasan menjadi satu observasi."}
+              ? "Tanyakan satu soal kepada siswa, lalu minta ia menjelaskan alasannya."
+              : "Tampilkan soal kelompok. Siswa mengisi tiga baris pada kartu: jawaban, alasan, dan soal tambahan."}
           </p>
           {plan.delivery === "card" && (
             <>
@@ -230,7 +230,7 @@ export function ExitWorkspace({
           )}
           {draft && (
             <form
-              aria-label="Review Kartu Keluar"
+              aria-label="Review Kartu cek akhir"
               onSubmit={save}
               className="space-y-3 rounded-kartu border p-3"
             >

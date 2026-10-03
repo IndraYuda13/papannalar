@@ -14,16 +14,30 @@ async function packageFixture(page: Page) {
 }
 async function navigation(page: Page) {
   const handle = page.getByRole("button", {
-    name: "Tahan dua detik untuk navigasi sesi",
+    name: "Buka navigasi sesi",
     exact: true,
   });
-  await handle.focus();
-  await page.keyboard.down("Enter");
-  await expect(
-    page.getByRole("navigation", { name: "Navigasi sesi papan" }),
-  ).toBeVisible();
-  await page.keyboard.up("Enter");
-  return page.getByRole("navigation", { name: "Navigasi sesi papan" });
+  const nav = page.getByRole("navigation", { name: "Navigasi sesi papan" });
+  if (await nav.isVisible()) {
+    await nav
+      .getByRole("button", { name: "Tutup navigasi", exact: true })
+      .click();
+    await expect(handle).toBeFocused();
+  }
+  await handle.click();
+  await expect(nav).toBeVisible();
+  await nav
+    .getByRole("combobox", { name: "Tampilan sesi", exact: true })
+    .focus();
+  // The five-second auto-hide must never remove the focused menu.
+  await page.waitForTimeout(5100);
+  await expect(nav).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(nav).toBeHidden();
+  await expect(handle).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(nav).toBeVisible();
+  return nav;
 }
 test("CACHE01 board content uses actual IndexedDB: empty, strict input, persistence, clear and no group data", async ({
   page,
@@ -69,7 +83,7 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7P");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7P");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7P/ }).click();
   await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
@@ -159,12 +173,9 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
   offline = true;
   await context.setOffline(true);
   await board.reload();
-  await board
-    .getByRole("button", {
-      name: "Tutup tes · lanjut dengan cadangan",
-      exact: true,
-    })
-    .click();
+  await expect(
+    board.getByRole("region", { name: "Tes Kemampuan Papan", exact: true }),
+  ).toHaveCount(0);
   await board.getByText("Menu papan", { exact: true }).click();
   await board
     .getByRole("button", { name: "Buka paket tersimpan", exact: true })

@@ -62,6 +62,9 @@ function ItemPages({
     function measure() {
       if (!element || !region || !region.clientWidth || !region.clientHeight)
         return;
+      // A teacher preview with its prompt already above the model has no text
+      // pages to split; the page itself scrolls around the full-size controls.
+      if (hidePrompt && item.kind !== "card") return;
       if (!paginated) {
         if (
           element.scrollHeight > element.clientHeight + 1 ||
@@ -147,7 +150,7 @@ function ItemPages({
       observer.disconnect();
       changes.disconnect();
     };
-  }, [item.prompt, optionsKey, paginated, hidePrompt]);
+  }, [item.prompt, item.kind, optionsKey, paginated, hidePrompt]);
   return (
     <section ref={root} className="library-item" data-testid="library-item">
       <h1 className="library-prompt" hidden={paginated || hidePrompt}>

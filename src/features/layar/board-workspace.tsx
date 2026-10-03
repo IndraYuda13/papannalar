@@ -68,7 +68,6 @@ export function BoardWorkspace() {
     <BoardSessionWorkspace
       key={viewKey}
       resetRequest={resetRequest}
-      skipFirstUseCheck={viewKey > 0 || Boolean(resetRequest)}
       onReset={reset}
       onResetComplete={completeReset}
     />
@@ -80,14 +79,11 @@ function BoardSessionWorkspace({
   resetRequest,
   onReset,
   onResetComplete,
-  skipFirstUseCheck,
 }: {
   resetRequest?: string;
   onReset: () => void;
   onResetComplete: (requestId: string) => void;
-  skipFirstUseCheck: boolean;
 }) {
-  const [skipInitialCheck] = useState(skipFirstUseCheck);
   const [challenge, setChallenge] = useState<Challenge>();
   const [presentationId, setPresentationId] = useState<string>();
   const [envelope, setEnvelope] = useState<PresentationEnvelope>();
@@ -132,10 +128,9 @@ function BoardSessionWorkspace({
     const timer = window.setTimeout(() => {
       const cached = readBoardProfile();
       setProfile(cached);
-      setTesting(!cached && !skipInitialCheck);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [skipInitialCheck]);
+  }, []);
   async function completeTest(value: BoardProfile) {
     const saved = saveBoardProfile(value);
     setProfile(value);
@@ -237,10 +232,13 @@ function BoardSessionWorkspace({
     [presentationId, resetRequest, onResetComplete],
   );
   useEffect(() => {
-    if (!initialized.current) {
-      initialized.current = true;
-      void start(true);
-    }
+    const timer = setTimeout(() => {
+      if (!initialized.current) {
+        initialized.current = true;
+        void start(true);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [start]);
   useEffect(() => {
     const recover = () => {
@@ -421,7 +419,14 @@ function BoardSessionWorkspace({
             HP guru tetap tersimpan.
           </p>
         </div>
-        <Button size="board" variant="outline" onClick={() => setTesting(true)}>
+        <Button
+          size="board"
+          variant="outline"
+          onClick={(event) => {
+            event.currentTarget.closest("details")?.removeAttribute("open");
+            setTesting(true);
+          }}
+        >
           Tes Kemampuan Papan
         </Button>
         {profile && (
@@ -613,7 +618,13 @@ function BoardSessionWorkspace({
             <h1 className="mb-6 text-[64px] leading-tight font-bold">
               Layar Kelas menunggu.
             </h1>
-            <p className="mb-8 text-[32px]">Belum ada sesi yang ditampilkan.</p>
+            <ol className="mb-6 list-decimal space-y-2 pl-7 text-[26px]">
+              <li>Buka halaman ini di laptop, proyektor, atau papan kelas.</li>
+              <li>Di HP guru, buka sesi mengajar.</li>
+              <li>
+                Pilih Sambungkan Layar, lalu pindai QR atau isi kode di samping.
+              </li>
+            </ol>
             <p role="status" className="mb-6">
               {message}
             </p>

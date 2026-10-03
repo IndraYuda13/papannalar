@@ -22,8 +22,9 @@ for (const touches of [0, 1, 2, 4])
       errors: string[] = [];
     page.on("pageerror", () => errors.push("runtime"));
     await page.goto("/layar");
+    await page.locator(".board-menu > summary").click();
     await page
-      .getByRole("button", { name: "Simpan tampilan", exact: true })
+      .getByRole("button", { name: "Tes Kemampuan Papan", exact: true })
       .click();
     const panel = page.getByRole("region", {
         name: "Tes Kemampuan Papan",
@@ -272,7 +273,7 @@ test("REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7Q");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7Q");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7Q/ }).click();
   await openTeacherExample(page);
@@ -287,8 +288,9 @@ test("REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot
   for (const surface of [page, board])
     surface.on("pageerror", () => errors.push("runtime"));
   await board.goto("/layar");
+  await board.locator(".board-menu > summary").click();
   await board
-    .getByRole("button", { name: "Simpan tampilan", exact: true })
+    .getByRole("button", { name: "Tes Kemampuan Papan", exact: true })
     .click();
   await board
     .getByRole("button", {
@@ -383,7 +385,10 @@ test("REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot
     board.getByRole("region", { name: "Garis Bilangan Lompat", exact: true }),
   ).toContainText("Model sudah sesuai");
   await clickBoard(
-    board.getByRole("button", { name: "Ulang langkah", exact: true }),
+    board.getByRole("button", {
+      name: "Batalkan langkah terakhir",
+      exact: true,
+    }),
   );
   await expect(board.getByTestId("number-position")).toContainText("−3");
   await board.screenshot({
@@ -458,8 +463,9 @@ test("REMOTE02 fractions, ratio, algebra, balance and graphs use the bounded inp
     if (m.type() === "error") errors.push("console");
   });
   await board.goto("/layar");
+  await board.locator(".board-menu > summary").click();
   await board
-    .getByRole("button", { name: "Simpan tampilan", exact: true })
+    .getByRole("button", { name: "Tes Kemampuan Papan", exact: true })
     .click();
   await board
     .getByRole("button", {
@@ -639,7 +645,10 @@ test("REMOTE02 fractions, ratio, algebra, balance and graphs use the bounded inp
     board.getByRole("region", { name: "Tabel Rasio", exact: true }),
   ).toContainText("Periksa pengali kedua baris");
   await activate(
-    board.getByRole("button", { name: "Ulang langkah", exact: true }),
+    board.getByRole("button", {
+      name: "Batalkan langkah terakhir",
+      exact: true,
+    }),
   );
   await expect(
     board.getByLabel("Nilai B kolom 2", { exact: true }),

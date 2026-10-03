@@ -33,10 +33,7 @@ export async function openBoard(
   if (await save.isVisible()) await save.click();
   // A connection badge can render before the first-use capability effect.
   // Wait for the actual check when this browser has no saved profile.
-  const hasProfile = await page.evaluate(() =>
-    Boolean(localStorage.getItem("pn-board-capabilities-v1")),
-  );
-  if (!hasProfile) await expect(check).toBeVisible();
+  // Setup is optional: a new board reaches pairing with conservative defaults.
   await expect
     .poll(async () => {
       if (await check.isVisible())

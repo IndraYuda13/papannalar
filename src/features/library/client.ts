@@ -3,6 +3,17 @@ import {
   libraryNetworkAction,
   type LibraryAction,
 } from "../../contracts/library";
+export class LibraryRequestError extends Error {
+  constructor(public readonly status: number) {
+    super(
+      status === 409
+        ? "CONFLICT"
+        : status === 422
+          ? "INVALID_INPUT"
+          : "REQUEST_FAILED",
+    );
+  }
+}
 export async function libraryCall(action: LibraryAction): Promise<unknown> {
   const response = await fetch("/api/v1/library", {
     method: "POST",
@@ -10,14 +21,7 @@ export async function libraryCall(action: LibraryAction): Promise<unknown> {
     cache: "no-store",
     body: JSON.stringify(libraryNetworkAction(action)),
   });
-  if (!response.ok)
-    throw new Error(
-      response.status === 409
-        ? "CONFLICT"
-        : response.status === 422
-          ? "INVALID_INPUT"
-          : "REQUEST_FAILED",
-    );
+  if (!response.ok) throw new LibraryRequestError(response.status);
   return response.json();
 }
 export function jakartaDate(now = new Date()) {

@@ -17,11 +17,11 @@ export function OpeningBoard({
   const [intuitive, setIntuitive] = useState<"less" | "more" | null>(null);
   return (
     <section
-      aria-label={continuation ? "Lanjutan pembuka" : "Pembuka bermakna"}
+      aria-label={continuation ? "Diskusi lanjutan" : "Pertanyaan pembuka"}
       className="w-full space-y-5 text-left"
     >
       <h1 className="text-[56px] font-bold">
-        {continuation ? "Lanjutan Pembuka" : lesson.prompt}
+        {continuation ? "Ayo lanjutkan" : lesson.prompt}
       </h1>
       {lesson.intuitiveOnly && (
         <QuestionVisual
@@ -50,10 +50,7 @@ export function OpeningBoard({
           )}
           {lesson.intuitiveOnly ? (
             <div className="space-y-4 text-[40px]">
-              <p>
-                Tebak dengan intuisimu. Semua menulis perkiraan di buku; belum
-                perlu menghitung.
-              </p>
+              <p>Menurutmu, berapa jawabannya? Tulis perkiraanmu di buku.</p>
               <div className="flex gap-4">
                 <Button
                   size="board"
@@ -79,17 +76,14 @@ export function OpeningBoard({
                   . Apa alasanmu?
                 </p>
               )}
-              <p>
-                Di stasiun, lihat contoh dengan angka lain sebelum mencoba model
-                sendiri.
-              </p>
+              <p>Jelaskan alasanmu kepada teman.</p>
             </div>
           ) : lesson.tool ? (
             <ToolActivity task={lesson.tool} pattern="predict" />
           ) : (
             <p className="text-[40px]">
-              Tulis perkiraan di buku. Bandingkan alasanmu dengan teman; model
-              konteks disiapkan pada alat yang sesuai.
+              Tulis jawabanmu di buku. Ceritakan cara menghitungnya kepada
+              teman.
             </p>
           )}
         </>

@@ -11,6 +11,7 @@ import {
   type PackageVariant,
 } from "@/core/package/build";
 import { createPackageRepository } from "@/local/packages";
+import { createCycleRepository } from "@/local/cycles";
 import { loadPackagePlacements } from "@/features/oral/package-placement";
 import { Button } from "@/ui/components/button";
 import { MathPrompt } from "@/ui/components/math-prompt";
@@ -44,9 +45,7 @@ export function PackageWorkspace({
   onSelectedStepChange: (value: string) => void;
   purpose?: "session" | "extra";
 }) {
-  const [variant, setVariant] = useState<PackageVariant>(
-    classroom && classroom.grade <= 3 ? "oral" : "initial",
-  );
+  const [variant, setVariant] = useState<PackageVariant | "auto">("auto");
   const [openingStep, setOpeningStep] = useState<StepId>(
     classroom && classroom.grade >= 7
       ? "D1"
@@ -87,19 +86,29 @@ export function PackageWorkspace({
     };
   }, [ownerId, mode, classroom?.id, setPkg, setSelectedStep]);
   async function prepare() {
-    if (!classroom) return;
+    if (!classroom || busy) return;
     setBusy(true);
     setMessage("");
     const repo = createPackageRepository({ ownerId, mode });
+    const cycles = createCycleRepository({ ownerId, mode });
     try {
+      const previous = (await cycles.list(classroom.id)).at(-1);
+      const chosen =
+        variant === "auto"
+          ? classroom.grade <= 3
+            ? "oral"
+            : previous?.assessmentRevision
+              ? "weekly"
+              : "initial"
+          : variant;
       const occupied = await loadPackagePlacements(
         { ownerId, mode },
         classroom.id,
         students,
       );
-      if ((variant === "weekly" || variant === "short") && !occupied.length) {
+      if ((chosen === "weekly" || chosen === "short") && !occupied.length) {
         setMessage(
-          "Belum ada hasil cek siswa. Pilih Cek pertama, atau lakukan cek secara lisan, sebelum menyiapkan latihan lanjutan.",
+          "Belum ada hasil cek siswa untuk membuat latihan lanjutan. Buka langkah 3: Mengajar, masukkan jawaban siswa, lalu simpan penilaian sesi sebelumnya.",
         );
         return;
       }
@@ -107,7 +116,7 @@ export function PackageWorkspace({
         id: crypto.randomUUID(),
         classId: classroom.id,
         grade: classroom.grade,
-        variant,
+        variant: chosen,
         seed: freshSeed(),
         occupied,
       });
@@ -131,6 +140,7 @@ export function PackageWorkspace({
       );
     } finally {
       repo.close();
+      cycles.close();
       setBusy(false);
     }
   }
@@ -323,15 +333,22 @@ export function PackageWorkspace({
                   aria-label="Jenis paket"
                   className={field}
                   value={variant}
-                  onChange={(e) => setVariant(e.target.value as PackageVariant)}
+                  onChange={(e) =>
+                    setVariant(e.target.value as PackageVariant | "auto")
+                  }
                 >
+                  <option value="auto">
+                    Pilih otomatis sesuai riwayat kelas
+                  </option>
                   <option value="initial">Cek pertama · 10 soal</option>
                   <option value="weekly">
                     {classroom.grade <= 3
                       ? "Cek lanjutan · secara lisan"
                       : "Cek lanjutan · 5 soal"}
                   </option>
-                  <option value="oral">Cek secara lisan</option>
+                  {classroom.grade <= 3 && (
+                    <option value="oral">Cek secara lisan</option>
+                  )}
                   <option value="short">Latihan singkat</option>
                 </select>
               </label>
@@ -346,11 +363,13 @@ export function PackageWorkspace({
                 </Button>
               )}
               <p className="text-sm text-muted-foreground sm:col-span-2">
-                {variant === "initial"
-                  ? "Untuk sesi pertama: periksa pemahaman siswa sebelum membagi kelompok."
-                  : variant === "oral"
-                    ? "Guru bertanya langsung kepada siswa. Tidak memakai lembar jawaban."
-                    : "Memakai hasil cek sebelumnya untuk menyiapkan latihan lanjutan."}
+                {variant === "auto"
+                  ? "Aplikasi memilih cek pertama untuk kelas baru, cek lanjutan setelah ada hasil, atau cek lisan untuk kelas 1–3."
+                  : variant === "initial"
+                    ? "Untuk sesi pertama: periksa pemahaman siswa sebelum membagi kelompok."
+                    : variant === "oral"
+                      ? "Guru bertanya langsung kepada siswa. Tidak memakai lembar jawaban."
+                      : "Memakai hasil cek sebelumnya untuk menyiapkan latihan lanjutan."}
               </p>
             </div>
           </details>

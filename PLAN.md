@@ -2916,3 +2916,95 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
   Tidak membuat PR, deploy atau hostedmigration; CIpostpush belum diperiksa.
   Task implementasi dan publikasi kode selesai; operator/live/hardware gate
   tetap NOT_RUN sesuai handoff, tidak dijadikan approval atau production claim.
+
+
+### 9.63 Alur guru, kegagalan mulai sesi dan audit QA — 3 Oktober 2026 UTC
+
+- [S] Pengguna meminta audit/perbaikan menyeluruh, alur guru awam yang jelas,
+  semua tindakan utama bisa dijalankan, bahasa siswa tanpa jargon, kemudian
+  commit/push. Catatan PapanNalar-Codex-Handoff.md adalah saran QA, bukan sumber
+  approval. Source report menunjuk c2a0593; baseline run ini 05ed781, branch work
+  bersih. Lampiran report tidak diberikan; bukti live tidak diadopsi sebagai
+  bukti kandidat. Tidak membuat subagent, PR, scaffold atau mengulang M00–M17.
+- Skill cloud setup/runtime dipakai dengan toolchain existing. Node24.14.1,
+  pnpm11.19.0, Next16.3.6, PostgreSQL17.11 lokal55432 dan Chromium153. Tidak
+  mengubah credential/toolchain/lockfile. Dokumentasi Next use-client/Link/
+  useRouter dibaca sebelum perubahan; keputusan K42 ditambahkan di TECH_SPEC2.4.
+- Bug pengguna direproduksi di baseline melalui UI publik: contoh7B berisi29
+  jawaban → latihan kelas sama → Siapkan soal → Mulai mengajar gagal. Histori
+  contoh terisi dahulu dianggap histori asing; localOperation lalu memetakan
+  rejection bisnis menjadi storage error. Timeline demo dipisahkan berdasarkan
+  cycle id, bukan menghapus data. Start paket aktif sama idempotent. Pilot guard
+  tetap; error domain bertipe dan pesan tindakan, quota tetap dibedakan.
+- Alur utama kelas → soal → mengajar → hasil; satu primary, AI tambahan. Kelas
+  berlabel Nama kelas; edit1/16/32 inline/fokus/Batal. Preview persiapan satu
+  soal, tanggal sesi berjalan ditampilkan sebelum resume, finish asesmen menuju
+  hasil. Kegagalan refresh daftar setelah receipt tidak membatalkan sukses.
+- Koreksi manual mengisi jawaban/review/base revision asli, termasuk siswa
+  pertama. Kosong/belum terbaca tidak otomatis menjadi ?. Draft jawaban/soal
+  memakai cache scoped existing, writes berurutan, recovery/reload serta guard
+  keluar; batal edit kembali ke receipt. Hapus soal dapat dibatalkan. Tidak ada
+  migration kontrak atau skor. Draft berbeda revisi server dijaga dan diberi
+  peringatan; merge dua draft belum disediakan.
+- Konflik per siswa tidak menahan antrean siswa lain; kedua versi ditampilkan
+  dengan nomor absen dan status pemeriksaan. Pilihan guru eksplisit. Receipt
+  lama tidak menimpa edit lebih baru dalam antrean; hasil dan sesi menerima
+  invalidation. Cache fallback hanya network/5xx;401/403 tidak membuka cache.
+  canMutate terpusat menonaktifkan mutasi utama saat kendali asing. Tidak
+  mengklaim seluruh kombinasi race multi-tab atau setiap screen reader lulus.
+- Preview enam alat memakai scroll halaman; pecahan meletakkan kontrol di atas,
+  menjaga48px cell serta satu-utuh. Koordinat grafik yang semula overflow16px
+  di360px diperbaiki. Head/context HP ringkas, tombol wrap dan safe area cukup.
+  Filter memakai aria-pressed; board QR langsung tanpa wizard, capability yang
+  belum diuji tetap belum terverifikasi. Navigasi klik/Enter/Escape menjaga
+  fokus; background pointer tidak lagi men-toggle tombol menu.
+- Bahasa Cek pertama/Cek lanjutan/Kartu cek akhir/Kegiatan kelompok diselaraskan.
+  Instruksi model konteks dihapus; siswa diminta menulis jawaban dan menjelaskan
+  caranya. Judul Ayo lanjutkan/Diskusi lanjutan, pesan simpan tanpa jargon
+  database. Label undo baru ditambahkan ke allowlist remote yang terbatas,
+  sementara label lama tetap diterima untuk kompatibilitas.
+- Target unit24/2file PASS; target browser mencatat kegagalan locator, cache
+  readiness, remote undo dan overflow grafik lalu memperbaikinya. Tidak
+  menghapus assertion/coverage, menambah retries atau menerima console error.
+  New FLOW01–08 menguji start dari contoh, idempotensi/histori, koreksi/cancel/
+  503, draft, date, class edit, first-use pairing, conflict/race, read-only dan
+  unreadable. Rincian aktual ada pada receiptworkflow-v7.json.
+- Full pnpm verify exit1: format/types/lint PASS; unit1095/72file PASS,
+  coverage92,48/87,52/96,28/93,46; SQL306assertion+116guard yang dilaporkan
+  runner PASS;9native HTTP+PostgreSQL PASS; buildC8C81ckj1RWA6ZfXk6iSI PASS.
+  Browser147PASS/8FAIL,21menit,1worker/retry0/skip0. Total command1475,66s.
+  Kegagalan: dua label pembuka usang, tiga tes masih menganggap wizard otomatis,
+  dua status locator ambigu sebelum redirect, serta helper navigasi yang
+  men-toggle menu yang sudah terbuka. Audit juga menemukan pointer background
+  membuka lalu klik menutup trigger; kode dan regresi keyboard/pointer diperkuat.
+- Gate serial perbaikan format/types/lint/buildin2LtgftI23FrF8ZeWoHb serta
+  45/45E2E PASS exit0,303,73s; delapan full-failure tercakup. Audit gambar
+  menambah grid2×2 beranda HP dan mengganti dua literal rombel. Gate layout
+  format/types/lint/build2YNhqi0po4Ou62cg8yXZC PASS;15PASS/2FAIL browser karena
+  tes memaksa kelas7B meski beranda menautkan kelas terakhir7C. Setup tes kini
+  memeriksa tautan kelas aktual sebelum memilih7B. Tidak menghapus/memaksa
+  data contoh. Perbaikan format/types/lint+2regresi PASS exit0,52,25s.
+- Source final fe87487e0d244ea6eb2b149483127598ba3b853bf6c0cc67f4dcec804a067fae,
+  595input;580identik terhadapfull-run,592terhadapgate45. Perubahan akhir
+  setelahbuild hanya filetes.155skenario unik tercakup lintasfull+regresi,
+  semua kegagalan dipetakan kehasilPASS; bukan full155/155 pada satu buildfinal.
+  Unit/SQL/native inputidentik tidak diduplikasi. Semua fase/exitcode direkam.
+- Visual108capture/state pada13jenis halaman,360/390/768/1188/1366/1920px;
+  preview6alat juga600/900,pecahanpenyebut12,teks20px. Overflow0/pageerror0.
+  Screenshotfinal menunggu model nyata,formfokus dan konten; captureloading
+  awal tidak dianggap bukti. Loopbackcode-only memang tidak menerbitkan QR
+  lintasperangkat; pengujian QR memakai challengefixtureHTTPS yang dinyatakan.
+  Gambarrepresentatif diperiksa. Sebelumhanya2capture390, tidakmengaranglainnya.
+- Preservation PASS183fileterlindungi/40SQLexisting/8originaldocs/19oldreceipts/
+  journalprefix/handofftail. Oldbundlereceipt dipulihkan persis; pengukuran
+  kandidat masukworkflow-v7.json. Three154310bytegzip,posterprecache,
+  engine/GLBlazy terpisah. Panduanguru docs13 diperbarui,QA15temuan ditriase
+  di handoff; gateyangmemerlukanreviewnyata/perangkat tidak dipalsukan.
+- Tidak ada dependency/aset/SQL baru atau perubahan core matematika, scoring,
+  OMR, generator, auth/RLS, provider/ledger. PaidAPIUSD0; computeNOT_MEASURED.
+  GLB/poster/Blender existing/lazy tetap, provider live dan hardware/studi guru
+  NOT_RUN. Kebutuhan operator dicatat di handoffV6, dirujuk tanpa meminta ulang.
+  Source dokumen00–07/jurnal/receipt lama dijaga. Tidak deploy/hostedmigration.
+- Implementasi dan bukti disiapkan untuk commit serta normal fast-forward push
+  work:main yang sudah diotorisasi. SHA remote diperiksa setelah publikasi;
+  tidak forcepush atau membuat PR. Hasil publikasi dicatat pada respons akhir.

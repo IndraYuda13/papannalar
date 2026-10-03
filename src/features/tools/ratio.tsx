@@ -48,7 +48,7 @@ export function RatioTable({
       setHighlight([]);
     } catch {
       setNotice(
-        "Gunakan pengali positif, paling banyak enam kolom. Ulang langkah untuk mencoba kembali.",
+        "Gunakan pengali positif, paling banyak enam kolom. Batalkan langkah terakhir untuk mencoba kembali.",
       );
     }
   }
@@ -196,7 +196,7 @@ export function RatioTable({
           variant="outline"
           onClick={() => act({ type: "undo" })}
         >
-          Ulang langkah
+          Batalkan langkah terakhir
         </Button>
         <Button
           size="board"

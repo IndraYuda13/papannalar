@@ -1,4 +1,5 @@
 "use client";
+import { readLibraryDetail } from "@/features/library/read-detail";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -39,13 +40,16 @@ import {
   libraryCache,
   pendingLibraryResponses,
   queueLibraryResponse,
+  removeLibraryCache,
 } from "@/local/library";
 import { ScanCapture } from "@/features/scanner/capture";
 import type { CardAnswer } from "@/cards/layouts/layout-v1";
 import type { CustomFormBinding } from "@/contracts/custom-form";
 import { field, panel, libraryCall } from "./client";
-import { StateNotice } from "@/ui/components/studio";
+import { StateNotice, WorkflowSteps } from "@/ui/components/studio";
 import { LibraryItemView } from "./item-view";
+import { useDraftGuard } from "@/ui/use-draft-guard";
+import { ConflictReview } from "./conflict-review";
 type Detail = { run: LibraryRun; responses: LibraryResponse[] };
 export function SessionPage({ id }: { id: string }) {
   const { scope } = useTeacher(),
@@ -53,12 +57,13 @@ export function SessionPage({ id }: { id: string }) {
     [message, setMessage] = useState("");
   const load = useCallback(async () => {
     try {
-      const data = navigator.onLine
-        ? runDetailSchema.parse(await libraryCall({ action: "detail", id }))
-        : await libraryCache(scope, "detail", id);
-      if (!data) throw new Error();
-      setDetail(data);
-      if (navigator.onLine) await libraryCache(scope, "detail", id, data);
+      const loaded = await readLibraryDetail(scope, id);
+      setDetail(loaded.detail);
+      setMessage(
+        loaded.cached
+          ? "Sambungan terganggu. Menampilkan jawaban yang tersimpan di perangkat ini."
+          : "",
+      );
     } catch {
       setMessage(
         "Sesi belum dapat dibuka. Sambungkan internet untuk memuatnya.",
@@ -81,7 +86,16 @@ export function SessionPage({ id }: { id: string }) {
         }
       />
     );
-  return <SessionWorkspace key={id} initial={detail} />;
+  return (
+    <div className="space-y-4">
+      {message && (
+        <p role="status" className="practice-feedback">
+          {message}
+        </p>
+      )}
+      <SessionWorkspace key={id} initial={detail} />
+    </div>
+  );
 }
 function projection(run: LibraryRun): PresentationState {
   const item = run.document.items[run.position];
@@ -108,7 +122,7 @@ async function publishRun(env: PresentationEnvelope, next: LibraryRun) {
 }
 export function SessionWorkspace({ initial }: { initial: Detail }) {
   const router = useRouter();
-  const { scope, refresh } = useTeacher(),
+  const { scope, refresh, canMutate } = useTeacher(),
     [run, setRun] = useState(initial.run),
     [responses, setResponses] = useState(initial.responses),
     [message, setMessage] = useState(""),
@@ -119,11 +133,82 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     [attendance, setAttendance] = useState(
       initial.run.roster[0]?.attendanceNumber ?? 1,
     ),
-    [answers, setAnswers] = useState<CardAnswer[]>(
-      initial.run.document.items.map(() => "?"),
+    [answers, setAnswers] = useState<(CardAnswer | "")[]>(
+      initial.run.document.items.map(() => ""),
     ),
     [needsReview, setReview] = useState(false),
     [pending, setPending] = useState(false);
+  const [baseRevision, setBaseRevision] = useState(0);
+  const [answerDirty, setAnswerDirty] = useState(false);
+  const draftWrites = useRef(Promise.resolve());
+  const openedManual = useRef(false);
+  useDraftGuard(manual && answerDirty);
+  useEffect(() => {
+    let active = true;
+    void libraryCache(scope, "answerDraft", initial.run.id)
+      .then((draft) => {
+        const student = initial.run.roster.find(
+          (s) => s.id === draft?.studentId,
+        );
+        if (
+          !active ||
+          openedManual.current ||
+          !draft ||
+          !student ||
+          draft.formId !== initial.run.formId ||
+          draft.version !== initial.run.version ||
+          draft.answers.length !== initial.run.document.items.length
+        )
+          return;
+        setAttendance(student.attendanceNumber);
+        setAnswers(draft.answers);
+        setReview(draft.review);
+        setBaseRevision(draft.revision);
+        setManual(true);
+        setAnswerDirty(true);
+        setMessage(
+          "Ada jawaban yang belum disimpan. Periksa isian yang dipulihkan, lalu pilih Simpan jawaban atau Batal.",
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [initial, scope]);
+  useEffect(() => {
+    if (!manual || !answerDirty) return;
+    const student = run.roster.find((s) => s.attendanceNumber === attendance);
+    if (!student) return;
+    draftWrites.current = draftWrites.current
+      .then(async () => {
+        await libraryCache(scope, "answerDraft", run.id, {
+          formId: run.formId,
+          version: run.version,
+          studentId: student.id,
+          answers,
+          revision: baseRevision,
+          review: needsReview,
+        });
+      })
+      .catch(() =>
+        setMessage(
+          "Draft jawaban belum tersimpan di perangkat. Tetap di halaman ini dan pilih Simpan jawaban.",
+        ),
+      );
+  }, [
+    manual,
+    answerDirty,
+    run,
+    scope,
+    attendance,
+    answers,
+    baseRevision,
+    needsReview,
+  ]);
+  async function discardDraft() {
+    await draftWrites.current;
+    await removeLibraryCache(scope, "answerDraft", run.id);
+  }
   const mutating = useRef(false);
   const transport = usePresentationTransport({
     sessionId: run.id,
@@ -150,13 +235,17 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
       if (result.success && result.data.run.id === run.id) {
         setRun(result.data.run);
         setResponses(result.data.responses);
-        setPending(false);
-        setMessage("Jawaban tersimpan di database.");
+        void pendingLibraryResponses(scope)
+          .then((rows) => setPending(rows.some((r) => r.id === run.id)))
+          .catch(() => undefined);
+        setMessage(
+          "Jawaban tersimpan. Anda bisa melanjutkan ke siswa berikutnya.",
+        );
       }
     };
     window.addEventListener("pn-library-synced", synced);
     return () => window.removeEventListener("pn-library-synced", synced);
-  }, [run.id]);
+  }, [run.id, scope]);
   useEffect(() => {
     let stopped = false;
     void pendingLibraryResponses(scope)
@@ -180,6 +269,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
   }, [presentId, connected, envelopeRevision, latestSnapshot, run, receive]);
   async function move(position: number) {
     if (
+      !canMutate ||
       mutating.current ||
       run.status !== "active" ||
       position < 0 ||
@@ -199,8 +289,15 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         }),
       );
       setRun(next);
-      await libraryCache(scope, "detail", run.id, { run: next, responses });
-      await refresh();
+      await libraryCache(scope, "detail", run.id, {
+        run: next,
+        responses,
+      }).catch(() => {
+        setMessage(
+          "Soal sudah berganti. Salinan untuk penggunaan tanpa internet belum tersimpan di perangkat ini.",
+        );
+      });
+      await refresh().catch(() => undefined);
     } catch {
       setMessage(
         "Perubahan belum tersampaikan. Muat ulang sesi jika perangkat lain mengubahnya.",
@@ -211,13 +308,22 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     }
   }
   function selectStudent(n: number) {
+    if (
+      answerDirty &&
+      !window.confirm("Buang perubahan jawaban yang belum disimpan?")
+    )
+      return;
     setAttendance(n);
     const student = run.roster.find((s) => s.attendanceNumber === n),
       existing = responses.find((r) => r.studentId === student?.id);
-    setAnswers(existing?.answers ?? run.document.items.map(() => "?"));
+    setAnswers(existing?.answers ?? run.document.items.map(() => ""));
     setReview(existing?.status === "review");
+    setBaseRevision(existing?.revision ?? 0);
+    setAnswerDirty(false);
   }
   async function print() {
+    if (mutating.current) return;
+    mutating.current = true;
     setBusy(true);
     try {
       const [{ createCardPdf }, font] = await Promise.all([
@@ -243,19 +349,26 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
       );
     } catch {
       setMessage(
-        "Kartu belum dapat dibuat. Periksa font tersimpan dan coba lagi.",
+        "Kartu belum dapat diunduh. Sambungkan internet, lalu tekan Cetak kartu asesmen lagi.",
       );
     } finally {
+      mutating.current = false;
       setBusy(false);
     }
   }
   async function saveResponse() {
-    if (mutating.current) return;
+    if (mutating.current || !canMutate) return;
+    const completed = answers.filter((a): a is CardAnswer => a !== "");
+    if (completed.length !== answers.length) {
+      setMessage(
+        "Periksa setiap baris yang belum diisi atau belum terbaca. Pilih ? hanya jika siswa memilih Belum tahu.",
+      );
+      return;
+    }
     const student = run.roster.find((s) => s.attendanceNumber === attendance);
     if (!student) return;
     mutating.current = true;
     setBusy(true);
-    const old = responses.find((r) => r.studentId === student.id);
     setMessage("");
     const action: Extract<LibraryAction, { action: "response" }> = {
       action: "response",
@@ -264,8 +377,8 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
       pageIndex: 0,
       version: run.version,
       studentId: student.id,
-      answers,
-      revision: old?.revision ?? 0,
+      answers: completed,
+      revision: baseRevision,
       status: needsReview ? "review" : "received",
     };
     try {
@@ -273,8 +386,8 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         await queueLibraryResponse(scope, action);
         const local: LibraryResponse = {
           studentId: student.id,
-          answers,
-          revision: (old?.revision ?? 0) + 1,
+          answers: completed,
+          revision: baseRevision + 1,
           correct: run.document.items.filter(
             (q, i) => q.kind === "card" && q.key === answers[i],
           ).length,
@@ -294,11 +407,15 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         const data = runDetailSchema.parse(await libraryCall(action));
         setResponses(data.responses);
         setRun(data.run);
-        await libraryCache(scope, "detail", run.id, data);
+        await libraryCache(scope, "detail", run.id, data).catch(
+          () => undefined,
+        );
         setPending(false);
-        setMessage(`Absen ${attendance}: tersimpan di database.`);
+        setMessage(`Jawaban absen ${attendance} sudah tersimpan.`);
       }
       setManual(false);
+      setAnswerDirty(false);
+      await discardDraft().catch(() => undefined);
     } catch (error) {
       setMessage(
         error instanceof Error && error.message === "CONFLICT"
@@ -311,6 +428,14 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     }
   }
   async function finish() {
+    if (
+      !canMutate ||
+      (answerDirty &&
+        !window.confirm(
+          "Ada jawaban yang belum disimpan. Buang perubahan dan lanjut mengakhiri sesi?",
+        ))
+    )
+      return;
     if (
       mutating.current ||
       !window.confirm("Akhiri sesi? Materi dan jawaban tetap tersimpan.")
@@ -335,7 +460,13 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         responses,
       }).catch(() => {});
       await refresh().catch(() => {});
-      router.replace("/guru");
+      if (answerDirty) {
+        await discardDraft().catch(() => undefined);
+        setAnswerDirty(false);
+      }
+      router.replace(
+        run.mode === "assessment" ? `/guru/hasil/${run.id}` : "/guru",
+      );
     } catch {
       setMessage(
         "Sesi belum dapat diakhiri. Periksa sambungan lalu coba lagi.",
@@ -352,7 +483,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         href="/guru"
         className="inline-flex min-h-12 items-center text-primary"
       >
-        ← Simpan & keluar
+        ← Kembali ke beranda
       </Link>
       <SwipeNavigation
         disabled={busy || run.status !== "active"}
@@ -370,6 +501,19 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
           {run.document.items.length}
         </p>
       </SwipeNavigation>
+      <WorkflowSteps
+        current={run.status === "closed" ? 2 : 1}
+        steps={
+          run.mode === "assessment"
+            ? ["Cetak kartu", "Soal & jawaban", "Lihat hasil"]
+            : ["Soal siap", "Mengajar", "Akhiri sesi"]
+        }
+      />
+      {message && (
+        <p role="status" className="practice-feedback">
+          {message}
+        </p>
+      )}
       <div
         className="studio-session-progress"
         aria-label={`Soal ${run.position + 1} dari ${run.document.items.length}`}
@@ -404,13 +548,13 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
             {!transport.connected && (
               <PairingCodeInput
                 onPair={transport.pair}
-                disabled={transport.busy || busy}
+                disabled={!canMutate || transport.busy || busy}
               />
             )}
             {transport.snapshot && (
               <Button
                 variant="outline"
-                disabled={transport.busy || busy}
+                disabled={!canMutate || transport.busy || busy}
                 onClick={() => void transport.revoke()}
               >
                 <Unplug size={18} aria-hidden /> Putuskan layar
@@ -449,13 +593,19 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
           <div className="session-question-navigation flex flex-wrap gap-2">
             <Button
               variant="outline"
-              disabled={busy || run.position === 0 || run.status !== "active"}
+              disabled={
+                !canMutate ||
+                busy ||
+                run.position === 0 ||
+                run.status !== "active"
+              }
               onClick={() => void move(run.position - 1)}
             >
               <ChevronLeft size={18} aria-hidden /> Sebelumnya
             </Button>
             <Button
               disabled={
+                !canMutate ||
                 busy ||
                 run.position === run.document.items.length - 1 ||
                 run.status !== "active"
@@ -477,20 +627,31 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
               />
             </div>
           )}
-          {transport.snapshot && item.kind === "interactive" && (
+          {canMutate && transport.snapshot && item.kind === "interactive" && (
             <RemoteControls key={item.id} env={transport.snapshot.envelope} />
           )}
         </section>
       </div>
+      <ConflictReview scope={scope} run={run} canMutate={canMutate} />
       {run.mode === "assessment" && (
         <section className={panel} aria-label="Lembar jawaban">
           <h2 className="text-xl font-bold">
             Lembar jawaban · {responses.length}/{run.roster.length} masuk
           </h2>
-          <p className="text-sm">
-            Kelas {run.classLabel} · {run.date} · {run.document.items.length}{" "}
-            baris · Versi {run.version}
-          </p>
+          <ol className="list-decimal space-y-2 pl-5 text-sm">
+            <li>
+              Unduh kartu dan cetak ukuran asli (100%). Bagikan satu kartu
+              kepada setiap siswa.
+            </li>
+            <li>
+              Siswa mengisi nomor absen, lalu memilih jawaban pada{" "}
+              {run.document.items.length} baris soal.
+            </li>
+            <li>
+              Pindai kartu yang sudah diisi, atau masukkan jawabannya secara
+              manual.
+            </li>
+          </ol>
           <Button
             variant="outline"
             disabled={busy}
@@ -498,103 +659,140 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
           >
             Cetak kartu asesmen
           </Button>
-          <ScanCapture
-            kind="weekly"
-            formBinding={form}
-            roster={run.roster.map((s) => s.attendanceNumber)}
-            onManual={() => {
-              if (!mutating.current) setManual(true);
-            }}
-            onRead={(result) => {
-              if (
-                mutating.current ||
-                result.status === "rejected" ||
-                result.attendanceNumber === null
-              )
-                return;
-              setAttendance(result.attendanceNumber);
-              setAnswers(
-                result.answers
-                  .slice(0, run.document.items.length)
-                  .map((r) => (r.result === "missing" ? "?" : r.result)),
-              );
-              setReview(result.status === "review");
-              setManual(true);
-            }}
-          />
-          {manual && (
-            <form
-              className="space-y-3 rounded-input bg-pn-teal-100 p-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void saveResponse();
+          <fieldset disabled={!canMutate} className="min-w-0 space-y-3">
+            <ScanCapture
+              kind="weekly"
+              formBinding={form}
+              roster={run.roster.map((s) => s.attendanceNumber)}
+              onManual={() => {
+                if (!mutating.current && canMutate) {
+                  openedManual.current = true;
+                  selectStudent(attendance);
+                  setManual(true);
+                }
               }}
-            >
-              <h3 className="font-bold">Periksa jawaban</h3>
-              <label className="block">
-                Nomor absen
-                <select
-                  className={field}
-                  value={attendance}
-                  disabled={busy}
-                  onChange={(e) => selectStudent(Number(e.target.value))}
-                >
-                  {run.roster.map((s) => (
-                    <option key={s.id} value={s.attendanceNumber}>
-                      Absen {String(s.attendanceNumber).padStart(2, "0")}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {answers.map((answer, index) => (
-                  <label key={index}>
-                    Baris {index + 1}
-                    <select
-                      className={field}
-                      value={answer}
-                      disabled={busy}
-                      onChange={(e) =>
-                        setAnswers(
-                          answers.map((a, i) =>
-                            i === index ? (e.target.value as CardAnswer) : a,
-                          ),
-                        )
-                      }
-                    >
-                      {(["A", "B", "C", "D", "?"] as const).map((c) => (
-                        <option key={c} value={c}>
-                          {c === "?" ? "? / Belum tahu" : c}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ))}
-              </div>
-              <label className="flex min-h-12 items-center gap-3">
-                <input
-                  type="checkbox"
-                  disabled={busy}
-                  checked={needsReview}
-                  onChange={(e) => setReview(e.target.checked)}
-                />
-                Masih perlu dicek
-              </label>
-              <Button disabled={busy}>Simpan jawaban</Button>
-              <Button
-                variant="outline"
-                type="button"
-                disabled={busy}
-                onClick={() => setManual(false)}
+              onRead={(result) => {
+                if (
+                  !canMutate ||
+                  mutating.current ||
+                  result.status === "rejected" ||
+                  result.attendanceNumber === null
+                )
+                  return;
+                setAttendance(result.attendanceNumber);
+                openedManual.current = true;
+                setAnswers(
+                  result.answers
+                    .slice(0, run.document.items.length)
+                    .map((r) => (r.result === "missing" ? "" : r.result)),
+                );
+                const student = run.roster.find(
+                  (s) => s.attendanceNumber === result.attendanceNumber,
+                );
+                setBaseRevision(
+                  responses.find((r) => r.studentId === student?.id)
+                    ?.revision ?? 0,
+                );
+                setAnswerDirty(true);
+                setReview(result.status === "review");
+                setManual(true);
+              }}
+            />
+            {manual && (
+              <form
+                className="space-y-3 rounded-input bg-pn-teal-100 p-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void saveResponse();
+                }}
               >
-                Batal
-              </Button>
-            </form>
-          )}
+                <h3 className="font-bold">Periksa jawaban</h3>
+                <label className="block">
+                  Nomor absen
+                  <select
+                    aria-label="Nomor absen"
+                    className={field}
+                    value={attendance}
+                    disabled={busy}
+                    onChange={(e) => selectStudent(Number(e.target.value))}
+                  >
+                    {run.roster.map((s) => (
+                      <option key={s.id} value={s.attendanceNumber}>
+                        Absen {String(s.attendanceNumber).padStart(2, "0")}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {answers.map((answer, index) => (
+                    <label key={index}>
+                      Baris {index + 1}
+                      <select
+                        aria-label={`Baris ${index + 1}`}
+                        className={field}
+                        value={answer}
+                        required
+                        disabled={busy || !canMutate}
+                        onChange={(e) => {
+                          setAnswerDirty(true);
+                          setAnswers(
+                            answers.map((a, i) =>
+                              i === index ? (e.target.value as CardAnswer) : a,
+                            ),
+                          );
+                        }}
+                      >
+                        <option value="">Belum diisi / belum terbaca</option>
+                        {(["A", "B", "C", "D", "?"] as const).map((c) => (
+                          <option key={c} value={c}>
+                            {c === "?" ? "? / Belum tahu" : c}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                </div>
+                <label className="flex min-h-12 items-center gap-3">
+                  <input
+                    type="checkbox"
+                    disabled={busy}
+                    checked={needsReview}
+                    onChange={(e) => {
+                      setReview(e.target.checked);
+                      setAnswerDirty(true);
+                    }}
+                  />
+                  Masih perlu dicek
+                </label>
+                <Button disabled={busy || !canMutate}>Simpan jawaban</Button>
+                <Button
+                  variant="outline"
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    void discardDraft()
+                      .then(() => {
+                        setManual(false);
+                        setAnswerDirty(false);
+                      })
+                      .catch(() =>
+                        setMessage(
+                          "Draft belum dapat ditutup. Coba lagi; isian tetap tersedia.",
+                        ),
+                      );
+                  }}
+                >
+                  Batal
+                </Button>
+              </form>
+            )}
+          </fieldset>
           <p className="text-sm">
             {pending
               ? "Ada jawaban tersimpan di perangkat, menunggu sambungan."
-              : "Jawaban yang diterima tersimpan di database."}
+              : responses.length
+                ? "Jawaban sudah tersimpan. Anda bisa membuka hasilnya."
+                : "Belum ada jawaban. Pindai kartu atau pilih Input manual untuk mulai mencatat."}
           </p>
           <Button asChild>
             <Link href={`/guru/hasil/${run.id}`}>Buka hasil tersimpan</Link>
@@ -605,7 +803,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         {(run.status === "active" || closing) && (
           <Button
             variant="outline"
-            disabled={busy || closing}
+            disabled={!canMutate || busy || closing}
             aria-busy={closing}
             onClick={() => void finish()}
           >
@@ -616,12 +814,22 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
           </Button>
         )}
         <Button asChild variant="outline">
-          <Link href={`/guru/mulai?collection=${run.collectionId}`}>
+          <Link
+            href={`/guru/mulai?collection=${run.collectionId}&mode=${run.mode}`}
+          >
             Gunakan di kelas lain
           </Link>
         </Button>
       </div>
-      <p role="status">{message}</p>
+      {run.status === "active" &&
+        run.position === run.document.items.length - 1 && (
+          <p className="text-sm text-muted-foreground">
+            Ini soal terakhir.{" "}
+            {run.mode === "assessment"
+              ? "Catat jawaban siswa, lalu pilih Akhiri sesi untuk melihat hasil."
+              : "Pilih Akhiri sesi saat kegiatan belajar selesai."}
+          </p>
+        )}
     </div>
   );
 }

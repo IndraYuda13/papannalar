@@ -1,3 +1,164 @@
+<!-- BEGIN WORKFLOW_V7 -->
+
+## Alur guru, jawaban dan tampilan HP — 3 Oktober 2026
+
+Perubahan berangkat dari `05ed781`. Kesalahan **Sesi belum dimulai** berhasil
+direproduksi dari tombol yang dipakai pengguna: jalankan contoh sesi 7B,
+kembali ke latihan pada kelas yang sama, siapkan soal, lalu mulai mengajar.
+Histori contoh yang sudah terisi terbaca sebagai sesi persiapan biasa; pesan
+kesalahan kemudian keliru menunjuk penyimpanan perangkat. Histori contoh kini
+tetap tersimpan pada alurnya sendiri, sesi baru dimulai kosong, dan klik ulang
+memakai sesi yang sudah dibuat. Penolakan aturan sesi memiliki pesan khusus;
+masalah penyimpanan tetap ditangani sebagai masalah penyimpanan.
+
+Alur utama: **Beranda → Mulai mengajar → pilih kelas → pilih soal → Mulai
+sesi → jalankan kegiatan → Akhiri sesi**. Asesmen berakhir di hasil; mengajar
+berakhir di beranda. Latihan otomatis dan bantuan AI berada pada pilihan
+tambahan. [Panduan guru, soal sendiri dan cetak kartu](docs/13_GUIDE_LATIHAN_AI.md)
+menjelaskan langkah lengkap.
+
+| Halaman/bagian                     | Sebelum                                                                                  | Sesudah                                                                                                                                                    |
+| ---------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/masuk`                           | Perbaikan sebelumnya sudah memakai 3D otomatis dan menghapus pilihan tampilan berlebihan | Dipertahankan dan diperiksa ulang pada enam viewport; tidak diklaim sebagai perubahan baru                                                                 |
+| Kerangka guru                      | Pada HP, kepala halaman dan konteks menyita ruang                                        | Jarak lebih ringkas; judul, tombol dan navigasi tetap muat                                                                                                 |
+| `/guru`                            | Kegiatan mengajar dan AI memiliki bobot tindakan yang bersaing                           | Satu tindakan utama **Mulai mengajar**, urutan empat langkah, sesi terakhir beserta tanggal; AI tambahan                                                   |
+| `/guru/kelas`, detail kelas        | Form edit siswa berada setelah seluruh daftar; istilah rombel                            | **Nama kelas**, editor tepat di baris siswa, fokus langsung, Batal/Escape mengembalikan fokus                                                              |
+| `/guru/soal`, editor               | Draft belum disimpan hilang saat navigasi; hapus soal langsung                           | Draft lokal dapat dipulihkan; hapus soal bisa dibatalkan; jenis yang terkunci dijelaskan; operand pecahan mengikuti aktivitas                              |
+| `/guru/mulai`                      | Semua preview bertumpuk; tanggal baru dapat membuka sesi lama tanpa penjelasan           | Satu preview aktif; tanggal sesi lama ditampilkan; tanggal baru tidak dapat diedit saat melanjutkan sesi                                                   |
+| `/guru/sesi/:id`                   | Isian koreksi pertama dapat mulai dari `?`; gagal simpan membingungkan                   | Koreksi memuat jawaban/review yang tersimpan; draft terpisah, batal memulihkan jawaban lama, gagal simpan menjaga isian; akhiri asesmen membuka hasil      |
+| Preview enam alat                  | Kontrol pecahan dapat terdesak; area scroll bertumpuk; koordinat grafik melebar di HP    | Kontrol berada di atas model; halaman menjadi pemilik scroll vertikal; hanya model lebar bergulir horizontal; input koordinat muat 360px                   |
+| `/guru/asesmen`, `/guru/hasil/:id` | Filter dan tabel dominan; rincian jauh dari siswa yang dipilih                           | Filter dibuka bila perlu; koreksi dekat ringkasan; rincian tepat di baris; **Soal untuk dibahas bersama** berdasarkan lembar yang diterima                 |
+| `/guru/latihan`, `/guru/simulasi`  | Histori contoh bisa menghalangi mulai latihan; istilah langkah/kartu tidak konsisten     | Contoh terisi dan latihan baru tetap terpisah; lanjutkan sesi belum selesai; **Cek pertama**, **Cek lanjutan**, **Kartu cek akhir**, **Kegiatan kelompok** |
+| `/layar`                           | Pengaturan tampilan/tes kemampuan mendahului kode sambungan; navigasi perlu ditahan      | QR/kode muncul langsung; tes perangkat opsional; menu dapat dibuka klik/Enter, tetap terbuka saat fokus dan ditutup Escape                                 |
+| Konflik/sambungan                  | Satu konflik menghentikan antrean siswa lain; kegagalan503 tidak memakai salinan lokal   | Konflik tetap menunggu pilihan guru, siswa lain diteruskan; sesi/hasil memakai receipt;503/network dapat memakai cache scoped,401/403 tetap mengunci       |
+| Bahasa untuk siswa                 | “model konteks disiapkan pada alat yang sesuai”                                          | “Tulis jawabanmu di buku. Ceritakan cara menghitungnya kepada teman.”                                                                                      |
+
+### Evaluasi saran QA
+
+`PapanNalar-Codex-Handoff.md` diperlakukan sebagai saran, dibandingkan dengan
+HEAD; source auditnya menunjuk `c2a0593`, sedangkan build deployment live
+tidak diketahui. Lampiran audit yang disebut dokumen tersebut tidak disertakan.
+Tidak menyalin klaim live atau menjadikannya izin membuka gate AI.
+
+| Temuan | Keputusan dan bukti lokal                                                                                                                                                                                                                                |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PN-01  | Diperbaiki: koreksi siswa pertama/tengah/terakhir memuat jawaban/review; cancel,503,finish, draft reload diuji FLOW02/FLOW08                                                                                                                             |
+| PN-02  | Diperbaiki pada antrean per siswa, pilihan konflik, receipt/invalidation dan cache fallback. FLOW03/FLOW06 menguji503/403, dua siswa, serta edit baru saat respons lama sedang berjalan. Tidak mengklaim seluruh urutan race lintas-tab telah dibuktikan |
+| PN-03  | Diperbaiki: tanggal lama/resume eksplisit; FLOW03                                                                                                                                                                                                        |
+| PN-04  | Diperbaiki: editor/fokus inline siswa1/16/32; FLOW04                                                                                                                                                                                                     |
+| PN-05  | Diadaptasi: satu tindakan mengajar dan petunjuk langkah. Route serta nama menu yang sudah dikenali dipertahankan; tidak mengganti seluruh navigasi tanpa kebutuhan                                                                                       |
+| PN-06  | Diperbaiki: QR langsung, pengaturan/tes kemampuan opsional, profil belum diuji tetap belum terverifikasi; FLOW05 dan board-capabilities                                                                                                                  |
+| PN-07  | Diperbaiki: satu preview, kontrol pecahan di atas,48px target dipertahankan, rasio satu-utuh tidak diperkecil; tes enam alat360px dan audit viewport                                                                                                     |
+| PN-08  | Diperbaiki untuk mutasi sesi/editor utama: canMutate terpusat, kontrol dinonaktifkan dan preview tetap tersedia; FLOW07. Guard server tetap                                                                                                              |
+| PN-09  | Diperbaiki pada review manual/scan: kosong belum diisi tidak berubah otomatis menjadi pilihan `?`; FLOW08. Kontrak penilaian lama tidak diubah                                                                                                           |
+| PN-10  | Diperbaiki: draft scoped tersimpan, hapus bisa dibatalkan, cancel tambah kelas mempertahankan konteks; FLOW04/FLOW08 dan regresi latihan. Draft dengan revisi server berbeda dipertahankan dan diberi peringatan; belum ada alat merge dua draft soal    |
+| PN-11  | Diadaptasi: tindakan koreksi dan bahas soal berada dekat hasil. Hitungan berasal dari jawaban diterima, tanpa label kemampuan/ranking baru                                                                                                               |
+| PN-12  | Label UI diselaraskan dengan kartu10/5/3 baris; PDF dan frozen binding existing dipertahankan; cards/practice-v6/custom-card E2E                                                                                                                         |
+| PN-13  | Filter memakai aria-pressed; navigasi board mendukung click/Enter/Escape/fokus. Screen reader/perangkat fisik tetap NOT_RUN                                                                                                                              |
+| PN-14  | Jalur AI dibuat opsional dan manfaatnya dinyatakan. Adapter, review, privasi, anggaran, fallback statis dan konfigurasi server existing dipertahankan; tidak membuat reviewer atau bukti live                                                            |
+| PN-15  | Alasan jenis terkunci dijelaskan dan operand kedua hanya muncul bila diperlukan. Konversi interaktif ke kartu tetap membutuhkan pilihan/kunci nyata                                                                                                      |
+
+### Verifikasi kandidat
+
+`pnpm verify` pada build `C8C81ckj1RWA6ZfXk6iSI` selesai **exit1**:
+format/types/lint lulus; **1095 unit dalam72 file** lulus, coverage
+statement92,48%, branch87,52%, function96,28%, line93,46%; **306 assertion SQL
++116 guard yang dilaporkan runner** lulus; **9 integrasi native HTTP dengan
+PostgreSQL** lulus; build lulus. Browser **147 PASS/8 FAIL**,21menit,
+1worker/retry0/skip0. Run ini tetap dicatat gagal.
+
+Kegagalan tersebut mencakup dua label pembuka lama, tiga ekspektasi wizard
+otomatis, dua locator status yang ambigu sebelum redirect, dan helper
+navigasi yang menutup menu yang sudah terbuka. Audit juga menemukan bahwa
+pointer background dapat membuka menu sebelum klik tombol menutupnya lagi.
+Perbaikan mempertahankan pemeriksaan data, privasi, screenshot bounds dan
+konsol; tidak memperbesar timeout, menambah retry atau melemahkan assertion.
+
+Gate serial setelah perbaikan **45/45 E2E PASS, exit0**, build
+`in2LtgftI23FrF8ZeWoHb`,303,73detik termasuk format/types/lint/build:
+
+```bash
+pnpm format:check && pnpm typecheck && pnpm lint && pnpm build && pnpm exec playwright test tests/e2e/workflow-v7.spec.ts tests/e2e/board-content.spec.ts tests/e2e/opening-reflection.spec.ts tests/e2e/prelim.spec.ts tests/e2e/video-library.spec.ts tests/e2e/video-display.spec.ts tests/e2e/sync.spec.ts
+```
+
+Semua delapan kasus gagal full-run ada di gate45 yang lulus. Regresi mencakup
+kartu buatan guru, reuse lintas kelas, histori kunci, PDF/pixel scan, sync,
+conflict, cache, draft, pairing, enam alat dan navigasi keyboard/pointer.
+
+Audit gambar merapikan empat langkah beranda menjadi2×2 di HP dan mengganti
+dua kalimat “rombel”. Build terakhir **`2YNhqi0po4Ou62cg8yXZC`**, format/types/
+lint/build lulus. Regresi layout17 memberi15PASS/2FAIL: tes lama menganggap
+beranda selalu memakai7B, padahal riwayat terakhir memakai7C. Tes kini
+memeriksa kelas yang benar-benar ditautkan beranda, lalu memilih7B secara
+eksplisit untuk skenario penyimpanan draft. Aplikasi tidak diubah untuk
+menghapus atau memaksa riwayat contoh.
+
+Perbaikan tes tersebut diuji **2/2 PASS, exit0**,52,25detik, pada build yang
+sama. Hanya file tes berubah setelah build; format/types/lint juga lulus:
+
+```bash
+pnpm format:check && pnpm typecheck && pnpm lint && pnpm exec playwright test tests/e2e/teacher-flow-v4.spec.ts -g 'FLOW01 beginner'
+```
+
+**155 skenario unik memiliki hasil PASS setelah perbaikan terkait**, lintas
+full-run dan regresi. Tidak diklaim full155/155 dijalankan pada satu build
+terakhir. Unit/SQL/native yang sudah lulus dan tidak berubah tidak diulang.
+595 input kandidat memiliki hash
+`fe87487e0d244ea6eb2b149483127598ba3b853bf6c0cc67f4dcec804a067fae`;
+580 identik terhadap full-run,592 identik terhadap gate45. Tiga perbedaan
+terakhir hanya CSS beranda, dua kalimat kelas, dan setup tes kelas terakhir.
+
+Audit visual akhir: **108 capture/state**,13 jenis halaman. Halaman utama
+diperiksa pada360/390/768/1188/1366/1920px; enam preview alat pada360/390/600/
+768/900px, termasuk pecahan penyebut12; teks20px dan menu papan juga diperiksa.
+**Overflow halaman0, pageerror0**. Runner menunggu alat dan form siap; gambar
+yang masih menampilkan loading tidak dipakai sebagai bukti akhir. Board
+loopback memang hanya menampilkan kode; QR HTTPS diperiksa oleh E2E dengan
+challenge fixture yang eksplisit, bukan klaim TLS/kamera live. Gambar
+representatif diperiksa secara visual. Full-page capture dapat menempatkan
+navigasi fixed/skiplink di tengah gambar; kondisi viewport diuji terpisah.
+
+Tabel sebelum/sesudah berdasarkan source yang dibandingkan dan pemeriksaan
+browser. Screenshot baseline hanya beranda dan error mulai pada390px;
+screenshot sesudah serta log lengkap tersimpan lokal dan tidak di-commit.
+Tidak membuat gambar “sebelum” untuk halaman yang belum ditangkap.
+
+Preservation **PASS**:183file terlindungi,40migration existing,8dokumen asli,
+19receipt lama, prefix jurnal dan tail handoff tetap identik. Bundle receipt
+lama dipulihkan persis; ukuran kandidat disimpan dalam receipt baru. Three
+opsional **154310byte gzip**, di bawah250000, terpisah dari precache; poster
+cached. Bukti terstruktur: [workflow-v7.json](artifacts/qa/ui-ai-v2/workflow-v7.json).
+
+### Batas hasil, biaya dan menjalankan aplikasi
+
+Tidak ada dependency, lockfile, aset atau migrasi baru. GLB/poster/Blender
+existing tetap dimuat terpisah; matematika, penilaian, kartu, auth/RLS dan
+histori dijaga. Tidak ada API berbayar (USD0); biaya compute lingkungan tidak
+diukur. OpenAI-compatible Chat Completions dan Anthropic-compatible Messages
+diperiksa melalui native HTTP fixture dan ledger/RLS PostgreSQL lokal;
+provider live NOT_RUN.
+
+Pengujian ini membuktikan perilaku software pada lingkungan lokal. Studi guru
+pemula, kelas nyata, kamera/QR HTTPS, sentuh fisik dan printer tetap NOT_RUN.
+Persyaratan credential, review materi/privasi serta rollout SQL040 existing
+sudah tercatat pada bagian **Kebutuhan operator/perangkat** di handoff V6;
+tidak diminta ulang dan tidak dianggap sudah terpenuhi. Run ini tidak deploy,
+menjalankan migrasi hosted, atau membuka gate AI/review.
+
+```bash
+cd /workspace/papannalar
+source /workspace/.papannalar-cloud/activate.sh
+pnpm build
+pnpm video
+```
+
+Buka `http://127.0.0.1:3100/masuk`; gunakan tab lain untuk `/layar`.
+`pnpm video` memakai Auth/transport fixture loopback54325 serta PostgreSQL
+lokal55432. LLM dinonaktifkan oleh konfigurasi lingkungan; saran statis tetap
+tersedia. Pada checkout lain gunakan Node24.14.1/pnpm11.19.0,
+`pnpm install --frozen-lockfile`, lalu ikuti [setup lokal](docs/09_LOCAL_HANDOFF.md).
+
+<!-- END WORKFLOW_V7 -->
 <!-- BEGIN PRACTICE_V6 -->
 
 ## Alur guru, soal sendiri, cetak kartu dan reset papan — 3 Oktober 2026

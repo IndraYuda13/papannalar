@@ -541,6 +541,10 @@ for (const viewport of [
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/layar");
+    await expect(page.getByTestId("pairing-code")).toBeVisible();
+    await page
+      .getByRole("button", { name: "Ubah tampilan", exact: true })
+      .click();
     const setup = page.getByRole("region", { name: "Atur tampilan layar" });
     await expect(setup).toBeVisible();
     const sizes: number[] = [];
@@ -609,11 +613,24 @@ test("V2 profile survives resize, reload and failed metadata upload; local field
     await route.fulfill({ status: 503, body: "unavailable" });
   });
   await page.goto("/layar");
+  await page
+    .getByRole("button", { name: "Ubah tampilan", exact: true })
+    .click();
   await page.getByLabel("Nama layar", { exact: true }).fill("Papan 7B");
   await page.getByRole("button", { name: /^Ringkas/ }).click();
   await page
     .getByRole("button", { name: "Simpan tampilan", exact: true })
     .click();
+  if (
+    !(await page
+      .getByRole("region", { name: "Tes Kemampuan Papan", exact: true })
+      .isVisible())
+  ) {
+    await page.locator(".board-menu > summary").click();
+    await page
+      .getByRole("button", { name: "Tes Kemampuan Papan", exact: true })
+      .click();
+  }
   const panel = page.getByRole("region", {
     name: "Tes Kemampuan Papan",
     exact: true,
@@ -685,8 +702,9 @@ test("V2 touch result waits for release and fresh one/two/four contacts; mouse n
   const errors = watchRuntime(page);
   await boardFixture(page);
   await page.goto("/layar");
+  await page.locator(".board-menu > summary").click();
   await page
-    .getByRole("button", { name: "Simpan tampilan", exact: true })
+    .getByRole("button", { name: "Tes Kemampuan Papan", exact: true })
     .click();
   const panel = page.getByRole("region", {
     name: "Tes Kemampuan Papan",
@@ -813,6 +831,9 @@ test("V2 rejected storage retains settings during the tab without a repeated wiz
     };
   });
   await page.goto("/layar");
+  await page
+    .getByRole("button", { name: "Ubah tampilan", exact: true })
+    .click();
   await page.getByRole("button", { name: /^Besar/ }).click();
   await page
     .getByRole("button", { name: "Simpan tampilan", exact: true })

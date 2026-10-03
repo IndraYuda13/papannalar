@@ -6,7 +6,7 @@ import { useTeacher } from "@/features/guru/app-context";
 import { runSchema, publicLibraryItem } from "@/contracts/library";
 import { Button } from "@/ui/components/button";
 import { field, panel, libraryCall, jakartaDate } from "./client";
-import { PageHeader, StateNotice } from "@/ui/components/studio";
+import { PageHeader, StateNotice, WorkflowSteps } from "@/ui/components/studio";
 import { LibraryItemView } from "./item-view";
 export function StartLesson({
   classId = "",
@@ -17,14 +17,15 @@ export function StartLesson({
   collectionId?: string;
   mode?: "teach" | "assessment";
 }) {
-  const { classes, state, refresh } = useTeacher(),
+  const { classes, state, refresh, canMutate } = useTeacher(),
     router = useRouter(),
     [cls, setClass] = useState(classId || classes[0]?.id || ""),
     [collection, setCollection] = useState(collectionId),
     [date, setDate] = useState(jakartaDate()),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
-    [preview, setPreview] = useState(false);
+    [preview, setPreview] = useState(false),
+    [previewIndex, setPreviewIndex] = useState(0);
   const lock = useRef(false),
     runId = useRef<string>(crypto.randomUUID());
   const available = state.collections.filter(
@@ -47,9 +48,10 @@ export function StartLesson({
         r.mode === mode,
     );
   async function start() {
-    if (lock.current || !selected || !cls) return;
+    if (lock.current || !selected || !cls || !canMutate) return;
     lock.current = true;
     setBusy(true);
+    setMessage("");
     try {
       if (active) {
         router.push(`/guru/sesi/${active.id}`);
@@ -66,7 +68,7 @@ export function StartLesson({
           mode,
         }),
       );
-      await refresh();
+      await refresh().catch(() => undefined);
       router.push(`/guru/sesi/${value.id}`);
     } catch {
       setMessage("Sesi belum dimulai. Periksa pilihan dan sambungan.");
@@ -80,7 +82,15 @@ export function StartLesson({
       <PageHeader
         eyebrow="Siapkan sesi"
         title={mode === "teach" ? "Mulai mengajar" : "Buat asesmen"}
-        description="Pilih kelas dan materi. Sesi yang sudah berjalan dapat dilanjutkan."
+        description={
+          mode === "assessment"
+            ? "Pilih soal pilihan ganda. Setelah itu, cetak kartu, kumpulkan jawaban, dan lihat hasil siswa."
+            : "Pilih kelas dan soal. Setelah itu Anda bisa menampilkan soal di layar atau mengajar dari perangkat ini."
+        }
+      />
+      <WorkflowSteps
+        current={selected ? 2 : cls ? 1 : 0}
+        steps={["Pilih kelas", "Pilih soal", "Mulai sesi"]}
       />
       {!classes.length ? (
         <StateNotice
@@ -91,7 +101,8 @@ export function StartLesson({
             </Button>
           }
         >
-          Buat rombel dan jumlah siswa, lalu kembali untuk memilih soal.
+          Isi nama kelas dan jumlah siswa. Setelah tersimpan, pilih Mulai
+          mengajar.
         </StateNotice>
       ) : (
         <section className={`${panel} studio-start-form`}>
@@ -112,16 +123,24 @@ export function StartLesson({
               ))}
             </select>
           </label>
-          <label className="block">
-            Tanggal
-            <input
-              className={field}
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
-          </label>
+          <details>
+            <summary className="min-h-12 cursor-pointer content-center text-sm text-muted-foreground">
+              {active
+                ? `Sesi ${active.date.split("-").reverse().join("/")} masih berjalan`
+                : `Tanggal sesi: ${date.split("-").reverse().join("/")} · ubah`}
+            </summary>
+            <label className="block">
+              Tanggal
+              <input
+                className={field}
+                type="date"
+                value={active?.date ?? date}
+                disabled={Boolean(active)}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </label>
+          </details>
           <label className="block">
             <span className="studio-step" aria-hidden>
               2
@@ -133,6 +152,7 @@ export function StartLesson({
               onChange={(e) => {
                 setCollection(e.target.value);
                 setPreview(false);
+                setPreviewIndex(0);
               }}
             >
               <option value="">Pilih kumpulan</option>
@@ -154,8 +174,8 @@ export function StartLesson({
           </label>
           {mode === "assessment" && (
             <p className="text-sm text-muted-foreground">
-              Pilih soal dengan pilihan jawaban dan kunci. Kartu Nalar dicetak
-              pada halaman asesmen setelah ini.
+              Kartu Nalar adalah lembar jawaban siswa. Anda bisa mengunduh dan
+              mencetaknya pada halaman berikutnya.
             </p>
           )}
           {unavailable.length > 0 && (
@@ -210,35 +230,69 @@ export function StartLesson({
                   : "Interaktif di layar"}
               </p>
               <Button variant="outline" onClick={() => setPreview(!preview)}>
-                Preview materi
+                {preview ? "Tutup pratinjau" : "Preview materi"}
               </Button>
-              {preview &&
-                selected.document.items.map((item, index) => (
+              {preview && (
+                <section aria-label="Pratinjau materi" className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      variant="outline"
+                      disabled={previewIndex === 0}
+                      onClick={() => setPreviewIndex(previewIndex - 1)}
+                    >
+                      Soal sebelumnya
+                    </Button>
+                    <span>
+                      Soal {previewIndex + 1}/{selected.document.items.length}
+                    </span>
+                    <Button
+                      variant="outline"
+                      disabled={
+                        previewIndex >= selected.document.items.length - 1
+                      }
+                      onClick={() => setPreviewIndex(previewIndex + 1)}
+                    >
+                      Soal berikutnya
+                    </Button>
+                  </div>
                   <div
-                    key={item.id}
                     data-library-preview
                     className="rounded-input border p-3"
                   >
                     <LibraryItemView
-                      item={publicLibraryItem(item)}
-                      row={index + 1}
+                      key={selected.document.items[previewIndex].id}
+                      item={publicLibraryItem(
+                        selected.document.items[previewIndex],
+                      )}
+                      row={previewIndex + 1}
                     />
                   </div>
-                ))}
+                </section>
+              )}
               <p className="text-sm text-muted-foreground">
                 Sambungkan Layar Kelas dari halaman sesi setelah ini.
               </p>
             </>
           )}
+          {active && (
+            <p className="practice-feedback">
+              Sesi {active.date.split("-").reverse().join("/")} masih berjalan
+              pada soal {active.position + 1}/{active.document.items.length}.
+              Lanjutkan sesi tersebut. Untuk kegiatan baru, akhiri sesi lama
+              terlebih dahulu.
+            </p>
+          )}
           <Button
-            disabled={busy || !selected || !cls || !date}
+            disabled={!canMutate || busy || !selected || !cls || !date}
             onClick={() => void start()}
           >
-            {active
-              ? "Lanjutkan sesi"
-              : mode === "assessment"
-                ? "Simpan & mulai asesmen"
-                : "Mulai sesi"}
+            {busy
+              ? "Membuka sesi…"
+              : active
+                ? "Lanjutkan sesi"
+                : mode === "assessment"
+                  ? "Simpan & mulai asesmen"
+                  : "Mulai sesi"}
           </Button>
         </section>
       )}

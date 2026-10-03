@@ -2,6 +2,7 @@
 import {
   useEffect,
   useState,
+  useRef,
   useImperativeHandle,
   type FormEvent,
   type Ref,
@@ -9,6 +10,8 @@ import {
 import type { ClassDto } from "@/contracts/classes";
 import type { StudentDto } from "@/contracts/api";
 import type { LocalScope } from "@/local/scope";
+import { LocalStorageError } from "@/local/scope";
+import { LocalActionError } from "@/local/action-error";
 import { createCycleRepository } from "@/local/cycles";
 import { createPackageRepository } from "@/local/packages";
 import { createAssessmentRepository } from "@/local/assessments";
@@ -67,9 +70,10 @@ export function CycleWorkspace({
   const { ownerId, mode } = scope;
   const [syncRevision, setSyncRevision] = useState(0);
   const [legacyHistory, setLegacyHistory] = useState(false);
+  const starting = useRef(false);
   useEffect(() => {
     onSessionChange(
-      data && !data.cycle.classEnded
+      data && !data.cycle.assessmentRevision
         ? { package: data.package, sessionId: data.cycle.id }
         : undefined,
     );
@@ -110,7 +114,8 @@ export function CycleWorkspace({
     }
   }
   async function start() {
-    if (!detail || busy || mode !== "demo") return;
+    if (!detail || busy || starting.current || mode !== "demo") return;
+    starting.current = true;
     setBusy(true);
     const packages = createPackageRepository(scope),
       repo = createCycleRepository(scope);
@@ -164,25 +169,47 @@ export function CycleWorkspace({
         "Sesi baru siap, belum ada jawaban. Soal dan kelas dikunci selama sesi ini.",
       );
     } catch (error) {
-      const reason = error instanceof Error ? error.message : "";
-      setLegacyHistory(
-        reason === "Keep PRELIM and fresh-class histories separate",
-      );
+      const reason = error instanceof LocalActionError ? error.code : undefined;
+      setLegacyHistory(reason === "SEPARATE_HISTORY");
+      const guidance = {
+        ACTIVE_SESSION:
+          "Masih ada sesi berjalan. Lanjutkan sesi di bawah, lalu tutup kelas sebelum memakai soal baru.",
+        FINISH_PREVIOUS:
+          "Sesi sebelumnya belum selesai dinilai. Klik Simpan penilaian sesi di bawah sebelum memulai lagi.",
+        PACKAGE_USED:
+          "Soal ini sudah dipakai. Buka langkah 2: Soal, lalu pilih Siapkan soal lain untuk sesi berikutnya.",
+        NEXT_CHECK_REQUIRED:
+          "Kelas sudah mengikuti cek pertama. Buka langkah 2: Soal, pilih Siapkan soal lain, lalu pilih Cek lanjutan.",
+        CLASS_CHANGED:
+          "Kelas atau tingkatnya sudah berubah. Buka langkah 2: Soal dan siapkan soal untuk kelas yang dipilih.",
+        NO_STUDENTS:
+          "Belum ada siswa aktif. Tambahkan siswa pada menu Kelas sebelum memulai.",
+        CHECK_NOT_SUPPORTED:
+          "Cek lisan tersedia untuk kelas 1–3. Untuk kelas ini, buka langkah 2: Soal lalu siapkan Cek pertama atau Cek lanjutan.",
+        SEPARATE_HISTORY:
+          "Kelas ini memiliki riwayat dari contoh sesi. Buka contoh sesi yang sudah ada melalui tautan di bawah.",
+      };
       setMessage(
-        reason === "Keep PRELIM and fresh-class histories separate"
-          ? "Kelas ini sudah dipakai untuk contoh sesi dengan jawaban terisi. Lanjutkan contoh itu, atau buat kelas contoh baru untuk memakai soal Anda sendiri."
-          : reason === "Finalize previous assessment first"
-            ? "Sesi sebelumnya belum selesai. Tutup sesi dan simpan hasil penilaian di bawah sebelum memulai lagi."
-            : reason === "Prepare a new package for each session"
-              ? "Soal ini sudah digunakan. Buka Siapkan soal lain untuk membuat latihan sebelum sesi berikutnya."
-              : reason === "Use weekly package after initial placement"
-                ? "Kelas ini sudah menjalani cek pertama. Buka Siapkan soal lain lalu pilih Cek lanjutan."
-                : "Sesi belum dimulai. Periksa soal dan penyimpanan perangkat, lalu coba lagi.",
+        reason
+          ? guidance[reason]
+          : error instanceof LocalStorageError && error.code === "QUOTA"
+            ? "Penyimpanan perangkat penuh. Kosongkan ruang di perangkat, lalu coba lagi. Jangan hapus data situs agar jawaban tetap tersimpan."
+            : "Sesi belum dapat dibuka. Muat ulang halaman lalu coba lagi. Jika tetap gagal, pastikan browser mengizinkan penyimpanan data situs.",
       );
+      if (reason === "ACTIVE_SESSION" || reason === "FINISH_PREVIOUS") {
+        await repo
+          .list(detail.class.id)
+          .then(async (rows) => {
+            const last = rows.at(-1);
+            if (last) setData(await repo.read(last.id));
+          })
+          .catch(() => undefined);
+      }
     } finally {
       repo.close();
       packages.close();
       setBusy(false);
+      starting.current = false;
     }
   }
   useImperativeHandle(actionsRef, () => ({ start }));
@@ -421,8 +448,8 @@ export function CycleWorkspace({
             <section aria-label="Hasil cek sesi" className="space-y-3">
               <h4 className="font-bold">
                 {data.package.variant === "initial"
-                  ? "Cek Awal · kartu A5"
-                  : "Cek Mingguan"}
+                  ? "Cek pertama · kartu A5"
+                  : "Cek lanjutan"}
               </h4>
               <PrintCards
                 compact

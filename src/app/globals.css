@@ -1101,55 +1101,54 @@
 :is(.board-surface, [data-library-preview]) [data-library-tool] .fraction-row {
   margin-block: auto;
 }
-@container (max-width: 520px) {
-  [data-library-preview] .fraction-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr);
-    gap: 6px;
-    overflow: visible;
-  }
-  [data-library-preview] .fraction-row > div:first-child {
-    grid-column: 1;
-    grid-row: 1;
-    width: auto;
-    min-width: 0;
-    align-self: end;
-    align-items: stretch;
-  }
-  [data-library-preview] .fraction-row > div:last-child {
-    grid-column: 2;
-    grid-row: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
-    align-items: end;
-    min-width: 0;
-    font-size: 16px;
-    gap: 8px;
-  }
-  [data-library-preview] .fraction-row > div:last-child label {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    gap: 3px;
-    font-size: 14px;
-  }
-  [data-library-preview] .fraction-row > div:last-child select {
-    width: 100%;
-    min-width: 0;
-  }
-  [data-library-preview] .fraction-row [data-slot="button"] {
-    min-width: 0;
-    padding-inline: 8px;
-    font-size: 14px;
-  }
-  [data-library-preview] .fraction-row > div:nth-child(2) {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    min-width: 0;
-    overflow-x: auto;
-    --board-fraction-whole: max(100cqw, var(--fraction-min-whole));
-  }
+[data-library-preview] .fraction-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr);
+  gap: 6px;
+  overflow: visible;
 }
+[data-library-preview] .fraction-row > div:first-child {
+  grid-column: 1;
+  grid-row: 1;
+  width: auto;
+  min-width: 0;
+  align-self: end;
+  align-items: stretch;
+}
+[data-library-preview] .fraction-row > div:last-child {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  align-items: end;
+  min-width: 0;
+  font-size: 16px;
+  gap: 8px;
+}
+[data-library-preview] .fraction-row > div:last-child label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 3px;
+  font-size: 14px;
+}
+[data-library-preview] .fraction-row > div:last-child select {
+  width: 100%;
+  min-width: 0;
+}
+[data-library-preview] .fraction-row [data-slot="button"] {
+  min-width: 0;
+  padding-inline: 8px;
+  font-size: 14px;
+}
+[data-library-preview] .fraction-row > div:nth-child(2) {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-width: 0;
+  overflow-x: auto;
+  --board-fraction-whole: max(100cqw, var(--fraction-min-whole));
+}
+
 .board-surface [data-testid="pairing-qr"] {
   flex-shrink: 1;
   min-height: 0;
@@ -1944,4 +1943,30 @@ html:has([data-light-display="true"]) {
   .story-comparison-text > svg {
     transform: rotate(90deg);
   }
+}
+
+/* Teacher preview uses page scrolling. Only wide mathematical models scroll sideways. */
+[data-library-preview]:has([data-library-tool]) {
+  block-size: auto;
+  min-block-size: 22rem;
+}
+[data-library-preview]:has([data-library-tool]) .library-item-body {
+  min-block-size: 18rem;
+  flex: none;
+}
+[data-library-preview]:has([data-library-tool])
+  .library-work-area:not([hidden]) {
+  overflow-y: visible;
+  overscroll-behavior: auto;
+}
+[data-library-preview] .board-graph-coordinates label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  gap: 4px;
+}
+[data-library-preview] .board-graph-coordinates input {
+  width: 100%;
+  min-width: 48px;
 }

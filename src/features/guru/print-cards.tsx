@@ -41,7 +41,9 @@ export function PrintCards({
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       setMessage("PDF siap. Cetak 100% / ukuran asli, hitam putih.");
     } catch {
-      setMessage("PDF belum tersedia. Coba kembali setelah font tersimpan.");
+      setMessage(
+        "Kartu belum bisa diunduh. Sambungkan internet, lalu coba lagi.",
+      );
     } finally {
       setBusy(false);
     }
@@ -68,7 +70,11 @@ export function PrintCards({
           >
             {CARD_KINDS.map((kind) => (
               <option key={kind} value={kind}>
-                {cardLayout(kind).title}
+                {kind === "initial"
+                  ? "Cek pertama · 10 baris"
+                  : kind === "weekly"
+                    ? "Cek lanjutan · 5 baris"
+                    : "Kartu cek akhir · 3 baris"}
               </option>
             ))}
           </select>
@@ -91,7 +97,7 @@ export function PrintCards({
       <p className="mt-2 text-sm text-muted-foreground">
         {count
           ? `${count} siswa: cetak ${Math.ceil(count / perSheet)} lembar A4 (${perSheet} kartu per lembar), lalu potong. Satu kartu per siswa.`
-          : `Cek Awal: 2 kartu per lembar. Mingguan dan Keluar: 4 kartu per lembar.`}{" "}
+          : `Cek pertama: 2 kartu per lembar. Cek lanjutan dan cek akhir: 4 kartu per lembar.`}{" "}
         Cetak 100% / ukuran asli, hitam putih.
       </p>
       <p role="status" className="mt-2 text-sm">

@@ -1,4 +1,5 @@
 "use client";
+import { readLibraryDetail } from "@/features/library/read-detail";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useTeacher } from "./app-context";
@@ -7,8 +8,7 @@ import {
   type LibraryResponse,
   type LibraryRun,
 } from "@/contracts/library";
-import { libraryCall, field, panel } from "@/features/library/client";
-import { libraryCache } from "@/local/library";
+import { field, panel } from "@/features/library/client";
 import { createNameRepository } from "@/local/names";
 import { Button } from "@/ui/components/button";
 import { mathText } from "@/features/library/item-view";
@@ -43,79 +43,94 @@ export function AssessmentsPage() {
         }
       />
       <div
-        role="tablist"
+        role="group"
         aria-label="Asesmen dan hasil"
         className="studio-tabs flex gap-2"
       >
         <Button
-          role="tab"
-          aria-selected={tab === "sessions"}
+          aria-pressed={tab === "sessions"}
           variant={tab === "sessions" ? "default" : "outline"}
           onClick={() => setTab("sessions")}
         >
           Sesi Asesmen
         </Button>
         <Button
-          role="tab"
-          aria-selected={tab === "results"}
+          aria-pressed={tab === "results"}
           variant={tab === "results" ? "default" : "outline"}
           onClick={() => setTab("results")}
         >
           Hasil
         </Button>
       </div>
-      <div className="studio-filter grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <label>
-          Kelas
-          <select
-            className={field}
-            value={cls}
-            onChange={(e) => setClass(e.target.value)}
-          >
-            <option value="">Semua kelas</option>
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Kumpulan
-          <select
-            className={field}
-            value={collection}
-            onChange={(e) => setCollection(e.target.value)}
-          >
-            <option value="">Semua kumpulan</option>
-            {state.collections
-              .filter((c) => c.document.kind === "cards")
-              .map((c) => (
+      <details className="studio-filter-panel">
+        <summary className="min-h-12 cursor-pointer content-center font-semibold text-primary">
+          Cari berdasarkan kelas atau tanggal
+          {cls || collection || from || to ? " · Filter aktif" : ""}
+        </summary>
+        <div className="studio-filter grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label>
+            Kelas
+            <select
+              className={field}
+              value={cls}
+              onChange={(e) => setClass(e.target.value)}
+            >
+              <option value="">Semua kelas</option>
+              {classes.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.document.title}
+                  {c.label}
                 </option>
               ))}
-          </select>
-        </label>
-        <label>
-          Dari tanggal
-          <input
-            type="date"
-            className={field}
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-          />
-        </label>
-        <label>
-          Sampai tanggal
-          <input
-            type="date"
-            className={field}
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-          />
-        </label>
-      </div>
+            </select>
+          </label>
+          <label>
+            Kumpulan
+            <select
+              className={field}
+              value={collection}
+              onChange={(e) => setCollection(e.target.value)}
+            >
+              <option value="">Semua kumpulan</option>
+              {state.collections
+                .filter((c) => c.document.kind === "cards")
+                .map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.document.title}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <label>
+            Dari tanggal
+            <input
+              type="date"
+              className={field}
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
+          </label>
+          <label>
+            Sampai tanggal
+            <input
+              type="date"
+              className={field}
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+            />
+          </label>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setClass("");
+            setCollection("");
+            setFrom("");
+            setTo("");
+          }}
+        >
+          Tampilkan semua
+        </Button>
+      </details>
       <ul className="studio-row-list">
         {runs.map((r) => (
           <li key={r.id}>
@@ -173,16 +188,19 @@ export function ResultPage({ id }: { id: string }) {
       responses: LibraryResponse[];
     }>(),
     [names, setNames] = useState<Record<string, string>>({}),
+    [cached, setCached] = useState(false),
     [selected, setSelected] = useState(""),
     [message, setMessage] = useState("");
   const load = useCallback(async () => {
     try {
-      const data = navigator.onLine
-        ? runDetailSchema.parse(await libraryCall({ action: "detail", id }))
-        : await libraryCache(scope, "detail", id);
-      if (!data) throw new Error();
-      setDetail(data);
-      if (navigator.onLine) await libraryCache(scope, "detail", id, data);
+      const loaded = await readLibraryDetail(scope, id);
+      setDetail(loaded.detail);
+      setCached(loaded.cached);
+      setMessage(
+        loaded.cached
+          ? "Sambungan terganggu. Menampilkan jawaban yang tersimpan di perangkat ini."
+          : "",
+      );
       const repo = createNameRepository(scope);
       try {
         setNames(
@@ -203,6 +221,16 @@ export function ResultPage({ id }: { id: string }) {
     const t = setTimeout(() => void load(), 0);
     return () => clearTimeout(t);
   }, [load]);
+  useEffect(() => {
+    const synced = (event: Event) => {
+      const value = runDetailSchema.safeParse(
+        (event as CustomEvent<unknown>).detail,
+      );
+      if (value.success && value.data.run.id === id) setDetail(value.data);
+    };
+    window.addEventListener("pn-library-synced", synced);
+    return () => window.removeEventListener("pn-library-synced", synced);
+  }, [id]);
   if (!detail)
     return (
       <StateNotice
@@ -247,19 +275,63 @@ export function ResultPage({ id }: { id: string }) {
           <span>Soal · Versi {run.version}</span>
         </div>
       </div>
+      {responses.some((r) => r.status === "received") && (
+        <details className={panel}>
+          <summary className="min-h-12 cursor-pointer content-center font-bold">
+            Soal untuk dibahas bersama
+          </summary>
+          <p className="text-sm">
+            Hitungan dari lembar yang sudah diperiksa. Pilih soal yang perlu
+            dijelaskan kembali kepada kelas.
+          </p>
+          <ol className="space-y-3">
+            {run.document.items.map((q, index) =>
+              q.kind === "card" ? (
+                <li key={q.id}>
+                  <b>
+                    Soal {index + 1}: {mathText(q.prompt)}
+                  </b>
+                  <p>
+                    {
+                      responses.filter(
+                        (r) =>
+                          r.status === "received" && r.answers[index] !== q.key,
+                      ).length
+                    }{" "}
+                    jawaban belum tepat dari{" "}
+                    {responses.filter((r) => r.status === "received").length}{" "}
+                    lembar diperiksa.
+                  </p>
+                  {q.explanation && (
+                    <p className="text-muted-foreground">{q.explanation}</p>
+                  )}
+                </li>
+              ) : null,
+            )}
+          </ol>
+        </details>
+      )}
       {run.synthetic && (
         <p className="text-sm">Hasil contoh, bukan data siswa nyata.</p>
       )}
+      <div className="practice-next-action">
+        <p>
+          {responses.length < run.roster.length
+            ? "Masih ada siswa yang belum mengumpulkan jawaban. Anda bisa melengkapinya sekarang atau nanti."
+            : "Semua lembar sudah masuk. Pilih nomor absen untuk melihat jawaban siswa."}
+        </p>
+        <Button asChild variant="outline">
+          <Link href={`/guru/sesi/${id}`}>Pindai atau koreksi lembar</Link>
+        </Button>
+      </div>
       <section className={panel}>
         <h2 className="flex items-center gap-2 text-xl font-bold">
           <FileCheck2 size={24} className="text-primary" aria-hidden />
           {responses.length}/{run.roster.length} lembar masuk
         </h2>
         <p className="text-sm text-muted-foreground">
-          {navigator.onLine
-            ? "Hasil tersimpan"
-            : "Salinan tersimpan di perangkat"}{" "}
-          · Nomor absen saat asesmen
+          {cached ? "Salinan tersimpan di perangkat" : "Hasil tersimpan"} ·
+          Nomor absen saat asesmen
         </p>
         <ul className="divide-y">
           {run.roster.map((s) => {
@@ -283,52 +355,51 @@ export function ResultPage({ id }: { id: string }) {
                       : "Belum masuk"}
                   </span>
                 </button>
+                {selected === s.id && student && (
+                  <section className={panel} aria-label="Rincian jawaban">
+                    <h2 className="text-xl font-bold">
+                      Absen {student.attendanceNumber} · Rincian jawaban
+                    </h2>
+                    {answer ? (
+                      <>
+                        <p>
+                          Revisi {answer.revision} · {answer.correct}/
+                          {run.document.items.length} benar
+                        </p>
+                        <ol className="space-y-4">
+                          {run.document.items.map((q, i) =>
+                            q.kind === "card" ? (
+                              <li key={q.id}>
+                                <b>
+                                  {i + 1}. {mathText(q.prompt)}
+                                </b>
+                                <p>
+                                  Jawaban:{" "}
+                                  {answer.answers[i] === "?"
+                                    ? "? / Belum tahu"
+                                    : answer.answers[i]}{" "}
+                                  · Kunci: {q.key}
+                                </p>
+                                {q.explanation && (
+                                  <p className="text-muted-foreground">
+                                    {q.explanation}
+                                  </p>
+                                )}
+                              </li>
+                            ) : null,
+                          )}
+                        </ol>
+                      </>
+                    ) : (
+                      <p>Belum ada lembar untuk siswa ini.</p>
+                    )}
+                  </section>
+                )}
               </li>
             );
           })}
         </ul>
       </section>
-      {student && (
-        <section className={panel} aria-label="Rincian jawaban">
-          <h2 className="text-xl font-bold">
-            Absen {student.attendanceNumber} · Rincian jawaban
-          </h2>
-          {answer ? (
-            <>
-              <p>
-                Revisi {answer.revision} · {answer.correct}/
-                {run.document.items.length} benar
-              </p>
-              <ol className="space-y-4">
-                {run.document.items.map((q, i) =>
-                  q.kind === "card" ? (
-                    <li key={q.id}>
-                      <b>
-                        {i + 1}. {mathText(q.prompt)}
-                      </b>
-                      <p>
-                        Jawaban:{" "}
-                        {answer.answers[i] === "?"
-                          ? "? / Belum tahu"
-                          : answer.answers[i]}{" "}
-                        · Kunci: {q.key}
-                      </p>
-                      {q.explanation && (
-                        <p className="text-muted-foreground">{q.explanation}</p>
-                      )}
-                    </li>
-                  ) : null,
-                )}
-              </ol>
-            </>
-          ) : (
-            <p>Belum ada lembar untuk siswa ini.</p>
-          )}
-        </section>
-      )}
-      <Button asChild variant="outline">
-        <Link href={`/guru/sesi/${id}`}>Pindai atau koreksi lembar</Link>
-      </Button>
       <p role="status">{message}</p>
     </div>
   );

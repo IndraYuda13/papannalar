@@ -118,7 +118,7 @@ export function packagePages(
       }
     if (!p.lesson.oralReflection)
       for (const row of [1, 2, 3])
-        add(`Kartu Keluar · Baris ${row}`, {
+        add(`Kartu cek akhir · Baris ${row}`, {
           ...common,
           mode: "exit",
           question: row,
@@ -155,7 +155,7 @@ export function packagePages(
     );
     if (!p.lesson.oralReflection)
       [set.exit, set.reason, set.exitContext].forEach((q, i) =>
-        add(`Kartu Keluar · Baris ${i + 1}`, {
+        add(`Kartu cek akhir · Baris ${i + 1}`, {
           ...common,
           mode: "exit",
           question: i + 1,

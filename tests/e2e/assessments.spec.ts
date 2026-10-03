@@ -59,7 +59,7 @@ test("scan review / Ganti / Lewati / manual fallback and offline durable reload"
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7B");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7B");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7B/ }).click();
   await openTeacherExample(page);

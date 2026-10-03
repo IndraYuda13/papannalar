@@ -27,6 +27,7 @@ type Data = {
   state: z.infer<typeof libraryStateSchema>;
   classes: ClassDto[];
   offline: boolean;
+  canMutate: boolean;
   refresh: () => Promise<void>;
 };
 const Context = createContext<Data | null>(null);
@@ -36,7 +37,7 @@ export function useTeacher() {
   return value;
 }
 export function TeacherProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<Omit<Data, "refresh">>(),
+  const [data, setData] = useState<Omit<Data, "refresh" | "canMutate">>(),
     [message, setMessage] = useState(""),
     [conflict, setConflict] = useState(false),
     [locked, setLocked] = useState(false);
@@ -135,7 +136,7 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
           libraryCall,
         );
         if (count && !stopped) {
-          setMessage(`${count} lembar tersimpan di database.`);
+          setMessage(`${count} lembar jawaban sudah terkirim dan tersimpan.`);
           await refresh();
         }
       } catch {
@@ -176,7 +177,9 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
       />
     );
   return (
-    <Context.Provider value={{ ...data, refresh }}>
+    <Context.Provider
+      value={{ ...data, refresh, canMutate: !conflict && !locked }}
+    >
       {data.state.sample && (
         <span className="mb-4 inline-block rounded-full bg-pn-teal-100 px-3 py-1 text-xs font-bold text-primary">
           Data contoh
@@ -189,7 +192,10 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
       )}
       {conflict && (
         <div role="alert" className="mb-4 rounded-input border bg-card p-4">
-          <p>Data contoh sedang dikendalikan perangkat lain.</p>
+          <p>
+            Data contoh sedang dikendalikan perangkat lain. Anda dapat melihat
+            soal dan hasil. Ambil alih kendali untuk mengubahnya.
+          </p>
           <Button
             variant="outline"
             onClick={async () => {
@@ -199,14 +205,20 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
                 )
               )
                 return;
-              const r = await fetch("/api/v1/sample/control", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ takeover: true }),
-              });
-              if (r.ok) {
-                setConflict(false);
-                await refresh();
+              try {
+                const r = await fetch("/api/v1/sample/control", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ takeover: true }),
+                });
+                if (r.ok) {
+                  setConflict(false);
+                  await refresh();
+                } else throw new Error();
+              } catch {
+                setMessage(
+                  "Kendali belum berpindah. Periksa sambungan, lalu coba lagi.",
+                );
               }
             }}
           >

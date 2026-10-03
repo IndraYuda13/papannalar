@@ -39,10 +39,14 @@ export function BoardAppearanceProvider({ children }: { children: ReactNode }) {
   const [notice, setNotice] = useState("");
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      const saved = store.read(Boolean(readBoardProfile()));
+      const previous = store.read(Boolean(readBoardProfile()));
+      // Start with the conservative default; appearance is always editable.
+      const saved = previous.needsSetup
+        ? store.save(previous.profile)
+        : previous;
       setSnapshot(saved);
       setDraft(saved.profile);
-      setEditing(saved.needsSetup);
+      setEditing(false);
       if (!saved.persisted && !saved.needsSetup)
         setNotice(
           "Tampilan berlaku di tab ini. Penyimpanan browser tidak tersedia.",

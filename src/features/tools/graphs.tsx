@@ -814,7 +814,7 @@ export function Graphs({
           disabled={!state.history.length}
           onClick={() => act({ type: "undo" })}
         >
-          Ulang langkah
+          Batalkan langkah terakhir
         </Button>
         <Button
           size="board"

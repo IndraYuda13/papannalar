@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { libraryCache, removeLibraryCache } from "@/local/library";
+import { useDraftGuard } from "@/ui/use-draft-guard";
 import { useRouter } from "next/navigation";
 import { useTeacher } from "@/features/guru/app-context";
 import { Button } from "@/ui/components/button";
@@ -59,15 +61,14 @@ export function CollectionsPage({
         </p>
       )}
       <div
-        role="tablist"
+        role="group"
         aria-label="Sumber soal"
         className="studio-tabs flex gap-2"
       >
         {(["system", "teacher"] as const).map((t) => (
           <Button
             key={t}
-            role="tab"
-            aria-selected={tab === t}
+            aria-pressed={tab === t}
             variant={tab === t ? "default" : "outline"}
             onClick={() => setTab(t)}
           >
@@ -176,7 +177,7 @@ function CollectionEditor({
   initial?: Collection;
   assessmentSource?: Collection;
 }) {
-  const { refresh } = useTeacher(),
+  const { refresh, scope, canMutate } = useTeacher(),
     router = useRouter();
   const [id, setId] = useState(() => initial?.id ?? crypto.randomUUID()),
     [revision, setRevision] = useState(initial?.revision ?? 0),
@@ -205,14 +206,77 @@ function CollectionEditor({
     [errors, setErrors] = useState<Record<string, string>>({}),
     [busy, setBusy] = useState(false),
     [saved, setSaved] = useState(initial?.status === "ready"),
-    [activeItem, setActiveItem] = useState(document.items[0]?.id),
+    [activeItem, setActiveItem] = useState<string | undefined>(
+      document.items[0]?.id,
+    ),
     [templateUndo, setTemplateUndo] = useState<{
       index: number;
       item: DraftDocument["items"][number];
     }>();
   const readonly = source === "system";
+  const [dirty, setDirty] = useState(false);
+  const [draftState, setDraftState] = useState("");
+  const [deleted, setDeleted] = useState<DraftDocument>();
+  const writes = useRef(Promise.resolve());
+  const saving = useRef(false);
+  const edited = useRef(false);
+  const writeVersion = useRef(0);
+  const draftKey = initial?.id ?? `new:${assessmentSource?.id ?? "blank"}`;
+  useDraftGuard(dirty && draftState !== "Draft tersimpan di perangkat ini.");
+  useEffect(() => {
+    if (initial?.source === "system") return;
+    let active = true;
+    void libraryCache(scope, "editorDraft", draftKey)
+      .then((draft) => {
+        if (!draft || !active || edited.current) return;
+        if (draft.revision !== (initial?.revision ?? 0)) {
+          setMessage(
+            "Ada draft di perangkat ini, tetapi soal di server sudah berubah. Draft lama tetap disimpan; jangan menimpa soal sebelum membandingkan isinya.",
+          );
+          return;
+        }
+        setId(draft.id);
+        setDocument(draft.document);
+        setDirty(true);
+        setSaved(false);
+        setActiveItem(draft.document.items[0]?.id);
+        setDraftState("Draft tersimpan di perangkat ini.");
+        setMessage(
+          "Draft yang belum selesai dipulihkan. Lanjutkan mengedit, lalu simpan saat siap.",
+        );
+      })
+      .catch(() => {
+        if (active)
+          setDraftState(
+            "Penyimpanan draft di perangkat belum tersedia. Simpan untuk nanti sebelum keluar.",
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, [scope, draftKey, initial?.revision, initial?.source]);
   function change(next: DraftDocument) {
+    if (!canMutate || busy) return;
+    edited.current = true;
     setDocument(next);
+    setDirty(true);
+    setDraftState("Menyimpan draft di perangkat…");
+    const generation = ++writeVersion.current;
+    writes.current = writes.current
+      .then(async () => {
+        await libraryCache(scope, "editorDraft", draftKey, {
+          id,
+          revision,
+          document: next,
+        });
+        if (generation === writeVersion.current)
+          setDraftState("Draft tersimpan di perangkat ini.");
+      })
+      .catch(() =>
+        setDraftState(
+          "Draft belum tersimpan. Jangan tutup halaman; periksa isian lalu pilih Simpan untuk nanti.",
+        ),
+      );
     setSaved(false);
     setErrors({});
   }
@@ -223,6 +287,8 @@ function CollectionEditor({
     });
   }
   async function save(ready: boolean) {
+    if (busy || saving.current || !canMutate) return;
+    saving.current = true;
     setBusy(true);
     setMessage("");
     try {
@@ -254,6 +320,7 @@ function CollectionEditor({
           : "Belum tersimpan. Periksa isian alat dan internet.",
       );
     } finally {
+      saving.current = false;
       setBusy(false);
     }
   }
@@ -264,7 +331,13 @@ function CollectionEditor({
     setRevision(response.revision);
     setVersion(response.version);
     setSaved(ready);
-    await refresh();
+    await writes.current;
+    await removeLibraryCache(scope, "editorDraft", draftKey).catch(
+      () => undefined,
+    );
+    setDirty(false);
+    setDraftState("");
+    await refresh().catch(() => undefined);
     if (!initial) history.replaceState(null, "", `/guru/soal/${id}`);
   }
   function add() {
@@ -340,13 +413,18 @@ function CollectionEditor({
           Soal yang diubah berlaku untuk sesi baru. Hasil sesi lama tetap sama.
         </p>
       )}
+      {draftState && (
+        <p role="status" className="text-sm text-primary">
+          {draftState}
+        </p>
+      )}
       <label className="block font-semibold">
         Nama kumpulan
         <input
           className={field}
           value={document.title}
           maxLength={90}
-          readOnly={readonly}
+          readOnly={readonly || busy || !canMutate}
           onChange={(e) => change({ ...document, title: e.target.value })}
         />
         {errorAt("title")}
@@ -355,7 +433,7 @@ function CollectionEditor({
         Jenis kumpulan
         <select
           className={field}
-          disabled={readonly || document.items.length > 0}
+          disabled={readonly || busy || !canMutate || document.items.length > 0}
           value={document.kind}
           onChange={(e) =>
             change({
@@ -370,7 +448,25 @@ function CollectionEditor({
       </label>
       <p className="text-sm text-muted-foreground">
         Maksimal 5 soal. Untuk Kartu Nalar, satu soal memakai satu baris.
+        {!readonly &&
+          document.items.length > 0 &&
+          " Jenis kumpulan tetap selama ada soal. Buat kumpulan baru untuk memakai jenis lain."}
       </p>
+      {deleted && (
+        <div className="practice-feedback">
+          Soal dihapus.{" "}
+          <Button
+            variant="outline"
+            onClick={() => {
+              change(deleted);
+              setActiveItem(deleted.items[0]?.id);
+              setDeleted(undefined);
+            }}
+          >
+            Batalkan penghapusan
+          </Button>
+        </div>
+      )}
       <div className="studio-editor-layout">
         <aside className="studio-editor-index" aria-label="Daftar soal">
           <p>{document.items.length}/5 soal · Pilih soal untuk mengedit</p>
@@ -411,7 +507,7 @@ function CollectionEditor({
                   <div className="flex gap-1">
                     <Button
                       variant="outline"
-                      disabled={index === 0}
+                      disabled={index === 0 || busy || !canMutate}
                       aria-label={`Naikkan soal ${index + 1}`}
                       onClick={() => {
                         const items = [...document.items];
@@ -427,12 +523,17 @@ function CollectionEditor({
                     <Button
                       variant="outline"
                       aria-label={`Hapus soal ${index + 1}`}
-                      onClick={() =>
+                      disabled={busy || !canMutate}
+                      onClick={() => {
+                        setDeleted(document);
+                        setActiveItem(
+                          document.items.find((_, i) => i !== index)?.id,
+                        );
                         change({
                           ...document,
                           items: document.items.filter((_, i) => i !== index),
-                        })
-                      }
+                        });
+                      }}
                     >
                       Hapus
                     </Button>
@@ -442,11 +543,12 @@ function CollectionEditor({
               <label className="block">
                 Pertanyaan
                 <textarea
+                  aria-label="Pertanyaan"
                   className={field}
                   rows={2}
                   value={item.prompt}
                   maxLength={400}
-                  readOnly={readonly}
+                  readOnly={readonly || busy || !canMutate}
                   onChange={(e) =>
                     changeItem(index, { ...item, prompt: e.target.value })
                   }
@@ -463,7 +565,7 @@ function CollectionEditor({
                           className={field}
                           value={item.options[n]}
                           maxLength={400}
-                          readOnly={readonly}
+                          readOnly={readonly || busy || !canMutate}
                           onChange={(e) => {
                             const options = [...item.options] as [
                               string,
@@ -484,7 +586,7 @@ function CollectionEditor({
                     <select
                       className={field}
                       value={item.key}
-                      disabled={readonly}
+                      disabled={readonly || busy || !canMutate}
                       onChange={(e) =>
                         changeItem(index, {
                           ...item,
@@ -504,7 +606,7 @@ function CollectionEditor({
                       rows={2}
                       value={item.explanation}
                       maxLength={600}
-                      readOnly={readonly}
+                      readOnly={readonly || busy || !canMutate}
                       onChange={(e) =>
                         changeItem(index, {
                           ...item,
@@ -523,7 +625,7 @@ function CollectionEditor({
                     Aktivitas
                     <select
                       className={field}
-                      disabled={readonly}
+                      disabled={readonly || busy || !canMutate}
                       value={
                         item.kind === "writing" ? "writing" : item.tool.kind
                       }
@@ -566,10 +668,14 @@ function CollectionEditor({
                     />
                   )}
                   {item.kind === "interactive" && !readonly && (
-                    <ToolFields
-                      tool={item.tool}
-                      onChange={(tool) => changeItem(index, { ...item, tool })}
-                    />
+                    <fieldset disabled={busy || !canMutate} className="min-w-0">
+                      <ToolFields
+                        tool={item.tool}
+                        onChange={(tool) =>
+                          changeItem(index, { ...item, tool })
+                        }
+                      />
+                    </fieldset>
                   )}{" "}
                   {errorAt(`items.${index}.tool`)}
                 </>
@@ -607,7 +713,7 @@ function CollectionEditor({
           {!readonly && (
             <Button
               variant="outline"
-              disabled={document.items.length >= 5}
+              disabled={busy || !canMutate || document.items.length >= 5}
               onClick={add}
             >
               Tambah soal
@@ -650,6 +756,7 @@ function CollectionEditor({
         {readonly ? (
           <Button
             variant="outline"
+            disabled={busy || !canMutate}
             onClick={() => {
               setId(crypto.randomUUID());
               setRevision(0);
@@ -667,12 +774,15 @@ function CollectionEditor({
           <>
             <Button
               variant="outline"
-              disabled={busy}
+              disabled={busy || !canMutate}
               onClick={() => void save(false)}
             >
               Simpan untuk nanti
             </Button>
-            <Button disabled={busy} onClick={() => void save(true)}>
+            <Button
+              disabled={busy || !canMutate}
+              onClick={() => void save(true)}
+            >
               Simpan & siap digunakan
             </Button>
           </>
@@ -688,7 +798,7 @@ function CollectionEditor({
         {!readonly && revision > 0 && (
           <Button
             variant="outline"
-            disabled={busy}
+            disabled={busy || !canMutate}
             onClick={async () => {
               if (
                 !window.confirm(
@@ -696,9 +806,21 @@ function CollectionEditor({
                 )
               )
                 return;
-              await libraryCall({ action: "archive", id, revision });
-              await refresh();
-              router.push("/guru/soal");
+              if (saving.current || !canMutate) return;
+              saving.current = true;
+              setBusy(true);
+              try {
+                await libraryCall({ action: "archive", id, revision });
+                await refresh().catch(() => undefined);
+                router.push("/guru/soal");
+              } catch {
+                setMessage(
+                  "Kumpulan belum diarsipkan. Periksa sambungan, lalu coba lagi.",
+                );
+              } finally {
+                saving.current = false;
+                setBusy(false);
+              }
             }}
           >
             Arsipkan

@@ -143,11 +143,11 @@ export function StationControls({
   );
   return (
     <section
-      aria-label="Kendali Stasiun"
+      aria-label="Kegiatan kelompok"
       className="space-y-3 rounded-kartu border border-primary/30 p-4"
     >
       <fieldset disabled={busy || disabled} className="space-y-3">
-        <h4 className="text-lg font-bold">Kendali Stasiun</h4>
+        <h4 className="text-lg font-bold">Kegiatan kelompok</h4>
         {!state && !packageVariant && (
           <label className="block">
             Waktu sesi{" "}

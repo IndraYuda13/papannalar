@@ -1,4 +1,9 @@
 import { createNameRepository } from "../../src/local/names";
+import { createCycleRepository } from "../../src/local/cycles";
+import {
+  libraryResponseConflicts,
+  resolveLibraryResponse,
+} from "../../src/local/library";
 import { createStudentRepository } from "../../src/local/db";
 import { readTeacherStudentView } from "../../src/features/guru/student-view";
 import { serializeStudent } from "../../src/contracts/api";
@@ -15,6 +20,9 @@ import { boardToolProgress } from "../../src/local/library-board-progress";
 import { lockLocalAccess, readLocalAccess } from "../../src/local/access";
 
 const fixture = {
+  createCycleRepository,
+  libraryResponseConflicts,
+  resolveLibraryResponse,
   createNameRepository,
   createStudentRepository,
   readTeacherStudentView,

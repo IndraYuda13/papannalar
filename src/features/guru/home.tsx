@@ -6,7 +6,7 @@ import { Button } from "@/ui/components/button";
 import { panel } from "@/features/library/client";
 import { capturePairingLink } from "@/features/classroom/pairing-url";
 import { OfflineChooser } from "@/features/library/offline-chooser";
-import { PageHeader } from "@/ui/components/studio";
+import { PageHeader, WorkflowSteps } from "@/ui/components/studio";
 import { ToolExplorer } from "@/ui/components/tool-explorer";
 import { MotionBoundary } from "@/ui/components/motion-boundary";
 import type { LibraryRun } from "@/contracts/library";
@@ -51,7 +51,7 @@ export function TeacherHome() {
         title="Siap belajar hari ini?"
         description={
           state.sample
-            ? "Coba mengajar dengan kelas contoh, atau jelajahi latihan dan bantuan AI."
+            ? "Kelas dan soal contoh sudah tersedia. Mulai dari satu sesi untuk mencoba cara mengajar."
             : "Pilih kelas, pilih soal, lalu mulai sesi mengajar."
         }
         actions={
@@ -61,6 +61,9 @@ export function TeacherHome() {
             </Link>
           </Button>
         }
+      />
+      <WorkflowSteps
+        steps={["Pilih kelas", "Pilih soal", "Mengajar", "Lihat hasil"]}
       />
       {pair && (
         <p role="status" className="rounded-input bg-pn-teal-100 p-3">
@@ -122,7 +125,7 @@ export function TeacherHome() {
             </Link>
           </Button>
         </section>
-        <section className={`${panel} flex flex-col gap-4 bg-pn-teal-100`}>
+        <section className={`${panel} flex flex-col gap-4`}>
           <h2 className="flex items-center gap-3 text-xl font-bold">
             <span className="activity-icon" aria-hidden>
               <Sparkles size={24} />
@@ -130,10 +133,11 @@ export function TeacherHome() {
             Latihan & bantuan AI
           </h2>
           <p>
-            Siapkan latihan sesuai kebutuhan kelas. AI membantu cerita soal dan
-            saran mengajar; kartu saran juga tersedia tanpa AI.
+            Butuh latihan tambahan? Siapkan soal otomatis. Jika diperlukan,
+            gunakan AI untuk mengganti cerita soal atau mencari cara
+            menjelaskan.
           </p>
-          <Button asChild className="mt-auto">
+          <Button asChild variant="outline" className="mt-auto">
             <Link
               href={`/guru/latihan?mode=${state.sample ? "demo" : "pilot"}${last ? `&class=${last.id}` : ""}`}
             >

@@ -62,8 +62,9 @@ test("Aplikasi Guru terbuka pada HP, font lokal siap dan navigasi ke papan beker
   const opened = page.waitForEvent("popup");
   await openBoard.click();
   const board = await opened;
+  await board.locator(".board-menu > summary").click();
   await board
-    .getByRole("button", { name: "Simpan tampilan", exact: true })
+    .getByRole("button", { name: "Tes Kemampuan Papan", exact: true })
     .click();
   const capability = board.getByRole("region", {
     name: "Tes Kemampuan Papan",

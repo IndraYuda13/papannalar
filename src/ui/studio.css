@@ -641,3 +641,99 @@
 .scene-frame:has(.scene-canvas[data-ready="true"]) > .tool-poster {
   visibility: hidden;
 }
+
+/* Short orientation for the everyday teacher journey. */
+.workflow-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+.workflow-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--pn-line);
+  border-radius: 12px;
+  background: white;
+  font-size: 14px;
+}
+.workflow-steps li > span:first-child {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--pn-teal-800);
+  background: var(--pn-teal-100);
+  font-weight: 700;
+}
+.workflow-steps li[aria-current="step"] {
+  border-color: var(--pn-teal-700);
+  background: var(--pn-teal-100);
+  font-weight: 700;
+}
+.studio-start-form {
+  max-width: 720px;
+}
+.studio-workspace form {
+  scroll-margin-block: 20px 100px;
+}
+.studio-workspace [data-slot="button"] {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.studio-filter-panel {
+  border-block: 1px solid var(--pn-line);
+  padding-block: 4px;
+}
+.studio-context {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+}
+.studio-workspace [aria-label="Rincian jawaban"] {
+  margin-block: 8px 16px;
+  background: var(--pn-teal-100);
+}
+@media (max-width: 767px) {
+  .studio-context {
+    margin-bottom: 12px;
+    padding-bottom: 4px;
+  }
+  .studio-page-header {
+    margin-bottom: 16px;
+  }
+  .studio-header-actions,
+  .studio-header-actions > [data-slot="button"] {
+    width: 100%;
+  }
+  .studio-workspace {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+  .workflow-steps li {
+    padding: 10px 8px;
+  }
+}
+
+.studio-workspace h1,
+.studio-workspace h2 {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 767px) {
+  .workflow-steps:has(> :last-child:nth-child(4)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .workflow-steps:has(> :last-child:nth-child(3)) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .workflow-steps:has(> :last-child:nth-child(3)) li {
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+  }
+}

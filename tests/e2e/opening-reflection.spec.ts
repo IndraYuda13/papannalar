@@ -20,7 +20,7 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7R");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7R");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7R/ }).click();
   await openTeacherExample(page);
@@ -88,7 +88,7 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
   });
   await controls.getByRole("button", { name: "Lanjutan", exact: true }).click();
   await expect(
-    board.getByRole("region", { name: "Lanjutan pembuka", exact: true }),
+    board.getByRole("region", { name: "Diskusi lanjutan", exact: true }),
   ).toContainText("mulai di −3 lalu turun 5");
   await expect(board.getByTestId("lesson-objective")).toContainText("basement");
   await page
@@ -98,13 +98,13 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
     .getByRole("button", { name: "Tampilkan pembuka katalog", exact: true })
     .click();
   await expect(
-    board.getByRole("region", { name: "Pembuka bermakna", exact: true }),
+    board.getByRole("region", { name: "Pertanyaan pembuka", exact: true }),
   ).toContainText("2/3 gelas ditambah 1/4");
   await board
     .getByRole("button", { name: "Lebih kecil / kurang", exact: true })
     .click();
   await expect(
-    board.getByRole("region", { name: "Pembuka bermakna", exact: true }),
+    board.getByRole("region", { name: "Pertanyaan pembuka", exact: true }),
   ).toContainText("Perkiraan: lebih kecil / kurang");
   await expect(
     board.getByRole("region", { name: "Batang Pecahan", exact: true }),

@@ -1,6 +1,26 @@
 import type { ReactNode } from "react";
 import { CircleAlert, FolderOpen, LoaderCircle } from "lucide-react";
 
+/** A short, non-interactive orientation; actual actions remain labelled buttons. */
+export function WorkflowSteps({
+  steps,
+  current,
+}: {
+  steps: readonly string[];
+  current?: number;
+}) {
+  return (
+    <ol className="workflow-steps" aria-label="Alur mengajar">
+      {steps.map((step, index) => (
+        <li key={step} aria-current={index === current ? "step" : undefined}>
+          <span aria-hidden>{index + 1}</span>
+          <span>{step}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function PageHeader({
   title,
   description,

@@ -232,6 +232,35 @@ auth/RLS, privasi, matematika, anggaran dan ledger tetap berlaku. Migration
 hosted, provider live, cetak/perangkat fisik dan studi guru bukan hasil fixture
 lokal. Jurnal PLAN9.62 dan receipt `artifacts/qa/ui-ai-v2/practice-v6.json`.
 
+### 2.4 Addendum perjalanan guru dan pemulihan jawaban — 3 Oktober 2026
+
+K42 [S]: audit menyeluruh, perbaiki kegagalan Mulai sesi, sederhanakan bahasa
+siswa/guru dan uji perjalanan nyata sebelum commit/push. Handoff QA eksternal
+berbaseline c2a0593 diperlakukan sebagai saran; checkout pekerjaan adalah 05ed781.
+[D] Alur utama memakai library: kelas → soal → mengajar/asesmen → hasil.
+Latihan otomatis/AI tetap opsional dan tidak membuka gate materi/privasi.
+Contoh terisi dan cycle persiapan pada kelas demo yang sama memiliki riwayat
+belajar terpisah; semua UUID, respons lama dan namespace tetap dipertahankan.
+Guard riwayat pilot tetap berlaku. Retry start paket aktif mengembalikan cycle
+semula. Kegagalan domain berjenis/berkode aman tidak lagi dilabeli error storage;
+exception data mentah tetap disanitasi. Cek lisan hanya ditawarkan kelas 1–3.
+
+[D] Editor jawaban memuat nilai/revisi saat dibuka; belum diisi/tidak terbaca
+berbeda dari pilihan eksplisit ?. Draft lokal scoped tidak menjadi nilai sampai
+Simpan berhasil; koreksi menggunakan CAS revisi saat draft dibuka. Konflik antrean
+per siswa tidak menghentikan siswa lain. Versi lokal ditahan hingga guru memilih;
+receipt pendahulu yang berhasil hanya memajukan revisi edit lokal berikutnya.
+Fallback sesi/hasil untuk jaringan/5xx memakai cache tenant yang sama; 401/403 dan
+respons invalid tidak membuka cache. Draft soal disimpan lokal dan pemulihan
+memeriksa revisi sumber; tidak menimpa perubahan server yang lebih baru.
+
+[D] Tanggal resume lama tampil eksplisit. Akhiri asesmen menuju hasil; rincian
+siswa dan edit siswa berada pada baris terpilih. Preview satu soal, kontrol pecahan
+di atas model, target matematis dan perbandingan satu-utuh tetap. First-use board
+langsung pairing dengan preset balanced dan sentuhan konservatif yang belum
+terverifikasi; tes kemampuan tetap opsional. Navigasi bisa diklik/Enter dan tidak
+menghilang saat fokus di dalam. Tidak ada migration/dependency/aset baru.
+
 ## 3. Arsitektur dan dependensi
 
 ### 3.1 Satu aplikasi, modul terpisah [D; memenuhi S0 keputusan 9]

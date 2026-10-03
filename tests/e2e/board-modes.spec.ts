@@ -31,7 +31,7 @@ async function paired(page: Page, browser: Browser) {
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7V");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7V");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7V/ }).click();
   await openTeacherExample(page);
@@ -225,7 +225,7 @@ test("UI01 SD public questions, independent work and exit reasons render their g
   await publish({ ...exit, taskEpoch: crypto.randomUUID() });
   await expect(
     board
-      .getByRole("region", { name: "Kartu Keluar kelompok" })
+      .getByRole("region", { name: "Kartu cek akhir kelompok" })
       .getByRole("figure", { name: "Model visual soal" }),
   ).toHaveCount(packet.plan.groups.length);
   await expect(board.locator('[data-diagram="quantities"]')).toHaveCount(0);
@@ -354,7 +354,7 @@ test("UI01 Sorot uses a twin, permits Nala repair, and returns the same station 
   await expect(spot).toHaveCount(0);
   await expect(line.getByTestId("number-position")).toHaveText(before);
   await line
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await expect(line.getByTestId("number-position")).toContainText("−3");
   expect(errors).toEqual([]);
@@ -476,7 +476,7 @@ test("UI01 four public panels paginate with 72px prompts, independent model stat
     .getByRole("button", { name: "Perbesar panel 1", exact: true })
     .click();
   await first
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await expect(first.getByTestId("number-position")).not.toHaveText(before);
   await panels

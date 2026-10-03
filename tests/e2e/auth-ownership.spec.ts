@@ -42,7 +42,7 @@ test("refresh session mempertahankan cookie dan no-store meski resource tidak di
 });
 async function createClassUi(page: Page, label: string, count: number) {
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill(label);
+  await page.getByLabel("Nama kelas", { exact: true }).fill(label);
   await page.getByLabel("Jumlah siswa").fill(String(count));
   const created = page.waitForResponse(
     (response) =>
@@ -238,7 +238,7 @@ test("CRUD kelas A/B melalui API tetap dibatasi RLS PostgreSQL", async ({
     expect(
       (await page.request.get(`/api/v1/classes/${a.class.id}`)).status(),
     ).toBe(200);
-    await page.getByLabel("Nama rombel", { exact: true }).fill("7C");
+    await page.getByLabel("Nama kelas", { exact: true }).fill("7C");
     await page.getByRole("button", { name: "Simpan perubahan" }).click();
     await expect(
       page.getByRole("heading", { name: "Kelas 7C", exact: true }),

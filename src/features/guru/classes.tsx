@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTeacher } from "./app-context";
 import {
   classDetailSchema,
@@ -23,7 +23,7 @@ import { classPresence } from "@/local/class-presence";
 import { PageHeader, StateNotice } from "@/ui/components/studio";
 import { Search, UsersRound } from "lucide-react";
 export function ClassesPage() {
-  const { classes, scope, refresh } = useTeacher(),
+  const { classes, scope, refresh, canMutate } = useTeacher(),
     [adding, setAdding] = useState(false),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false),
@@ -35,7 +35,10 @@ export function ClassesPage() {
         title="Kelas"
         description="Daftar kelas dan siswa Anda. Nama siswa tetap di perangkat ini."
         actions={
-          <Button onClick={() => setAdding(!adding)}>
+          <Button
+            disabled={!canMutate || busy}
+            onClick={() => setAdding(!adding)}
+          >
             {adding ? "Batal menambah" : "Tambah kelas"}
           </Button>
         }
@@ -45,7 +48,9 @@ export function ClassesPage() {
           className={panel}
           onSubmit={async (e) => {
             e.preventDefault();
+            if (busy || !canMutate) return;
             setBusy(true);
+            setMessage("");
             const f = new FormData(e.currentTarget);
             try {
               const res = await fetch("/api/v1/classes", {
@@ -62,6 +67,9 @@ export function ClassesPage() {
               if (!res.ok) throw new Error();
               await refresh();
               setAdding(false);
+              setMessage(
+                "Kelas tersimpan. Buka kelas di bawah, lalu pilih Mulai mengajar.",
+              );
             } catch {
               setMessage("Kelas belum tersimpan. Periksa isian dan sambungan.");
             } finally {
@@ -70,7 +78,7 @@ export function ClassesPage() {
           }}
         >
           <label>
-            Nama rombel
+            Nama kelas
             <input
               className={field}
               name="label"
@@ -140,7 +148,7 @@ export function ClassesPage() {
       </ul>
       {!classes.length && (
         <StateNotice title="Belum ada kelas">
-          Tambahkan rombel pertama untuk mulai mengajar.
+          Tambahkan kelas pertama untuk mulai mengajar.
         </StateNotice>
       )}
       {classes.length > 0 &&
@@ -156,7 +164,7 @@ export function ClassesPage() {
   );
 }
 export function ClassPage({ id }: { id: string }) {
-  const { scope, state, refresh } = useTeacher(),
+  const { scope, state, refresh, canMutate } = useTeacher(),
     [detail, setDetail] = useState<{
       class: ClassDto;
       students: StudentDto[];
@@ -165,6 +173,13 @@ export function ClassPage({ id }: { id: string }) {
     [selected, setSelected] = useState<StudentDto>(),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
+  const editorRef = useRef<HTMLFormElement>(null);
+  const editorTrigger = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!selected) return;
+    editorRef.current?.scrollIntoView({ block: "nearest" });
+    editorRef.current?.querySelector("input")?.focus({ preventScroll: true });
+  }, [selected]);
   const owner = scope.ownerId,
     mode = scope.mode;
   const [absent, setAbsent] = useState<string[]>([]),
@@ -242,6 +257,81 @@ export function ClassPage({ id }: { id: string }) {
       />
     );
   const classroom = detail.class;
+  const editor = selected && (
+    <form
+      key={selected.id}
+      ref={editorRef}
+      aria-label={`Edit siswa absen ${selected.attendanceNumber}`}
+      tabIndex={-1}
+      className="w-full space-y-3 rounded-input bg-pn-teal-100 p-4"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (busy || !canMutate) return;
+        const f = new FormData(e.currentTarget);
+        setBusy(true);
+        try {
+          await libraryCall({
+            action: "roster",
+            classId: id,
+            studentId: selected.id,
+            attendanceNumber: Number(f.get("attendance")),
+            active: f.get("active") === "on",
+          });
+          const repo = createNameRepository(scope);
+          try {
+            await repo.save(selected.id, String(f.get("localName") ?? ""));
+          } finally {
+            repo.close();
+          }
+          setSelected(undefined);
+          await load();
+          await refresh();
+          setMessage("Perubahan tersimpan.");
+        } catch {
+          setMessage("Belum tersimpan. Nomor absen harus unik antara 1–40.");
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      <h3 className="font-bold">
+        Edit siswa · Absen {selected.attendanceNumber}
+      </h3>
+      <label className="block">
+        Nomor absen
+        <input
+          className={field}
+          name="attendance"
+          type="number"
+          min={1}
+          max={40}
+          defaultValue={selected.attendanceNumber}
+          required
+        />
+      </label>
+      <label className="block">
+        Nama panggilan di perangkat ini
+        <input
+          name="localName"
+          className={field}
+          defaultValue={names[selected.id] ?? ""}
+          maxLength={120}
+        />
+      </label>
+      <label className="flex min-h-12 items-center gap-3">
+        <input name="active" type="checkbox" defaultChecked={selected.active} />
+        Siswa aktif (hapus centang untuk arsip)
+      </label>
+      <Button disabled={busy}>Simpan siswa</Button>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => setSelected(undefined)}
+      >
+        Batal
+      </Button>
+    </form>
+  );
   return (
     <div className="space-y-5">
       <Link
@@ -326,15 +416,23 @@ export function ClassPage({ id }: { id: string }) {
                 />
                 Hadir
               </label>
-              <Button variant="outline" onClick={() => setSelected(s)}>
+              <Button
+                disabled={!canMutate || busy}
+                variant="outline"
+                onClick={(event) => {
+                  editorTrigger.current = event.currentTarget;
+                  setSelected(s);
+                }}
+              >
                 Edit
               </Button>
+              {selected?.id === s.id && editor}
             </li>
           ))}
         </ul>
         <Button
           variant="outline"
-          disabled={detail.students.length >= 40}
+          disabled={!canMutate || detail.students.length >= 40}
           onClick={() =>
             setSelected({
               schemaVersion: 1,
@@ -350,86 +448,12 @@ export function ClassPage({ id }: { id: string }) {
         >
           Tambah siswa
         </Button>
-        {selected && (
-          <form
-            key={selected.id}
-            className="space-y-3 rounded-input bg-pn-teal-100 p-4"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const f = new FormData(e.currentTarget);
-              setBusy(true);
-              try {
-                await libraryCall({
-                  action: "roster",
-                  classId: id,
-                  studentId: selected.id,
-                  attendanceNumber: Number(f.get("attendance")),
-                  active: f.get("active") === "on",
-                });
-                const repo = createNameRepository(scope);
-                try {
-                  await repo.save(
-                    selected.id,
-                    String(f.get("localName") ?? ""),
-                  );
-                } finally {
-                  repo.close();
-                }
-                setSelected(undefined);
-                await load();
-                await refresh();
-                setMessage("Perubahan tersimpan.");
-              } catch {
-                setMessage(
-                  "Belum tersimpan. Nomor absen harus unik antara 1–40.",
-                );
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            <label className="block">
-              Nomor absen
-              <input
-                className={field}
-                name="attendance"
-                type="number"
-                min={1}
-                max={40}
-                defaultValue={selected.attendanceNumber}
-                required
-              />
-            </label>
-            <label className="block">
-              Nama panggilan di perangkat ini
-              <input
-                name="localName"
-                className={field}
-                defaultValue={names[selected.id] ?? ""}
-                maxLength={120}
-              />
-            </label>
-            <label className="flex min-h-12 items-center gap-3">
-              <input
-                name="active"
-                type="checkbox"
-                defaultChecked={selected.active}
-              />
-              Siswa aktif (hapus centang untuk arsip)
-            </label>
-            <Button disabled={busy}>Simpan siswa</Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setSelected(undefined)}
-            >
-              Batal
-            </Button>
-          </form>
-        )}
+        {selected &&
+          !detail.students.some((s) => s.id === selected.id) &&
+          editor}
         <details>
           <summary className="flex min-h-12 cursor-pointer items-center font-semibold text-primary">
-            Impor dan nama lokal
+            Tambahkan nama siswa dari file
           </summary>
           <LocalRoster
             ownerId={owner}
@@ -441,30 +465,41 @@ export function ClassPage({ id }: { id: string }) {
       </section>
       <details className={panel}>
         <summary className="min-h-12 cursor-pointer font-bold">
-          Pengaturan kelas dan cek level
+          Ubah nama atau tingkat kelas
         </summary>
         <form
           className="space-y-3"
           onSubmit={async (e) => {
             e.preventDefault();
             const f = new FormData(e.currentTarget);
-            const res = await fetch(`/api/v1/classes/${id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: serializeUpdateClass({
-                label: String(f.get("label")),
-                grade: Number(f.get("grade")),
-                revision: classroom.revision,
-              }),
-            });
-            if (res.ok) {
+            if (busy || !canMutate) return;
+            setBusy(true);
+            setMessage("");
+            try {
+              const res = await fetch(`/api/v1/classes/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: serializeUpdateClass({
+                  label: String(f.get("label")),
+                  grade: Number(f.get("grade")),
+                  revision: classroom.revision,
+                }),
+              });
+              if (!res.ok) throw new Error();
               await load();
               await refresh();
-            } else setMessage("Pengaturan belum tersimpan.");
+              setMessage("Pengaturan kelas tersimpan.");
+            } catch {
+              setMessage(
+                "Pengaturan belum tersimpan. Periksa sambungan, lalu coba lagi. Jika kelas berubah di perangkat lain, muat ulang halaman.",
+              );
+            } finally {
+              setBusy(false);
+            }
           }}
         >
           <label className="block">
-            Nama rombel
+            Nama kelas
             <input
               name="label"
               defaultValue={classroom.label}
@@ -483,7 +518,9 @@ export function ClassPage({ id }: { id: string }) {
               className={field}
             />
           </label>
-          <Button>Simpan pengaturan</Button>
+          <Button disabled={busy}>
+            {busy ? "Menyimpan…" : "Simpan pengaturan"}
+          </Button>
         </form>
       </details>
       <p role="status">{message}</p>

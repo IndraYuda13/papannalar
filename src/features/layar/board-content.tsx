@@ -179,7 +179,7 @@ function BoardBody({ state, content, plan }: ContentProps) {
   if (state.mode === "continuation")
     return (
       <>
-        <h1 className={heading}>Lanjutan Pembuka</h1>
+        <h1 className={heading}>Ayo lanjutkan</h1>
         <p className="max-w-5xl text-[56px]">
           Lift berada di lantai 5, lalu turun ke basement −2. Bagaimana arah
           geraknya berubah?
@@ -218,13 +218,13 @@ function BoardBody({ state, content, plan }: ContentProps) {
   if (state.mode === "exit")
     return (
       <>
-        <h1 className={heading}>Kartu Keluar</h1>
+        <h1 className={heading}>Kartu cek akhir</h1>
         <p className="max-w-5xl text-[48px]">
           Tuliskan nomor absen. Siapkan satu pilihan jawaban dan alasan pada dua
           baris pertama.
         </p>
         <p className="mt-10 text-[32px]">
-          Buka paket Kartu Keluar dari HP guru untuk menampilkan soal tiap
+          Buka paket Kartu cek akhir dari HP guru untuk menampilkan soal tiap
           kelompok.
         </p>
       </>

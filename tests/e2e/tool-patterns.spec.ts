@@ -17,7 +17,7 @@ test("Seven patterns use actual paired board, distinct examples, repairs, unique
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7P");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7P");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7P/ }).click();
   await openTeacherExample(page);

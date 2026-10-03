@@ -96,7 +96,7 @@ export function Balance({
       setHighlight([]);
     } catch {
       setNotice(
-        "Pembagi dan pengali harus bukan nol. Ulang langkah jika nilai atau jumlah langkah terlalu besar.",
+        "Pembagi dan pengali harus bukan nol. Batalkan langkah terakhir jika nilai atau jumlah langkah terlalu besar.",
       );
     }
   }
@@ -290,7 +290,7 @@ export function Balance({
           disabled={!state.history.length}
           onClick={() => act({ type: "undo" })}
         >
-          Ulang langkah
+          Batalkan langkah terakhir
         </Button>
         <Button
           size="board"

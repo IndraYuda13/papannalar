@@ -1,10 +1,45 @@
 # Memakai soal, Kartu Nalar dan bantuan AI
 
-Alur utama adalah **pilih kelas → siapkan soal → mulai mengajar**.
-Bantuan AI boleh dilewati.
-Pengaturan kelas, cek lisan, kartu lain dan persiapan offline ada di
-**Alat & pengaturan tambahan**. Peringatan kehilangan/sinkronisasi data
-tetap terlihat dan dapat langsung membuka bagian yang perlu ditangani.
+Untuk kegiatan sehari-hari, mulai dari **Beranda → Mulai mengajar**.
+AI dan latihan otomatis adalah pilihan tambahan; keduanya boleh dilewati.
+
+## Mengajar dari awal sampai selesai
+
+1. **Pilih kelas.** Jika belum ada, buka Kelas → Tambah kelas. Isi nama kelas,
+   tingkat dan jumlah siswa. Nama siswa boleh ditambahkan nanti dan tetap di
+   perangkat guru.
+2. **Pilih kumpulan soal.** Gunakan soal siap pakai atau soal Anda sendiri.
+   Preview materi menampilkan satu soal; gunakan Soal berikutnya untuk memeriksa
+   soal lain. Jika ada sesi lama, tanggal dan posisi soal ditampilkan sebelum
+   Anda memilih Lanjutkan sesi.
+3. **Mulai sesi.** Anda bisa mengajar dari HP. Untuk memakai proyektor/TV/papan,
+   buka `/layar` di perangkat itu. Di HP, pilih Sambungkan Layar lalu pindai QR
+   atau masukkan kode enam digit. Tidak perlu memilih pengaturan tampilan dulu.
+4. **Jalankan kegiatan.** Tampilkan soal satu per satu. Untuk asesmen, cetak Kartu
+   Nalar dari halaman sesi, bagikan kepada siswa, kemudian pindai kartu atau
+   pilih Input manual. Periksa isian sebelum Simpan jawaban.
+5. **Akhiri sesi.** Sesi mengajar kembali ke beranda. Asesmen langsung membuka
+   hasil; pilih nomor absen untuk melihat jawaban, atau Pindai atau koreksi lembar
+   untuk melengkapi jawaban. Hasil → Soal untuk dibahas bersama membantu memilih
+   soal yang perlu dijelaskan lagi, berdasarkan lembar yang sudah diperiksa.
+
+## Saat perlu melanjutkan atau memperbaiki isian
+
+- Beranda → Lanjutkan sesi membuka kegiatan yang belum diakhiri.
+- Koreksi jawaban selalu dimulai dari jawaban yang tersimpan. Batal membuang
+  edit; jawaban lama tetap ada. Baris kosong/tidak terbaca harus diperiksa, bukan
+  otomatis dianggap siswa menjawab “Belum tahu”.
+- Draft soal tersimpan di perangkat. Saat dibuka kembali, aplikasi memulihkan
+  isian yang belum selesai. Simpan & siap digunakan tetap diperlukan agar
+  kumpulan muncul pada pilihan sesi. Hapus soal dapat dibatalkan.
+- Jika jawaban berbeda di dua perangkat, bagian Bandingkan jawaban menampilkan
+  kedua versi. Pilih versi yang benar; jawaban siswa lain tetap bisa dikirim.
+- Jika data contoh dikendalikan perangkat lain, Anda bisa melihat soal/hasil.
+  Pilih Ambil alih kendali jika memang ingin memindahkan kendalinya.
+
+Pengaturan kelas, cek lisan, kartu lain dan persiapan penggunaan tanpa internet
+berada di **Alat & pengaturan tambahan** pada latihan. Peringatan yang memerlukan
+tindakan tetap terlihat.
 
 ## Memakai soal buatan sendiri
 
@@ -99,3 +134,8 @@ dan dicoba otomatis saat tersambung lagi, termasuk setelah memuat ulang.
 **Contoh sesi lengkap dengan jawaban terisi** tetap tersedia di `/guru/simulasi`.
 Contoh 32 siswa ini dipakai untuk mempelajari pemindaian, kelompok dan kegiatan;
 sesi yang Anda siapkan sendiri tetap terpisah.
+
+Kalimat untuk siswa menjelaskan tindakan yang bisa dilakukan, misalnya:
+“Tulis jawabanmu di buku. Ceritakan cara menghitungnya kepada teman.” Istilah
+teknis seperti model konteks, revisi database dan kode langkah tidak diperlukan
+untuk menjawab soal.

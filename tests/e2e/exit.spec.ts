@@ -52,7 +52,7 @@ test("EXIT01 teacher freezes package, board gets each public row, manual review 
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7E");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7E");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7E/ }).click();
   await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
@@ -97,12 +97,12 @@ test("EXIT01 teacher freezes package, board gets each public row, manual review 
     "Layar tersambung",
   );
   const exit = page.getByRole("region", {
-    name: "Hasil Kartu Keluar",
+    name: "Hasil Kartu cek akhir",
     exact: true,
   });
   await exit
     .getByRole("button", {
-      name: "Bekukan Kartu Keluar dari paket",
+      name: "Siapkan pertanyaan penutup",
       exact: true,
     })
     .click();
@@ -116,13 +116,13 @@ test("EXIT01 teacher freezes package, board gets each public row, manual review 
       .click();
     await expect(
       board.getByRole("heading", {
-        name: `Kartu Keluar · Baris ${row}/3`,
+        name: `Kartu cek akhir · Baris ${row}/3`,
         exact: true,
       }),
     ).toBeVisible();
     await expect(
       board
-        .getByRole("region", { name: "Kartu Keluar kelompok", exact: true })
+        .getByRole("region", { name: "Kartu cek akhir kelompok", exact: true })
         .locator("section"),
     ).toHaveCount(3);
   }
@@ -165,7 +165,7 @@ test("EXIT01 teacher freezes package, board gets each public row, manual review 
   ).not.toContainText("0/1 pasangan dinilai");
   await mkdir("artifacts/qa/M10", { recursive: true });
   await board
-    .getByRole("region", { name: "Kartu Keluar kelompok", exact: true })
+    .getByRole("region", { name: "Kartu cek akhir kelompok", exact: true })
     .screenshot({ path: "artifacts/qa/M10/exit-board.png" });
   expect(errors).toEqual([]);
   await writeFile(

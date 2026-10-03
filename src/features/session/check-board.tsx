@@ -26,7 +26,7 @@ export function CheckBoard({ state }: { state: PresentationState }) {
   return (
     <section aria-label="Soal cek paket" className="w-full space-y-8">
       <p className="text-[32px]">
-        {value.total === 10 ? "Cek Awal" : "Cek Mingguan"} · Soal{" "}
+        {value.total === 10 ? "Cek pertama" : "Cek lanjutan"} · Soal{" "}
         {state.question}/{value.total} · Baris {state.question} pada kartu ·{" "}
         {remaining} detik
       </p>

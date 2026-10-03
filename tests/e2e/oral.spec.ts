@@ -49,7 +49,7 @@ test("oral grade 2 goes down on first wrong, skips without evidence, and resumes
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("2L");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("2L");
   await page.getByLabel("Tingkat kelas", { exact: true }).fill("2");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 2L/ }).click();

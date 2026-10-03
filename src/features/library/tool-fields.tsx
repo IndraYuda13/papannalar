@@ -162,30 +162,32 @@ export function ToolFields({
             <option value="equivalent">Pecahan senilai</option>
           </select>
         </label>
-        {(["left", "right"] as const).map((side, i) => (
-          <div key={side} className="space-y-2">
-            <NumberField
-              label={`Pembilang ${i + 1}`}
-              help="Banyak bagian yang diwarnai. Negatif memakai tanda minus."
-              value={t[side].numerator}
-              min={-12}
-              max={12}
-              onChange={(n) =>
-                set({ ...t, [side]: { ...t[side], numerator: n } })
-              }
-            />
-            <NumberField
-              label={`Penyebut ${i + 1}`}
-              help="Banyak bagian sama besar dalam satu utuh (2–12)."
-              value={t[side].denominator}
-              min={2}
-              max={12}
-              onChange={(n) =>
-                set({ ...t, [side]: { ...t[side], denominator: n } })
-              }
-            />
-          </div>
-        ))}
+        {(["left", "right"] as const)
+          .filter((side) => t.operation !== "represent" || side === "left")
+          .map((side, i) => (
+            <div key={side} className="space-y-2">
+              <NumberField
+                label={`Pembilang ${i + 1}`}
+                help="Banyak bagian yang diwarnai. Negatif memakai tanda minus."
+                value={t[side].numerator}
+                min={-12}
+                max={12}
+                onChange={(n) =>
+                  set({ ...t, [side]: { ...t[side], numerator: n } })
+                }
+              />
+              <NumberField
+                label={`Penyebut ${i + 1}`}
+                help="Banyak bagian sama besar dalam satu utuh (2–12)."
+                value={t[side].denominator}
+                min={2}
+                max={12}
+                onChange={(n) =>
+                  set({ ...t, [side]: { ...t[side], denominator: n } })
+                }
+              />
+            </div>
+          ))}
       </div>
     );
   if (t.kind === "ratio")

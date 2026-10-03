@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LocalActionError } from "./action-error";
 import {
   parseBoundary,
   randomIdSchema,
@@ -34,6 +35,8 @@ export async function localOperation<T>(
   try {
     return await operation();
   } catch (error) {
+    // An expected workflow constraint is not a broken storage device.
+    if (error instanceof LocalActionError) throw error;
     // Never attach the raw record, name or browser exception to diagnostics.
     const name = error instanceof Error ? error.name : "";
     const code =

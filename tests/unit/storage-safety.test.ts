@@ -1,5 +1,15 @@
 import { expect, it } from "vitest";
 import { localOperation, LocalStorageError } from "../../src/local/scope";
+import { LocalActionError } from "../../src/local/action-error";
+it("keeps an actionable session conflict separate from a storage failure", async () => {
+  const conflict = new LocalActionError("FINISH_PREVIOUS");
+  await expect(
+    localOperation(async () => {
+      throw conflict;
+    }),
+  ).rejects.toBe(conflict);
+  expect(JSON.stringify(conflict)).toContain("FINISH_PREVIOUS");
+});
 import {
   registerUpdateGuard,
   pageUpdateSafe,

@@ -77,7 +77,7 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7N");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7N");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7N/ }).click();
   const pkg = page.getByRole("region", { name: "Paket Sesi", exact: true }),
@@ -240,7 +240,7 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
     /\b32\b|C3|D1|D3|B4|mastery|answerKey/,
   );
   const stations = cycle.getByRole("region", {
-    name: "Kendali Stasiun",
+    name: "Kegiatan kelompok",
     exact: true,
   });
   await stations
@@ -341,12 +341,12 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
       .click();
   }
   const exit = cycle.getByRole("region", {
-    name: "Hasil Kartu Keluar",
+    name: "Hasil Kartu cek akhir",
     exact: true,
   });
   await exit
     .getByRole("button", {
-      name: "Bekukan Kartu Keluar dari paket",
+      name: "Siapkan pertanyaan penutup",
       exact: true,
     })
     .click();
@@ -359,7 +359,7 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
       .click();
     await expect(
       board.getByRole("heading", {
-        name: `Kartu Keluar · Baris ${row}/3`,
+        name: `Kartu cek akhir · Baris ${row}/3`,
         exact: true,
       }),
     ).toBeVisible();

@@ -148,14 +148,18 @@ export function NumberLine({
       state.jumps.length >= 40 &&
       (action.type === "jump" || action.type === "move")
     ) {
-      setNotice("Ulang langkah atau mulai ulang untuk mencoba lagi.");
+      setNotice(
+        "Batalkan langkah terakhir atau mulai ulang untuk mencoba lagi.",
+      );
       return;
     }
     try {
       dispatch(action);
       setNotice("");
     } catch {
-      setNotice("Ulang langkah atau mulai ulang untuk mencoba lagi.");
+      setNotice(
+        "Batalkan langkah terakhir atau mulai ulang untuk mencoba lagi.",
+      );
     }
   };
   function pointerValue(e: PointerEvent<SVGCircleElement>) {
@@ -375,7 +379,7 @@ export function NumberLine({
           variant="outline"
           onClick={() => act({ type: "undo" })}
         >
-          Ulang langkah
+          Batalkan langkah terakhir
         </Button>
         <Button
           size="board"

@@ -15,7 +15,7 @@ test("teacher pairs board, public groups render and number line/lift respond loc
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7B");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7B");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7B/ }).click();
   await openTeacherExample(page);
@@ -86,7 +86,7 @@ test("teacher pairs board, public groups render and number line/lift respond loc
     board.getByText("Model sudah sesuai. Ceritakan arah lompatanmu."),
   ).toBeVisible();
   await board
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await expect(board.getByTestId("number-position")).toHaveText("Posisi −3");
   // Real pointer drag, then one-step undo.
@@ -119,7 +119,7 @@ test("teacher pairs board, public groups render and number line/lift respond loc
   await boardContext.setOffline(true);
   await expect(board.getByTestId("board-connection")).toContainText("Offline");
   await board
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await board.getByRole("button", { name: "Lompat", exact: true }).click();
   await expect(board.getByTestId("number-position")).toHaveText("Posisi −8");

@@ -12,16 +12,17 @@ const origin = "http://127.0.0.1:3100";
 async function call(page: Page, path: string, data: object) {
   return page.request.post(path, { headers: { Origin: origin }, data });
 }
-async function createDemo(page: Page) {
+async function createDemo(page: Page, grade = 7) {
   await loginTeacher(page, { guided: true });
   await page.getByLabel("Gunakan kelas").selectOption("demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7UX");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7UX");
+  await page.getByLabel("Tingkat kelas", { exact: true }).fill(String(grade));
   await page.getByLabel("Jumlah siswa", { exact: true }).fill("3");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
   await expect(page.getByLabel("Topik pembuka", { exact: true })).toHaveValue(
-    "D1",
+    grade === 7 ? "D1" : /^A/,
   );
 }
 for (const width of [360, 390])
@@ -139,7 +140,7 @@ test("EASY02 local preparation persists offline, resets on content edits and nev
 });
 
 test("EASY03 oral checks need no printed answer card", async ({ page }) => {
-  await createDemo(page);
+  await createDemo(page, 2);
   await page.getByText("Siapkan soal lain", { exact: true }).click();
   await page.getByLabel("Jenis paket", { exact: true }).selectOption("oral");
   await page
@@ -427,8 +428,8 @@ test("AUTHOR: ready save returns to own list, own cards appear in assessment and
   await expect(page).toHaveURL(/\/guru\/soal\?tab=teacher&saved=/);
   const copyId = new URL(page.url()).searchParams.get("saved")!;
   await expect(
-    page.getByRole("tab", { name: "Soal Saya", exact: true }),
-  ).toHaveAttribute("aria-selected", "true");
+    page.getByRole("button", { name: "Soal Saya", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await expect(
     page
       .getByRole("status")
@@ -448,9 +449,7 @@ test("AUTHOR: ready save returns to own list, own cards appear in assessment and
   await expect(choices.locator(`option[value="${copyId}"]`)).toHaveText(
     "Gerak lift · Kartu Nalar",
   );
-  await expect(page.getByRole("tablist", { name: "Sumber soal" })).toHaveCount(
-    0,
-  );
+  await expect(page.getByRole("group", { name: "Sumber soal" })).toHaveCount(0);
   await choices.selectOption(copyId);
   await page
     .getByRole("button", { name: "Simpan & mulai asesmen", exact: true })

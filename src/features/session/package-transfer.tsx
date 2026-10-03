@@ -125,8 +125,11 @@ export function PackageTransfer({
       {status?.proposal && (
         <>
           <p role="alert">
-            Papan memakai kendali lokal: {MODE_LABELS[status.proposal.mode]}.
-            Pilih tampilan yang akan dilanjutkan.
+            Papan memakai kendali lokal:{" "}
+            {status.proposal.mode === "exit"
+              ? "Kartu cek akhir"
+              : MODE_LABELS[status.proposal.mode]}
+            . Pilih tampilan yang akan dilanjutkan.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button

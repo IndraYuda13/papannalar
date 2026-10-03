@@ -486,7 +486,7 @@ export function TeacherWorkspace({
           <p className="text-sm text-muted-foreground">
             {mode === "demo"
               ? "Kelas percobaan terpisah dari kelas Anda. Buat satu kelas contoh untuk mencoba latihan dan AI."
-              : "Gunakan rombel Anda. Untuk mencoba tanpa data siswa, pilih Data contoh."}
+              : "Gunakan kelas Anda. Untuk mencoba tanpa data siswa, pilih Data contoh."}
           </p>
         )}
         <ul className="grid gap-2 sm:grid-cols-2">
@@ -541,8 +541,6 @@ export function TeacherWorkspace({
           variant={classes.length ? "outline" : "default"}
           onClick={() => {
             setAdding(!adding);
-            setDetail(undefined);
-            setLabels({});
           }}
           disabled={busy || offline}
         >
@@ -558,7 +556,7 @@ export function TeacherWorkspace({
         {adding && (
           <form onSubmit={create} className="space-y-3">
             <label className="block font-semibold">
-              Nama rombel
+              Nama kelas
               <input
                 name="label"
                 required
@@ -568,7 +566,7 @@ export function TeacherWorkspace({
               />
             </label>
             <p className="text-sm text-muted-foreground">
-              Gunakan nama rombel, bukan nama siswa.
+              Isi nama kelas, misalnya 7B.
             </p>
             <label className="block font-semibold">
               Tingkat kelas
@@ -703,7 +701,7 @@ export function TeacherWorkspace({
                 className="space-y-3"
               >
                 <label className="block font-semibold">
-                  Nama rombel
+                  Nama kelas
                   <input
                     name="label"
                     required

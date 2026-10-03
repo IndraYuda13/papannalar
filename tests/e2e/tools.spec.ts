@@ -15,7 +15,7 @@ test("TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7T");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7T");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7T/ }).click();
   await openTeacherExample(page);
@@ -66,7 +66,7 @@ test("TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
   await ratio.getByRole("button", { name: "Jalankan", exact: true }).click();
   await expect(ratio).toContainText("Periksa pengali kedua baris");
   await ratio
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await expect(
     ratio.getByLabel("Nilai B kolom 2", { exact: true }),
@@ -116,19 +116,19 @@ test("TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
   await algebra.getByLabel("Ubin −1 kelompok 3", { exact: true }).click();
   await expect(algebra.locator("[data-algebra-tile]")).toHaveCount(15);
   await algebra
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await expect(algebra.locator("[data-algebra-tile]")).toHaveCount(17);
   await injectFixture(board);
   await waitForShellCache(board);
   await context.setOffline(true);
   await algebra
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await algebra.getByRole("button", { name: "Jalankan", exact: true }).click();
   await expect(algebra).toContainText("Periksa jumlah kelompok");
   await algebra
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await algebra.getByRole("button", { name: "Jalankan", exact: true }).click();
   await expect(algebra).toContainText("Model sudah sesuai: 3x + 12");
@@ -148,7 +148,7 @@ test("TOOL02 fractions keep whole size, check the model, undo, and run offline o
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7F");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7F");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7F/ }).click();
   await openTeacherExample(page);
@@ -200,7 +200,7 @@ test("TOOL02 fractions keep whole size, check the model, undo, and run offline o
   await tool.getByRole("button", { name: "Jalankan", exact: true }).click();
   await expect(tool).toContainText("Model sudah sesuai");
   await tool
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await expect(tool.getByTestId("fraction-values")).toHaveText(
     "3/6 · 2/6 · 4/6",
@@ -222,7 +222,7 @@ test("TOOL02 fractions keep whole size, check the model, undo, and run offline o
     (await tool.getByTestId("fraction-whole-0-0").boundingBox())!.width,
   ).toBe(before!.width);
   await tool
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await mkdir("artifacts/qa/M09", { recursive: true });
   await tool.screenshot({ path: "artifacts/qa/M09/fractions-board.png" });

@@ -17,7 +17,7 @@ async function paired(page: Page, browser: Browser) {
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("10G");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("10G");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 10G/ }).click();
   await openTeacherExample(page);
@@ -160,7 +160,7 @@ test("TOOL06 D6 linear slider is one undo step; point, exact table, and wrong gu
   await board.mouse.up();
   await expect(tool.getByTestId("graph-model")).toContainText("4x");
   await tool
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await expect(tool.getByLabel("Kemiringan A", { exact: true })).toHaveValue(
     "0",
@@ -225,7 +225,7 @@ test("TOOL06 E2 shades intersection of all inequalities, detects empty region, a
   await waitForShellCache(board);
   await context.setOffline(true);
   await tool
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await expect(tool.getByTestId("graph-feasible")).toHaveCount(1);
   await run(tool);
@@ -259,7 +259,7 @@ test("TOOL06 E3 parabola roots 2 and 3; reversed roots and undo are real model c
   await expect(tool.getByRole("status")).toContainText("Bandingkan koefisien");
   for (let i = 0; i < 2; i++)
     await tool
-      .getByRole("button", { name: "Ulang langkah", exact: true })
+      .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
       .click();
   await expect(tool.getByTestId("graph-roots")).toHaveText(
     "Akar model: 2 dan 3",

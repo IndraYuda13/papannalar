@@ -18,6 +18,7 @@ import { packageSession } from "../features/session/package-session";
 import type { ClassDto } from "../contracts/classes";
 import type { StudentDto } from "../contracts/api";
 import type { ReplayBaseline } from "../core/placement/replay";
+import { LocalActionError } from "./action-error";
 
 export function createCycleRepository(scope: LocalScope) {
   const db = openDataDatabase(scope),
@@ -26,9 +27,19 @@ export function createCycleRepository(scope: LocalScope) {
     packages: Table<TeacherPackage, string> = db.table("packages"),
     responses: Table<SavedCard, string> = db.table("responses");
   async function history(classId: string) {
-    const contexts = (
+    let contexts = (
       await sessions.where("classroom.id").equals(classId).toArray()
     ).map(parseAssessmentContext);
+    if (scope.mode === "demo") {
+      // The filled example and the teacher's practice share a class/roster,
+      // but never a learning timeline. Keep every example record untouched.
+      const own = new Set(
+        (await cycles.where("classId").equals(classId).toArray()).map(
+          (c) => c.id,
+        ),
+      );
+      contexts = contexts.filter((c) => own.has(c.session.sessionId));
+    }
     return Promise.all(
       contexts.map(async (context) => ({
         context,
@@ -49,12 +60,16 @@ export function createCycleRepository(scope: LocalScope) {
       localOperation(() =>
         db.transaction("rw", cycles, sessions, packages, async () => {
           if (input.classroom.mode !== scope.mode)
-            throw new Error("Wrong namespace");
+            throw new LocalActionError("CLASS_CHANGED");
           const existing = (
             await cycles.where("classId").equals(input.classroom.id).toArray()
           ).map(parseCycle);
-          if (existing.some((c) => !c.classEnded || !c.assessmentRevision))
-            throw new Error("Finalize previous assessment first");
+          const active = existing.find((c) => !c.classEnded);
+          // A repeated tap/retry of the same preparation resumes its session.
+          if (active?.packageId === input.packageId) return active;
+          if (active) throw new LocalActionError("ACTIVE_SESSION");
+          if (existing.some((c) => !c.assessmentRevision))
+            throw new LocalActionError("FINISH_PREVIOUS");
           const contexts = (
             await sessions
               .where("classroom.id")
@@ -62,16 +77,29 @@ export function createCycleRepository(scope: LocalScope) {
               .toArray()
           )
             .map(parseAssessmentContext)
-            .filter((c) => !c.parentSessionId);
+            .filter(
+              (c) =>
+                !c.parentSessionId &&
+                (scope.mode !== "demo" || existing.some((e) => e.id === c.id)),
+            );
           const pkg = parseTeacherPackage(await packages.get(input.packageId));
+          if (
+            pkg.classId !== input.classroom.id ||
+            pkg.grade !== input.classroom.grade
+          )
+            throw new LocalActionError("CLASS_CHANGED");
+          if (!input.students.some((s) => s.active))
+            throw new LocalActionError("NO_STUDENTS");
+          if (!pkg.assessment.length && input.classroom.grade > 3)
+            throw new LocalActionError("CHECK_NOT_SUPPORTED");
           if (existing.some((c) => c.packageId === pkg.id))
-            throw new Error("Prepare a new package for each session");
+            throw new LocalActionError("PACKAGE_USED");
           if (contexts.some((c) => !existing.some((e) => e.id === c.id)))
-            throw new Error("Keep PRELIM and fresh-class histories separate");
+            throw new LocalActionError("SEPARATE_HISTORY");
           const ordinal =
             Math.max(0, ...contexts.map((c) => c.session.ordinal)) + 1;
           if (ordinal > 1 && pkg.variant === "initial")
-            throw new Error("Use weekly package after initial placement");
+            throw new LocalActionError("NEXT_CHECK_REQUIRED");
           const frozen = freezePackage(pkg);
           const ctx = packageSession({
             id: input.id,

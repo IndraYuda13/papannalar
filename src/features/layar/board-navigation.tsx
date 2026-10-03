@@ -15,7 +15,8 @@ export function BoardNavigation({
 }) {
   const [visible, setVisible] = useState(false),
     [generation, setGeneration] = useState(0);
-  const hold = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const menu = useRef<HTMLElement>(null);
   const interactive = [
     "opening",
     "station",
@@ -30,55 +31,54 @@ export function BoardNavigation({
   }
   useEffect(() => {
     if (!visible) return;
-    const timer = setTimeout(() => setVisible(false), 5000);
+    const timer = setTimeout(() => {
+      if (!menu.current?.contains(document.activeElement)) setVisible(false);
+    }, 5000);
     return () => clearTimeout(timer);
   }, [visible, generation]);
   useEffect(() => {
     if (interactive) return;
-    const open = () => {
+    const open = (event: PointerEvent) => {
+      // The trigger and menu own their clicks; background reveal must not toggle them.
+      if (
+        event.target instanceof Node &&
+        (trigger.current?.contains(event.target) ||
+          menu.current?.contains(event.target))
+      )
+        return;
       setVisible(true);
       setGeneration((n) => n + 1);
     };
     window.addEventListener("pointerdown", open);
     return () => window.removeEventListener("pointerdown", open);
   }, [interactive]);
-  useEffect(() => () => clearTimeout(hold.current), []);
   if (!pages.length) return null;
-  function cancel() {
-    clearTimeout(hold.current);
-    hold.current = undefined;
-  }
-  function start() {
-    cancel();
-    hold.current = setTimeout(show, 2000);
+  function close() {
+    setVisible(false);
+    trigger.current?.focus();
   }
   return (
     <>
       <button
         type="button"
-        aria-label="Tahan dua detik untuk navigasi sesi"
+        ref={trigger}
+        aria-label="Buka navigasi sesi"
+        aria-expanded={visible}
         className="fixed bottom-0 left-0 z-40 h-24 w-24 rounded-tr-kartu border-2 bg-white/95 text-[26px]"
-        onPointerDown={start}
-        onPointerUp={cancel}
-        onPointerCancel={cancel}
-        onPointerLeave={cancel}
-        onKeyDown={(e) => {
-          if (!e.repeat && [" ", "Enter"].includes(e.key)) {
-            e.preventDefault();
-            start();
-          }
-        }}
-        onKeyUp={cancel}
-        onBlur={cancel}
+        onClick={() => (visible ? close() : show())}
       >
         ↔
       </button>
       {visible && (
         <nav
+          ref={menu}
           aria-label="Navigasi sesi papan"
           className="fixed right-4 bottom-0 left-28 z-40 flex flex-wrap items-center gap-3 rounded-kartu border-4 border-primary bg-white p-3"
           onPointerDown={show}
-          onKeyDown={show}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") close();
+            else show();
+          }}
         >
           <Button
             size="board"
@@ -109,6 +109,9 @@ export function BoardNavigation({
             onClick={() => onSelect(index + 1)}
           >
             Lanjut
+          </Button>
+          <Button size="board" variant="outline" onClick={close}>
+            Tutup navigasi
           </Button>
         </nav>
       )}

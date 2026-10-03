@@ -9,7 +9,7 @@ async function start7b(page: Page) {
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7B");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7B");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7B/ }).click();
   await openTeacherExample(page);
@@ -187,7 +187,7 @@ test("M05-b recorded PRELIM regression: opening, check, scan, groups, station, a
   await board.screenshot({ path: "artifacts/qa/M05/check.png" });
   await controls.getByRole("button", { name: "Lanjutan", exact: true }).click();
   await expect(
-    board.getByRole("heading", { name: "Lanjutan Pembuka", exact: true }),
+    board.getByRole("heading", { name: "Ayo lanjutkan", exact: true }),
   ).toBeVisible();
   const scanStart = Date.now();
   await scanThree(page);
@@ -208,21 +208,21 @@ test("M05-b recorded PRELIM regression: opening, check, scan, groups, station, a
   ).toBeVisible();
   await board.screenshot({ path: "artifacts/qa/M05/station.png" });
   await controls
-    .getByRole("button", { name: "Kartu Keluar", exact: true })
+    .getByRole("button", { name: "Kartu cek akhir", exact: true })
     .click();
   await expect(
-    board.getByRole("heading", { name: "Kartu Keluar", exact: true }),
+    board.getByRole("heading", { name: "Kartu cek akhir", exact: true }),
   ).toBeVisible();
   await expect(
-    board.getByText(/Buka paket Kartu Keluar dari HP guru/),
+    board.getByText(/Buka paket Kartu cek akhir dari HP guru/),
   ).toBeVisible();
   const exit = page.getByRole("region", {
-    name: "Hasil Kartu Keluar",
+    name: "Hasil Kartu cek akhir",
     exact: true,
   });
   await exit
     .getByRole("button", {
-      name: "Bekukan Kartu Keluar dari paket",
+      name: "Siapkan pertanyaan penutup",
       exact: true,
     })
     .click();
@@ -232,13 +232,13 @@ test("M05-b recorded PRELIM regression: opening, check, scan, groups, station, a
     .click();
   await expect(
     board.getByRole("heading", {
-      name: "Kartu Keluar · Baris 2/3",
+      name: "Kartu cek akhir · Baris 2/3",
       exact: true,
     }),
   ).toBeVisible();
   await expect(
     board
-      .getByRole("region", { name: "Kartu Keluar kelompok", exact: true })
+      .getByRole("region", { name: "Kartu cek akhir kelompok", exact: true })
       .locator("section"),
   ).toHaveCount(3);
   await controls.getByRole("button", { name: "Refleksi", exact: true }).click();

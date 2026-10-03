@@ -47,7 +47,7 @@ test("teacher prepares and replaces offline package, reloads its cache and sees 
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7P");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7P");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7P/ }).click();
   await injectFixture(page);
@@ -120,7 +120,7 @@ test("C01 CSV stays local, invalid batch changes nothing, and empty name deletes
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7CSV");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7CSV");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7CSV/ }).click();
   await page
@@ -167,7 +167,7 @@ test("static Bisik and printable independent tasks work offline", async ({
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7T");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7T");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7T/ }).click();
   await injectFixture(page);

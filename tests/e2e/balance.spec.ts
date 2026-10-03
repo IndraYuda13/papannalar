@@ -18,7 +18,7 @@ async function paired(page: Page, browser: Browser) {
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("10T");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("10T");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 10T/ }).click();
   await openTeacherExample(page);
@@ -134,7 +134,7 @@ test("TOOL05 actual balance: symmetric drag/cancel, exact 3x−7=11, zero guard,
   });
   await expect(tool.getByTestId("balance-right")).toHaveText("12");
   await tool
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await operation(tool, "0", "Bagi kedua ruas");
   await expect(tool.getByRole("status")).toContainText("bukan nol");
@@ -144,7 +144,7 @@ test("TOOL05 actual balance: symmetric drag/cancel, exact 3x−7=11, zero guard,
   await context.setOffline(true);
   await solve(tool);
   await tool
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await expect(tool.getByTestId("balance-right")).toHaveText("18");
   await operation(tool, "3", "Bagi kedua ruas");
@@ -212,7 +212,7 @@ test("TOOL05 seven patterns: predictions, distinct twin, Nala repair, open paths
   await tool.getByRole("button", { name: "Jalankan", exact: true }).click();
   await expect(tool.getByRole("status")).toContainText("Periksa langkah");
   await tool
-    .getByRole("button", { name: "Ulang langkah", exact: true })
+    .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();
   await solve(tool);
   await open("open");

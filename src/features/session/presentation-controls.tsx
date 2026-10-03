@@ -506,7 +506,7 @@ export function PresentationControls({
                     )
                   }
                 >
-                  {MODE_LABELS[mode]}
+                  {mode === "exit" ? "Kartu cek akhir" : MODE_LABELS[mode]}
                 </Button>
               ))}
             </div>

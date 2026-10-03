@@ -225,7 +225,7 @@ export function AlgebraTiles({
             setSelectedTile("");
           }}
         >
-          Ulang langkah
+          Batalkan langkah terakhir
         </Button>
         <Button
           size="board"

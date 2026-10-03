@@ -1,0 +1,2780 @@
+{
+  "schemaVersion": 1,
+  "task": "Teacher workflow, start failure, advisory QA, drafts, mobile layout and plain language",
+  "baseCommit": "05ed781fdcf029d89f08bb0b4aeb3b8e777adbdb",
+  "environment": {
+    "date": "2026-10-03",
+    "node": "24.14.1",
+    "pnpm": "11.19.0",
+    "next": "16.3.6",
+    "postgresql": "17.11; isolated loopback55432",
+    "browser": "Chromium153; one worker; retries0",
+    "authTransport": "HTTP fixture loopback54325; no real email",
+    "LLM_ENABLED": false
+  },
+  "source": {
+    "baseCommit": "05ed781fdcf029d89f08bb0b4aeb3b8e777adbdb",
+    "sha256": "fe87487e0d244ea6eb2b149483127598ba3b853bf6c0cc67f4dcec804a067fae",
+    "fileCount": 595
+  },
+  "fullVerification": {
+    "command": {
+      "command": "pnpm verify",
+      "exitCode": 1,
+      "startedAtUnix": 1791052728.709906,
+      "durationSeconds": 1475.66,
+      "log": "/workspace/.papannalar-cloud/logs/workflow-v7-final-verify.log"
+    },
+    "sourceSha256": "b9a08e1015cfa626ffb0e2e33c2555cea984641a4aaaf4797f9119303b82d652",
+    "buildId": "C8C81ckj1RWA6ZfXk6iSI",
+    "format": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "unit": {
+      "status": "PASS",
+      "files": 72,
+      "tests": 1095,
+      "coverage": {
+        "statements": 92.48,
+        "branches": 87.52,
+        "functions": 96.28,
+        "lines": 93.46
+      }
+    },
+    "postgresql": {
+      "status": "PASS",
+      "assertionsReported": 306,
+      "guardsReported": 116
+    },
+    "nativeAIIntegration": {
+      "status": "PASS",
+      "files": 1,
+      "tests": 9,
+      "liveProvider": false
+    },
+    "build": "PASS",
+    "browser": {
+      "stats": {
+        "startTime": "2026-10-03T18:42:24.114Z",
+        "duration": 1259914.966,
+        "expected": 147,
+        "skipped": 0,
+        "unexpected": 8,
+        "flaky": 0
+      },
+      "workers": 1,
+      "retries": 0,
+      "cases": [
+        {
+          "file": "assessments.spec.ts",
+          "title": "IndexedDB v1 migration, CAS, duplicate, reopen, atomic rollback and deletion",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "assessments.spec.ts",
+          "title": "scan review / Ganti / Lewati / manual fallback and offline durable reload",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "auth-ownership.spec.ts",
+          "title": "refresh session mempertahankan cookie dan no-store meski resource tidak ditemukan",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "auth-ownership.spec.ts",
+          "title": "visitor dialihkan; cookie palsu dan callback invalid tidak mengautentikasi",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "auth-ownership.spec.ts",
+          "title": "magic link PKCE, reload session, cookie HttpOnly dan logout bekerja",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "auth-ownership.spec.ts",
+          "title": "board memakai anonymous identity terpisah tanpa teacher API atau nama lokal",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "auth-ownership.spec.ts",
+          "title": "CRUD kelas A/B melalui API tetap dibatasi RLS PostgreSQL",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "auth-ownership.spec.ts",
+          "title": "nama local-only bergabung di UI guru; API baru dan papan tidak menerima canary",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "auth-ownership.spec.ts",
+          "title": "logout offline mengunci akses lokal dan dicabut saat online kembali",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "auth-ownership.spec.ts",
+          "title": "CSRF dan field tambahan ditolak pada endpoint mutasi",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "balance.spec.ts",
+          "title": "TOOL05 actual balance: symmetric drag/cancel, exact 3x−7=11, zero guard, offline undo",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "balance.spec.ts",
+          "title": "TOOL05 seven patterns: predictions, distinct twin, Nala repair, open paths and separate models",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-capabilities.spec.ts",
+          "title": "BOARD01 six checks, 0 touch fallback, local profile and public payload",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-capabilities.spec.ts",
+          "title": "BOARD01 six checks, 1 touch fallback, local profile and public payload",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-capabilities.spec.ts",
+          "title": "BOARD01 six checks, 2 touch fallback, local profile and public payload",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-capabilities.spec.ts",
+          "title": "BOARD01 six checks, 4 touch fallback, local profile and public payload",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-capabilities.spec.ts",
+          "title": "REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot control reflection and stops offline",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-capabilities.spec.ts",
+          "title": "REMOTE02 fractions, ratio, algebra, balance and graphs use the bounded input channel",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-content.spec.ts",
+          "title": "CACHE01 board content uses actual IndexedDB: empty, strict input, persistence, clear and no group data",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-content.spec.ts",
+          "title": "CACHE02 teacher uploads package, board navigates offline, explicit handoff reconciles, reload loses roster and retains content",
+          "status": "unexpected",
+          "attemptStatuses": [
+            "failed"
+          ]
+        },
+        {
+          "file": "board-modes.spec.ts",
+          "title": "UI01 SD public questions, independent work and exit reasons render their given models without assessment keys",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-modes.spec.ts",
+          "title": "UI01 teacher hint controls report board progress and target reveal needs explicit HP confirmation without replacing the student model",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-modes.spec.ts",
+          "title": "UI01 Sorot uses a twin, permits Nala repair, and returns the same station model/undo after a fresh input epoch",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-modes.spec.ts",
+          "title": "UI01 four public panels paginate with 72px prompts, independent model state and offline resume",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-modes.spec.ts",
+          "title": "UI01 SD5 lower touch zone, 1.5x objects, SMA10 tariffs and explicit Berdua fallback",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "cards.spec.ts",
+          "title": "teacher downloads all three real A4 PDFs locally without runtime errors",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "classroom.spec.ts",
+          "title": "teacher pairs board, public groups render and number line/lift respond locally",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "exit.spec.ts",
+          "title": "exit storage is atomic, frozen, idempotent, isolated and can reopen offline",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "exit.spec.ts",
+          "title": "EXIT01 teacher freezes package, board gets each public row, manual review and correction survive offline",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "freshclass.spec.ts",
+          "title": "E2E02 fresh 32-student class uses UI/photo inputs through check, rotations, late exit, finalization and next session",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "graphs.spec.ts",
+          "title": "TOOL06 D6 linear slider is one undo step; point, exact table, and wrong guess are checked",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "graphs.spec.ts",
+          "title": "TOOL06 SPLDV two lines intersect at 5 GB / 25 and share exact table values",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "graphs.spec.ts",
+          "title": "TOOL06 E2 shades intersection of all inequalities, detects empty region, and works offline",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "graphs.spec.ts",
+          "title": "TOOL06 E3 parabola roots 2 and 3; reversed roots and undo are real model changes",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "graphs.spec.ts",
+          "title": "TOOL06 E4 exponent is multiplicative and compared with a line; no overflow or off-domain point",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "graphs.spec.ts",
+          "title": "TOOL06 all seven patterns share graph engine, retain independent turns and deduplicate points",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "llm.spec.ts",
+          "title": "LLM01 real teacher UI keeps name/raw question local, shows honest fallback, stores feedback and preserves board privacy",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "llm.spec.ts",
+          "title": "LLM API rejects unowned/extra fields and remains disabled without credentials",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "local-demo.spec.ts",
+          "title": "explicit local demo uses the normal PKCE callback and grants only teacher session",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "offline.spec.ts",
+          "title": "manifest build hanya shell publik, JS belajar, CSS/font dan poster lokal",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "offline.spec.ts",
+          "title": "tab baru offline membuka latihan, contoh sesi dan papan; font, IndexedDB dan fullscreen tetap bekerja",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "offline.spec.ts",
+          "title": "audit cache mendeteksi aset hilang; tidak mengklaim siap hanya karena online",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "omr.spec.ts",
+          "title": "real worker scans pixels/printed text, stays local and works offline after reload",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "opening-reflection.spec.ts",
+          "title": "OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective and ephemeral reflection",
+          "status": "unexpected",
+          "attemptStatuses": [
+            "failed"
+          ]
+        },
+        {
+          "file": "oral.spec.ts",
+          "title": "oral CAS/frozen baseline/reopen/undo/skip/resume use real IndexedDB",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "oral.spec.ts",
+          "title": "oral grade 2 goes down on first wrong, skips without evidence, and resumes offline",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "package.spec.ts",
+          "title": "package cache survives reopen with CAS, freeze and tenant isolation",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "package.spec.ts",
+          "title": "teacher prepares and replaces offline package, reloads its cache and sees tool gaps",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "package.spec.ts",
+          "title": "C01 CSV stays local, invalid batch changes nothing, and empty name deletes identity",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "package.spec.ts",
+          "title": "static Bisik and printable independent tasks work offline",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "pairing.spec.ts",
+          "title": "pairing HTTP uses separate board auth, owner checks, public schema, CAS, ACK and revoke",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v5.spec.ts",
+          "title": "PRACTICE01 360: preview is reversible, selected stories persist in tasks/PDF, one session uses that package",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v5.spec.ts",
+          "title": "PRACTICE01 390: preview is reversible, selected stories persist in tasks/PDF, one session uses that package",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v5.spec.ts",
+          "title": "PRACTICE01 1366: preview is reversible, selected stories persist in tasks/PDF, one session uses that package",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v5.spec.ts",
+          "title": "PRACTICE02 correct code recovers an expired own sample lease; a different active controller is never taken over automatically",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v6.spec.ts",
+          "title": "EASY01 360: one click starts prepared session; frozen topic creates editable copy and keeps history",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v6.spec.ts",
+          "title": "EASY01 390: one click starts prepared session; frozen topic creates editable copy and keeps history",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v6.spec.ts",
+          "title": "EASY02 local preparation persists offline, resets on content edits and never changes content approval",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v6.spec.ts",
+          "title": "EASY03 oral checks need no printed answer card",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v6.spec.ts",
+          "title": "RESET lost response: old board escapes, history remains and fresh session pairs",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v6.spec.ts",
+          "title": "RESET offline/reload: old board escapes, history remains and fresh session pairs",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "practice-v6.spec.ts",
+          "title": "AUTHOR: ready save returns to own list, own cards appear in assessment and interactive copy requires real answers",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "prelim.spec.ts",
+          "title": "M05-a reset reproduces canonical inputs/groups, excluding three cards until actual pixel scan",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "prelim.spec.ts",
+          "title": "M05-b recorded PRELIM regression: opening, check, scan, groups, station, actual exit and reflection",
+          "status": "unexpected",
+          "attemptStatuses": [
+            "failed"
+          ]
+        },
+        {
+          "file": "privacy-storage.spec.ts",
+          "title": "IndexedDB kosong aman; nama optional dan operasi delete/update tidak crash",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "privacy-storage.spec.ts",
+          "title": "nama lokal dan referensi selamat setelah tutup/reload; join hanya di teacher view",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "privacy-storage.spec.ts",
+          "title": "namespace dua akun dan demo/pilot terpisah; clear hanya database nama aktif",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "privacy-storage.spec.ts",
+          "title": "transaksi bulk roster rollback penuh pada absen bentrok; schema menolak nama",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "privacy-storage.spec.ts",
+          "title": "browser canary: hanya DTO eksplisit masuk request, nama tidak di URL/log/cache/papan",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "rehearsal.spec.ts",
+          "title": "M17 software rehearsal 1: three rotations, source tools, exit, reflection and offline scan",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "rehearsal.spec.ts",
+          "title": "M17 software rehearsal 2: three rotations, source tools, exit, reflection and offline scan",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "rehearsal.spec.ts",
+          "title": "M17 software rehearsal 3: three rotations, source tools, exit, reflection and offline scan",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "session-ux-v3.spec.ts",
+          "title": "Session phone 360: six previews + writing fit and retain real math",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "session-ux-v3.spec.ts",
+          "title": "Session phone 390: six previews + writing fit and retain real math",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "session-ux-v3.spec.ts",
+          "title": "QR pixels connect once automatically; ACK collapses controls, disconnect restores them, close succeeds or stays retryable",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "session-ux-v3.spec.ts",
+          "title": "Scanned link waits for an active session, then connects once without manual submit",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "session-ux-v3.spec.ts",
+          "title": "Foreign QR stays local and camera denial leaves manual pairing usable",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "shell.spec.ts",
+          "title": "Aplikasi Guru terbuka pada HP, font lokal siap dan navigasi ke papan bekerja",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "shell.spec.ts",
+          "title": "Layar Kelas 1920x1080 memakai font papan, tanpa data guru atau kode pasangan palsu",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "shell.spec.ts",
+          "title": "Kontrol layar penuh terhidrasi dan dapat dibuka lalu ditutup",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "shell.spec.ts",
+          "title": "Ukuran teks guru 130% tetap dapat dibaca tanpa scroll horizontal",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "stations.spec.ts",
+          "title": "TURN01 real IndexedDB records actual start once, isolates semester/owner and rejects rewritten history",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "stations.spec.ts",
+          "title": "ROT01 teacher timer/three rounds and board projection preserve privacy",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "storage-recovery.spec.ts",
+          "title": "OFF02 migration retains old records, quota aborts atomically, eviction is detected and canonical pseudonyms can be restored",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "storage-recovery.spec.ts",
+          "title": "OFF03 a new service worker stays waiting during class and activates only after local data is safe",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "storage-recovery.spec.ts",
+          "title": "PRIV03 paired roster exists only in board RAM and disappears on offline reload",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "sync.spec.ts",
+          "title": "SYNC04 automatic 401 raises an actionable notice while device settings stay collapsed and answers remain durable",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "sync.spec.ts",
+          "title": "SYNC04 automatic 409 raises an actionable notice while device settings stay collapsed and answers remain durable",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "sync.spec.ts",
+          "title": "SYNC01 offline queue survives restart, lost ACK retry is idempotent and late correction stays pending until accepted",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "sync.spec.ts",
+          "title": "SYNC02 401/409/429/503 retain durable data; class deletion purges the local dependency group",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "sync.spec.ts",
+          "title": "SYNC03 two teacher devices enforce read-only import, explicit takeover and reviewed conflict",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW01 beginner reaches practice and AI from home at 360; class data, drafts and session survive disclosure",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW01 beginner reaches practice and AI from home at 390; class data, drafts and session survive disclosure",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW02 empty pages offer a next action; personal and example classes remain separate",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW04 selected class reopens offline through canonical shell; essential storage warning stays visible",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW03 AI status never claims tested readiness; changing source clears the previous lesson",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "tool-patterns.spec.ts",
+          "title": "Seven patterns use actual paired board, distinct examples, repairs, unique models and independent turns",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "tools.spec.ts",
+          "title": "TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "tools.spec.ts",
+          "title": "TOOL02 fractions keep whole size, check the model, undo, and run offline on actual board route",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 visible login automatically renders 3D without controls; hidden panels stay lazy and light mode releases the canvas",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 no WebGL and reduced motion preserve poster, login and teaching; scanner never fetches a model",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 save-data prevents 3D library/model download while login remains usable",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 saved-light prevents 3D library/model download while login remains usable",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 all three bundled models render only on selection with one canvas",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 offline precache excludes the scene engine and GLBs; scanner and failed lazy download retain function",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U1 walkthrough all teacher views, local data, editor selection and text130% at 360",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U1 walkthrough all teacher views, local data, editor selection and text130% at 390",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U1 walkthrough all teacher views, local data, editor selection and text130% at 1024",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U1 walkthrough all teacher views, local data, editor selection and text130% at 1366",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 QR is actually rendered with contrast and stays inside idle board viewport",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U1 empty/error/retry routes keep navigation and keyboard access",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-polish-editor.spec.ts",
+          "title": "Polish T01/T05/T06: examples fill forms and use real previews at 360x800",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-polish-editor.spec.ts",
+          "title": "Polish T03/T04: pairing CTA is bounded and phone control has one entry at 360x800",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-polish-editor.spec.ts",
+          "title": "Polish T01/T05/T06: examples fill forms and use real previews at 390x844",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-polish-editor.spec.ts",
+          "title": "Polish T03/T04: pairing CTA is bounded and phone control has one entry at 390x844",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-polish-editor.spec.ts",
+          "title": "Polish T01/T05/T06: examples fill forms and use real previews at 1366x768",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-polish-editor.spec.ts",
+          "title": "Polish T03/T04: pairing CTA is bounded and phone control has one entry at 1366x768",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-connection-logout.spec.ts",
+          "title": "logout revokes only this controller across independent logins of the same teacher; retired UUID cannot re-claim",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-connection-logout.spec.ts",
+          "title": "displaced sample observer logout cannot revoke the active device even if the tab UUID is known",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-connection.spec.ts",
+          "title": "V2 re-scan keeps question 3 and presentation identity; displaced controller, replay and revoked QR are blocked",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 400-character prompt and four options remain complete and bounded at 1280x720",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 400-character prompt and four options remain complete and bounded at 1366x768",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 400-character prompt and four options remain complete and bounded at 1920x1080",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 all six production tools fit the board after reading a long prompt",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 model and temporary ink survive reading pages and appearance edits",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 teacher preview uses Atkinson and readable pages at 390x844",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 teacher preview uses Atkinson and readable pages at 1280x720",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1/V2 presets use production previews and bounded controls at 1280x720",
+          "status": "unexpected",
+          "attemptStatuses": [
+            "failed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1/V2 presets use production previews and bounded controls at 1366x768",
+          "status": "unexpected",
+          "attemptStatuses": [
+            "failed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1/V2 presets use production previews and bounded controls at 1920x1080",
+          "status": "unexpected",
+          "attemptStatuses": [
+            "failed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V2 profile survives resize, reload and failed metadata upload; local fields stay off the wire",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V2 touch result waits for release and fresh one/two/four contacts; mouse never passes",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V2 legacy capabilities migrate to balanced appearance without another wizard",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V2 rejected storage retains settings during the tab without a repeated wizard",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "Polish T02: normal connection stays small, details remain accessible and save notice expires",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "Polish T02: a storage warning remains visible while the model still works",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "Polish T07: pointer/keyboard motion is accurate with no-preference",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "Polish T07: pointer/keyboard motion is accurate with reduce",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U01 sample login uses persistent teacher/classes/results on main routes",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U02 local class identity, attendance and export persist; student UUID and network remain private",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U03-U05 system session plays, recovers question3 automatically and stored model survives reload",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U12 actual custom-card pixels are bound to frozen form, and rescan is idempotent",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U14 sample, another teacher, board and visitor cannot read each other's private data",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U15 two cached classes open offline; revised pending response syncs once and logout locks cache",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U08-U13 author five cards, reuse across classes, store revise and retain historical keys",
+          "status": "unexpected",
+          "attemptStatuses": [
+            "failed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U10 teacher creates real interactive/writing collection and preview retains form",
+          "status": "unexpected",
+          "attemptStatuses": [
+            "failed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U16 teacher navigation fits phone and desktop with no runtime errors",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW08 an unfinished answer remains a draft after reload, never becomes unknown answers or a submitted score",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW01 filled example and fresh practice coexist; repeated start resumes, without changing 29 example answers",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW02 manual correction preserves first/middle/last answers; cancel/reopen, failed save and finish lead to results",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW03 session date is explicit, preview uses one question, and cached 503 never bypasses 403",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW04 student editor opens inline with focus; collection draft survives back/reload and deletion has undo",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW05 first-use board shows pairing without setup; appearance cancel preserves pairing",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW06 a conflicting answer never blocks another student; in-flight edits keep their newest values and require an explicit conflict choice",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW07 read-only sample control disables changes while keeping preview available",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        }
+      ]
+    }
+  },
+  "regressionAfterRepairs": {
+    "command": {
+      "command": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm build && pnpm exec playwright test tests/e2e/workflow-v7.spec.ts tests/e2e/board-content.spec.ts tests/e2e/opening-reflection.spec.ts tests/e2e/prelim.spec.ts tests/e2e/video-library.spec.ts tests/e2e/video-display.spec.ts tests/e2e/sync.spec.ts",
+      "exitCode": 0,
+      "startedAtUnix": 1791054366.301328,
+      "durationSeconds": 303.73,
+      "log": "/workspace/.papannalar-cloud/logs/workflow-v7-candidate.log"
+    },
+    "browser": {
+      "stats": {
+        "startTime": "2026-10-03T19:07:02.523Z",
+        "duration": 247451.185,
+        "expected": 45,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "workers": 1,
+      "retries": 0,
+      "cases": [
+        {
+          "file": "board-content.spec.ts",
+          "title": "CACHE01 board content uses actual IndexedDB: empty, strict input, persistence, clear and no group data",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "board-content.spec.ts",
+          "title": "CACHE02 teacher uploads package, board navigates offline, explicit handoff reconciles, reload loses roster and retains content",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "opening-reflection.spec.ts",
+          "title": "OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective and ephemeral reflection",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "prelim.spec.ts",
+          "title": "M05-a reset reproduces canonical inputs/groups, excluding three cards until actual pixel scan",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "prelim.spec.ts",
+          "title": "M05-b recorded PRELIM regression: opening, check, scan, groups, station, actual exit and reflection",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "sync.spec.ts",
+          "title": "SYNC04 automatic 401 raises an actionable notice while device settings stay collapsed and answers remain durable",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "sync.spec.ts",
+          "title": "SYNC04 automatic 409 raises an actionable notice while device settings stay collapsed and answers remain durable",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "sync.spec.ts",
+          "title": "SYNC01 offline queue survives restart, lost ACK retry is idempotent and late correction stays pending until accepted",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "sync.spec.ts",
+          "title": "SYNC02 401/409/429/503 retain durable data; class deletion purges the local dependency group",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "sync.spec.ts",
+          "title": "SYNC03 two teacher devices enforce read-only import, explicit takeover and reviewed conflict",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 400-character prompt and four options remain complete and bounded at 1280x720",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 400-character prompt and four options remain complete and bounded at 1366x768",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 400-character prompt and four options remain complete and bounded at 1920x1080",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 all six production tools fit the board after reading a long prompt",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 model and temporary ink survive reading pages and appearance edits",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 teacher preview uses Atkinson and readable pages at 390x844",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1 teacher preview uses Atkinson and readable pages at 1280x720",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1/V2 presets use production previews and bounded controls at 1280x720",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1/V2 presets use production previews and bounded controls at 1366x768",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V1/V2 presets use production previews and bounded controls at 1920x1080",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V2 profile survives resize, reload and failed metadata upload; local fields stay off the wire",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V2 touch result waits for release and fresh one/two/four contacts; mouse never passes",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V2 legacy capabilities migrate to balanced appearance without another wizard",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "V2 rejected storage retains settings during the tab without a repeated wizard",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "Polish T02: normal connection stays small, details remain accessible and save notice expires",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "Polish T02: a storage warning remains visible while the model still works",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "Polish T07: pointer/keyboard motion is accurate with no-preference",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-display.spec.ts",
+          "title": "Polish T07: pointer/keyboard motion is accurate with reduce",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U01 sample login uses persistent teacher/classes/results on main routes",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U02 local class identity, attendance and export persist; student UUID and network remain private",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U03-U05 system session plays, recovers question3 automatically and stored model survives reload",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U12 actual custom-card pixels are bound to frozen form, and rescan is idempotent",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U14 sample, another teacher, board and visitor cannot read each other's private data",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U15 two cached classes open offline; revised pending response syncs once and logout locks cache",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U08-U13 author five cards, reuse across classes, store revise and retain historical keys",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U10 teacher creates real interactive/writing collection and preview retains form",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "video-library.spec.ts",
+          "title": "U16 teacher navigation fits phone and desktop with no runtime errors",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW08 an unfinished answer remains a draft after reload, never becomes unknown answers or a submitted score",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW01 filled example and fresh practice coexist; repeated start resumes, without changing 29 example answers",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW02 manual correction preserves first/middle/last answers; cancel/reopen, failed save and finish lead to results",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW03 session date is explicit, preview uses one question, and cached 503 never bypasses 403",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW04 student editor opens inline with focus; collection draft survives back/reload and deletion has undo",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW05 first-use board shows pairing without setup; appearance cancel preserves pairing",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW06 a conflicting answer never blocks another student; in-flight edits keep their newest values and require an explicit conflict choice",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "workflow-v7.spec.ts",
+          "title": "FLOW07 read-only sample control disables changes while keeping preview available",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    "buildId": "in2LtgftI23FrF8ZeWoHb",
+    "sourceSha256": "6ce0b861c0235ec8844d5960229cf6b63a644e438fc8956aab714b25d8d8bdf5",
+    "allEightFullRunFailuresCoveredAndPassed": true
+  },
+  "layoutVerification": {
+    "command": {
+      "command": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm build && pnpm exec playwright test tests/e2e/teacher-flow-v4.spec.ts tests/e2e/ui-ai-v2.spec.ts",
+      "exitCode": 1,
+      "startedAtUnix": 1791054979.7226067,
+      "durationSeconds": 116.27,
+      "log": "/workspace/.papannalar-cloud/logs/workflow-v7-final-layout.log"
+    },
+    "browser": {
+      "stats": {
+        "startTime": "2026-10-03T19:17:05.184Z",
+        "duration": 70771.81,
+        "expected": 15,
+        "skipped": 0,
+        "unexpected": 2,
+        "flaky": 0
+      },
+      "workers": 1,
+      "retries": 0,
+      "cases": [
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW01 beginner reaches practice and AI from home at 360; class data, drafts and session survive disclosure",
+          "status": "unexpected",
+          "attemptStatuses": [
+            "failed"
+          ]
+        },
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW01 beginner reaches practice and AI from home at 390; class data, drafts and session survive disclosure",
+          "status": "unexpected",
+          "attemptStatuses": [
+            "failed"
+          ]
+        },
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW02 empty pages offer a next action; personal and example classes remain separate",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW04 selected class reopens offline through canonical shell; essential storage warning stays visible",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW03 AI status never claims tested readiness; changing source clears the previous lesson",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 visible login automatically renders 3D without controls; hidden panels stay lazy and light mode releases the canvas",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 no WebGL and reduced motion preserve poster, login and teaching; scanner never fetches a model",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 save-data prevents 3D library/model download while login remains usable",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 saved-light prevents 3D library/model download while login remains usable",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 all three bundled models render only on selection with one canvas",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 offline precache excludes the scene engine and GLBs; scanner and failed lazy download retain function",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U1 walkthrough all teacher views, local data, editor selection and text130% at 360",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U1 walkthrough all teacher views, local data, editor selection and text130% at 390",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U1 walkthrough all teacher views, local data, editor selection and text130% at 1024",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U1 walkthrough all teacher views, local data, editor selection and text130% at 1366",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U2 QR is actually rendered with contrast and stays inside idle board viewport",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "ui-ai-v2.spec.ts",
+          "title": "U1 empty/error/retry routes keep navigation and keyboard access",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    "buildId": "2YNhqi0po4Ou62cg8yXZC",
+    "failureCause": "Two old tests assumed home always chose sample7B. Home correctly used the latest class7C after other assessments. The test now checks the class linked from home, then selects7B explicitly for its draft-persistence scenario."
+  },
+  "scenarioCoverage": {
+    "uniqueScenarios": 155,
+    "latestRecordedResultForEveryScenario": "PASS",
+    "sameBuildFull155PassClaimed": false,
+    "explanation": "Full147PASS/8FAIL, repair45PASS, layout15PASS/2FAIL, final2PASS. All recorded failures are covered by passing repairs. Final runtime changes since repair45 are one CSS grid rule and two classroom-copy literals; the last change affects only test setup."
+  },
+  "candidateVerification": {
+    "command": {
+      "command": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm exec playwright test tests/e2e/teacher-flow-v4.spec.ts -g 'FLOW01 beginner'",
+      "exitCode": 0,
+      "startedAtUnix": 1791055261.5804513,
+      "durationSeconds": 52.25,
+      "log": "/workspace/.papannalar-cloud/logs/workflow-v7-layout-repair.log"
+    },
+    "browser": {
+      "stats": {
+        "startTime": "2026-10-03T19:21:33.672Z",
+        "duration": 20117.106,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "workers": 1,
+      "retries": 0,
+      "cases": [
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW01 beginner reaches practice and AI from home at 360; class data, drafts and session survive disclosure",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        },
+        {
+          "file": "teacher-flow-v4.spec.ts",
+          "title": "FLOW01 beginner reaches practice and AI from home at 390; class data, drafts and session survive disclosure",
+          "status": "expected",
+          "attemptStatuses": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    "buildId": "2YNhqi0po4Ou62cg8yXZC",
+    "changedInputsSinceFullVerify": [
+      "src/features/guru/app-context.tsx",
+      "src/features/guru/teacher-workspace.tsx",
+      "src/features/layar/board-content.tsx",
+      "src/features/layar/board-navigation.tsx",
+      "src/features/library/conflict-review.tsx",
+      "src/features/library/session.tsx",
+      "src/ui/studio.css",
+      "src/ui/use-draft-guard.ts",
+      "tests/e2e/board-content.spec.ts",
+      "tests/e2e/opening-reflection.spec.ts",
+      "tests/e2e/prelim.spec.ts",
+      "tests/e2e/teacher-flow-v4.spec.ts",
+      "tests/e2e/video-display.spec.ts",
+      "tests/e2e/video-library.spec.ts",
+      "tests/e2e/workflow-v7.spec.ts"
+    ],
+    "changedInputsSinceRepair45": [
+      "src/features/guru/teacher-workspace.tsx",
+      "src/ui/studio.css",
+      "tests/e2e/teacher-flow-v4.spec.ts"
+    ],
+    "identicalInputsSinceFullVerify": 580,
+    "note": "Full-run failures remain recorded. Only affected tests are repeated after repairs; unit, SQL and native provider suites are not duplicated."
+  },
+  "rootCause": {
+    "reproducedOn": "05ed781",
+    "publicFlow": "Sample login -> example 7B filled29 -> practice sameclass -> prepare -> start",
+    "cause": "Filled-example history was rejected as foreign practice history, then business rejection was classified as storage failure.",
+    "repair": "Separate demo timelines without deleting history, idempotent repeated start, typed action messages and automatic check selection.",
+    "regression": "workflow-v7 FLOW01, freshclass E2E02"
+  },
+  "qaReport": {
+    "file": "PapanNalar-Codex-Handoff.md",
+    "treatedAs": "Advisory; source references c2a0593; live deployment revision unknown",
+    "appendices": "Not supplied; no claims copied from absent evidence",
+    "decisions": "UI_AI_HANDOFF.md WORKFLOW_V7 table PN-01 through PN-15"
+  },
+  "visual": {
+    "status": "PASS",
+    "buildId": "2YNhqi0po4Ou62cg8yXZC",
+    "count": 108,
+    "captures": [
+      {
+        "name": "login",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "login",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "login",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "login",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "login",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "login",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "home",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "home",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "home",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "home",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "home",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "home",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "classes",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "classes",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "classes",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "classes",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "classes",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "classes",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "class",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "class",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "class",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "class",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "class",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "class",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "collections",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "collections",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "collections",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "collections",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "collections",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "collections",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "editor",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "editor",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "editor",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "editor",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "editor",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "editor",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "start",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "start",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "start",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "start",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "start",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "start",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "assessments",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "assessments",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "assessments",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "assessments",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "assessments",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "assessments",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "session",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "session",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "session",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "session",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "session",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "session",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "results",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "results",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "results",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "results",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "results",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "results",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "practice",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "practice",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "practice",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "practice",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "practice",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "practice",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "example",
+        "width": 360,
+        "height": 800,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "example",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "example",
+        "width": 768,
+        "height": 1024,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "example",
+        "width": 1188,
+        "height": 761,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "example",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "example",
+        "width": 1920,
+        "height": 1080,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "practice-ready",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "practice-started",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "class-inline-editor",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-number-line",
+        "width": 360,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-number-line",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-number-line",
+        "width": 600,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-number-line",
+        "width": 768,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-number-line",
+        "width": 900,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-fractions",
+        "width": 360,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-fractions",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-fractions",
+        "width": 600,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-fractions",
+        "width": 768,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-fractions",
+        "width": 900,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-ratio",
+        "width": 360,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-ratio",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-ratio",
+        "width": 600,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-ratio",
+        "width": 768,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-ratio",
+        "width": 900,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-algebra",
+        "width": 360,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-algebra",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-algebra",
+        "width": 600,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-algebra",
+        "width": 768,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-algebra",
+        "width": 900,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-balance",
+        "width": 360,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-balance",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-balance",
+        "width": 600,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-balance",
+        "width": 768,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-balance",
+        "width": 900,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-graphs",
+        "width": 360,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-graphs",
+        "width": 390,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-graphs",
+        "width": 600,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-graphs",
+        "width": 768,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "preview-graphs",
+        "width": 900,
+        "height": 844,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "large-text",
+        "width": 390,
+        "height": 844,
+        "font": "20px",
+        "overflow": 0
+      },
+      {
+        "name": "board-waiting",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      },
+      {
+        "name": "board-menu",
+        "width": 1366,
+        "height": 768,
+        "font": "16px",
+        "overflow": 0
+      }
+    ],
+    "pageErrors": 0,
+    "before": [
+      "home-390",
+      "start-error-390"
+    ],
+    "screenshots": "Local synthetic/attendance-only PNGs excluded from Git; representative screens inspected. Final capture waits for actual tool regions, form focus and large-text content; initial loading captures are excluded as visual proof.",
+    "physicalDevice": false,
+    "noviceTeacherStudy": false
+  },
+  "preservation": {
+    "status": "PASS",
+    "comparedTo": "05ed781fdcf029d89f08bb0b4aeb3b8e777adbdb",
+    "protectedFiles": 183,
+    "changedProtectedFiles": [],
+    "originalDocuments": 8,
+    "changedOriginalDocuments": [],
+    "oldReceiptCount": 19,
+    "changedOldReceipts": [],
+    "originalJournalPrefixPreserved": true,
+    "historicalHandoffPreserved": true,
+    "existingMigrations": 40,
+    "intentionalChanges": [
+      "Local cycles: separate the filled demo timeline, keep pilot guard and idempotent start.",
+      "Local scope: preserve typed public action errors; sanitize database exceptions.",
+      "Local library: scoped drafts, pending responses and explicit conflict resolution; no SQL or math changes."
+    ]
+  },
+  "assets": {
+    "buildId": "2YNhqi0po4Ou62cg8yXZC",
+    "optionalVisualChunks": [
+      {
+        "path": "/_next/static/chunks/2wluchj_q5z_j.js",
+        "bytes": 619410,
+        "gzipBytes": 154310
+      }
+    ],
+    "optionalVisualGzipBytes": 154310,
+    "budgetGzipBytes": 250000,
+    "excludedFromOfflinePrecache": true,
+    "precachedPosters": [
+      "/assets/pn-ui-v2/posters/learning-board.webp",
+      "/assets/pn-ui-v2/posters/balance-scale.webp",
+      "/assets/pn-ui-v2/posters/algebra-kit.webp"
+    ]
+  },
+  "cost": {
+    "newDependencies": 0,
+    "newAssets": 0,
+    "paidAPICalls": 0,
+    "paidAPIUSD": 0,
+    "managedComputeUSD": "NOT_MEASURED"
+  },
+  "providers": [
+    {
+      "protocol": "OpenAI-compatible Chat Completions",
+      "local": "Native HTTP fixture + PostgreSQL ledger/RLS PASS",
+      "live": "NOT_RUN"
+    },
+    {
+      "protocol": "Anthropic-compatible Messages",
+      "local": "Native HTTP fixture + PostgreSQL ledger/RLS PASS",
+      "live": "NOT_RUN"
+    }
+  ],
+  "limits": [
+    "Real teacher usability study, real classroom review, screen reader, physical touch/camera/QR HTTPS and physical printing NOT_RUN.",
+    "Provider credentials, human review and any hosted SQL040 rollout follow the existing operator checklist; no approvals fabricated.",
+    "A collection draft with a changed server revision is preserved and warned; a two-draft merge UI is not implemented.",
+    "No deployment, hosted migration, paid API or pull request was performed."
+  ],
+  "run": [
+    "source /workspace/.papannalar-cloud/activate.sh",
+    "pnpm build",
+    "pnpm video",
+    "Open http://127.0.0.1:3100/masuk and /layar in separate tabs."
+  ],
+  "publication": "Commit and normal fast-forward push authorized; remote SHA is checked after publication and reported separately."
+}

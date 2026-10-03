@@ -65,7 +65,7 @@ for (const width of [360, 390, 1366])
     await loginTeacher(page, { guided: true });
     await page.getByLabel("Gunakan kelas").selectOption("demo");
     await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-    await page.getByLabel("Nama rombel", { exact: true }).fill("7UI");
+    await page.getByLabel("Nama kelas", { exact: true }).fill("7UI");
     await page.getByLabel("Jumlah siswa", { exact: true }).fill("3");
     await page
       .getByRole("button", { name: "Simpan kelas", exact: true })

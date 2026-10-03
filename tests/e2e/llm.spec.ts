@@ -27,7 +27,7 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-  await page.getByLabel("Nama rombel", { exact: true }).fill("7V");
+  await page.getByLabel("Nama kelas", { exact: true }).fill("7V");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7V/ }).click();
   await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
@@ -87,7 +87,7 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
     "Layar tersambung",
   );
   const station = page.getByRole("region", {
-    name: "Kendali Stasiun",
+    name: "Kegiatan kelompok",
     exact: true,
   });
   await station

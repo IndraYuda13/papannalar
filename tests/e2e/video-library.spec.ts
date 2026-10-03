@@ -115,7 +115,9 @@ test("U02 local class identity, attendance and export persist; student UUID and 
   ).toBe(1);
   expect(JSON.stringify(after)).not.toContain("FIKTIF_LOCAL_CANARY");
   expect(bodies.join("\n")).not.toContain("FIKTIF_LOCAL_CANARY");
-  await page.getByText("Impor dan nama lokal", { exact: true }).click();
+  await page
+    .getByText("Tambahkan nama siswa dari file", { exact: true })
+    .click();
   await page
     .getByText("Nama opsional · hanya perangkat ini", { exact: true })
     .click();
@@ -505,15 +507,18 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
     title,
   );
   await page.getByRole("button", { name: "Simpan & siap digunakan" }).click();
-  await expect(page.getByRole("status")).toContainText(
-    "Kumpulan tersimpan dan siap digunakan",
-  );
+  await expect(page).toHaveURL(/\/guru\/soal\?tab=teacher&saved=/);
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "Kumpulan tersimpan dan siap digunakan" }),
+  ).toBeVisible();
   await expect(page).toHaveURL(/\/guru\/soal\?tab=teacher&saved=/);
   const setId = new URL(page.url()).searchParams.get("saved")!;
   expect(setId).toMatch(/^[a-f0-9-]{36}$/);
   await expect(
-    page.getByRole("tab", { name: "Soal Saya", exact: true }),
-  ).toHaveAttribute("aria-selected", "true");
+    page.getByRole("button", { name: "Soal Saya", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await page.goto(`/guru/soal/${setId}`);
   await page.reload();
   await expect(page.getByLabel("Nama kumpulan", { exact: true })).toHaveValue(
@@ -548,7 +553,7 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
     await expect(
       page
         .getByRole("status")
-        .filter({ hasText: `Absen ${n}: tersimpan di database.` }),
+        .filter({ hasText: `Jawaban absen ${n} sudah tersimpan.` }),
     ).toBeVisible();
   }
   const detail = runDetailSchema.parse(
@@ -593,9 +598,12 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
     .getByLabel("Kunci jawaban")
     .selectOption("B");
   await page.getByRole("button", { name: "Simpan & siap digunakan" }).click();
-  await expect(page.getByRole("status")).toContainText(
-    "Kumpulan tersimpan dan siap digunakan",
-  );
+  await expect(page).toHaveURL(/\/guru\/soal\?tab=teacher&saved=/);
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "Kumpulan tersimpan dan siap digunakan" }),
+  ).toBeVisible();
   const old = runDetailSchema.parse(
     await call(page, { action: "detail", id: runId }),
   );
@@ -615,7 +623,10 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
   expect(second.responses).toHaveLength(0);
   expect(second.run.classLabel).toBe("7C");
   await page.goto("/guru/asesmen");
-  await page.getByRole("tab", { name: "Hasil", exact: true }).click();
+  await page.getByRole("button", { name: "Hasil", exact: true }).click();
+  await page
+    .getByText("Cari berdasarkan kelas atau tanggal", { exact: true })
+    .click();
   await page
     .getByRole("combobox", { name: "Kumpulan", exact: true })
     .selectOption(setId);
@@ -680,9 +691,12 @@ test("U10 teacher creates real interactive/writing collection and preview retain
     .getByLabel("Pertanyaan", { exact: true })
     .fill("Tuliskan cerita gerak lift.");
   await page.getByRole("button", { name: "Simpan & siap digunakan" }).click();
-  await expect(page.getByRole("status")).toContainText(
-    "Kumpulan tersimpan dan siap digunakan",
-  );
+  await expect(page).toHaveURL(/\/guru\/soal\?tab=teacher&saved=/);
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "Kumpulan tersimpan dan siap digunakan" }),
+  ).toBeVisible();
   await expect(page).toHaveURL(/\/guru\/soal\?tab=teacher&saved=/);
   const createdId = new URL(page.url()).searchParams.get("saved")!;
   await page.goto(`/guru/soal/${createdId}`);

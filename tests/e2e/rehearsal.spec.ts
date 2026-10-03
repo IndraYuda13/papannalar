@@ -67,7 +67,7 @@ for (const run of [1, 2, 3]) {
     await loginTeacher(page);
     await chooseTeacherMode(page, "demo");
     await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
-    await page.getByLabel("Nama rombel", { exact: true }).fill("7B");
+    await page.getByLabel("Nama kelas", { exact: true }).fill("7B");
     await page
       .getByRole("button", { name: "Simpan kelas", exact: true })
       .click();
@@ -128,7 +128,7 @@ for (const run of [1, 2, 3]) {
       "Segitiga Biru · D1 · 7 siswa",
     );
     const station = page.getByRole("region", {
-      name: "Kendali Stasiun",
+      name: "Kegiatan kelompok",
       exact: true,
     });
     await station
@@ -246,12 +246,12 @@ for (const run of [1, 2, 3]) {
       page.getByRole("region", { name: "Paket Sesi", exact: true }),
     ).toContainText("Latihan tersimpan di perangkat ini");
     const exit = page.getByRole("region", {
-      name: "Hasil Kartu Keluar",
+      name: "Hasil Kartu cek akhir",
       exact: true,
     });
     await exit
       .getByRole("button", {
-        name: "Bekukan Kartu Keluar dari paket",
+        name: "Siapkan pertanyaan penutup",
         exact: true,
       })
       .click();
@@ -260,13 +260,13 @@ for (const run of [1, 2, 3]) {
       .click();
     await expect(
       board.getByRole("heading", {
-        name: "Kartu Keluar · Baris 2/3",
+        name: "Kartu cek akhir · Baris 2/3",
         exact: true,
       }),
     ).toBeVisible();
     await expect(
       board
-        .getByRole("region", { name: "Kartu Keluar kelompok", exact: true })
+        .getByRole("region", { name: "Kartu cek akhir kelompok", exact: true })
         .locator("section"),
     ).toHaveCount(3);
     await exit

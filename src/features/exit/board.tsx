@@ -15,11 +15,11 @@ export function ExitBoard({
 }) {
   return (
     <section
-      aria-label="Kartu Keluar kelompok"
+      aria-label="Kartu cek akhir kelompok"
       className="w-full space-y-6 text-left"
     >
       <h1 className="text-[56px] font-bold">
-        Kartu Keluar · Baris {value.row}/3
+        Kartu cek akhir · Baris {value.row}/3
       </h1>
       <p className="text-[32px]">
         Jawab sesuai panel kelompokmu. Satu pilihan; ? bila belum tahu.

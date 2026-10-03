@@ -219,7 +219,7 @@ export function Fractions({
           variant="outline"
           onClick={() => act({ type: "undo" })}
         >
-          Ulang langkah
+          Batalkan langkah terakhir
         </Button>
         <Button
           size="board"
