@@ -1,4 +1,4 @@
-import { openBoard } from "../browser/helpers";
+import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import {
@@ -64,7 +64,7 @@ for (const run of [1, 2, 3]) {
       });
     }
     await loginTeacher(page);
-    await page.getByLabel("Data kelas").selectOption("demo");
+    await chooseTeacherMode(page, "demo");
     await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
     await page.getByLabel("Nama rombel", { exact: true }).fill("7B");
     await page

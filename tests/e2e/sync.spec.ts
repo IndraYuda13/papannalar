@@ -1,6 +1,56 @@
 import { test, expect } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
-import { loginTeacher } from "../browser/helpers";
+import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
+
+for (const status of [401, 409])
+  test(`SYNC04 automatic ${status} raises an actionable notice while device settings stay collapsed and answers remain durable`, async ({
+    page,
+  }) => {
+    await page.clock.install();
+    await loginTeacher(page, { guided: true });
+    await page.getByLabel("Gunakan kelas").selectOption("demo");
+    await expect(page.getByLabel("Gunakan kelas")).toBeEnabled();
+    const device = page.locator("#teacher-device");
+    await expect(device).not.toHaveAttribute("open", "");
+    await expect(
+      page.getByRole("button", { name: "Sinkronkan jawaban", exact: true }),
+    ).toBeHidden();
+    await page.addScriptTag({
+      content: await readFile(".browser-tests/sync-fixture.js", "utf8"),
+    });
+    const ids = await page.evaluate(() => window.__syncFixture.initialize());
+    const before = await page.evaluate(() => window.__syncFixture.queue());
+    expect(before).toHaveLength(1);
+    await page.route("**/api/v1/sync", (route) =>
+      route.fulfill({
+        status,
+        json: { error: { code: status === 401 ? "UNAUTHORIZED" : "CONFLICT" } },
+      }),
+    );
+    await page.clock.runFor(16000);
+    const notice = page.getByRole("main").getByRole("alert");
+    await expect(notice).toContainText(
+      status === 401 ? "Masuk kembali" : "jawaban berbeda",
+    );
+    await expect(device).not.toHaveAttribute("open", "");
+    const held = await page.evaluate(() => window.__syncFixture.queue());
+    expect(held).toHaveLength(1);
+    expect(held[0].state).toBe(status === 401 ? "login" : "review");
+    expect(held[0].mutation).toEqual(before[0].mutation);
+    expect(
+      await page.evaluate(
+        (id) => window.__syncFixture.counts(id),
+        ids.sessionId,
+      ),
+    ).toEqual({ events: 1, outbox: 1 });
+    await notice
+      .getByRole("button", { name: "Periksa data tersimpan", exact: true })
+      .click();
+    await expect(device).toHaveAttribute("open", "");
+    await expect(
+      page.getByRole("button", { name: "Sinkronkan jawaban", exact: true }),
+    ).toBeVisible();
+  });
 
 test("SYNC01 offline queue survives restart, lost ACK retry is idempotent and late correction stays pending until accepted", async ({
   page,
@@ -91,7 +141,7 @@ test("SYNC01 offline queue survives restart, lost ACK retry is idempotent and la
     "graded",
   ])
     expect(requests.join("")).not.toContain(forbidden);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page
     .getByRole("button", { name: "Sinkronkan jawaban", exact: true })
     .click();
@@ -188,7 +238,7 @@ test("SYNC03 two teacher devices enforce read-only import, explicit takeover and
   expect(
     (await page.evaluate(() => window.__syncFixture.sync())).accepted,
   ).toBe(1);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   const otherContext = await browser.newContext({
     storageState: await context.storageState(),
     baseURL: "http://127.0.0.1:3100",
@@ -198,7 +248,7 @@ test("SYNC03 two teacher devices enforce read-only import, explicit takeover and
   other.on("pageerror", () => errors.push("device2-runtime"));
   page.on("pageerror", () => errors.push("device1-runtime"));
   await other.goto("/guru/latihan");
-  await other.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(other, "demo");
   await other.getByRole("button", { name: /Buka kelas 7S/ }).click();
   await other
     .getByRole("button", { name: "Muat sesi dari server", exact: true })

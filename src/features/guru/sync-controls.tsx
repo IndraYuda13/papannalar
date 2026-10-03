@@ -7,20 +7,23 @@ import { Button } from "../../ui/components/button";
 import type { ClassDto } from "../../contracts/classes";
 import { SyncReviewControls } from "./sync-review";
 import { useAutoSync } from "./auto-sync";
+import { syncAttentionMessage } from "./sync-notice";
 
 export function SyncControls({
   scope,
   classroom,
+  onAttention,
 }: {
   scope: LocalScope;
   classroom?: ClassDto;
+  onAttention?: (message: string) => void;
 }) {
   const [message, setMessage] = useState(
       "Jawaban tersimpan di perangkat ini. Sinkronkan saat online.",
     ),
     [busy, setBusy] = useState(false);
   const { ownerId, mode } = scope;
-  useAutoSync(scope, setMessage);
+  useAutoSync(scope, setMessage, onAttention);
   useEffect(() => {
     let active = true;
     const repo = createSyncRepository({ ownerId, mode });
@@ -31,6 +34,7 @@ export function SyncControls({
           setMessage(
             `${entries.length} sesi menunggu sinkronisasi${entries.some((e) => e.state === "review") ? "; ada konflik yang perlu ditinjau" : ""}.`,
           );
+        if (active) onAttention?.(syncAttentionMessage(entries));
       })
       .catch(() => {
         if (active) setMessage("Antrean lokal belum dapat dibuka.");
@@ -39,13 +43,14 @@ export function SyncControls({
     return () => {
       active = false;
     };
-  }, [ownerId, mode]);
+  }, [ownerId, mode, onAttention]);
   async function sync() {
     setBusy(true);
     const repo = createSyncRepository(scope);
     try {
       await repo.resume();
       const result = await synchronize(scope);
+      onAttention?.(syncAttentionMessage(result.entries));
       setMessage(
         result.entries.some((e) => e.state === "review")
           ? "Konflik perangkat: jawaban lokal tetap disimpan. Tinjau versi server sebelum mengganti."

@@ -1,4 +1,4 @@
-import { openBoard } from "../browser/helpers";
+import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import {
@@ -12,7 +12,7 @@ test("TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
 }) => {
   const errors: string[] = [];
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7T");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
@@ -144,7 +144,7 @@ test("TOOL02 fractions keep whole size, check the model, undo, and run offline o
     if (m.type() === "error") errors.push("teacher-console");
   });
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7F");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();

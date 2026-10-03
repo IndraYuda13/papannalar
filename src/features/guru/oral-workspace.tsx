@@ -254,7 +254,7 @@ export function OralWorkspace({
                 ? state.placement.stepId
                 : "Lanjut"}
               . Hasil cek lisan terpisah dari latihan tertulis. Cara penempatan
-              ini masih perlu ditinjau sebelum dipakai pada pilot.
+              ini masih perlu ditinjau sebelum dipakai pada kelas sungguhan.
             </p>
           )}
           <p>
@@ -273,8 +273,8 @@ export function OralWorkspace({
       <p role="status">{message}</p>
       {mode !== "demo" && (
         <p>
-          Konten draft hanya untuk Demo terpisah. Pilot menunggu review materi
-          dan aturan lisan.
+          Untuk mencoba cek lisan, pilih Data contoh. Materi dan aturan ini
+          belum disahkan untuk kelas sungguhan.
         </p>
       )}
     </section>

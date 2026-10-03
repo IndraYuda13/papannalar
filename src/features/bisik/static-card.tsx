@@ -20,10 +20,10 @@ export function StaticBisik({
       aria-label="Bisik statis"
       className="space-y-3 rounded-kartu bg-pn-teal-100 p-4"
     >
-      <h4 className="font-bold">Bisik · kartu strategi</h4>
+      <h4 className="font-bold">Bantuan guru · kartu saran</h4>
       {!code && (
         <label className="block">
-          Kode sumber
+          Kesulitan yang ingin dibahas
           <select
             aria-label="Kode Bisik"
             className="min-h-12 w-full border bg-white px-3"
@@ -33,7 +33,7 @@ export function StaticBisik({
             <option value="generic-error">Tanpa diagnosis khusus</option>
             {MISCONCEPTION_CODES.map((c) => (
               <option key={c} value={c}>
-                {c}
+                {getStrategy(c).title}
               </option>
             ))}
           </select>
@@ -41,9 +41,14 @@ export function StaticBisik({
       )}
       <p className="font-semibold">{strategy.title}</p>
       <p className="text-sm">
-        Sumber: {strategy.code} · Draft, belum direview manusia · tersedia
-        offline.
+        Kartu saran tersimpan · dapat dibaca tanpa internet.
       </p>
+      <details className="text-sm">
+        <summary className="min-h-12 cursor-pointer">
+          Sumber dan status materi
+        </summary>
+        Sumber: {strategy.code} · Materi percobaan, belum direview manusia.
+      </details>
       <ol className="list-inside list-decimal space-y-1">
         {strategy.prompts.map((p) => (
           <li key={p}>{p}</li>

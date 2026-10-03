@@ -1,7 +1,7 @@
 import { openBoard } from "../browser/helpers";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
-import { loginTeacher } from "../browser/helpers";
+import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
 test("TURN01 real IndexedDB records actual start once, isolates semester/owner and rejects rewritten history", async ({
   page,
 }) => {
@@ -34,7 +34,7 @@ test("ROT01 teacher timer/three rounds and board projection preserve privacy", a
     if (m.type() === "error") errors.push("teacher-console");
   });
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7R");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
@@ -159,7 +159,7 @@ test("ROT01 teacher timer/three rounds and board projection preserve privacy", a
     .click();
   await expect(rotation).toContainText("Rotasi selesai");
   await page.reload();
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await expect(control).toContainText("Rotasi selesai");
   expect(errors).toEqual([]);
   await boardContext.close();

@@ -81,7 +81,7 @@ test("tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap
   await fresh.setViewportSize({ width: 390, height: 844 });
   await fresh.goto("/guru/latihan");
   await expect(
-    fresh.getByRole("heading", { name: "Beranda", exact: true }),
+    fresh.getByRole("heading", { name: "Latihan & bantuan AI", exact: true }),
   ).toBeVisible();
   await injectFixture(fresh);
   expect(

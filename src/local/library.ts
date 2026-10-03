@@ -44,6 +44,20 @@ export async function libraryCache<T extends CacheKind>(
   }
 }
 const pendingSchema = libraryActionSchema.options[7];
+export async function removeLibraryCache(
+  scope: LocalScope,
+  kind: CacheKind,
+  key: string,
+) {
+  if ((await readLocalAccess())?.id !== scope.ownerId)
+    throw new Error("LOCKED");
+  const db = openDataDatabase(scope);
+  try {
+    await db.table("libraryCache").delete(`${kind}:${key}`);
+  } finally {
+    db.close();
+  }
+}
 export async function queueLibraryResponse(
   scope: LocalScope,
   input: Extract<LibraryAction, { action: "response" }>,

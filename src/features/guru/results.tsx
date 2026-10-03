@@ -144,7 +144,25 @@ export function AssessmentsPage() {
           </li>
         ))}
       </ul>
-      {!runs.length && <p>Belum ada asesmen pada pilihan ini.</p>}
+      {!runs.length && (
+        <StateNotice
+          title={
+            tab === "results"
+              ? "Hasil akan muncul setelah asesmen"
+              : "Belum ada asesmen berjalan"
+          }
+          action={
+            <Button asChild variant="outline">
+              <Link href="/guru/mulai?mode=assessment">
+                Mulai cek pemahaman
+              </Link>
+            </Button>
+          }
+        >
+          Pilih kelas dan Kartu Nalar untuk memeriksa pemahaman siswa. Jika
+          memakai filter, coba pilihan kelas atau tanggal lain.
+        </StateNotice>
+      )}
     </div>
   );
 }

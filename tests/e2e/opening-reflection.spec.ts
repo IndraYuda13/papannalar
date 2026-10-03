@@ -1,7 +1,7 @@
 import { openBoard } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
-import { loginTeacher } from "../browser/helpers";
+import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
 test.use({ trace: "off", screenshot: "off", video: "off" });
 declare global {
   interface Window {
@@ -17,7 +17,7 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
   test.setTimeout(60000);
   const errors: string[] = [];
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7R");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();

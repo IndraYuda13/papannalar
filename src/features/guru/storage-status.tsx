@@ -12,7 +12,13 @@ import {
   registerUpdateGuard,
 } from "../../offline/update-safety";
 import { Button } from "../../ui/components/button";
-export function StorageStatus({ scope }: { scope: LocalScope }) {
+export function StorageStatus({
+  scope,
+  onAttention,
+}: {
+  scope: LocalScope;
+  onAttention?: (message: string) => void;
+}) {
   const [health, setHealth] = useState<
       StorageHealth & { usage: number; quota: number }
     >(),
@@ -36,6 +42,15 @@ export function StorageStatus({ scope }: { scope: LocalScope }) {
       });
       setShell(cached);
       setWaiting(Boolean(registration?.waiting));
+      onAttention?.(
+        value.evicted
+          ? "Sebagian data perangkat pernah terhapus. Buka pengaturan penyimpanan untuk memulihkannya."
+          : estimate?.quota &&
+              estimate.usage &&
+              estimate.usage / estimate.quota > 0.9
+            ? "Ruang perangkat hampir penuh. Periksa penyimpanan sebelum melanjutkan."
+            : "",
+      );
     } catch {
       setHealth(undefined);
       setShell(false);
@@ -43,7 +58,7 @@ export function StorageStatus({ scope }: { scope: LocalScope }) {
         "Penyimpanan belum dapat dibuka. Jangan hapus data browser; coba lagi dan pulihkan sesi server saat online.",
       );
     }
-  }, [ownerId, mode]);
+  }, [ownerId, mode, onAttention]);
   useEffect(() => {
     const remove = registerUpdateGuard("teacher", teacherUpdateSafe);
     const error = (event: Event) => {
@@ -54,6 +69,11 @@ export function StorageStatus({ scope }: { scope: LocalScope }) {
           : code === "VERSION"
             ? "Versi penyimpanan belum cocok. Data dipertahankan; buka versi aplikasi yang sesuai."
             : "Data belum tersimpan. Periksa penyimpanan lalu coba lagi.",
+      );
+      onAttention?.(
+        code === "QUOTA"
+          ? "Penyimpanan penuh. Jawaban baru belum tersimpan; jangan buang kartu dan kosongkan ruang perangkat."
+          : "Ada data yang belum tersimpan. Periksa penyimpanan perangkat sebelum melanjutkan.",
       );
     };
     const refresh = () => {
@@ -70,7 +90,7 @@ export function StorageStatus({ scope }: { scope: LocalScope }) {
       window.removeEventListener("focus", refresh);
       window.removeEventListener("pn-sync-restored", refresh);
     };
-  }, [audit]);
+  }, [audit, onAttention]);
   async function update() {
     setBusy(true);
     try {
@@ -97,8 +117,8 @@ export function StorageStatus({ scope }: { scope: LocalScope }) {
       </p>
       <p>
         {shell
-          ? "Shell, font, alat dan pemindai tersimpan."
-          : "Cache aplikasi belum lengkap."}{" "}
+          ? "Aplikasi dan pemindai sudah tersimpan di perangkat."
+          : "Buka aplikasi saat online untuk menyiapkan penggunaan offline."}{" "}
         {health?.packages ?? 0} paket lokal.
       </p>
       {health?.evicted && (

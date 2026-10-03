@@ -193,6 +193,12 @@ Kebutuhan engineering lain yang belum diatur sumber (TTL, retry, retention,
 multi-device, versi library) diusulkan di bagian terkait. Keputusan yang mengubah
 produk/hasil belajar tidak disamarkan sebagai detail implementasi.
 
+### 2.1 Addendum alur guru — 3 Oktober 2026
+
+| ID | Masalah/instruksi terbaru | Keputusan implementasi | Batas |
+| --- | --- | --- | --- |
+| K39 | Pengguna tidak menemukan latihan, mode contoh membingungkan dan informasi perangkat menumpuk | [S instruksi terbaru] Latihan/AI terlihat di menu/home/kelas; kelas contoh otomatis. [D] Persiapan/kegiatan terbuka bertahap, teknis tersembunyi kecuali peringatan; query kelas/mode dinormalisasi ke shell publik tanpa cache HTML pribadi | Gate review/privasi/budget/RLS tidak berubah. Tidak mengklaim studi guru, provider live atau hardware berdasarkan fixture. Jurnal/evidence PLAN9.60 dan UI_AI_HANDOFF |
+
 ## 3. Arsitektur dan dependensi
 
 ### 3.1 Satu aplikasi, modul terpisah [D; memenuhi S0 keputusan 9]

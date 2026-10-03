@@ -256,10 +256,10 @@ export function CycleWorkspace({
       aria-label="Siklus kelas"
       className="space-y-4 rounded-kartu border-2 border-primary p-4"
     >
-      <h3 className="text-xl font-bold">Siklus kelas · dari Paket Sesi</h3>
+      <h3 className="text-xl font-bold">Sesi dari latihan yang disiapkan</h3>
       <p>
-        Mulai dengan kartu kosong. Nama tetap di perangkat guru; konten masih
-        draft untuk demo.
+        Mulai dengan kartu kosong, periksa jawaban, lalu bagi kegiatan sesuai
+        kebutuhan siswa. Materi ini masih untuk percobaan.
       </p>
       {(!data || data.cycle.assessmentRevision > 0) && (
         <Button
@@ -492,7 +492,8 @@ export function CycleWorkspace({
           {context.oralOnly && (
             <p>
               Cek mingguan kelas 1–3 dilakukan lisan bersama guru. Penempatan
-              dari Cek Lisan yang selesai; belum ada penempatan tetap pending.
+              dari Cek Lisan yang selesai. Siswa yang belum diperiksa tetap
+              menunggu.
             </p>
           )}
           <section
@@ -509,7 +510,7 @@ export function CycleWorkspace({
                     ? p.displayed.stepId
                     : p.displayed?.kind === "lanjut"
                       ? "Lanjut"
-                      : "pending"}
+                      : "belum diperiksa"}
                   {p.replay.belowRange.kind === "below-range"
                     ? " · di bawah jangkauan cek; lanjutkan Cek Lisan"
                     : ""}
@@ -556,7 +557,8 @@ export function CycleWorkspace({
                   checked={ackMissing}
                   onChange={(e) => setAckMissing(e.target.checked)}
                 />
-                Finalisasi dengan hasil yang masih pending; tidak diisi otomatis
+                Selesaikan penilaian meskipun ada jawaban yang belum masuk;
+                jawaban tidak diisi otomatis
               </label>
               <Button disabled={busy} onClick={() => void finalize()}>
                 Finalisasi penilaian

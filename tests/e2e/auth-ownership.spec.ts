@@ -105,12 +105,22 @@ test("magic link PKCE, reload session, cookie HttpOnly dan logout bekerja", asyn
     local: Object.entries(localStorage),
     session: Object.entries(sessionStorage),
   }));
-  expect(browserStorage.session.length).toBeLessThanOrEqual(1);
+  const identity = await (await page.request.get("/api/v1/teacher")).json();
+  // Seven boolean presentation choices plus the independent controller UUID.
+  expect(browserStorage.session.length).toBeLessThanOrEqual(8);
   for (const [key, value] of browserStorage.session) {
-    expect(key).toBe("pn-presentation-controller-v1");
-    expect(value).toMatch(
-      /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/,
-    );
+    if (key === "pn-presentation-controller-v1")
+      expect(value).toMatch(
+        /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/,
+      );
+    else {
+      expect(key).toMatch(
+        new RegExp(
+          `^pn-teacher-view:${identity.id}:pilot:teacher-(prepare|teach|rehearsal|ai|oral|class|device)$`,
+        ),
+      );
+      expect(value).toMatch(/^(open|closed)$/u);
+    }
   }
   // Only noncredential lock flags and eviction sentinels may live here.
   for (const [key, value] of browserStorage.local) {
@@ -243,8 +253,13 @@ test("CRUD kelas A/B melalui API tetap dibatasi RLS PostgreSQL", async ({
     });
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Hapus kelas" }).click();
+    await expect(page.getByRole("button", { name: /^Buka kelas/ })).toHaveCount(
+      0,
+    );
     await expect(
-      page.getByRole("heading", { name: "Belum ada kelas." }),
+      page.getByText("Tambahkan kelas pertama untuk menyiapkan latihan.", {
+        exact: true,
+      }),
     ).toBeVisible();
     expect(
       (await page.request.get(`/api/v1/classes/${a.class.id}`)).status(),
@@ -286,17 +301,26 @@ test("nama local-only bergabung di UI guru; API baru dan papan tidak menerima ca
       ),
     )
     .toBe(true);
-  await page.getByRole("link", { name: "Buka Layar Kelas" }).click();
-  await openBoard(page);
+  const popup = page.waitForEvent("popup");
+  await page.getByRole("link", { name: "Layar Kelas", exact: true }).click();
+  const board = await popup;
+  board.on("request", (request) =>
+    observed.push(request.url(), request.postData() ?? ""),
+  );
+  board.on("console", (message) => observed.push(message.text()));
+  await openBoard(board);
   await expect(
-    page.getByRole("heading", { name: "Layar Kelas menunggu." }),
+    board.getByRole("heading", { name: "Layar Kelas menunggu." }),
   ).toBeVisible();
   expect(
-    (await page.locator("body").innerText()).includes("LOCAL_ONLY_M01C_CANARY"),
+    (await board.locator("body").innerText()).includes(
+      "LOCAL_ONLY_M01C_CANARY",
+    ),
   ).toBe(false);
   expect(observed.some((text) => text.includes("LOCAL_ONLY_M01C_CANARY"))).toBe(
     false,
   );
+  await board.close();
 });
 
 test("logout offline mengunci akses lokal dan dicabut saat online kembali", async ({

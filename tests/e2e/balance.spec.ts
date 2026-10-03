@@ -1,4 +1,4 @@
-import { openBoard } from "../browser/helpers";
+import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import {
   test,
   expect,
@@ -15,7 +15,7 @@ import {
 
 async function paired(page: Page, browser: Browser) {
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("10T");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();

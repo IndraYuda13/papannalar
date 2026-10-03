@@ -158,7 +158,8 @@ export function SessionWorkspace({
     >
       <h3 className="text-xl font-bold">Sesi Tepat Level · demo 7B</h3>
       <p className="text-sm">
-        Data simulasi terpisah. Paket PRELIM draft; belum direview untuk pilot.
+        Simulasi dengan jawaban contoh. Materi belum disahkan untuk kelas
+        sungguhan.
       </p>
       {!context ? (
         <Button
@@ -300,7 +301,7 @@ export function SessionWorkspace({
               ))}
               <p className="text-sm">
                 ? berarti dipilih atau baris terbaca kosong. Belum terbaca tetap
-                pending, bukan salah.
+                belum masuk dan belum dinilai.
               </p>
               <div className="flex gap-2">
                 <Button type="submit" disabled={busy}>
@@ -369,7 +370,7 @@ export function SessionWorkspace({
           </details>
           {derived?.complete && (
             <div aria-label="Kelompok guru">
-              <h4 className="font-bold">Kelompok dari displayed placement</h4>
+              <h4 className="font-bold">Kelompok berdasarkan hasil cek</h4>
               {derived.grouping.groups.map((g) => (
                 <p key={g.id}>
                   {g.label} ·{" "}

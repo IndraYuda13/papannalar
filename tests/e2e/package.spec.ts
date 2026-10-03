@@ -4,6 +4,7 @@ import {
   loginTeacher,
   injectFixture,
   waitForShellCache,
+  chooseTeacherMode,
 } from "../browser/helpers";
 
 test("package cache survives reopen with CAS, freeze and tenant isolation", async ({
@@ -36,7 +37,7 @@ test("teacher prepares and replaces offline package, reloads its cache and sees 
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7P");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
@@ -65,8 +66,8 @@ test("teacher prepares and replaces offline package, reloads its cache and sees 
     page.getByText(/Alat interaktif untuk materi ini belum tersedia/),
   ).toBeVisible();
   await page.reload();
-  await page.getByLabel("Data kelas").selectOption("demo");
-  await expect(page.getByText(/NEEDS_REVIEW.*Versi 2/)).toBeVisible();
+  await chooseTeacherMode(page, "demo");
+  await expect(page.getByText(/Materi percobaan.*Versi 2/)).toBeVisible();
   expect(errors).toEqual([]);
   await mkdir("artifacts/qa/M06", { recursive: true });
   await page.screenshot({
@@ -97,7 +98,7 @@ test("C01 CSV stays local, invalid batch changes nothing, and empty name deletes
     requests.push(request.url() + (request.postData() ?? "")),
   );
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7CSV");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
@@ -144,7 +145,7 @@ test("static Bisik and printable independent tasks work offline", async ({
   const errors: string[] = [];
   page.on("pageerror", () => errors.push("pageerror"));
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7T");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
@@ -156,7 +157,7 @@ test("static Bisik and printable independent tasks work offline", async ({
     .click();
   await expect(page.getByText(/Paket tersimpan lokal/)).toBeVisible();
   await page.reload(); // newly controlled shell can serve lazy PDF chunks offline
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await context.setOffline(true);
   await page.getByLabel("Kode Bisik").selectOption("D1.2");
   await expect(

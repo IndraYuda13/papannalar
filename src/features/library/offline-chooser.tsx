@@ -7,6 +7,7 @@ import { SessionWorkspace } from "./session";
 import { field, panel } from "./client";
 import { StateNotice } from "@/ui/components/studio";
 import { Button } from "@/ui/components/button";
+import Link from "next/link";
 type Detail = { run: LibraryRun; responses: LibraryResponse[] };
 export function OfflineChooser() {
   const { scope, state } = useTeacher(),
@@ -67,6 +68,11 @@ export function OfflineChooser() {
           yang tersimpan dapat dibuka di perangkat ini.
         </StateNotice>
       )}
+      <Button asChild variant="outline">
+        <Link href={`/guru/latihan?mode=${scope.mode}`}>
+          Buka latihan tersimpan
+        </Link>
+      </Button>
     </section>
   );
 }

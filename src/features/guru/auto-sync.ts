@@ -3,10 +3,12 @@ import { useEffect } from "react";
 import type { LocalScope } from "../../local/scope";
 import { synchronize } from "../session/sync-client";
 import { createSyncRepository } from "../../local/sync";
+import { syncAttentionMessage } from "./sync-notice";
 /** Foreground only: bounded retries stored durably; closing the browser stops this loop. */
 export function useAutoSync(
   { ownerId, mode }: LocalScope,
   onStatus: (text: string) => void,
+  onAttention?: (text: string) => void,
 ) {
   useEffect(() => {
     const controller = new AbortController();
@@ -37,10 +39,13 @@ export function useAutoSync(
           .map((e) => e.nextAttempt);
         if (retry.length)
           delay = Math.max(1000, Math.min(...retry) - Date.now());
-        if (!controller.signal.aborted && result.accepted)
-          onStatus(
-            `${result.accepted} sesi diterima server. Nama tetap hanya di perangkat guru.`,
-          );
+        if (!controller.signal.aborted) {
+          onAttention?.(syncAttentionMessage(result.entries));
+          if (result.accepted)
+            onStatus(
+              `${result.accepted} sesi diterima server. Nama tetap hanya di perangkat guru.`,
+            );
+        }
       } catch {
         /* Explicit sync/storage status retains the pending/error state. */
       } finally {
@@ -61,5 +66,5 @@ export function useAutoSync(
       window.removeEventListener("online", resume);
       document.removeEventListener("visibilitychange", resume);
     };
-  }, [ownerId, mode, onStatus]);
+  }, [ownerId, mode, onStatus, onAttention]);
 }

@@ -4,6 +4,7 @@ import {
   loginTeacher,
   injectFixture,
   waitForShellCache,
+  chooseTeacherMode,
 } from "../browser/helpers";
 
 test("IndexedDB v1 migration, CAS, duplicate, reopen, atomic rollback and deletion", async ({
@@ -55,7 +56,7 @@ test("scan review / Ganti / Lewati / manual fallback and offline durable reload"
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7B");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
@@ -115,7 +116,7 @@ test("scan review / Ganti / Lewati / manual fallback and offline durable reload"
   await waitForShellCache(page);
   await context.setOffline(true);
   await page.reload();
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await expect(page.getByTestId("scan-count")).toHaveText(
     "31/32 kartu tersimpan lokal",
   );

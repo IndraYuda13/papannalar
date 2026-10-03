@@ -1,4 +1,4 @@
-import { openBoard } from "../browser/helpers";
+import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { test, expect } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
 import {
@@ -58,7 +58,7 @@ test("OFF02 migration retains old records, quota aborts atomically, eviction is 
   ).toBe(1);
   const evicted = await page.evaluate(() => window.__offlineFixture.evict());
   expect(evicted).toMatchObject({ cycles: 0, packages: 0, evicted: true });
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page
     .getByRole("button", { name: "Periksa kesiapan offline", exact: true })
     .click();
@@ -110,14 +110,14 @@ test("OFF03 a new service worker stays waiting during class and activates only a
   await waitForShellCache(page);
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Beranda", exact: true }),
+    page.getByRole("heading", { name: "Latihan & bantuan AI", exact: true }),
   ).toBeVisible();
   await fixtures(page);
   expect(
     await page.evaluate(() => Boolean(navigator.serviceWorker.controller)),
   ).toBe(true);
   const ids = await page.evaluate(() => window.__syncFixture.initialize());
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.evaluate(async () => {
     // A changed script URL installs the real worker as a new version, without a mock worker.
     await navigator.serviceWorker.register(
@@ -174,7 +174,7 @@ test("OFF03 a new service worker stays waiting during class and activates only a
     )
     .toBe(false);
   await expect(
-    page.getByRole("heading", { name: "Beranda", exact: true }),
+    page.getByRole("heading", { name: "Latihan & bantuan AI", exact: true }),
   ).toBeVisible();
 });
 

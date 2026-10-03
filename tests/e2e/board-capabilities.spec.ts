@@ -1,6 +1,6 @@
 import { test, expect, type Locator } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
-import { loginTeacher } from "../browser/helpers";
+import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
 import { snapshotSchema } from "../../src/contracts/presentation";
 import {
   remoteStatusSchema,
@@ -269,7 +269,7 @@ test("REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot
   test.setTimeout(120000);
   const errors: string[] = [];
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7Q");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();

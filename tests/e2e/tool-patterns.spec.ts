@@ -1,4 +1,4 @@
-import { openBoard } from "../browser/helpers";
+import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 import {
@@ -14,7 +14,7 @@ test("Seven patterns use actual paired board, distinct examples, repairs, unique
   test.setTimeout(120000);
   const errors: string[] = [];
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7P");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();

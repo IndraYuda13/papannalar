@@ -2,17 +2,25 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { Home, UsersRound, Layers, ClipboardCheck, LogOut } from "lucide-react";
+import {
+  Home,
+  UsersRound,
+  Layers,
+  ClipboardCheck,
+  LogOut,
+  Sparkles,
+} from "lucide-react";
 import { Brand } from "@/ui/components/brand";
 import { TeacherProvider } from "./app-context";
 import { logoutTeacher } from "@/features/classroom/logout-transport";
 import { MotionSwap } from "@/ui/components/interactive-motion";
 import { Presentation } from "lucide-react";
 const entries = [
-  ["/guru", "Beranda", Home],
-  ["/guru/kelas", "Kelas", UsersRound],
-  ["/guru/soal", "Soal & Presentasi", Layers],
-  ["/guru/asesmen", "Asesmen & Hasil", ClipboardCheck],
+  ["/guru", "Beranda", "Beranda", Home],
+  ["/guru/kelas", "Kelas", "Kelas", UsersRound],
+  ["/guru/soal", "Soal & Presentasi", "Soal", Layers],
+  ["/guru/latihan", "Latihan & AI", "Latihan & AI", Sparkles],
+  ["/guru/asesmen", "Asesmen & Hasil", "Hasil", ClipboardCheck],
 ] as const;
 export function TeacherNavigation({ children }: { children: ReactNode }) {
   const pathname = usePathname(),
@@ -27,7 +35,7 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
       router.refresh();
     }
   }
-  // Existing adaptive/rehearsal workspace remains an explicit secondary route.
+  // Adaptive activities retain their offline repository and access boundaries.
   const adaptive = pathname === "/guru/latihan";
   return (
     <div
@@ -52,9 +60,9 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
         </div>
         <nav
           aria-label="Menu utama"
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-pn-ink-400/30 bg-card pb-[env(safe-area-inset-bottom)] md:static md:mx-3 md:flex md:flex-col md:gap-2 md:border-0"
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-pn-ink-400/30 bg-card pb-[env(safe-area-inset-bottom)] md:static md:mx-3 md:flex md:flex-col md:gap-2 md:border-0"
         >
-          {entries.map(([href, label, Icon]) => {
+          {entries.map(([href, label, mobileLabel, Icon]) => {
             const active =
               href === "/guru"
                 ? pathname === href
@@ -66,13 +74,15 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
                 key={href}
                 href={href}
                 prefetch={false}
+                aria-label={label}
                 aria-current={active ? "page" : undefined}
                 className={`flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-input px-1 py-2 text-center text-[11px] font-semibold md:flex-row md:justify-start md:gap-3 md:px-3 md:text-sm ${active ? "bg-pn-teal-100 text-primary" : "text-muted-foreground"}`}
               >
                 <span className="nav-icon" aria-hidden>
                   <Icon size={22} strokeWidth={1.8} />
                 </span>
-                {label}
+                <span className="md:hidden">{mobileLabel}</span>
+                <span className="hidden md:inline">{label}</span>
               </Link>
             );
           })}

@@ -1687,3 +1687,108 @@ html:has([data-light-display="true"]) {
 .board-menu:not([open]) > :not(summary) {
   display: none;
 }
+
+/* Teacher activities disclose one task at a time without clearing its state. */
+.teacher-class-picker {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--pn-ink-400);
+  border-radius: 12px;
+  background: var(--card);
+}
+.teacher-class-picker [aria-pressed="true"] {
+  border-color: var(--primary);
+  background: var(--pn-teal-100);
+}
+.teacher-disclosure {
+  min-width: 0;
+  scroll-margin-top: 24px;
+  border: 1px solid color-mix(in srgb, var(--pn-ink-400) 45%, transparent);
+  border-radius: 12px;
+  background: var(--card);
+}
+.teacher-disclosure > summary {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+}
+.teacher-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.teacher-disclosure > summary > svg {
+  flex-shrink: 0;
+  transition: transform 180ms;
+}
+.teacher-disclosure[open] > summary > svg {
+  transform: rotate(180deg);
+}
+.teacher-disclosure[open] > summary {
+  color: var(--primary);
+}
+.teacher-disclosure:not([open]) > :not(summary) {
+  display: none;
+}
+.teacher-disclosure-body {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+  padding: 0 20px 20px;
+}
+.teacher-disclosure-body > section {
+  min-width: 0;
+}
+.teacher-ai-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--pn-teal-100);
+  font-size: 14px;
+}
+.teacher-ai-status > svg {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+@media (max-width: 767px) {
+  .teacher-class-picker {
+    padding: 16px;
+  }
+  .teacher-disclosure > summary {
+    padding: 14px 16px;
+  }
+  .teacher-disclosure-body {
+    padding-inline: 12px;
+  }
+  .teacher-disclosure-body [data-slot="button"] {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .teacher-disclosure > summary > svg {
+    transition: none;
+  }
+}
+.visual-preferences[data-reduced-motion="true"]
+  .teacher-disclosure
+  > summary
+  > svg,
+.visual-preferences[data-light-display="true"]
+  .teacher-disclosure
+  > summary
+  > svg {
+  transition: none;
+}
+
+.teacher-disclosure[data-motion-off="true"] > summary > svg {
+  transition: none;
+}

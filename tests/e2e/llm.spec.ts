@@ -1,7 +1,7 @@
 import { openBoard } from "../browser/helpers";
 import { expect, test } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
-import { loginTeacher } from "../browser/helpers";
+import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
 import { buildPackage } from "../../src/core/package/build";
 import { toPackageRecipe } from "../../src/contracts/sync-package";
 test.use({ trace: "off" });
@@ -24,7 +24,7 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7V");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
@@ -97,11 +97,12 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
   await expect(bisik).toBeVisible();
   const start = Date.now();
   await bisik
-    .getByRole("button", { name: "Sesuaikan saran", exact: true })
+    .getByRole("button", { name: "Minta saran AI", exact: true })
     .click();
   await expect(bisik).toContainText("AI belum tersedia untuk kartu ini");
   const bisikMs = Date.now() - start;
   const beforePreview = llmCalls;
+  await bisik.getByText("Tanya tentang cara mengajar", { exact: true }).click();
   await bisik
     .getByLabel("Pertanyaan Bisik lokal", { exact: true })
     .fill(`${canary} bingung mengurangkan.`);
@@ -178,7 +179,7 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
   await bisik.screenshot({ path: "artifacts/qa/M13/bisik-controls.png" });
   await page.context().setOffline(true);
   await bisik
-    .getByRole("button", { name: "Sesuaikan saran", exact: true })
+    .getByRole("button", { name: "Minta saran AI", exact: true })
     .click();
   await expect(bisik).toContainText(
     "Tanpa internet: menampilkan kartu strategi yang tersimpan",

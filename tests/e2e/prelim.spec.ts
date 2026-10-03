@@ -1,12 +1,12 @@
 import { openBoard } from "../browser/helpers";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
-import { loginTeacher } from "../browser/helpers";
+import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
 import { snapshotSchema } from "../../src/contracts/presentation";
 
 async function start7b(page: Page) {
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7B");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();

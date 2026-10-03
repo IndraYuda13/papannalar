@@ -9,6 +9,7 @@ import type { LocalScope } from "@/local/scope";
 import { Button } from "@/ui/components/button";
 import { applyStory } from "@/content/contexts/story-frames";
 import { promptText } from "@/content/templates/format";
+import { aiFallbackMessage } from "@/features/guru/ai-messages";
 export function EnrichmentControls({
   pkg,
   scope,
@@ -58,7 +59,7 @@ export function EnrichmentControls({
       setMessage(
         data.status === "ai"
           ? "Pratinjau cerita AI. Periksa makna sebelum menerapkan."
-          : "Cerita AI belum tersedia. Soal templat tetap siap; konten menunggu review.",
+          : `Cerita AI belum tersedia. ${aiFallbackMessage(data.reason)} Latihan tetap bisa dibaca tanpa cerita AI.`,
       );
     } catch {
       setMessage(
@@ -86,7 +87,7 @@ export function EnrichmentControls({
       onUpdated(next);
       setResult(undefined);
       setMessage(
-        "Cerita terverifikasi tersimpan lokal. Angka dan kunci tetap dari kode.",
+        "Cerita tersimpan di perangkat. Angka dan jawaban soal tetap sama.",
       );
     } catch {
       setMessage("Paket sudah berubah atau beku. Cerita tidak diterapkan.");

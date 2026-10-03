@@ -40,3 +40,5 @@ artifacts/qa/ui-polish/*
 !artifacts/qa/ui-polish/repair-browser-command.json
 
 !artifacts/qa/ui-ai-v2/session-ux-v3.json
+
+!artifacts/qa/ui-ai-v2/teacher-flow-v4.json

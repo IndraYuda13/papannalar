@@ -1,4 +1,4 @@
-import { openBoard } from "../browser/helpers";
+import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { expect, test } from "@playwright/test";
 import {
   loginTeacher,
@@ -12,7 +12,7 @@ test("teacher pairs board, public groups render and number line/lift respond loc
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7B");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();

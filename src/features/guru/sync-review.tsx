@@ -115,7 +115,7 @@ export function SyncReviewControls({
           ))}
           {!item.review.compatible && (
             <p>
-              Binding atau paket sudah berbeda. Gunakan versi server; jawaban
+              Sesi atau materi sudah berbeda. Gunakan versi server; jawaban
               lokal tetap dalam arsip.
             </p>
           )}

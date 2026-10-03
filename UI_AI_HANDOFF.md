@@ -1,3 +1,96 @@
+<!-- BEGIN TEACHER_FLOW_V4 -->
+
+## Perbaikan alur guru dan bantuan AI — 3 Oktober 2026 (WIB)
+
+Permintaan terbaru pengguna: latihan harus mudah ditemukan, beranda tidak
+menumpuk panel perangkat, dan fungsi AI harus jelas. Baseline `6a637a9`.
+Implementasi dan verifikasi software lokal selesai. Tidak ada deploy atau
+migration DB hosted. Bagian di bawah marker ini adalah laporan historis.
+
+| Halaman                         | Sebelum                                                                                   | Sesudah                                                                                                                                                                 |
+| ------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seluruh menu guru               | Latihan tersembunyi di pengaturan kelas; empat menu                                       | Menu **Latihan & AI** terlihat di desktop dan navigasi bawah HP; label HP ringkas                                                                                       |
+| `/guru`                         | Daftar sesi aktif tak terbatas mendahului kegiatan; AI sulit ditemukan                    | Tiga sesi terbaru dengan tanggal, sisanya dibuka bila perlu; kartu **Buka latihan & AI** menjelaskan tujuan                                                             |
+| `/guru/latihan`                 | Judul Beranda, panel sync/offline di atas kegiatan, akun contoh membuka mode pilot kosong | Judul sesuai tugas; kelas contoh dipilih otomatis; persiapan dan kegiatan berurutan; pengelolaan kelas/perangkat tertutup                                               |
+| Bantuan AI                      | Tombol tak punya konteks, kode kesulitan mentah, fallback tidak menjelaskan penyebab      | **Buat cerita untuk soal** dan **Cari cara menjelaskan**; pilihan judul kesulitan; status konfigurasi dan alasan fallback jelas; tanya tambahan opsional                |
+| `/guru/kelas/[id]`              | Pintu latihan berada dalam pengaturan                                                     | Aksi **Siapkan latihan & AI** terlihat, membawa kelas dan mode yang dipilih                                                                                             |
+| `/guru/mulai`                   | Form kosong tanpa kelas; pilihan sumber lama bisa tetap terpilih                          | Keadaan kosong mengarah ke tambah kelas; berpindah sumber mengosongkan materi sebelumnya                                                                                |
+| `/guru/asesmen`                 | Pesan kosong tanpa langkah berikutnya                                                     | Keadaan kosong mengarah ke mulai cek pemahaman                                                                                                                          |
+| Offline, cache dan sinkronisasi | Informasi rutin selalu tampil; URL konteks tidak punya fallback offline                   | Pengaturan tersedia di **Penyimpanan & internet**; peringatan penting tetap terlihat; mode/kelas kembali dari cache perangkat; query aman menunjuk shell publik kanonis |
+
+Cara mencoba: **Coba dengan data contoh → Beranda → Buka latihan & AI →
+Siapkan Paket Sesi → Coba bantuan AI → Pratinjau cerita AI**. Untuk saran
+mengajar, pilih kesulitan pada kartu; bantuan AI yang memakai konteks sesi ada
+saat rotasi berjalan. Latihan tidak mengarang sesi agar bisa melewati ledger.
+Status konfigurasi bukan bukti provider telah diuji. Kartu saran/soal tetap
+tersedia bila AI nonaktif. Review materi, privasi, anggaran, token dan RLS
+berlaku sebagaimana konfigurasi AI di bagian historis handoff ini.
+
+Targeted produksi: **17/17 E2E PASS**, satu worker/retry0, build
+`Quvw_Z5I4UI1eyh2trzdf` (1,6 menit). Unit kebijakan cache **17/17 PASS**.
+Setelah targeted, copy topik, indikator offline dan ringkasan tiga sesi
+beranda ditambahkan; semua perubahan dicakup verifikasi akhir berikutnya.
+Log `/workspace/.papannalar-cloud/logs/teacher-flow-targeted-prod.log`.
+Test FLOW03 awal salah memakai label DOM yang memuat nomor langkah; selector
+kemudian memakai nama combobox yang diakses pengguna. Dua attempt development
+3/4 dan0/1 gagal pada selector tersebut; tidak diklaim PASS.
+
+Attempt verify awal berhenti pada unit500seed:1086PASS/1timeout5s.
+Diagnostic single-worker19/19PASS (500seed1536ms, tanpa coverage).
+Attempt `VITEST_MAX_WORKERS=1 pnpm verify` meluluskan **1087/1087 unit**,
+**9/9 integrasi AI** dan seluruh SQL/RLS; build juga lulus. Browser dihentikan
+setelah18PASS/4FAIL/1interrupted/111NOT_RUN untuk memperbaiki ekspektasi UI lama.
+Targeted auth/offline setelah perbaikan **10/10 PASS** (39,1s). Whitelist
+penyimpanan tetap membatasi identitas/mode dan pilihan open/closed; pemeriksaan
+HttpOnly, CSRF, nama lokal dan akses antar akun tetap berlaku. Assertions,
+sample500,timeout unit dan coverage threshold tetap sama.
+
+Serial browser berikutnya dihentikan setelah69PASS/0FAIL/1interrupted/64NOT_RUN
+untuk memperbaiki hasil audit: konflik/login baru dari sinkronisasi otomatis
+harus memunculkan peringatan di luar pengaturan tertutup. Callback pemberitahuan
+ditambahkan tanpa mengubah queue, retry atau transport. Dua regresi baru
+memastikan jawaban tetap utuh dan tombol recovery membuka pengaturan.
+
+Kandidat `1lvMZRAM-FPLsYLD6GOcJ`: **format/types/lint/build PASS**.
+Full136E2E serial memberi **131PASS/5FAIL** (18m33,971s). Empat gagal memakai
+UI lama:4menu pada3viewport dan pesan asesmen kosong. Satu fresh-class mencatat
+board HTTP403 pada assertion konsol. Ulang lima kasus memberi **5/5 PASS**
+(1,9 menit); assertion konsol tetap ketat dan diagnostic endpoint ditambahkan.
+403 tidak terulang, tetapi penyebabnya belum dibuktikan. Tidak ada suppression,
+pengurangan skenario, perubahan timeout atau klaim full-run136/136PASS.
+
+Semua **136 skenario unik tercakup (131+5)** pada aplikasi/build yang sama.
+Hash membuktikan508/511input utuh; hanya tiga file tes browser berubah setelah
+full. Final command serial exit0:
+
+```bash
+pnpm format:check && pnpm typecheck && pnpm lint && pnpm exec playwright test tests/e2e/freshclass.spec.ts tests/e2e/ui-polish-editor.spec.ts tests/e2e/video-library.spec.ts --grep 'E2E02|Polish T01/T05/T06|U08-U13' --reporter=list
+```
+
+Unit1087, integrasi9 dan SQL/RLS yang telah PASS pada verify tidak diduplikasi.
+Input unit/integrasi tetap identik; perubahan kemudian hanya UI notification
+dan browser checks. Source final SHA256
+`e9cc3fc34a47ef39c8c0ae853328d6214a41314a86ce9ca5fe12d16f75695d4f` (511file).
+Log full `/workspace/.papannalar-cloud/logs/teacher-flow-final-candidate.log`;
+log regresi `/workspace/.papannalar-cloud/logs/teacher-flow-final-repair.log`.
+
+Bukti aktual: [teacher-flow-v4.json](artifacts/qa/ui-ai-v2/teacher-flow-v4.json).
+Audit produksi12route/viewport390/1366 plus2captureAI: **overflow0/pageerror0**.
+Screenshot diperiksa langsung, memakai kelas contoh dan tetap excluded; hasil
+browser bukan studi pengguna/hardware. Core matematika, konten, kontrak API,
+auth/RLS,38migration dan aset Blender existing utuh. Tidak ada dependency/aset
+baru; biaya APIUSD0, biaya infrastruktur cloud tidak diukur. Provider native
+OpenAI/Anthropic PASS pada fixture HTTP/ledger lokal; live NOT_RUN.
+
+Jalankan dari cloud: `source /workspace/.papannalar-cloud/activate.sh`,
+`pnpm build`, lalu `pnpm video`; buka `http://127.0.0.1:3100/masuk`.
+Launcher memakai PostgreSQL lokal dan Auth/transport fixture, bukan hosted.
+`pnpm video:dev` tersedia untuk pengembangan. Untuk backend Anda, ikuti bagian
+konfigurasi existing di bawah; credential/provider live/HTTPS/perangkat nyata
+belum diuji. Aktifkan LLM setelah aktivasi cloud, karena helper validasi
+menetapkan `LLM_ENABLED=false`.
+<!-- END TEACHER_FLOW_V4 -->
+
 # PapanNalar UI + AI v2 — handoff cloud
 
 Implementasi U0–U5 selesai pada repository existing untuk seluruh acceptance

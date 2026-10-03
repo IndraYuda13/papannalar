@@ -55,7 +55,10 @@ export async function openBoard(
     .toBe(true);
 }
 
-export async function loginTeacher(page: Page) {
+export async function loginTeacher(
+  page: Page,
+  options: { guided?: boolean } = {},
+) {
   const email = `teacher-${crypto.randomUUID()}@qa.invalid`;
   await page.goto("/masuk");
   await page.getByLabel("Email guru").fill(email);
@@ -70,11 +73,40 @@ export async function loginTeacher(page: Page) {
   const link: { url: string } = await response.json();
   await page.goto(link.url);
   await expect(page).toHaveURL(/\/guru$/);
-  // Adaptive baseline remains on its explicit secondary route after V1 navigation split.
-  await page.goto("/guru/latihan");
+  await page
+    .getByRole("navigation", { name: "Menu utama" })
+    .getByRole("link", { name: "Latihan & AI", exact: true })
+    .click();
   await expect(
     page.getByRole("button", { name: "Buat kelas", exact: true }),
   ).toBeVisible();
+  if (!options.guided) await openTeacherSections(page);
+}
+
+// Functional regression scenarios explicitly open the tasks they exercise.
+// Dedicated teacher-flow tests keep the beginner's collapsed first-use view.
+export async function openTeacherSections(page: Page) {
+  for (const id of [
+    "teacher-prepare",
+    "teacher-teach",
+    "teacher-rehearsal",
+    "teacher-ai",
+    "teacher-oral",
+    "teacher-class",
+    "teacher-device",
+    "teacher-print",
+  ]) {
+    const section = page.locator(`details#${id}`);
+    if (!((await section.getAttribute("open")) !== null))
+      await section.locator(":scope > summary").click();
+    await expect(section).toHaveAttribute("open", "");
+  }
+}
+export async function chooseTeacherMode(page: Page, mode: "demo" | "pilot") {
+  await page.getByLabel("Gunakan kelas").selectOption(mode);
+  await expect(page.getByLabel("Gunakan kelas")).toBeEnabled();
+  await expect(page.getByLabel("Gunakan kelas")).toHaveValue(mode);
+  await openTeacherSections(page);
 }
 
 export async function waitForShellCache(page: Page) {

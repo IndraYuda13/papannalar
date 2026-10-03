@@ -4,6 +4,7 @@ import {
   loginTeacher,
   injectFixture,
   waitForShellCache,
+  chooseTeacherMode,
 } from "../browser/helpers";
 test("oral CAS/frozen baseline/reopen/undo/skip/resume use real IndexedDB", async ({
   page,
@@ -37,7 +38,7 @@ test("oral grade 2 goes down on first wrong, skips without evidence, and resumes
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("2L");
   await page.getByLabel("Tingkat kelas", { exact: true }).fill("2");
@@ -57,7 +58,7 @@ test("oral grade 2 goes down on first wrong, skips without evidence, and resumes
   await expect(oral).toContainText("Dilewati. Tidak ada observasi");
   await expect(oral).toContainText("1 jawaban lisan tersimpan");
   await page.reload();
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await expect(oral).toContainText("Dilewati. Tidak ada observasi");
   await oral
     .getByRole("button", { name: "Lanjutkan cek lisan", exact: true })

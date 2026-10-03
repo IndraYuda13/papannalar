@@ -2637,3 +2637,107 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
   deployment/migration DB hosted/paid API NOT_RUN. Next exact: pengguna dapat
   membuka data contoh, lalu mengikuti konfigurasi/profile/review AI pada handoff
   ketika siap. Uji live/hosted tetap memerlukan izin yang sesuai.
+
+
+### 9.60 Audit alur guru dan bantuan AI — DONE software lokal (3 Oktober 2026, WIB)
+
+- Instruksi pengguna mengotorisasi audit/perbaikan langsung dan push, tanpa
+  konfirmasi detail visual. Latihan tersembunyi, judul Beranda ganda, mode
+  pilot pada akun contoh, panel teknis dan AI yang tidak jelas adalah masalah
+  aktual. Audit Chromium390/1366 mencakup beranda, latihan, kelas, soal, mulai
+  mengajar dan asesmen. Beranda contoh mempunyai banyak sesi aktif existing;
+  sesi tidak dihapus, hanya tiga terbaru terlihat dahulu.
+- Menu5tugas, kartu latihan di home, jalur kelas membawa konteks; contoh
+  langsung memakai kelas demo. Persiapan/kegiatan/AI/lisan terbuka sesuai
+  kebutuhan. Menutup bagian tidak unmount draft/sesi. State kegiatan terisolasi
+  per kelas/mode; pilihan tampilan disimpan per guru/mode. Respons async lama
+  tidak mengembalikan nama setelah lock.
+- Kartu saran memakai judul kesulitan; peran cerita AI dan bantuan sesi jelas.
+  Status/fallback tidak mengaku ready/live atau membuat session ID fiktif.
+  Preview privasi, explicit apply, review, native adapters/ledger tetap utuh.
+  Teks bebas tambahan tertutup; endpoint/model/key tetap konfigurasi server.
+- Device controls tetap mounted untuk auto-sync/update guard. Ringkasan rutin
+  tersembunyi; quota/eviction/conflict penting punya alert dan pintu ke recovery.
+  Cache mode/kelas memakai schema/access existing; classDetail cache dihapus
+  saat DELETE kelas sukses. Query mode/UUID valid hanya mengambil shell publik
+  kanonis, tidak menaruh URL/private HTML/RSC/API pada CacheStorage.
+- Format/types/lint PASS pada batch cache;17unit cache PASS. Targeted produksi
+ 17/17 E2E PASS1,6menit,1worker/retry0: UI pemula360/390, real local RLS,
+  privasi nama/raw pertanyaan, fallback, draf/CAS, CSV, PDF offline, eviction,
+  update safety, restore/takeover/conflict dan idempotency. Test FLOW03 awal
+ 3/4 lalu0/1 dev gagal selector label DOM bernomor, diperbaiki ke combobox
+  accessible. Deadline assertion tidak diperlemah; targeted produksi lulus.
+- Build targeted `Quvw_Z5I4UI1eyh2trzdf`; setelahnya ringkasan3sesi/copy topik
+  dan indikator offline ditambahkan. Kandidat final berikutnya memakai satu
+  `pnpm verify` serial; tidak menjalankan full suite terpisah lagi.
+- Sebelum verify final: core/content/contracts/server/auth/review/38migration,
+  lockfile/aset unchanged. Dokumen00–07/jurnal lama dipertahankan. Tidak ada
+  paid/liveAPI, hostedmigration/deploy; USD0, tidak menambah aset/dependency.
+  Provider live/HTTPS/hardware/studi guru adalah gap eksternal; bukan blocker
+  implementasi yang dipakai sebagai alasan berhenti. Next exact: final verify,
+  inspect build/screenshots/evidence, commit dan fast-forward push sesuai izin.
+
+- Attempt verify awal: format/type/lint PASS, unit1086 PASS/1FAIL pada test
+ 500seed (5019ms melewati default5000ms),69file PASS/1FAIL; exit1,
+ integration/build/E2E NOT_RUN pada attempt itu. Core/test package byte-identical.
+ Diagnostic single-worker tanpa coverage19/19 PASS,500seed1536ms,7,41s total.
+ Runtime Vitest5 mendukung VITEST_MAX_WORKERS; kandidat akhir memakai1worker
+ agar coverage tidak bersaing dengan test OMR/domain lain. Tidak mengubah
+ assertion,500sample,timeout,coverage threshold atau config default repositori.
+ Hash510input termasuk3config runner adalah e023cf05bfc7b6d7ad583f6903c1dc988edb5ae1891c5ff36d36a6d5291793c5;
+ daftar507source sebelumnya sama, perubahan hash hanya penambahan manifest config.
+
+- Attempt `VITEST_MAX_WORKERS=1 pnpm verify`: format/type/lint, unit1087/70file
+ PASS (coverage92,44/87,47/96,26/93,44), SQL/RLS dan integration9/1file PASS,
+ build PASS. Browser dihentikan exit130 setelah18PASS/4FAIL/1interrupted,
+ 111NOT_RUN (JSON skipped112 termasuk interrupted). Empat kegagalan adalah
+ ekspektasi UI lama: tombol buat kelas harus aktif saat offline, storage hanya
+ controller UUID, judul kosong lama, link papan lama. Assertion diganti mengikuti
+ UI yang benar; whitelist storage tetap ketat pada teacher/mode dan boolean.
+ Cache/auth ownership, HTTPOnly/CSRF, nama canary dan API404 tetap diuji.
+- Targeted koreksi `auth-ownership` + `assessments`:10/10PASS,39,1s, retry0.
+ Per-file hash membuktikan508/510 input identik terhadap suite unit/integration
+ yang sudah lulus; dua perubahan hanya browser helper dan assertion auth UI.
+ Kandidat a02c160ca0ce09c276905657be254d5d958f27ea1089a4059fced04cf17cd58f
+ (510file) menjalankan format/type/lint/build + semua134E2E secara serial.
+ Unit/SQL/integration yang sudah tercakup verify tidak diduplikasi.
+
+- Serial browser berikutnya dihentikan untuk hasil audit pemberitahuan, bukan
+ karena test gagal:69PASS/0FAIL/1interrupted/64NOT_RUN, exit130,13,6menit.
+ Konflik/login yang baru muncul dari auto-sync hanya mengubah panel tertutup.
+ Callback UI kini menyampaikan peringatan penting pada DeviceControls untuk
+ proses otomatis maupun manual; retry, transport, queue, schema dan data utuh.
+ Dua regresi baru memakai queue IndexedDB nyata dengan HTTP401/409 sintetis,
+ tanpa klik sinkronisasi manual: notice terlihat, detail tetap tertutup sampai
+ tombol recovery diklik, mutation/event/outbox tetap identik. Unit/integration
+ tidak mengimpor hook/komponen UI yang diubah sesudah suite lulus.
+
+- Build kandidat final `1lvMZRAM-FPLsYLD6GOcJ`; format/type/lint/build PASS.
+ Full browser136case serial:131PASS/5FAIL,18m33,971s, retry0/skip0.
+ Empat gagal memakai ekspektasi UI lama (jumlah menu4 di3viewport dan copy
+ asesmen kosong). Satu fresh-class gagal assertion konsol akibat board HTTP403;
+ seluruh langkah fungsional selesai. Diagnostic endpoint ditambahkan, assertion
+ konsol tetap strict. Ulang5case serial PASS5/5,1,9menit;403 tidak terulang.
+ Tidak mengklaim transient403 sudah didiagnosis/diperbaiki di kode produksi.
+- Kandidat aplikasi/build tidak berubah setelah full:508/511input byte-identical,
+ tiga perubahan hanya ekspektasi/instrumentasi browser. Bukti memetakan tepat5
+ case gagal ke5case PASS;136skenario unik tercakup131+5, tanpa menduplikasi full
+ suite. Final format/type/lint +5regresi exit0. `pnpm verify`/full E2E earlier
+ bukan full PASS; riwayat gagal/interrupted tetap dicatat pada receipt/handoff.
+- Source final e9cc3fc34a47ef39c8c0ae853328d6214a41314a86ce9ca5fe12d16f75695d4f,
+ 511file. Unit1087, integration9, SQL/RLS dipakai dari verify sukses per tahap;
+ seluruh input yang diimpor unit/integration identik. Perbandingan502/510file
+ utuh; delapan perubahan UI notification/browser dan satu helper UI baru.
+- Audit produksi akhir12route/viewport (390/1366) +2capture AI PASS: overflow0,
+ pageerror0; latihan selalu7B/demode, persiapan terbuka, teknis tertutup.
+ Screenshot diperiksa langsung. Beranda HP2522px vs sebelum12352px; dataset
+ contoh bertambah dari test, jadi bukan perbandingan dataset beku/studi guru.
+ 3sesi terlihat dan108older tersedia tanpa dihapus. Audit/hasil aman pada
+ `artifacts/qa/ui-ai-v2/teacher-flow-v4.json`; screenshot/raw log excluded.
+- Preservation final PASS: core/content/contracts/server,38migration/SQLtests,
+ lockfile,3GLB/poster/.blend,8dokumen original dan prefix jurnal/handoff lama.
+ Biaya APIUSD0; biaya cloud tidak diukur. Live provider/perangkat/HTTPS NOT_RUN;
+ observed403 tidak direproduksi pada regresi. Tidak ada deploy/hostedmigration.
+ Demo build final berjalan port3100 memakai DB existing + Auth/transport fixture.
+ Next exact action: commit hasil terverifikasi dan push fast-forward main sesuai
+ instruksi pengguna; catat SHA remote sesudah operasi aktual.

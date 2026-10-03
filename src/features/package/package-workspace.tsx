@@ -13,8 +13,7 @@ import { loadPackagePlacements } from "@/features/oral/package-placement";
 import { Button } from "@/ui/components/button";
 import { MathPrompt } from "@/ui/components/math-prompt";
 import type { GeneratedQuestion } from "@/content/templates/types";
-import { StaticBisik } from "@/features/bisik/static-card";
-import { EnrichmentControls } from "./enrichment-controls";
+import { getStep } from "@/content/ladder/registry";
 
 const field = "min-h-12 rounded-input border border-pn-ink-400 bg-white px-3";
 const freshSeed = () => crypto.getRandomValues(new Uint32Array(1))[0];
@@ -23,13 +22,16 @@ export function PackageWorkspace({
   mode,
   classroom,
   students = [],
+  pkg,
+  onPackageChange: setPkg,
 }: {
   ownerId: string;
   mode: "demo" | "pilot";
   classroom?: ClassDto;
   students?: readonly StudentDto[];
+  pkg?: TeacherPackage;
+  onPackageChange: (value: TeacherPackage | undefined) => void;
 }) {
-  const [pkg, setPkg] = useState<TeacherPackage>();
   const [variant, setVariant] = useState<PackageVariant>(
     classroom && classroom.grade <= 3 ? "oral" : "initial",
   );
@@ -57,7 +59,7 @@ export function PackageWorkspace({
     return () => {
       active = false;
     };
-  }, [ownerId, mode, classroom?.id]);
+  }, [ownerId, mode, classroom?.id, setPkg]);
   async function prepare() {
     if (!classroom) return;
     setBusy(true);
@@ -197,7 +199,7 @@ export function PackageWorkspace({
       aria-label="Paket Sesi"
       className="space-y-4 rounded-kartu border border-primary/30 bg-white p-4"
     >
-      <h3 className="text-xl font-bold">Paket Sesi</h3>
+      <h3 className="text-xl font-bold">Materi latihan</h3>
       <p className="text-sm">
         Siapkan sebelum kelas. Soal, tugas, petunjuk dan kartu keluar tersedia
         offline.
@@ -230,17 +232,10 @@ export function PackageWorkspace({
       {pkg && (
         <>
           <p className="rounded-input bg-pn-amber-100 p-3">
-            Draft · NEEDS_REVIEW. Belum disahkan untuk pilot. Versi{" "}
+            Materi percobaan · belum disahkan untuk kelas sungguhan. Versi{" "}
             {pkg.revision}
             {pkg.frozen ? " · terkunci" : ""}.
           </p>
-          <EnrichmentControls
-            key={`${pkg.id}:${pkg.revision}`}
-            pkg={pkg}
-            scope={{ ownerId, mode }}
-            disabled={busy}
-            onUpdated={setPkg}
-          />
           <h4 className="font-bold">Pembuka Bermakna</h4>
           <p>{pkg.opening.prompt}</p>
           <p>Lanjutan: {pkg.opening.followup}</p>
@@ -269,7 +264,7 @@ export function PackageWorkspace({
             >
               {pkg.activities.map((a) => (
                 <option key={a.stepId} value={a.stepId}>
-                  {a.stepId} ·{" "}
+                  {getStep(a.stepId).label} ·{" "}
                   {a.interactiveSupport === "unavailable"
                     ? "alat belum tersedia"
                     : "alat tersedia"}
@@ -288,8 +283,8 @@ export function PackageWorkspace({
               </Button>
               {activity.interactiveSupport === "unavailable" && (
                 <p role="note">
-                  Alat interaktif untuk materi ini belum tersedia (K01). Soal
-                  dapat dipratinjau; cakupan interaktif belum lengkap.
+                  Alat interaktif untuk materi ini belum tersedia. Soal dapat
+                  dipratinjau; cakupan interaktif belum lengkap.
                 </p>
               )}
               <details>
@@ -322,7 +317,6 @@ export function PackageWorkspace({
                     .join(" · ")}
                 </p>
               </details>
-              <StaticBisik />
             </>
           )}
         </>

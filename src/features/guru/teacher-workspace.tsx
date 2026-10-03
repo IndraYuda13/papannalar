@@ -1,5 +1,13 @@
 "use client";
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import Link from "next/link";
+import { Check, School } from "lucide-react";
 import {
   classDetailSchema,
   classListSchema,
@@ -18,15 +26,16 @@ import {
 } from "@/local/access";
 import { readTeacherStudentView } from "./student-view";
 import { Button } from "@/ui/components/button";
-import { SessionWorkspace } from "@/features/session/session-workspace";
-import { CycleWorkspace } from "@/features/session/cycle-workspace";
-import { PackageWorkspace } from "@/features/package/package-workspace";
 import { LocalRoster } from "./local-roster";
-import { OralWorkspace } from "./oral-workspace";
-import { SyncControls } from "./sync-controls";
 import { purgeDeletedClass } from "@/local/delete-class";
-import { StorageStatus } from "./storage-status";
 import { logoutTeacher } from "@/features/classroom/logout-transport";
+import { libraryCall } from "@/features/library/client";
+import { libraryStateSchema } from "@/contracts/library";
+import { ActivityDisclosure } from "./activity-disclosure";
+import { DeviceControls } from "./device-controls";
+import { PracticeActivities } from "./practice-activities";
+import { libraryCache, removeLibraryCache } from "@/local/library";
+import type { LocalScope } from "@/local/scope";
 
 const inputClass =
   "mt-1 min-h-12 w-full rounded-input border border-pn-ink-400 bg-white px-3 font-normal";
@@ -56,12 +65,79 @@ export function TeacherWorkspace() {
   const [labels, setLabels] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [sample, setSample] = useState(false);
+  const [offline, setOffline] = useState(false);
+  const accessOwner = useRef<string>(undefined);
+  const requestVersion = useRef(0);
+
+  const showClass = useCallback(
+    async (id: string, activeOwner: string, activeMode: "demo" | "pilot") => {
+      if (!activeOwner) return;
+      const version = ++requestVersion.current;
+      setBusy(true);
+      setMessage("");
+      try {
+        const scope = { ownerId: activeOwner, mode: activeMode };
+        const data = navigator.onLine
+          ? classDetailSchema.parse(await requestJson(`/api/v1/classes/${id}`))
+          : await libraryCache(scope, "classDetail", id);
+        if (!data || data.class.mode !== activeMode)
+          throw new Error("CLASS_UNAVAILABLE");
+        if (navigator.onLine)
+          await libraryCache(scope, "classDetail", id, data).catch(() => {
+            /* Offline availability is reported by device controls. */
+          });
+        const names = createNameRepository({
+          ownerId: activeOwner,
+          mode: data.class.mode,
+        });
+        try {
+          const views = await Promise.all(
+            data.students.map((student) =>
+              readTeacherStudentView(student, names),
+            ),
+          );
+          if (
+            version !== requestVersion.current ||
+            accessOwner.current !== activeOwner
+          )
+            return;
+          setLabels(
+            Object.fromEntries(
+              views.map((view) => [view.studentId, view.label]),
+            ),
+          );
+        } finally {
+          names.close();
+        }
+        if (
+          version !== requestVersion.current ||
+          accessOwner.current !== activeOwner
+        )
+          return;
+        setDetail(data);
+        setAdding(false);
+        const url = new URL(window.location.href);
+        url.searchParams.set("class", data.class.id);
+        url.searchParams.set("mode", data.class.mode);
+        window.history.replaceState(null, "", url);
+      } catch {
+        if (version === requestVersion.current)
+          setMessage("Kelas belum dapat dibuka. Coba lagi saat online.");
+      } finally {
+        if (version === requestVersion.current) setBusy(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     let current = true;
     const channel = new BroadcastChannel("pn-teacher-access");
     channel.onmessage = () => {
       current = false;
+      accessOwner.current = undefined;
+      requestVersion.current++;
       setReady(true);
       setOwnerId(undefined);
       setClasses([]);
@@ -69,12 +145,31 @@ export function TeacherWorkspace() {
       setLabels({});
     };
     async function load() {
+      setOffline(!navigator.onLine);
+      const query = new URL(window.location.href).searchParams;
       try {
         if (!navigator.onLine) {
           const grant = await readLocalAccess();
           if (current) {
             setOwnerId(grant?.id);
-            setMessage("Offline: daftar kelas server belum dimuat.");
+            accessOwner.current = grant?.id;
+            setMode(query.get("mode") === "demo" ? "demo" : "pilot");
+            setMessage(
+              "Tanpa internet: buka latihan yang sudah tersimpan pada perangkat ini.",
+            );
+            if (grant) {
+              const nextMode = query.get("mode") === "demo" ? "demo" : "pilot";
+              const scope: LocalScope = { ownerId: grant.id, mode: nextMode };
+              const cached = await libraryCache(scope, "classes", "index");
+              const state = await libraryCache(scope, "state", "index");
+              if (!current) return;
+              setClasses(cached?.classes ?? []);
+              setSample(state?.sample ?? false);
+              const selected =
+                cached?.classes.find((c) => c.id === query.get("class")) ??
+                cached?.classes[0];
+              if (selected) await showClass(selected.id, grant.id, nextMode);
+            }
           }
         } else {
           if (await hasPendingLogout()) {
@@ -86,12 +181,36 @@ export function TeacherWorkspace() {
             await requestJson("/api/v1/teacher"),
           );
           if (!current || !(await rememberLocalAccess(identity.id))) return;
+          const state = libraryStateSchema.parse(
+            await libraryCall({ action: "list" }),
+          );
+          const nextMode =
+            state.sample || query.get("mode") === "demo" ? "demo" : "pilot";
           const list = classListSchema.parse(
-            await requestJson("/api/v1/classes?mode=pilot"),
+            await requestJson(`/api/v1/classes?mode=${nextMode}`),
           );
           if (current) {
             setOwnerId(identity.id);
+            accessOwner.current = identity.id;
+            setSample(state.sample);
+            setMode(nextMode);
+            const url = new URL(window.location.href);
+            url.searchParams.set("mode", nextMode);
+            window.history.replaceState(null, "", url);
             setClasses(list.classes);
+            await libraryCache(
+              { ownerId: identity.id, mode: nextMode },
+              "classes",
+              "index",
+              list,
+            ).catch(() => {});
+            const selected =
+              list.classes.find((c) => c.id === query.get("class")) ??
+              (state.sample
+                ? list.classes.find((c) => c.label === "7B")
+                : undefined) ??
+              list.classes[0];
+            if (selected) await showClass(selected.id, identity.id, nextMode);
           }
         }
       } catch {
@@ -102,58 +221,45 @@ export function TeacherWorkspace() {
       }
     }
     void load();
+    const online = () => setOffline(false);
+    const disconnected = () => setOffline(true);
+    window.addEventListener("online", online);
+    window.addEventListener("offline", disconnected);
     return () => {
       current = false;
       channel.close();
+      window.removeEventListener("online", online);
+      window.removeEventListener("offline", disconnected);
     };
-  }, []);
+  }, [showClass]);
 
   async function refresh(nextMode = mode) {
     const list = classListSchema.parse(
       await requestJson(`/api/v1/classes?mode=${nextMode}`),
     );
     setClasses(list.classes);
-  }
-  async function showClass(id: string) {
-    if (!ownerId) return;
-    setBusy(true);
-    setMessage("");
-    try {
-      const data = classDetailSchema.parse(
-        await requestJson(`/api/v1/classes/${id}`),
-      );
-      const names = createNameRepository({ ownerId, mode: data.class.mode });
-      try {
-        const views = await Promise.all(
-          data.students.map((student) =>
-            readTeacherStudentView(student, names),
-          ),
-        );
-        setLabels(
-          Object.fromEntries(views.map((view) => [view.studentId, view.label])),
-        );
-      } finally {
-        names.close();
-      }
-      setDetail(data);
-      setAdding(false);
-    } catch {
-      setMessage("Kelas belum dapat dibuka. Coba lagi saat online.");
-    } finally {
-      setBusy(false);
-    }
+    if (ownerId)
+      await libraryCache(
+        { ownerId, mode: nextMode },
+        "classes",
+        "index",
+        list,
+      ).catch(() => {});
+    return list.classes;
   }
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!ownerId) return;
     setBusy(true);
     setMessage("");
     const form = new FormData(event.currentTarget);
+    const id = crypto.randomUUID();
     try {
       await requestJson(
         "/api/v1/classes",
         "POST",
         serializeCreateClass({
-          id: crypto.randomUUID(),
+          id,
           label: String(form.get("label")),
           grade: Number(form.get("grade")),
           count: Number(form.get("count")),
@@ -161,6 +267,7 @@ export function TeacherWorkspace() {
         }),
       );
       await refresh();
+      await showClass(id, ownerId, mode);
       setAdding(false);
     } catch {
       setMessage("Kelas belum tersimpan. Periksa isian dan sambungan.");
@@ -170,7 +277,7 @@ export function TeacherWorkspace() {
   }
   async function update(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!detail) return;
+    if (!detail || !ownerId) return;
     const form = new FormData(event.currentTarget);
     setBusy(true);
     try {
@@ -184,7 +291,7 @@ export function TeacherWorkspace() {
         }),
       );
       await refresh();
-      await showClass(detail.class.id);
+      await showClass(detail.class.id, ownerId, mode);
       setMessage("Kelas diperbarui.");
     } catch {
       setMessage("Perubahan belum tersimpan. Buka ulang kelas dan coba lagi.");
@@ -213,6 +320,11 @@ export function TeacherWorkspace() {
         { ownerId, mode: detail.class.mode },
         detail.class.id,
       );
+      await removeLibraryCache(
+        { ownerId, mode: detail.class.mode },
+        "classDetail",
+        detail.class.id,
+      );
       try {
         await Promise.all(
           detail.students.map((student) => names.delete(student.id)),
@@ -235,6 +347,8 @@ export function TeacherWorkspace() {
   async function logout() {
     // Revoke local UI access first, including when no network is available.
     await lockLocalAccess();
+    accessOwner.current = undefined;
+    requestVersion.current++;
     setOwnerId(undefined);
     setClasses([]);
     setDetail(undefined);
@@ -263,168 +377,148 @@ export function TeacherWorkspace() {
     );
   return (
     <div className="space-y-5">
-      <SyncControls scope={{ ownerId, mode }} classroom={detail?.class} />
-      <StorageStatus scope={{ ownerId, mode }} />
-      <h2 id="kelas-heading" className="text-[22px] leading-7 font-bold">
-        {classes.length ? "Kelas Anda" : "Belum ada kelas."}
-      </h2>
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="flex-1 text-sm font-semibold">
-          Data kelas
-          <select
-            aria-label="Data kelas"
-            className={inputClass}
-            value={mode}
-            disabled={busy}
-            onChange={async (event) => {
-              const next = event.target.value === "demo" ? "demo" : "pilot";
-              setMode(next);
-              setDetail(undefined);
-              setLabels({});
-              if (!navigator.onLine) {
-                setMessage(
-                  "Offline: paket dan sesi tersimpan tetap dapat dibuka.",
-                );
-                setClasses([]);
-                return;
-              }
-              try {
-                await refresh(next);
-              } catch {
-                setMessage("Daftar kelas belum tersedia offline.");
-                setClasses([]);
-              }
-            }}
-          >
-            <option value="pilot">Kelas aktif</option>
-            <option value="demo">Demo terpisah</option>
-          </select>
-        </label>
-        <Button variant="outline" onClick={logout}>
-          Keluar
-        </Button>
-      </div>
-      <ul className="space-y-2">
-        {classes.map((classroom) => (
-          <li key={classroom.id}>
-            <Button
-              variant="outline"
-              className="w-full justify-between"
-              onClick={() => showClass(classroom.id)}
-              disabled={busy}
-            >
-              Buka kelas {classroom.label}
-              <span className="text-sm">{classroom.count} siswa</span>
-            </Button>
-          </li>
-        ))}
-      </ul>
-      <Button
-        onClick={() => {
-          setAdding(!adding);
-          setDetail(undefined);
-          setLabels({});
-        }}
-        disabled={busy}
-      >
-        {adding ? "Batal" : "Buat kelas"}
-      </Button>
-      {adding && (
-        <form onSubmit={create} className="space-y-3">
-          <label className="block font-semibold">
-            Nama rombel
-            <input
-              name="label"
-              required
-              maxLength={40}
-              placeholder="7B"
-              className={inputClass}
-            />
-          </label>
-          <p className="text-sm text-muted-foreground">
-            Gunakan nama rombel, bukan nama siswa.
-          </p>
-          <label className="block font-semibold">
-            Tingkat kelas
-            <input
-              name="grade"
-              type="number"
-              min={1}
-              max={12}
-              defaultValue={7}
-              required
-              className={inputClass}
-            />
-          </label>
-          <label className="block font-semibold">
-            Jumlah siswa
-            <input
-              name="count"
-              type="number"
-              min={1}
-              max={40}
-              defaultValue={32}
-              required
-              className={inputClass}
-            />
-          </label>
-          <Button type="submit" disabled={busy}>
-            Simpan kelas
-          </Button>
-        </form>
+      {offline && (
+        <p role="status" className="text-sm">
+          Tanpa internet · latihan tersimpan tetap dapat digunakan pada
+          perangkat ini.
+        </p>
       )}
-      {detail && (
-        <section
-          aria-label="Detail kelas"
-          className="space-y-3 border-t border-pn-ink-400/30 pt-4"
+      {sample && (
+        <p className="rounded-input bg-pn-teal-100 px-4 py-3 text-sm">
+          <b>Data contoh</b> · Coba kegiatan dan AI tanpa memakai data siswa
+          nyata.
+        </p>
+      )}
+      <section aria-labelledby="kelas-heading" className="teacher-class-picker">
+        <h2
+          id="kelas-heading"
+          className="flex items-center gap-2 text-xl font-bold"
         >
-          <h3 className="text-lg font-bold">Kelas {detail.class.label}</h3>
-          <p>
-            Tingkat {detail.class.grade} · {detail.class.count} siswa
-          </p>
-          <ul aria-label="Daftar absen" className="grid grid-cols-2 gap-2">
-            {detail.students.map((student) => (
-              <li
-                key={student.id}
-                className="rounded-input bg-pn-teal-100 px-3 py-2"
+          <School size={24} aria-hidden />
+          Pilih kelas untuk latihan
+        </h2>
+        <div className="flex flex-wrap items-center gap-2">
+          {!sample && (
+            <label className="flex-1 text-sm font-semibold">
+              Gunakan kelas
+              <select
+                aria-label="Gunakan kelas"
+                className={inputClass}
+                value={mode}
+                disabled={busy}
+                onChange={async (event) => {
+                  const next = event.target.value === "demo" ? "demo" : "pilot";
+                  requestVersion.current++;
+                  setBusy(true);
+                  setMode(next);
+                  setClasses([]);
+                  setDetail(undefined);
+                  setLabels({});
+                  // The selected mode survives an offline reload without mixing data.
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("mode", next);
+                  url.searchParams.delete("class");
+                  window.history.replaceState(null, "", url);
+                  if (!navigator.onLine) {
+                    try {
+                      const cached = await libraryCache(
+                        { ownerId, mode: next },
+                        "classes",
+                        "index",
+                      );
+                      setClasses(cached?.classes ?? []);
+                      if (cached?.classes[0])
+                        await showClass(cached.classes[0].id, ownerId, next);
+                      setMessage(
+                        "Tanpa internet: membuka kelas dan latihan yang sudah tersimpan.",
+                      );
+                    } catch {
+                      setMessage(
+                        "Kelas ini belum tersimpan pada perangkat. Buka kembali saat online.",
+                      );
+                    } finally {
+                      setBusy(false);
+                    }
+                    return;
+                  }
+                  try {
+                    const list = await refresh(next);
+                    if (list[0]) await showClass(list[0].id, ownerId, next);
+                  } catch {
+                    setMessage("Daftar kelas belum tersedia offline.");
+                    setClasses([]);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
               >
-                {labels[student.id] ?? `Absen ${student.attendanceNumber}`}
-              </li>
-            ))}
-          </ul>
-          <LocalRoster
-            ownerId={ownerId}
-            mode={mode}
-            students={detail.students}
-            onSaved={async () => {
-              const names = createNameRepository({ ownerId, mode });
-              try {
-                const views = await Promise.all(
-                  detail.students.map((s) => readTeacherStudentView(s, names)),
-                );
-                setLabels(
-                  Object.fromEntries(views.map((v) => [v.studentId, v.label])),
-                );
-              } finally {
-                names.close();
-              }
-            }}
-          />
-          <form
-            key={detail.class.revision}
-            onSubmit={update}
-            className="space-y-3"
-          >
+                <option value="pilot">Kelas saya</option>
+                <option value="demo">Data contoh · untuk mencoba</option>
+              </select>
+            </label>
+          )}
+        </div>
+        {!sample && (
+          <p className="text-sm text-muted-foreground">
+            {mode === "demo"
+              ? "Kelas percobaan terpisah dari kelas Anda. Buat satu kelas contoh untuk mencoba latihan dan AI."
+              : "Gunakan rombel Anda. Untuk mencoba tanpa data siswa, pilih Data contoh."}
+          </p>
+        )}
+        <ul className="grid gap-2 sm:grid-cols-2">
+          {classes.map((classroom) => (
+            <li key={classroom.id}>
+              <Button
+                variant="outline"
+                className="w-full justify-between"
+                aria-pressed={detail?.class.id === classroom.id}
+                onClick={() => showClass(classroom.id, ownerId, mode)}
+                disabled={busy}
+              >
+                Buka kelas {classroom.label}
+                <span className="flex items-center gap-2 text-sm">
+                  {classroom.count} siswa
+                  {detail?.class.id === classroom.id && (
+                    <Check size={18} aria-hidden />
+                  )}
+                </span>
+              </Button>
+            </li>
+          ))}
+        </ul>
+        <Button
+          variant={classes.length ? "outline" : "default"}
+          onClick={() => {
+            setAdding(!adding);
+            setDetail(undefined);
+            setLabels({});
+          }}
+          disabled={busy || offline}
+        >
+          {adding ? "Batal" : "Buat kelas"}
+        </Button>
+        {!classes.length && (
+          <p className="text-sm">
+            {mode === "demo"
+              ? "Buat kelas contoh terlebih dahulu. Nama siswa tidak diperlukan."
+              : "Tambahkan kelas pertama untuk menyiapkan latihan."}
+          </p>
+        )}
+        {adding && (
+          <form onSubmit={create} className="space-y-3">
             <label className="block font-semibold">
               Nama rombel
               <input
                 name="label"
                 required
                 maxLength={40}
-                defaultValue={detail.class.label}
+                placeholder="7B"
                 className={inputClass}
               />
             </label>
+            <p className="text-sm text-muted-foreground">
+              Gunakan nama rombel, bukan nama siswa.
+            </p>
             <label className="block font-semibold">
               Tingkat kelas
               <input
@@ -432,44 +526,137 @@ export function TeacherWorkspace() {
                 type="number"
                 min={1}
                 max={12}
+                defaultValue={7}
                 required
-                defaultValue={detail.class.grade}
                 className={inputClass}
               />
             </label>
-            <Button type="submit" disabled={busy}>
-              Simpan perubahan
+            <label className="block font-semibold">
+              Jumlah siswa
+              <input
+                name="count"
+                type="number"
+                min={1}
+                max={40}
+                defaultValue={32}
+                required
+                className={inputClass}
+              />
+            </label>
+            <Button type="submit" disabled={busy || offline}>
+              Simpan kelas
             </Button>
           </form>
-          <Button variant="outline" disabled={busy} onClick={remove}>
-            Hapus kelas
-          </Button>
-        </section>
-      )}
-      <PackageWorkspace
-        key={`package/${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
-        ownerId={ownerId}
-        mode={mode}
-        students={detail?.students}
-        classroom={detail?.class}
-      />
-      <SessionWorkspace
-        key={`prelim/${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
-        ownerId={ownerId}
-        mode={mode}
-        detail={detail}
-      />
-      <CycleWorkspace
+        )}
+      </section>
+      <PracticeActivities
         key={`${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
-        scope={{ ownerId, mode }}
-        detail={detail}
-      />
-      <OralWorkspace
-        key={`oral/${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
         ownerId={ownerId}
         mode={mode}
         detail={detail}
         labels={labels}
+      />
+      <ActivityDisclosure
+        id="teacher-class"
+        key={`class/${ownerId}/${mode}`}
+        title="Kelola kelas terpilih"
+        description="Nama lokal, daftar siswa dan pengaturan kelas."
+        scope={{ ownerId, mode }}
+      >
+        {detail ? (
+          <section
+            aria-label="Detail kelas"
+            className="space-y-3 border-t border-pn-ink-400/30 pt-4"
+          >
+            <h3 className="text-lg font-bold">Kelas {detail.class.label}</h3>
+            <p>
+              Tingkat {detail.class.grade} · {detail.class.count} siswa
+            </p>
+            <ul aria-label="Daftar absen" className="grid grid-cols-2 gap-2">
+              {detail.students.map((student) => (
+                <li
+                  key={student.id}
+                  className="rounded-input bg-pn-teal-100 px-3 py-2"
+                >
+                  {labels[student.id] ?? `Absen ${student.attendanceNumber}`}
+                </li>
+              ))}
+            </ul>
+            <LocalRoster
+              ownerId={ownerId}
+              mode={mode}
+              students={detail.students}
+              onSaved={async () => {
+                const names = createNameRepository({ ownerId, mode });
+                try {
+                  const views = await Promise.all(
+                    detail.students.map((s) =>
+                      readTeacherStudentView(s, names),
+                    ),
+                  );
+                  setLabels(
+                    Object.fromEntries(
+                      views.map((v) => [v.studentId, v.label]),
+                    ),
+                  );
+                } finally {
+                  names.close();
+                }
+              }}
+            />
+            <form
+              key={detail.class.revision}
+              onSubmit={update}
+              className="space-y-3"
+            >
+              <label className="block font-semibold">
+                Nama rombel
+                <input
+                  name="label"
+                  required
+                  maxLength={40}
+                  defaultValue={detail.class.label}
+                  className={inputClass}
+                />
+              </label>
+              <label className="block font-semibold">
+                Tingkat kelas
+                <input
+                  name="grade"
+                  type="number"
+                  min={1}
+                  max={12}
+                  required
+                  defaultValue={detail.class.grade}
+                  className={inputClass}
+                />
+              </label>
+              <Button type="submit" disabled={busy || offline}>
+                Simpan perubahan
+              </Button>
+            </form>
+            <Button
+              variant="outline"
+              disabled={busy || offline}
+              onClick={remove}
+            >
+              Hapus kelas
+            </Button>
+          </section>
+        ) : (
+          <p>Pilih kelas terlebih dahulu.</p>
+        )}
+        <Button asChild variant="outline">
+          <Link href="/guru/kelas">Buka daftar kelas</Link>
+        </Button>
+        <Button variant="outline" onClick={logout}>
+          Keluar
+        </Button>
+      </ActivityDisclosure>
+      <DeviceControls
+        key={`${ownerId}/${mode}`}
+        scope={{ ownerId, mode }}
+        classroom={detail?.class}
       />
       <p role="status" className="text-sm text-muted-foreground">
         {message}

@@ -11,6 +11,7 @@ import {
 } from "@/contracts/bisik";
 import { Button } from "@/ui/components/button";
 import { previewBisikQuestion } from "./bisik-privacy";
+import { aiFallbackMessage } from "./ai-messages";
 export function BisikControls({
   scope,
   classId,
@@ -130,7 +131,7 @@ export function BisikControls({
       setMessage(
         value.status === "ai"
           ? "Saran AI berdasarkan kartu sumber. Tinjau sebelum digunakan."
-          : "AI belum tersedia untuk kartu ini. Kartu strategi tetap dapat digunakan.",
+          : `AI belum tersedia untuk kartu ini. ${aiFallbackMessage(value.reason)} Kartu saran tetap dapat digunakan.`,
       );
     } catch {
       if (active.current === controller)
@@ -183,7 +184,7 @@ export function BisikControls({
       className="studio-panel bg-white p-4 min-w-0 space-y-3 [&_button]:w-full [&_button]:max-w-full"
     >
       <Button disabled={busy} onClick={() => void ask()}>
-        Sesuaikan saran
+        Minta saran AI
       </Button>
       {busy && (
         <Button variant="outline" onClick={() => active.current?.abort()}>
@@ -196,47 +197,53 @@ export function BisikControls({
           <p>Sumber: {result.sourceStrategyIds.join(", ")}</p>
         </div>
       )}
-      <label className="block">
-        Pertanyaan untuk Bisik · hanya di perangkat sampai dikirim
-        <textarea
-          aria-label="Pertanyaan Bisik lokal"
-          className="mt-1 min-h-24 w-full rounded-input border bg-white p-3"
-          maxLength={500}
-          value={raw}
-          onChange={(e) => {
-            setRaw(e.target.value);
-            setPreview(undefined);
-          }}
-        />
-      </label>
-      <Button
-        variant="outline"
-        disabled={busy}
-        onClick={() => void makePreview()}
-      >
-        Periksa pratinjau lokal
-      </Button>
-      {preview && (
-        <div aria-label="Pratinjau Bisik">
-          <p>{preview}</p>
+      <details>
+        <summary className="min-h-12 cursor-pointer font-semibold">
+          Tanya tentang cara mengajar
+        </summary>
+        <label className="block">
+          Pertanyaan tambahan · jangan sertakan nama siswa
+          <textarea
+            aria-label="Pertanyaan Bisik lokal"
+            className="mt-1 min-h-24 w-full rounded-input border bg-white p-3"
+            maxLength={500}
+            placeholder="Contoh: bagaimana menjelaskan pengurangan bilangan negatif?"
+            value={raw}
+            onChange={(e) => {
+              setRaw(e.target.value);
+              setPreview(undefined);
+            }}
+          />
+        </label>
+        <Button
+          variant="outline"
+          disabled={busy}
+          onClick={() => void makePreview()}
+        >
+          Periksa pratinjau lokal
+        </Button>
+        {preview && (
+          <div aria-label="Pratinjau Bisik">
+            <p>{preview}</p>
+            <p>
+              Pastikan tidak ada nama atau identitas, termasuk nama yang belum
+              tersimpan di perangkat.
+            </p>
+            <Button
+              disabled={!freeText || busy}
+              onClick={() => void ask(preview)}
+            >
+              Kirim pertanyaan tanpa identitas
+            </Button>
+          </div>
+        )}
+        {!freeText && (
           <p>
-            Pastikan tidak ada nama atau identitas, termasuk nama yang belum
-            tersimpan di perangkat.
+            Tanya bebas belum aktif: menunggu review privasi. Kartu statis tetap
+            tersedia.
           </p>
-          <Button
-            disabled={!freeText || busy}
-            onClick={() => void ask(preview)}
-          >
-            Kirim pertanyaan tanpa identitas
-          </Button>
-        </div>
-      )}
-      {!freeText && (
-        <p>
-          Tanya bebas belum aktif: menunggu review privasi. Kartu statis tetap
-          tersedia.
-        </p>
-      )}
+        )}
+      </details>
       <div className="flex flex-wrap gap-2">
         <Button variant="outline" onClick={() => void feedback(true)}>
           Berguna

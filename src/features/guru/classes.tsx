@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTeacher } from "./app-context";
 import {
   classDetailSchema,
@@ -158,7 +157,6 @@ export function ClassesPage() {
 }
 export function ClassPage({ id }: { id: string }) {
   const { scope, state, refresh } = useTeacher(),
-    router = useRouter(),
     [detail, setDetail] = useState<{
       class: ClassDto;
       students: StudentDto[];
@@ -264,6 +262,11 @@ export function ClassPage({ id }: { id: string }) {
         <Button asChild variant="outline">
           <Link href={`/guru/mulai?class=${id}&mode=assessment`}>
             Buat asesmen
+          </Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href={`/guru/latihan?class=${id}&mode=${mode}`}>
+            Siapkan latihan & AI
           </Link>
         </Button>
       </div>
@@ -482,9 +485,6 @@ export function ClassPage({ id }: { id: string }) {
           </label>
           <Button>Simpan pengaturan</Button>
         </form>
-        <Button variant="outline" onClick={() => router.push("/guru/latihan")}>
-          Buka Sesi Tepat Level
-        </Button>
       </details>
       <p role="status">{message}</p>
     </div>

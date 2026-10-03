@@ -58,7 +58,12 @@ for (const viewport of [
     await sample(page);
     await expect(
       page.getByRole("navigation", { name: "Menu utama" }).locator("svg"),
-    ).toHaveCount(4);
+    ).toHaveCount(5);
+    await expect(
+      page
+        .getByRole("navigation", { name: "Menu utama" })
+        .getByRole("link", { name: "Latihan & AI", exact: true }),
+    ).toBeVisible();
     await noHorizontalOverflow(page);
     await page.screenshot({
       path: info.outputPath("guru.png"),

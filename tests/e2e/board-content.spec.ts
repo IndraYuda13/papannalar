@@ -1,4 +1,4 @@
-import { openBoard } from "../browser/helpers";
+import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { test, expect, type Page } from "@playwright/test";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import {
@@ -67,7 +67,7 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
     });
   }
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7P");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();

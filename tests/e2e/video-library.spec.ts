@@ -631,8 +631,11 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
   await page.getByLabel("Dari tanggal", { exact: true }).fill("2100-01-01");
   await expect(resultLinks).toHaveCount(0);
   await expect(
-    page.getByText("Belum ada asesmen pada pilihan ini."),
+    page.getByRole("heading", { name: "Hasil akan muncul setelah asesmen" }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Mulai cek pemahaman", exact: true }),
+  ).toHaveAttribute("href", "/guru/mulai?mode=assessment");
   await page.getByLabel("Dari tanggal", { exact: true }).fill(detail.run.date);
   await page
     .getByRole("combobox", { name: "Kelas", exact: true })

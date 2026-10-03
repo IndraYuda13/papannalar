@@ -10,14 +10,29 @@ export function cacheTarget(
   manifest: ShellManifest,
 ): string | undefined {
   const url = new URL(request.url);
+  const context = [...url.searchParams];
+  // Return the canonical public shell, never cache a teacher's query URL.
+  const practiceContext =
+    request.mode === "navigate" &&
+    url.pathname === "/guru/latihan" &&
+    new Set(context.map(([key]) => key)).size === context.length &&
+    context.every(([key, value]) =>
+      key === "mode"
+        ? value === "demo" || value === "pilot"
+        : key === "class" &&
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(
+            value,
+          ),
+    );
   if (
     request.method !== "GET" ||
     url.origin !== origin ||
     (url.search &&
       !(
-        request.mode !== "navigate" &&
-        url.pathname === "/icon.svg" &&
-        /^\?icon\.[A-Za-z0-9_-]{1,80}\.svg$/.test(url.search)
+        practiceContext ||
+        (request.mode !== "navigate" &&
+          url.pathname === "/icon.svg" &&
+          /^\?icon\.[A-Za-z0-9_-]{1,80}\.svg$/.test(url.search))
       )) ||
     request.rsc
   )

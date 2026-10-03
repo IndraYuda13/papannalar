@@ -1,7 +1,7 @@
 import { openBoard } from "../browser/helpers";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { loginTeacher } from "../browser/helpers";
+import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
 import type { CardAnswer, CardKind } from "../../src/cards/layouts/layout-v1";
 const commands: {
   action: string;
@@ -72,7 +72,7 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
       );
   });
   await loginTeacher(page);
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama rombel", { exact: true }).fill("7N");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
@@ -99,6 +99,13 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
     }),
     board = await boardContext.newPage();
   board.on("pageerror", () => errors.push("board-runtime"));
+  board.on("response", (response) => {
+    if (response.status() >= 400)
+      commands.push({
+        action: `board:${new URL(response.url()).pathname}`,
+        status: response.status(),
+      });
+  });
   board.on("console", (m) => {
     if (m.type() === "error")
       errors.push(`board-console:${m.text().slice(0, 140)}`);
@@ -356,7 +363,7 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
   );
   await expect(cycle).toContainText("0 hasil masih pending");
   await page.reload();
-  await page.getByLabel("Data kelas").selectOption("demo");
+  await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: /Buka kelas 7N/ }).click();
   await expect(cycle.getByTestId("cycle-status")).toContainText(
     "penilaian final revisi 1",

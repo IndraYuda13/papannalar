@@ -7,10 +7,30 @@ import { panel } from "@/features/library/client";
 import { capturePairingLink } from "@/features/classroom/pairing-url";
 import { OfflineChooser } from "@/features/library/offline-chooser";
 import { PageHeader } from "@/ui/components/studio";
-import { ToolPoster } from "@/ui/components/decorative-scene";
 import { ToolExplorer } from "@/ui/components/tool-explorer";
 import { MotionBoundary } from "@/ui/components/motion-boundary";
-import { BookOpen, Presentation } from "lucide-react";
+import type { LibraryRun } from "@/contracts/library";
+import { BookOpen, Presentation, Sparkles, ArrowRight } from "lucide-react";
+function ResumeLesson({ run: r }: { run: LibraryRun }) {
+  return (
+    <li>
+      <Link
+        className="flex min-h-16 flex-wrap items-center justify-between gap-2 rounded-input border p-3"
+        href={`/guru/sesi/${r.id}`}
+      >
+        <span>
+          <b>{r.classLabel}</b> · {r.document.title}
+          <small className="block text-muted-foreground">
+            {r.mode === "assessment" ? "Cek pemahaman" : "Mengajar"} · Soal{" "}
+            {r.position + 1}/{r.document.items.length} ·{" "}
+            {r.date.split("-").reverse().join("/")}
+          </small>
+        </span>
+        <span className="font-semibold text-primary">Lanjutkan →</span>
+      </Link>
+    </li>
+  );
+}
 export function TeacherHome() {
   const { classes, state, offline } = useTeacher(),
     [pair, setPair] = useState("");
@@ -29,7 +49,11 @@ export function TeacherHome() {
       <PageHeader
         eyebrow="Satu papan, setiap siswa belajar"
         title="Siap belajar hari ini?"
-        description="Lanjutkan yang sedang berjalan, atau siapkan pengalaman belajar baru."
+        description={
+          state.sample
+            ? "Coba mengajar dengan kelas contoh, atau jelajahi latihan dan bantuan AI."
+            : "Pilih kelas, pilih soal, lalu mulai sesi mengajar."
+        }
         actions={
           <Button asChild>
             <Link href={last ? `/guru/mulai?class=${last.id}` : "/guru/kelas"}>
@@ -44,53 +68,81 @@ export function TeacherHome() {
         </p>
       )}
       {active.length > 0 && (
-        <section aria-label="Sesi aktif" className={`${panel} studio-resume`}>
+        <section
+          id="teacher-home-resume"
+          aria-label="Sesi aktif"
+          className={`${panel} studio-resume`}
+        >
           <h2 className="text-xl font-bold">Lanjutkan sesi</h2>
           <ul className="space-y-3">
-            {active.map((r) => (
-              <li key={r.id}>
-                <Link
-                  className="flex min-h-16 flex-wrap items-center justify-between gap-2 rounded-input border p-3"
-                  href={`/guru/sesi/${r.id}`}
-                >
-                  <span>
-                    <b>{r.classLabel}</b> · {r.document.title}
-                    <small className="block text-muted-foreground">
-                      {r.mode === "assessment" ? "Cek pemahaman" : "Mengajar"} ·
-                      Soal {r.position + 1}/{r.document.items.length}
-                    </small>
-                  </span>
-                  <span className="font-semibold text-primary">
-                    Lanjutkan →
-                  </span>
-                </Link>
-              </li>
+            {active.slice(0, 3).map((r) => (
+              <ResumeLesson key={r.id} run={r} />
             ))}
           </ul>
+          {active.length > 3 && (
+            <details>
+              <summary className="flex min-h-12 cursor-pointer items-center font-semibold text-primary">
+                Sesi lainnya ({active.length - 3})
+              </summary>
+              <ul className="max-h-96 space-y-3 overflow-y-auto overscroll-contain">
+                {active.slice(3).map((r) => (
+                  <ResumeLesson key={r.id} run={r} />
+                ))}
+              </ul>
+            </details>
+          )}
         </section>
       )}
-      <section className={`${panel} studio-start-card`}>
-        <div className="space-y-3 min-w-0">
+      <div className="grid gap-4 sm:grid-cols-2" aria-label="Pilih kegiatan">
+        <section className={`${panel} flex flex-col gap-4`}>
+          <div className="space-y-3 min-w-0">
+            <h2 className="flex items-center gap-3 text-xl font-bold">
+              <span className="activity-icon" aria-hidden>
+                <BookOpen size={24} strokeWidth={1.8} />
+              </span>
+              Mengajar dengan soal pilihan
+            </h2>
+            <p className="text-muted-foreground">
+              Gunakan soal siap pakai atau buat soal sendiri, lalu tampilkan di
+              Layar Kelas.
+            </p>
+            {last && (
+              <Link
+                className="inline-flex min-h-12 items-center text-primary underline"
+                href={`/guru/kelas/${last.id}`}
+              >
+                Buka kelas {last.label}
+              </Link>
+            )}
+          </div>
+          <Button asChild variant="outline" className="mt-auto">
+            <Link href="/guru/soal">
+              Pilih soal
+              <ArrowRight size={18} aria-hidden />
+            </Link>
+          </Button>
+        </section>
+        <section className={`${panel} flex flex-col gap-4 bg-pn-teal-100`}>
           <h2 className="flex items-center gap-3 text-xl font-bold">
             <span className="activity-icon" aria-hidden>
-              <BookOpen size={24} strokeWidth={1.8} />
+              <Sparkles size={24} />
             </span>
-            Mulai dari kelas Anda
+            Latihan & bantuan AI
           </h2>
-          <p className="text-muted-foreground">
-            Pilih kelas dan soal untuk mulai mengajar.
+          <p>
+            Siapkan latihan sesuai kebutuhan kelas. AI membantu cerita soal dan
+            saran mengajar; kartu saran juga tersedia tanpa AI.
           </p>
-          {last && (
+          <Button asChild className="mt-auto">
             <Link
-              className="inline-flex min-h-12 items-center text-primary underline"
-              href={`/guru/kelas/${last.id}`}
+              href={`/guru/latihan?mode=${state.sample ? "demo" : "pilot"}${last ? `&class=${last.id}` : ""}`}
             >
-              Buka kelas {last.label}
+              Buka latihan & AI
+              <ArrowRight size={18} aria-hidden />
             </Link>
-          )}
-        </div>
-        <ToolPoster asset="learning-board" />
-      </section>
+          </Button>
+        </section>
+      </div>
       <MotionBoundary>
         <section className="flex flex-wrap items-center justify-between gap-3 rounded-kartu bg-pn-teal-100 p-5">
           <div>
