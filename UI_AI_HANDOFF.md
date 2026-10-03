@@ -4,8 +4,11 @@
 
 Permintaan terbaru pengguna: perbaiki manfaat AI, bahasa, alur latihan dan
 penyambungan kode yang benar, lalu commit/push. Baseline `8df9357`. Implementasi
-software dan verifikasi lokal selesai; commit/push menjadi langkah terakhir.
-Bagian setelah marker ini adalah laporan historis.
+software dan verifikasi lokal selesai. Commit implementasi
+[f636a09](https://github.com/IndraYuda13/papannalar/commit/f636a09268e95952dcd44f597a6a3c1bbc78ec51)
+berhasil dipush fast-forward ke `main`; SHA remote cocok dengan lokal. CI sesudah
+push belum diperiksa; tidak ada deployment. Catatan publikasi berikut hanya
+dokumentasi, tanpa perubahan aplikasi. Bagian setelah marker ini historis.
 
 | Bagian                      | Sebelum                                                                      | Sesudah                                                                                          |
 | --------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |

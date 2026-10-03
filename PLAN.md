@@ -2811,5 +2811,9 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
  diupdate builddipertahankan, measurement baru ada di practice-v5.json.
  Tidak mengklaim seluruhkonten unchanged: helperpembuka+2framedraft disengaja.
  Evidence artifacts/qa/ui-ai-v2/practice-v5.json; panduan novice docs/13.
-- Next exact: commit hasil terverifikasi dan fast-forward push main sesuai
- instruksi. Hardware,providerlive,studiuser,hostedmigration/deploy NOT_RUN.
+- Publikasi aktual: commitimplementasi f636a09268e95952dcd44f597a6a3c1bbc78ec51 berhasil
+ fast-forward push8df9357→f636a09 ke origin/main,exit0; ls-remote cocok
+ danworkingtreebersih. Catatanpublikasi berikut hanya3filedoc/evidence;
+ source/tests/buildcandidate tetap. CIpostpush belumdiperiksa,tidakdeploy.
+ Tasksoftwarelokal selesai. Providerlive,reviewnyata,hardware/studiguru dan
+ hostedmigration memerlukan langkahoperator sesuaihandoff; tetapNOT_RUN.

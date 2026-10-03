@@ -472,8 +472,16 @@
     "No production readiness claim."
   ],
   "publication": {
-    "status": "PENDING_COMMIT_AND_AUTHORIZED_PUSH",
-    "target": "origin/main"
+    "status": "PUSHED",
+    "implementationCommit": "f636a09268e95952dcd44f597a6a3c1bbc78ec51",
+    "target": "origin/main",
+    "verifiedRemoteAtImplementationPush": "f636a09268e95952dcd44f597a6a3c1bbc78ec51",
+    "pushExitCode": 0,
+    "verifiedAt": "2026-10-03T13:14:29.844253+00:00",
+    "workingTreeCleanAfterImplementationCommit": true,
+    "ciPostPush": "NOT_CHECKED",
+    "deployment": "NOT_RUN",
+    "note": "The follow-up documentation-only commit records this completed implementation push. Application/test input hash remains unchanged."
   },
   "buildId": "AcxGagMd5dd7VgVnPgFrA",
   "optionalBundleSnapshot": {
