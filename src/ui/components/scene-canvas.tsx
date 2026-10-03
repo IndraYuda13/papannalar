@@ -24,7 +24,9 @@ function loadAsset(asset: SceneAsset) {
   let bytes = assetBytes.get(asset);
   if (!bytes) {
     bytes = fetch(`/assets/pn-ui-v2/models/${asset}.glb`, {
-      cache: "force-cache",
+      // Revalidate between app loads so a replaced GLB cannot stay stale.
+      // The in-memory promise still avoids duplicate downloads in this tab.
+      cache: "no-cache",
     })
       .then(async (response) => {
         if (!response.ok) throw new Error("ASSET_UNAVAILABLE");

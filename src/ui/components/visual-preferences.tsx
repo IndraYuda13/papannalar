@@ -12,12 +12,6 @@ const Context = createContext({
   reduced: false,
   light: false,
   saveData: false,
-  setReduced: (value: boolean) => {
-    void value;
-  },
-  setLight: (value: boolean) => {
-    void value;
-  },
 });
 const KEY = "pn-visual-preferences-v1";
 export function VisualPreferencesProvider({
@@ -58,18 +52,6 @@ export function VisualPreferencesProvider({
       window.removeEventListener("storage", sync);
     };
   }, []);
-  function save(nextReduced: boolean, nextLight: boolean) {
-    setReduced(nextReduced);
-    setLight(nextLight);
-    try {
-      localStorage.setItem(
-        KEY,
-        JSON.stringify({ reduced: nextReduced, light: nextLight }),
-      );
-    } catch {
-      /* RAM preference remains usable. */
-    }
-  }
   return (
     <Context.Provider
       value={{
@@ -77,8 +59,6 @@ export function VisualPreferencesProvider({
         reduced: reduced || osReduced,
         light,
         saveData,
-        setReduced: (value) => save(value, light),
-        setLight: (value) => save(reduced, value),
       }}
     >
       <div
@@ -93,28 +73,4 @@ export function VisualPreferencesProvider({
 }
 export function useVisualPreferences() {
   return useContext(Context);
-}
-export function VisualSettings() {
-  const preferences = useVisualPreferences();
-  return (
-    <details className="studio-visual-settings">
-      <summary>Tampilan nyaman</summary>
-      <label>
-        <input
-          type="checkbox"
-          checked={preferences.reduced}
-          onChange={(e) => preferences.setReduced(e.target.checked)}
-        />
-        Kurangi animasi
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={preferences.light}
-          onChange={(e) => preferences.setLight(e.target.checked)}
-        />
-        Tampilan ringan
-      </label>
-    </details>
-  );
 }

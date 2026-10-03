@@ -11,10 +11,17 @@ export function MotionBoundary({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const { reduced, light, saveData } = useVisualPreferences();
+  const { ready, reduced, light, saveData } = useVisualPreferences();
   useEffect(() => {
     const node = ref.current;
-    if (!node || reduced || light || saveData || !window.IntersectionObserver)
+    if (
+      !node ||
+      !ready ||
+      reduced ||
+      light ||
+      saveData ||
+      !window.IntersectionObserver
+    )
       return;
     const observer = new IntersectionObserver(
       (entries) => {
@@ -32,7 +39,7 @@ export function MotionBoundary({
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [reduced, light, saveData]);
+  }, [ready, reduced, light, saveData]);
   return (
     <div ref={ref} className={className}>
       {children}

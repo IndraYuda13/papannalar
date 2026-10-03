@@ -30,13 +30,14 @@
     },
     {
       "id": "algebra-kit",
-      "bytes": 55672,
-      "triangles": 3360,
-      "meshes": 9,
-      "sha256": "0bbc295d95e8254cf85e19418e8fcc29e07b9c04d4fbb96873c60d5c9dcc4e65",
+      "bytes": 127860,
+      "triangles": 8376,
+      "meshes": 27,
+      "sha256": "3d2790376b9da5f00f981055775557d5b6817215012a076103574d3157b18e90",
       "sourceSha256": "02b748ce74dbbf48a73416c18a63e3ce2feb4acd95e58bf4872fd820022f5b6f",
       "blendFile": "design/pn-ui-v2/algebra-kit.blend",
-      "dimensionsBlenderZUp": [2.85, 2.15, 1.005]
+      "dimensionsBlenderZUp": [2.88, 1.48481, 2.23078],
+      "geometry": "Original inclined tray with x\u00b2 square, three x rods and five unit tiles; raised mesh labels"
     }
   ]
 }

@@ -243,26 +243,6 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-.studio-visual-settings summary {
-  min-height: 48px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 600;
-}
-.studio-visual-settings label {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  min-height: 48px;
-  font-size: 13px;
-}
-.studio-visual-settings input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--pn-teal-700);
-}
 .decorative-scene {
   margin: 0;
   min-width: 0;

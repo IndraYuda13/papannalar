@@ -11,6 +11,7 @@ import {
 } from "@/core/tools/algebra";
 import type { ToolModel } from "@/core/tools/patterns";
 import { PointerOwnership } from "@/core/tools/pointers";
+import { ObjectFace } from "@/ui/components/activity-icon";
 import { Button } from "@/ui/components/button";
 type HeldTile = {
   tile: Tile;
@@ -161,6 +162,7 @@ export function AlgebraTiles({
               if (e.detail === 0) add({ ...tile, id: crypto.randomUUID() });
             }}
           >
+            <ObjectFace />
             {label(tile)}
           </Button>
         ))}
@@ -186,7 +188,7 @@ export function AlgebraTiles({
                   key={tile.id}
                   data-algebra-tile={tile.id}
                   aria-label={`Ubin ${label(tile)} kelompok ${i + 1}`}
-                  className={`size-[88px] touch-none rounded-input border-2 text-[40px] ${tile.sign < 0 ? "border-dashed bg-pn-amber-100" : "bg-primary text-white"} ${selectedTile === tile.id ? "outline-4 outline-pn-amber-500" : ""}`}
+                  className={`algebra-tile size-[88px] touch-none rounded-input border-2 text-[40px] ${tile.sign < 0 ? "border-dashed bg-pn-amber-100" : "bg-primary text-white"} ${selectedTile === tile.id ? "outline-4 outline-pn-amber-500" : ""}`}
                   onPointerDown={(e) => capture(e, tile, true)}
                   onPointerMove={move}
                   onPointerUp={release}
@@ -197,6 +199,7 @@ export function AlgebraTiles({
                   }}
                 >
                   {label(tile)}
+                  <ObjectFace />
                 </button>
               ))}
             </div>

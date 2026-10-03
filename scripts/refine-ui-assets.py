@@ -10,9 +10,10 @@ import hashlib
 import json
 import math
 import struct
+import sys
 
 import bpy
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -123,14 +124,78 @@ def glb_stats(path):
             "sha256": hashlib.sha256(data).hexdigest()}
 
 
+def algebra_models(mats):
+    """A coherent inclined tray: square x², equal-length x rods, unit squares.
+
+    All markings are original mesh strokes. No fonts, textures or downloads.
+    The sloping face remains visible from the application's +Z front camera.
+    """
+    models = []
+    def box(name, location, size, color, rotation=0):
+        bpy.ops.mesh.primitive_cube_add(size=1, location=location)
+        obj = bpy.context.object
+        obj.dimensions = size
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        finish(obj, name, mats[color], min(.055, min(size) * .28))
+        obj.rotation_euler.z = rotation
+        models.append(obj)
+        return obj
+
+    box("Rounded learning tray", (0, 0, 0), (2.88, 2.26, .14), "paper")
+    box("Recessed mint surface", (0, 0, .082), (2.68, 2.06, .035), "mint")
+    box("Square x squared", (-.73, .36, .17), (1.12, 1.12, .14), "teal")
+    # Raised x marks: preserve clear tile silhouettes without a floating sphere.
+    def x_mark(x, y, size=.14):
+        for angle in (-math.pi / 4, math.pi / 4):
+            box("Raised x mark", (x, y, .25), (size, .026, .018), "white", angle)
+    x_mark(-.78, .36, .22)
+    # A rounded original stroke keeps the raised superscript unmistakably 2.
+    curve = bpy.data.curves.new("Raised numeral two", type="CURVE")
+    curve.dimensions = "3D"
+    curve.bevel_depth, curve.bevel_resolution, curve.resolution_u = .009, 2, 6
+    spline = curve.splines.new("BEZIER")
+    points = [(-.60, .51), (-.58, .54), (-.53, .535), (-.53, .505),
+              (-.56, .48), (-.60, .44), (-.52, .44)]
+    spline.bezier_points.add(len(points) - 1)
+    for point, (x, y) in zip(spline.bezier_points, points):
+        point.co = (x, y, .25)
+        point.handle_left_type = point.handle_right_type = "AUTO"
+    numeral = bpy.data.objects.new("Raised squared mark", curve)
+    bpy.context.scene.collection.objects.link(numeral)
+    bpy.context.view_layer.objects.active = numeral
+    numeral.select_set(True)
+    bpy.ops.object.convert(target="MESH")
+    finish(bpy.context.object, "Raised squared mark", mats["white"])
+    models.append(bpy.context.object)
+    for i in range(3):
+        x = .15 + i * .37
+        box("Equal x rod " + str(i + 1), (x, .36, .17), (.29, 1.12, .14), "teal" if i == 0 else "blue")
+        x_mark(x, .36)
+    for i in range(5):
+        x = -.94 + i * .46
+        box("Unit square " + str(i + 1), (x, -.68, .17), (.29, .29, .14), "amber")
+        box("Raised unit mark", (x, -.68, .25), (.026, .13, .018), "ink")
+    bpy.context.view_layer.update()
+    rotation = Matrix.Rotation(math.radians(66), 4, "X")
+    for obj in models:
+        obj.matrix_world = Matrix.Translation(Vector((0, 0, 1.17))) @ rotation @ obj.matrix_world
+    box("Stable low plinth", (0, .32, .07), (2.68, 1.22, .14), "paper")
+    box("Rear support", (0, .70, .55), (.68, .21, 1.04), "teal")
+    bpy.context.view_layer.update()
+    return models
+
+
 def build(asset):
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
     bpy.data.orphans_purge(do_recursive=True)
-    bpy.ops.import_scene.gltf(filepath=str(SOURCE / "models" / (asset + ".glb")))
-    imported = [o for o in bpy.context.scene.objects if o.type == "MESH"]
     mats = {name: material(name) for name in PALETTE}
-    models = [refine(obj, mats) for obj in imported]
+    if asset == "algebra-kit":
+        models = algebra_models(mats)
+    else:
+        bpy.ops.import_scene.gltf(filepath=str(SOURCE / "models" / (asset + ".glb")))
+        imported = [o for o in bpy.context.scene.objects if o.type == "MESH"]
+        models = [refine(obj, mats) for obj in imported]
     for obj in list(bpy.context.scene.objects):
         if obj.type != "MESH":
             bpy.data.objects.remove(obj, do_unlink=True)
@@ -197,12 +262,20 @@ def build(asset):
     return {"id": asset, **glb_stats(PUBLIC / "models" / (asset + ".glb")),
             "sourceSha256": hashlib.sha256((SOURCE / "models" / (asset + ".glb")).read_bytes()).hexdigest(),
             "blendFile": "design/pn-ui-v2/" + asset + ".blend",
-            "dimensionsBlenderZUp": [round(v, 5) for v in size]}
+            "dimensionsBlenderZUp": [round(v, 5) for v in size],
+            **({"geometry": "Original inclined tray with x² square, three x rods and five unit tiles; raised mesh labels"} if asset == "algebra-kit" else {})}
 
 
 (DESIGN / "renders").mkdir(parents=True, exist_ok=True)
 bpy.context.scene.world = bpy.data.worlds.new("PapanNalar studio")
-results = [build(asset) for asset in IDS]
+args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+selected = args or list(IDS)
+assert all(asset in IDS for asset in selected)
+previous = json.loads((DESIGN / "blender-provenance.json").read_text()) if (DESIGN / "blender-provenance.json").exists() else {"models": []}
+updated = {item["id"]: item for item in previous["models"]}
+for asset in selected:
+    updated[asset] = build(asset)
+results = [updated[asset] for asset in IDS]
 receipt = {"tool": "Blender", "version": bpy.app.version_string,
            "renderEngine": "Cycles CPU", "samples": 96, "denoising": False,
            "posterSize": [720, 540],

@@ -11,6 +11,7 @@ type ItemProps = {
   row?: number;
   model?: ToolModel;
   onRun?: (model: ToolModel) => boolean;
+  hidePrompt?: boolean;
 };
 type ReadingPage = {
   kind: "prompt" | "option" | "workspace";
@@ -20,12 +21,18 @@ type ReadingPage = {
 export function LibraryItemView(props: ItemProps) {
   return <ItemPages key={props.item.id} {...props} />;
 }
-function ItemPages({ item, row = 1, model, onRun }: ItemProps) {
+function ItemPages({
+  item,
+  row = 1,
+  model,
+  onRun,
+  hidePrompt = false,
+}: ItemProps) {
   const root = useRef<HTMLElement>(null),
     body = useRef<HTMLDivElement>(null);
   const [paginated, setPaginated] = useState(
     () =>
-      item.prompt.length > 140 ||
+      (!hidePrompt && item.prompt.length > 140) ||
       (item.kind === "card" &&
         (item.options.some((o) => o.length > 80) ||
           item.options.join("").length > 240)),
@@ -35,7 +42,7 @@ function ItemPages({ item, row = 1, model, onRun }: ItemProps) {
   const optionsKey = JSON.stringify(item.kind === "card" ? item.options : null);
   const index = Math.min(position, Math.max(0, pages.length - 1));
   const current = pages[index] ?? {
-    kind: "prompt",
+    kind: hidePrompt && item.kind !== "card" ? "workspace" : "prompt",
     label: "Pertanyaan",
     text: item.prompt,
   };
@@ -101,7 +108,7 @@ function ItemPages({ item, row = 1, model, onRun }: ItemProps) {
           next.push({ kind, label, text: part });
       }
       try {
-        add(item.prompt, "prompt", "Pertanyaan");
+        if (!hidePrompt) add(item.prompt, "prompt", "Pertanyaan");
         const choices: string[] | null = JSON.parse(optionsKey);
         if (choices) {
           choices.forEach((text, choice) =>
@@ -140,10 +147,10 @@ function ItemPages({ item, row = 1, model, onRun }: ItemProps) {
       observer.disconnect();
       changes.disconnect();
     };
-  }, [item.prompt, optionsKey, paginated]);
+  }, [item.prompt, optionsKey, paginated, hidePrompt]);
   return (
     <section ref={root} className="library-item" data-testid="library-item">
-      <h1 className="library-prompt" hidden={paginated}>
+      <h1 className="library-prompt" hidden={paginated || hidePrompt}>
         {mathText(item.prompt)}
       </h1>
       <p className="library-instruction">

@@ -15,6 +15,7 @@ import {
   type NumberLineState,
 } from "@/core/tools/number-line";
 import type { ToolModel } from "@/core/tools/patterns";
+import { FaceMarks } from "@/ui/components/activity-icon";
 import { Button } from "@/ui/components/button";
 const asNumber = (n: Rational) => Number(n.numerator) / Number(n.denominator);
 const label = (n: number) => String(n).replace("-", "−").replace(".", ",");
@@ -49,7 +50,14 @@ export function NumberLine({
     pointer = useRef<number | null>(null);
   const [radius, setRadius] = useState(vertical ? 68 : 64);
   const [visibleRadius, setVisibleRadius] = useState(24);
-  const [axisText, setAxisText] = useState({ size: 36, x: -52, y: 12 });
+  const [axisText, setAxisText] = useState({
+    size: 36,
+    x: -52,
+    y: 12,
+    below: 65,
+  });
+  const [axisPixels, setAxisPixels] = useState(900);
+  const [railPadding, setRailPadding] = useState(60);
   useEffect(() => {
     const svg = graph.current;
     if (!svg) return;
@@ -68,10 +76,16 @@ export function NumberLine({
         setRadius(Math.max(48, hit) / 2 / scale);
         // Include the two-pixel non-scaling border in the visible diameter.
         setVisibleRadius((marker - 2) / 2 / scale);
+        const padding = Math.max(60, (Math.max(24, marker / 2) + 12) / scale);
+        setRailPadding(padding);
+        setAxisPixels(
+          (vertical ? 480 : Math.max(1, 1320 - 2 * padding)) * scale,
+        );
         setAxisText({
           size: (vertical ? 18 : 22) / scale,
           x: -(marker / 2 + 16) / scale,
           y: 6 / scale,
+          below: (marker / 2 + 28) / scale,
         });
       }
     };
@@ -116,11 +130,18 @@ export function NumberLine({
         current) *
         zoom,
     range = max - min;
-  const axis = vertical ? 480 : 1200;
-  const position = (n: number) => 60 + ((n - min) / range) * axis;
+  const offset = vertical ? 60 : railPadding;
+  const axis = vertical ? 480 : Math.max(1, 1320 - 2 * railPadding);
+  const position = (n: number) => offset + ((n - min) / range) * axis;
+  // Label density follows available pixels; the rational model and snap quantum
+  // stay unchanged. The rail is still continuous between these exact tick values.
+  const wanted = range / Math.max(2, Math.min(20, Math.floor(axisPixels / 52)));
+  const magnitude = 10 ** Math.floor(Math.log10(wanted));
+  const step = [1, 2, 5, 10].find((n) => n * magnitude >= wanted)! * magnitude;
+  const firstTick = Math.ceil(min / step) * step;
   const points = Array.from(
-    { length: Math.min(21, range + 1) },
-    (_, i) => min + (i * range) / Math.min(20, range),
+    { length: Math.max(0, Math.floor((max - firstTick) / step) + 1) },
+    (_, i) => Number((firstTick + i * step).toPrecision(10)),
   );
   const act = (action: Parameters<typeof reduceNumberLine>[1]) => {
     if (
@@ -147,7 +168,8 @@ export function NumberLine({
       1 /
       Math.max(Number(task.origin.denominator), Number(task.delta.denominator));
     return (
-      Math.round((min + ((point.x - 60) / axis) * range) / quantum) * quantum
+      Math.round((min + ((point.x - offset) / axis) * range) / quantum) *
+      quantum
     );
   }
   function release(e: PointerEvent<SVGCircleElement>) {
@@ -198,9 +220,9 @@ export function NumberLine({
             transform={vertical ? "translate(0 600) rotate(-90)" : undefined}
           >
             <line
-              x1="60"
+              x1={offset}
               y1="150"
-              x2={60 + axis}
+              x2={offset + axis}
               y2="150"
               stroke="var(--color-pn-ink-900)"
               strokeWidth="5"
@@ -211,7 +233,7 @@ export function NumberLine({
                 <text
                   transform={vertical ? "rotate(90)" : undefined}
                   x={vertical ? axisText.x : 0}
-                  y={vertical ? axisText.y : 65}
+                  y={vertical ? axisText.y : axisText.below}
                   textAnchor="middle"
                   fontSize={axisText.size}
                 >
@@ -274,20 +296,37 @@ export function NumberLine({
                 }
               }}
             />
-            <circle
-              data-testid="number-marker-visual"
-              className="number-line-marker"
+            <g
+              className="number-line-visual"
               data-dragging={dragAt !== null ? "true" : "false"}
-              aria-hidden="true"
-              pointerEvents="none"
-              cx={position(dragAt ?? current)}
-              cy="150"
-              r={visibleRadius}
-              fill="var(--color-pn-amber-500)"
-              stroke="var(--color-pn-ink-900)"
-              strokeWidth="2"
-              vectorEffect="non-scaling-stroke"
-            />
+              style={{
+                transformOrigin: "0 0",
+                transform: `translate(${position(dragAt ?? current)}px, 150px)`,
+              }}
+            >
+              <circle
+                data-testid="number-marker-visual"
+                className="number-line-marker"
+                data-dragging={dragAt !== null ? "true" : "false"}
+                aria-hidden="true"
+                pointerEvents="none"
+                cx="0"
+                cy="0"
+                r={visibleRadius}
+                fill="var(--color-pn-amber-500)"
+                stroke="var(--color-pn-ink-900)"
+                strokeWidth="2"
+                vectorEffect="non-scaling-stroke"
+              />
+              <g
+                className="number-line-face"
+                aria-hidden="true"
+                pointerEvents="none"
+                transform={`${vertical ? "rotate(90)" : ""} scale(${visibleRadius / 17}) translate(-21 -23)`}
+              >
+                <FaceMarks />
+              </g>
+            </g>
           </g>
         </svg>
         <output

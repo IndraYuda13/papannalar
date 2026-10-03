@@ -6,7 +6,7 @@ import { Home, UsersRound, Layers, ClipboardCheck, LogOut } from "lucide-react";
 import { Brand } from "@/ui/components/brand";
 import { TeacherProvider } from "./app-context";
 import { logoutTeacher } from "@/features/classroom/logout-transport";
-import { VisualSettings } from "@/ui/components/visual-preferences";
+import { MotionSwap } from "@/ui/components/interactive-motion";
 import { Presentation } from "lucide-react";
 const entries = [
   ["/guru", "Beranda", Home],
@@ -78,11 +78,6 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="studio-sidebar-foot">
-          <p className="studio-eyebrow">PapanNalar Studio</p>
-          <p className="text-sm text-muted-foreground">
-            Siapkan. Ajarkan. Pahami.
-          </p>
-          <VisualSettings />
           <button
             className="mt-4 hidden min-h-12 items-center gap-2 text-sm text-muted-foreground md:flex"
             onClick={() => void logout()}
@@ -98,16 +93,18 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
       >
         <div className="mx-auto max-w-5xl">
           <div className="studio-context">
-            <span>Ruang mengajar Anda</span>
             <Link href="/layar" prefetch={false} target="_blank">
               <Presentation size={18} aria-hidden />
               Layar Kelas
             </Link>
           </div>
-          <div className="mb-4 md:hidden">
-            <VisualSettings />
-          </div>
-          {adaptive ? children : <TeacherProvider>{children}</TeacherProvider>}
+          <MotionSwap change={pathname}>
+            {adaptive ? (
+              children
+            ) : (
+              <TeacherProvider>{children}</TeacherProvider>
+            )}
+          </MotionSwap>
         </div>
       </main>
     </div>

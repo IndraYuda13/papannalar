@@ -3,7 +3,8 @@
 Implementasi U0–U5 selesai pada repository existing untuk seluruh acceptance
 software yang dapat diuji lokal. Gerbang upgrade awal serial **PASS, exit 0**;
 hasil historis ada di `artifacts/qa/ui-ai-v2/summary.json`. Koreksi UI terbaru
-berdasarkan dua screenshot pengguna diuji terarah seperti dicatat di bawah.
+berdasarkan dua screenshot pengguna merupakan hasil historis. Koreksi UX HP dan
+akun contoh 3 Oktober dijelaskan pada bagian terbaru di bawah.
 Baseline HEAD `efcdd36b318cb84654a12f0dd698dd6bc0e05b94` (branch `work`).
 Snapshot implementasi [5eef21f](https://github.com/IndraYuda13/papannalar/commit/5eef21f9c2aea0c9217c4fb376c44e6aaacf792e)
 berhasil dipush ke `main` pada 3 Oktober 2026 (WIB) atas permintaan pengguna.
@@ -17,7 +18,83 @@ dipertahankan. Core matematika, konten, penyimpanan lokal, auth, review dan selu
 37 migration existing tidak berubah. Sembilan addendum memiliki backup dan proof
 bahwa isi dokumen serta jurnal sebelumnya tetap utuh.
 
-## Koreksi UI terbaru — 2 Oktober 2026
+## Koreksi UX HP dan akun contoh — 3 Oktober 2026 (WIB)
+
+Implementasi tujuh permintaan terbaru selesai dan gerbang kandidat akhir
+**PASS, exit 0**. Baseline koreksi ini `4ce1227a7b4831e1a8d9e3dda5e9042a2d5eb501`.
+Build `ANeazQh8M22lxHU2tCNGE`, source SHA256
+`cabf4f62d5300e949e48855744ddab57e45b2a7cc1a9d6724aeef7465f0b5adb`
+(501file). Bukti aktual: [session-ux-v3.json](artifacts/qa/ui-ai-v2/session-ux-v3.json).
+
+Command final serial:
+
+```bash
+pnpm format:check && pnpm typecheck && pnpm lint && pnpm build && pnpm test:e2e
+```
+
+Format/types/lint/build PASS; **129/129 E2E PASS**,17m1.669s,1worker,
+tanpa retry/flaky/skip. Zona tulis dibersihkan2431ms setelah tombol putuskan
+digunakan; server revoke sukses, reload tetap tanpa tinta.
+Unit **1086/70file**, integration **9/1file** dan seluruh SQL/RLS sudah PASS
+pada tahap `pnpm verify` sebelum audit visual terakhir. Setelah itu hanya CSS
+preview pecahan dan assertion overlap E2E berubah; rekonstruksi SHA membuktikan
+499file lainnya byte-identical, termasuk input unit/integration dan TypeScript
+aplikasi. Suite yang sudah dicakup tidak diduplikasi. Command `pnpm verify`
+terdahulu bukan full PASS: satu attempt gagal karena deadline total test,
+dua attempt dihentikan untuk audit motion/layout. Riwayat dan hasil aktual ada
+pada PLAN9.58 dan receipt; hasil akhir tidak menyembunyikan attempt tersebut.
+Log E2E final `/workspace/.papannalar-cloud/logs/session-ux-final-candidate.log`;
+output tahap format/types/lint/build ada pada execution transcript.
+
+| Halaman                       | Sebelum koreksi ini                                                                                                                 | Sesudah                                                                                                                                                                                                       |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/masuk`, seluruh shell guru  | Menu “Tampilan nyaman”, branding footer/context berulang                                                                            | Menu dan copy berulang dihapus; preferensi OS/aksesibilitas yang tersimpan tetap dihormati otomatis                                                                                                           |
+| Akun data contoh              | Tiga gate server menonaktifkan AI khusus SAMPLE_TEACHER_ID                                                                          | Status, Bisik dan enrichment melalui adapter/ledger yang sama dengan akun guru                                                                                                                                |
+| `/guru`                       | Ubin aljabar bertumpuk dan bentuk sulit dikenali                                                                                    | Baki miring Blender dengan x², tiga batang x dan lima ubin satuan; dua model lain utuh                                                                                                                        |
+| `/guru/sesi/[id]` di HP       | Rail/label bertumpuk, grafik dua kolom sempit, kontrol pecahan overlap, input pairing tetap terlihat, close tidak berpindah halaman | Preview keenam alat dan tulisan punya gulir sendiri, angka dan kontrol pecahan terbaca, tombol48px; QR langsung claim; ACK menyembunyikan form; disconnect mengembalikannya; close punya progres lalu beranda |
+| `/layar`                      | Trigger menu minimal96px dan isi tertutup mempertahankan kotak layout                                                               | Trigger48px ringkas, isi tertutup tanpa layout, menu lengkap saat dibuka                                                                                                                                      |
+| Seluruh halaman guru dan alat | Transisi terbatas, objek dominan simbol polos                                                                                       | Transisi halaman/soal220ms, scroll halus/reveal, strip geser antarsoal, ikon/objek SVG kartun asli                                                                                                            |
+
+Geser antarsoal hanya aktif pada strip judul/progres: tidak merebut drag penanda,
+ubin, titik grafik, gulir alat atau tulisan. Tombol/keyboard tetap tersedia.
+Label dan padding SVG mengikuti ruang piksel; pointer projection memakai area
+rail/grafik yang sama. Reducer, bilangan rasional, solver dan check tidak berubah.
+Model/input tetap mounted ketika konten digulir atau bagian bacaan berpindah.
+Motion menunggu preferensi siap; OS reduced-motion/save-data/preferensi tersimpan
+menonaktifkan motion atau memakai poster tanpa menu pengaturan tambahan.
+
+QR kamera aplikasi dan challenge tersimpan dari kamera HP langsung mengajukan
+claim setelah sesi/kelas aktif dipilih. Tidak mem-fetch/navigasi URL hasil scan.
+QR foreign ditolak lokal, kamera ditutup setelah decode, request terkunci agar
+satu scan tidak memanggil dua kali. “Layar tersambung” bergantung ACK papan,
+bukan sekadar sukses claim. Koneksi gagal tetap memberi kode manual dan retry.
+Akhiri sesi mempertahankan konfirmasi yang sudah ada; kegagalan tetap di sesi,
+keberhasilan menutup di server, memperbarui cache, lalu `replace('/guru')`.
+
+AI akun contoh setara akun guru: tidak ada blacklist SAMPLE_TEACHER_ID pada route
+AI. Switch global/config/profile, batas biaya/token, review konten/privasi,
+allowlist DTO, ownership/RLS, kartu statis dan idempotensi tetap berlaku.
+Dua protokol diuji dengan HTTP fixture + ledger PostgreSQL nyata; **live NOT_RUN**.
+Auth/content-review hooks pada integration sintetis; manifest approval production
+tetap utuh. Browser memakai Auth/transport fixture loopback, bukan layanan live.
+Operator mengisi endpoint/model/key server dan policy/profile yang sudah
+didokumentasikan di bawah; toolchain cloud mengaktifkan `LLM_ENABLED=false`
+untuk validasi aman, jadi opt-in aplikasi harus disetel setelah aktivasi toolchain; tidak ada credential atau approval yang dikarang.
+
+Model algebra-kit baru127860byte/8376triangle + poster99214byte. Total ketiga
+GLB317492byte + poster355382byte =672874byte, maksimum127860byte<500KB/model.
+Blender4.3.2/Cycles CPU96samples, transparan720×540, tanpa download/font/texture
+baru; `.blend` dan generator tersedia. Dua GLB/poster/blend lain byte-identical.
+Fetch model direvalidasi antarpemuatan aplikasi agar GLB lama tidak tertahan
+force-cache; satu promise/canvas di tab, tetap lazy terpisah dari renderer soal.
+Aset/API berbayar **USD0**. Perangkat fisik/kamera nyata/hosted provider dan deploy
+belum diuji/dijalankan; fixture kamera bukan bukti hardware.
+Duabelas screenshot keenam alat pada HP360/390 disimpan lokal di
+`artifacts/qa/ui-ai-v2/session-ux-v3/`; model pada `scene-algebra-kit.png`.
+Semua jenis alat diperiksa visual; screenshot/log mentah tetap ignored,
+tanpa tinta pengguna atau QR yang dipublikasikan.
+
+## Koreksi pertama — 2 Oktober 2026 (hasil historis)
 
 3D sekarang otomatis tampil saat scene terlihat, tanpa caption
 “Papan dan benda belajar” dan tanpa tombol Jelajahi 3D/Lihat poster. Scene tetap
@@ -29,7 +106,7 @@ Navigator soal memakai grid dengan lebar minimum nol dan teks yang dibatasi ruan
 kartu. Overflow awal **20px → 0px** pada desktop. Semua kartu tetap dalam panel
 pada lebar360/390/1024/1280/1366 dan teks100/130%; target sentuh minimal48px.
 
-Build terbaru `JJ8Ophp65UWCGJ7KT-ntf`: format/typecheck/lint/build **PASS**, dan
+Build koreksi 2 Oktober `JJ8Ophp65UWCGJ7KT-ntf`: format/typecheck/lint/build **PASS**, dan
 **21/21 tes browser terarah PASS**,86.658detik,1worker,tanpa retry/flaky/skip.
 Kelima check dijalankan serial pada kandidat yang sama. Tes meliputi render
 otomatis, save-data/preference tersimpan, fallback, scanner/offline cache,
@@ -121,8 +198,8 @@ kode pairing pada screenshot idle disamarkan.
 ## Motion, 3D dan biaya aset
 
 Reveal ringan memakai IntersectionObserver dan CSS; tidak menambah dependency
-motion atau event penilaian. **Kurangi animasi** mengikuti preferensi OS/pengguna.
-**Tampilan ringan** dan save-data mencegah download engine/model. Poster menjaga
+motion atau event penilaian. Reduced motion mengikuti OS/preferensi tersimpan.
+Preferensi ringan tersimpan dan save-data mencegah download engine/model. Poster menjaga
 tampilan saat loading; Three/GLTFLoader dimuat otomatis saat scene terlihat,
 setelah preferences siap. Caption dan tombol mode scene sudah dihapus.
 Satu canvas, DPR maksimum 1.5, render hanya saat input/resize/load/visibility;
@@ -139,7 +216,7 @@ balance-scale dan algebra-kit pada Jelajahi alat; kartu katalog memakai poster.
 QR, scanner dan renderer soal tidak memakai scene dekoratif. Poster di-precache;
 GLB dan chunk Three dikecualikan dari cache shell.
 
-Setelah authoring Blender: model **245.304 byte**, poster **341.308 byte**, total
+Snapshot authoring 2 Oktober (historis): model **245.304 byte**, poster **341.308 byte**, total
 **586.612 byte**. Learning-board pada login **68.160 byte**; model terbesar
 timbangan **121.472 byte**, semuanya di bawah batas500KB per model. Poster
 berukuran720×540; ketiganya di-precache. File `.blend`/originals hanya sumber
@@ -213,8 +290,9 @@ Status operator memisahkan configured, connectionTested, contentEligible,
 privacyReviewed dan budgetEnabled/reason. Hash review stale tidak membuat konten
 eligible. `connectionTested` pada status aplikasi tetap false; receipt diagnosis
 terpisah tidak otomatis menjadi approval kelas. Manifest review konten masih kosong,
-privacy review masih null. Sample teacher tidak memanggil AI. Kartu strategi statis
-tetap tersedia, tanpa nama/foto/ink/QR/identity kelas pada payload provider.
+privacy review masih null. Akun contoh memakai aturan konfigurasi/review/budget
+yang sama dengan guru; gate khusus akun contoh sudah dihapus. Kartu strategi
+statis tetap tersedia, tanpa nama/foto/ink/QR/identity kelas pada payload provider.
 
 ## Diagnosis aman
 

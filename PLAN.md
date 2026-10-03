@@ -2542,3 +2542,77 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
 - Tidak ada blocker publikasi. CI post-push belum diperiksa. Next exact:
   periksa Actions bila diperlukan, atau jalankan build mengikuti UI_AI_HANDOFF;
   gate live/perangkat/hosted tetap mengikuti batas bukti sebelumnya.
+
+
+### 9.58 Koreksi UX HP, akun contoh dan ubin Blender — DONE (3 Oktober 2026, WIB)
+
+- Tujuh permintaan terbaru diterapkan: gate AI khusus akun contoh dihapus pada
+  status/Bisik/enrichment, tetap melalui native adapter dan ledger/budget/review;
+  menu “Tampilan nyaman” serta copy footer/context berulang dihapus; preferensi
+  OS/save-data/preferensi tersimpan tetap dihormati tanpa menu tambahan.
+- Preview sesi/editor punya area gulir bounded untuk6alat; garis bilangan full
+  width/label adaptif, grafik dengan label signed/decimal dan padding responsif;
+  matematika/pointer projection konsisten, tombol HP48px dan board tetap besar.
+  Ikon SVG kartun/face dekoratif tidak membawa kunci atau hasil penilaian.
+- QR scan langsung claim satu kali; challenge dari kamera HP menunggu sesi aktif
+  lalu claim otomatis. Heading/form berdasarkan ACK, form kembali setelah putus.
+  Close terkunci, punya progres, menyimpan/cache lalu kembali `/guru`; gagal
+  tetap retryable. Geser antarsoal hanya strip judul; drag alat/tulisan aman.
+- Menu board48px dan konten closed tanpa layout. Motion route/soal220ms,
+  scroll/reveal/input feedback mengikuti preferensi, tanpa remount provider,
+  auto-orbit atau WebGL pada soal/scanner.
+- Blender4.3.2 mengganti hanya algebra-kit: baki miring x²/rod x/unit square,
+  raised mesh labels tanpa font; GLB127860byte8376triangle, poster99214byte.
+  Total3GLB317492+355382poster=672874byte. Dua model/poster/blend lain unchanged.
+  Sumber/scripts/manifest/provenance tersedia; seleksi asset CLI untuk reproduksi.
+- PostgreSQL lokal snapshot belum berjalan: awal9integrationcase tidak dieksekusi
+  (connection refused), setelah startup cluster existing9/9 PASS (8.00s).
+  Native HTTP OpenAI/Anthropic mencakup sample/normal, replay, pricing/profile,
+  unknown counters, content/privacy/rate gate dan concurrent reservation.
+  Tidak memakai API berbayar/live, DB hosted, migration baru atau deploy.
+- Targeted browser5/5 PASS (45.1s):360/390 keenam alat+tulisan, scan QR piksel
+  sampai ACK SQL, collapse/revoke, close failure/success, geser, link pending,
+  foreign QR tanpa network dan kamera ditolak tetap bisa manual.
+  Kartu juga PASS pada360/390; seluruh6alat board1280/1366/1920 PASS (8.3s),
+  tiga GLB render satu canvas PASS (5.8s). Koreksi glyph/padding/menu closed
+  berasal dari inspeksi browser nyata.
+- Satu batch browser sempat overlap perebutan operator akun contoh; terdiagnosis
+  sebagai konflik resource. Seluruh batch selanjutnya/final dijalankan serial.
+  Early test salah menunggu next enabled di soal terakhir dan kamera canvas
+  tanpa repaint diperbaiki pada fixture; tidak memperlemah invariant aplikasi.
+- Attempt final pertama dihentikan exit130 setelah27 E2E PASS/1interrupted/
+  101not-run untuk audit regresi motion. Penanda/face kemudian dipindahkan
+  sebagai satu visual group: motion160ms tetap ada, drag tanpa transition,
+  reduced-motion0ms; test10frame memastikan face/dot tidak terpisah.
+- Attempt final berikutnya build `waZ7xW6s4J_t931tl5c6p`: format/type/lint/
+  unit1086/integration9/SQL/build PASS, E2E128 PASS/1 FAIL, command exit1.
+  Test OPEN01 gabungan9viewport/preset dan siklus privasi tinta kehabisan
+  deadline total30s saat revoke; assertion belum selesai, bukan bukti PASS.
+  Diagnostic scoped timeout60s PASS (test25.8s), kemudian test mempunyai budget
+  total60s serta assertion tambahan response revoke sukses dan clear<5000ms;
+  deadline tiap assertion tetap default. Targeted rerun1/1 PASS (test27.8s,
+  total32.1s). Percobaan instrumentation pertama dihentikan exit130 untuk
+  memperbaiki URL test-only yang salah; aplikasi tidak diubah untuk timeout ini.
+- Attempt build `1_SKjulHq72o163c0t3K-` source `a7d52afae5c3b3b05643e8f53690a8b67cf5b1544e3f7d6506511f516dda5ae5`
+  dihentikan exit130 saat audit screenshot HP menemukan label Bagi pecahan
+  terlalu rapat/overlap; E2E116 PASS/1interrupted/12not-run, bukan full PASS.
+  Toolbar pecahan diubah menjadi kolom responsif, label di atas select,
+  controls48px tanpa overlap. Test menambah bounding-box invariant bagi setiap
+  baris. Targeted360/390 kedua case PASS (16.0s), screenshot diperiksa ulang.
+- SHA rekonstruksi memastikan tepat2file berubah sejak unit/integration/SQL
+  PASS: CSS preview dan assertion E2E. Seluruh499file lain byte-identical,
+  termasuk semua TypeScript aplikasi, unit/integration inputs dan assets.
+  Suite unit/integration tidak diduplikasi setelah perubahan CSS ini.
+- Kandidat final source SHA256 `cabf4f62d5300e949e48855744ddab57e45b2a7cc1a9d6724aeef7465f0b5adb`
+  (501file) dibekukan. Command serial `pnpm format:check && pnpm typecheck &&
+  pnpm lint && pnpm build && pnpm test:e2e`: format/type/lint/build PASS,
+  E2E129/129 PASS (17m1.669s),1worker/retry0/flaky0/skip0, command exit0.
+  Build final `ANeazQh8M22lxHU2tCNGE`; revoke/clear tinta2431ms, tanpa
+  storage write/request tinta, reload tetap bersih. Log E2E
+  `/workspace/.papannalar-cloud/logs/session-ux-final-candidate.log`;
+  output tahap sebelumnya ada pada execution transcript.
+  Receipt aktual `artifacts/qa/ui-ai-v2/session-ux-v3.json`; seluruh source/hash,
+  budget/model/precache/protected38migration dan9body dokumen cocok.
+  Screenshot12preview HP serta GLB aktual diperiksa dan disimpan ignored.
+  Next exact: commit/push sesuai otorisasi pengguna sebelumnya.
+  Credential AI/HTTPS/hardware nyata tetap gap eksternal, bukan bukti production.

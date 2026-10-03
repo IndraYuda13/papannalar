@@ -7,6 +7,7 @@ Run after scripts/refine-ui-assets.py: python3 scripts/encode-ui-posters.py
 from pathlib import Path
 import hashlib
 import json
+import sys
 
 from PIL import Image
 
@@ -17,13 +18,15 @@ PUBLIC = ROOT / "public/assets/pn-ui-v2"
 receipt = json.loads((DESIGN / "blender-provenance.json").read_text())
 original = json.loads((DESIGN / "originals/manifest.json").read_text())
 assets = []
+selected = sys.argv[1:] or [item["id"] for item in receipt["models"]]
 for item in receipt["models"]:
     asset = item["id"]
     target = PUBLIC / "posters" / (asset + ".webp")
-    with Image.open(DESIGN / "renders" / (asset + ".png")) as image:
-        assert image.mode == "RGBA" and image.size == (720, 540)
-        assert image.getextrema()[3][0] == 0
-        image.save(target, format="WEBP", quality=88, method=6, exact=True)
+    if asset in selected:
+        with Image.open(DESIGN / "renders" / (asset + ".png")) as image:
+            assert image.mode == "RGBA" and image.size == (720, 540)
+            assert image.getextrema()[3][0] == 0
+            image.save(target, format="WEBP", quality=88, method=6, exact=True)
     old = next(value for value in original["assets"] if value["id"] == asset)
     assets.append({**old, **item, "posterBytes": target.stat().st_size,
                    "posterSha256": hashlib.sha256(target.read_bytes()).hexdigest(),

@@ -17,6 +17,7 @@ import {
 } from "@/core/tools/fractions";
 import type { ToolModel } from "@/core/tools/patterns";
 import { PointerOwnership } from "@/core/tools/pointers";
+import { ObjectFace } from "@/ui/components/activity-icon";
 import { Button } from "@/ui/components/button";
 export function Fractions({
   task,
@@ -143,11 +144,13 @@ export function Fractions({
                         key={cell}
                         aria-label={`Batang ${i + 1} bagian ${number + 1}`}
                         aria-pressed={selected}
-                        className={`min-h-[88px] min-w-[88px] flex-1 border-r-2 border-pn-ink-900 last:border-r-0 ${selected ? (bar.sign < 0 ? "bg-pn-amber-100 outline outline-2 outline-dashed outline-primary" : "bg-primary") : "bg-white"}`}
+                        className={`fraction-cell min-h-[88px] min-w-[88px] flex-1 border-r-2 border-pn-ink-900 last:border-r-0 ${selected ? (bar.sign < 0 ? "bg-pn-amber-100 outline outline-2 outline-dashed outline-primary" : "bg-primary") : "bg-white"}`}
                         onClick={() =>
                           act({ type: "paint", bar: i, cell: number })
                         }
-                      />
+                      >
+                        <ObjectFace />
+                      </button>
                     );
                   })}
                 </div>

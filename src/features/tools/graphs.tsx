@@ -32,6 +32,7 @@ import {
   type ToolModel,
 } from "@/core/tools/patterns";
 import { PointerOwnership } from "@/core/tools/pointers";
+import { ObjectFace } from "@/ui/components/activity-icon";
 import { Button } from "@/ui/components/button";
 type CoefficientAction = Extract<GraphAction, { type: "coefficient" }>;
 const number = (v: Rational) => Number(v.numerator) / Number(v.denominator);
@@ -163,13 +164,15 @@ export function Graphs({
     model = frame.model,
     point = pointPreview ?? frame.point,
     d = task.domain;
-  const width = 1000,
-    height = 480,
-    left = 80,
-    top = 20,
-    plotWidth = 890,
-    plotHeight = 400;
+  const width = 1000;
   const [axisFont, setAxisFont] = useState(22);
+  // Reserve real pixel space for signed/decimal labels on narrow previews.
+  // Pointer projection and clipping use the same responsive drawing rectangle.
+  const height = Math.max(480, axisFont * 12),
+    left = Math.max(80, axisFont * 3.5),
+    top = Math.max(20, axisFont * 1.4),
+    plotWidth = width - left - Math.max(30, axisFont * 1.3),
+    plotHeight = height - top - axisFont * 2.2;
   useEffect(() => {
     const element = plot.current;
     if (!element) return;
@@ -378,14 +381,14 @@ export function Graphs({
                   />
                   <text
                     x={left + t * plotWidth}
-                    y={top + plotHeight + 30}
+                    y={top + plotHeight + axisFont * 1.3}
                     textAnchor="middle"
                   >
                     {displayTick(d.minX + t * (d.maxX - d.minX))}
                   </text>
                   <text
-                    x={left - 10}
-                    y={top + t * plotHeight + 8}
+                    x={left - axisFont * 0.5}
+                    y={top + t * plotHeight + axisFont * 0.32}
                     textAnchor="end"
                   >
                     {displayTick(d.maxY - t * (d.maxY - d.minY))}
@@ -487,7 +490,7 @@ export function Graphs({
               <text x={width - axisFont} y={height - 5} fontSize={axisFont}>
                 x
               </text>
-              <text x="8" y={axisFont} fontSize={axisFont}>
+              <text x={left - axisFont} y={axisFont} fontSize={axisFont}>
                 y
               </text>
             </svg>
@@ -556,7 +559,7 @@ export function Graphs({
                   }
                 }}
               >
-                ●
+                <ObjectFace />
               </button>
             )}
           </div>

@@ -57,15 +57,11 @@ function logStatic(
 export async function llmStatus(request: NextRequest) {
   try {
     const ctx = authContext(request);
-    const teacher = await requireTeacher(ctx);
+    await requireTeacher(ctx);
     const cfg = llmConfiguration();
     let budgetEnabled = false,
       budgetReason: FallbackReason = "disabled";
-    if (
-      cfg.enabled &&
-      cfg.provider.profile &&
-      teacher.id !== process.env["SAMPLE_TEACHER_ID"]
-    ) {
+    if (cfg.enabled && cfg.provider.profile) {
       try {
         const value = await withDeadline(2000, request.signal, (signal) =>
           llmRpc(
@@ -115,7 +111,7 @@ export async function bisikRequest(request: NextRequest) {
   try {
     const ctx = authContext(request);
     return await withDeadline(5000, request.signal, async (signal) => {
-      const teacher = await requireTeacher(ctx);
+      await requireTeacher(ctx);
       const input = await readBody(request, bisikRequestSchema);
       await classDetail(ctx.client, input.classId);
       const cfg = llmConfiguration(),
@@ -139,8 +135,7 @@ export async function bisikRequest(request: NextRequest) {
         (!cfg.freeText || !safeQuestionText(input.question))
       )
         return fallback("privacy");
-      if (!cfg.enabled || teacher.id === process.env["SAMPLE_TEACHER_ID"])
-        return fallback("disabled");
+      if (!cfg.enabled) return fallback("disabled");
       if (!strategy) return fallback("unreviewed");
       const history = await readSync(ctx.client, input.classId);
       if (!history.records.some((r) => r.sessionId === input.sessionId))
@@ -187,7 +182,7 @@ export async function enrichmentRequest(request: NextRequest) {
   try {
     const ctx = authContext(request);
     return await withDeadline(30000, request.signal, async (signal) => {
-      const teacher = await requireTeacher(ctx);
+      await requireTeacher(ctx);
       const input = await readBody(request, enrichRequestSchema, 65536);
       const detail = await classDetail(ctx.client, input.recipe.classId);
       if (input.recipe.grade !== detail.class.grade)
@@ -218,8 +213,7 @@ export async function enrichmentRequest(request: NextRequest) {
       const history = await readSync(ctx.client, pkg.classId);
       if (history.records.some((r) => r.payload.package.id === pkg.id))
         return fallback("frozen");
-      if (!cfg.enabled || teacher.id === process.env["SAMPLE_TEACHER_ID"])
-        return fallback("disabled");
+      if (!cfg.enabled) return fallback("disabled");
       const slots = approvedStorySlots(pkg);
       if (!slots.length) return fallback("unreviewed");
       signal.throwIfAborted();

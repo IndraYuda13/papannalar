@@ -924,9 +924,29 @@ for (const motion of ["no-preference", "reduce"] as const) {
     await marker.press("ArrowRight");
     await expect(page.getByTestId("number-position")).toHaveText("Posisi −2");
     const visual = page.getByTestId("number-marker-visual");
+    const moving = page.locator(".number-line-visual");
     expect(
-      await visual.evaluate((el) => getComputedStyle(el).transitionDuration),
+      await moving.evaluate((el) => getComputedStyle(el).transitionDuration),
     ).toBe(motion === "reduce" ? "0s" : "0.16s");
+    // Sample the real animated geometry: the decorative face must follow the
+    // visible marker throughout keyboard motion, including reduced motion.
+    const offsets = await page.evaluate(async () => {
+      const samples: number[] = [];
+      for (let i = 0; i < 10; i++) {
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve()),
+        );
+        const dot = document
+          .querySelector('[data-testid="number-marker-visual"]')!
+          .getBoundingClientRect();
+        const face = document
+          .querySelector(".number-line-face")!
+          .getBoundingClientRect();
+        samples.push(Math.abs(dot.x + dot.width / 2 - face.x - face.width / 2));
+      }
+      return samples;
+    });
+    expect(Math.max(...offsets)).toBeLessThan(1.5);
     const start = (await marker.boundingBox())!;
     const to = await marker.evaluate((el) => {
       const transform = (el.parentNode as SVGGElement).getScreenCTM()!;
@@ -941,7 +961,7 @@ for (const motion of ["no-preference", "reduce"] as const) {
     await page.mouse.move(to.x, to.y, { steps: 6 });
     await expect(visual).toHaveAttribute("data-dragging", "true");
     expect(
-      await visual.evaluate((el) => getComputedStyle(el).transitionDuration),
+      await moving.evaluate((el) => getComputedStyle(el).transitionDuration),
     ).toBe("0s");
     await page.mouse.up();
     await expect(page.getByTestId("number-position")).toHaveText("Posisi 0");

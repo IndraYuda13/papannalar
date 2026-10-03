@@ -13,6 +13,7 @@ import {
 import { rational, type Rational } from "@/core/math/rational";
 import { exactText, linearText, type ToolModel } from "@/core/tools/patterns";
 import { PointerOwnership } from "@/core/tools/pointers";
+import { ObjectFace } from "@/ui/components/activity-icon";
 import { Button } from "@/ui/components/button";
 
 const text = (v: Rational) => exactText(v).replaceAll("-", "−");
@@ -49,11 +50,12 @@ function Weights({ value }: { value: LinearExpression }) {
           (_, i) => (
             <span
               key={`${term}-${i}`}
-              className={`flex min-h-[88px] min-w-[88px] items-center justify-center border-4 px-3 text-[36px] ${term === "x" ? "rounded-t-3xl border-primary bg-secondary" : "border-pn-amber-500 bg-white"} ${v.numerator < 0n ? "border-dashed" : ""}`}
+              className={`balance-weight flex min-h-[88px] min-w-[88px] items-center justify-center border-4 px-3 text-[36px] ${term === "x" ? "rounded-t-3xl border-primary bg-secondary" : "border-pn-amber-500 bg-white"} ${v.numerator < 0n ? "border-dashed" : ""}`}
             >
               {separate
                 ? `${v.numerator < 0n ? "−" : ""}${term === "x" ? "x" : "1"}`
                 : `${text(v)}${term === "x" ? "x" : " satuan"}`}
+              <ObjectFace />
             </span>
           ),
         );
@@ -215,6 +217,7 @@ export function Balance({
               onLostPointerCapture={cancel}
               onClick={(e) => chooseWeight(operation, e.detail)}
             >
+              <ObjectFace />
               {label}
             </Button>
           );

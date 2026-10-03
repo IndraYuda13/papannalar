@@ -235,62 +235,73 @@ for (const selected of [
   "anthropic-messages",
 ] as const)
   describe(`${selected} route → HTTP fixture → PostgreSQL ledger`, () => {
-    it("Bisik and enrichment validate and write correct alias/profile/price receipt, replay never calls twice", async () => {
-      const profile = configure(selected);
-      approve();
-      const input = ask(),
-        first = await bisikRequest(request("bisik", input));
-      expect(await first.json()).toMatchObject({ status: "ai", ...answer });
-      const replay = await bisikRequest(request("bisik", input));
-      expect(await replay.json()).toMatchObject({
-        status: "static",
-        reason: "active",
-      });
-      const pkg = buildPackage({
-        id: crypto.randomUUID(),
-        classId,
-        grade: 7,
-        variant: "weekly",
-        seed: 33,
-        occupied: [{ kind: "step", stepId: "D1" }],
-      });
-      expect(
-        await (
-          await enrichmentRequest(
-            request("enrich", {
-              requestId: crypto.randomUUID(),
-              recipe: toPackageRecipe(pkg),
-            }),
-          )
-        ).json(),
-      ).toMatchObject({
-        status: "ai",
-        stories: [{ choice: { frameId: "lift-down-v1", variant: 0 } }],
-      });
-      const rows = JSON.parse(
-        sql(
-          `select jsonb_agg(jsonb_build_object('usage',usage,'snapshot',profile_snapshot)) from pn_private.llm_usage where owner_id='${owner}'`,
-        ),
-      );
-      expect(rows).toHaveLength(2);
-      for (const row of rows)
-        expect(row).toMatchObject({
-          usage: {
-            profileId: profile.id,
-            protocol: selected,
-            requestedModel: profile.model,
-            reportedModel: "fixture-reported-snapshot",
-            configVersion: "test-v2",
-            priceVersion: "test-price",
-            usageKnown: true,
-          },
-          snapshot: { maxOutputTokens: 2048 },
+    it.each([false, true])(
+      "Bisik/enrichment ledger and idempotency are identical with sample account=%s",
+      async (sample) => {
+        if (sample) vi.stubEnv("SAMPLE_TEACHER_ID", owner);
+        const profile = configure(selected);
+        approve();
+        const status = await llmStatus(
+          new NextRequest("http://127.0.0.1:3100/api/v1/llm/status"),
+        );
+        expect(await status.json()).toMatchObject({
+          configured: true,
+          budgetEnabled: true,
         });
-      expect(bodies).toHaveLength(2);
-      expect(bodies.join("")).not.toMatch(
-        new RegExp(`${owner}|${classId}|${sessionId}|answerKey|photo|ink`),
-      );
-    });
+        const input = ask(),
+          first = await bisikRequest(request("bisik", input));
+        expect(await first.json()).toMatchObject({ status: "ai", ...answer });
+        const replay = await bisikRequest(request("bisik", input));
+        expect(await replay.json()).toMatchObject({
+          status: "static",
+          reason: "active",
+        });
+        const pkg = buildPackage({
+          id: crypto.randomUUID(),
+          classId,
+          grade: 7,
+          variant: "weekly",
+          seed: 33,
+          occupied: [{ kind: "step", stepId: "D1" }],
+        });
+        expect(
+          await (
+            await enrichmentRequest(
+              request("enrich", {
+                requestId: crypto.randomUUID(),
+                recipe: toPackageRecipe(pkg),
+              }),
+            )
+          ).json(),
+        ).toMatchObject({
+          status: "ai",
+          stories: [{ choice: { frameId: "lift-down-v1", variant: 0 } }],
+        });
+        const rows = JSON.parse(
+          sql(
+            `select jsonb_agg(jsonb_build_object('usage',usage,'snapshot',profile_snapshot)) from pn_private.llm_usage where owner_id='${owner}'`,
+          ),
+        );
+        expect(rows).toHaveLength(2);
+        for (const row of rows)
+          expect(row).toMatchObject({
+            usage: {
+              profileId: profile.id,
+              protocol: selected,
+              requestedModel: profile.model,
+              reportedModel: "fixture-reported-snapshot",
+              configVersion: "test-v2",
+              priceVersion: "test-price",
+              usageKnown: true,
+            },
+            snapshot: { maxOutputTokens: 2048 },
+          });
+        expect(bodies).toHaveLength(2);
+        expect(bodies.join("")).not.toMatch(
+          new RegExp(`${owner}|${classId}|${sessionId}|answerKey|photo|ink`),
+        );
+      },
+    );
     it("unknown counters retain charged reserve and stages remain honest", async () => {
       configure(selected);
       approve();

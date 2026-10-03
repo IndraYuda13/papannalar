@@ -69,8 +69,19 @@ test("U2 visible login automatically renders 3D without controls; hidden panels 
   expect(await page.evaluate(() => window.__pnDraws ?? 0)).toBe(frames);
   await mkdir(evidence, { recursive: true });
   await page.screenshot({ path: `${evidence}/scene-rendered.png` });
-  await page.locator(".studio-login-form summary").click();
-  await page.getByLabel("Tampilan ringan", { exact: true }).check();
+  await expect(page.getByText("Tampilan nyaman", { exact: true })).toHaveCount(
+    0,
+  );
+  // Existing accessibility preferences remain honored without a redundant menu.
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "pn-visual-preferences-v1",
+      JSON.stringify({ light: true }),
+    );
+    window.dispatchEvent(
+      new StorageEvent("storage", { key: "pn-visual-preferences-v1" }),
+    );
+  });
   await expect(page.locator(".scene-canvas")).toHaveCount(0);
   await expect(
     page.getByRole("img", { name: "Ilustrasi PapanNalar", exact: true }),

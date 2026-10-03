@@ -137,6 +137,7 @@ export function usePresentationTransport({
           ? "Kendali sedang dipakai atau sesi telah berubah. Periksa perangkat aktif sebelum mencoba lagi."
           : "Kode belum dapat dipakai. Periksa koneksi dan enam digit terbaru di layar.",
       );
+      throw error;
     } finally {
       locked.current = false;
       setBusy(false);

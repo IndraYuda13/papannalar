@@ -30,11 +30,7 @@ export function OfflineChooser() {
         <Button variant="outline" onClick={() => setOpened(undefined)}>
           Pilih kelas / materi tersimpan lain
         </Button>
-        <SessionWorkspace
-          key={opened.run.id}
-          initial={opened}
-          reload={async () => {}}
-        />
+        <SessionWorkspace key={opened.run.id} initial={opened} />
       </div>
     );
   return (

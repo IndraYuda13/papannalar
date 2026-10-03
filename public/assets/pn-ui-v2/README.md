@@ -4,6 +4,9 @@ Tiga file GLB adalah geometry 3D nyata, bukan gambar yang diberi nama .glb.
 Geometri dari kit dipertahankan sebagai dasar desain dan salinan asli disimpan
 di `design/pn-ui-v2/originals/`. Blender 4.3.2 merapikan tepi, normals, bola,
 material matte dan warna sRGB yang dikonversi ke linear untuk glTF.
+Pada koreksi UX 3 Oktober, algebra-kit dibangun ulang sebagai baki miring dengan
+ubin x², batang x dan ubin satuan; semua label merupakan mesh buatan sendiri.
+Model learning-board dan balance-scale dipertahankan byte-identical.
 Tidak memakai texture/image/font eksternal. Poster WebP transparan berasal dari
 render Cycles CPU model yang sama, dengan pencahayaan studio dan contact shadow.
 
@@ -34,6 +37,10 @@ file desain/poster, tidak diekspor ke GLB aplikasi. Reproduksi dari root repo:
 ```bash
 blender --background --factory-startup --python-exit-code 1 --python scripts/refine-ui-assets.py
 python3 scripts/encode-ui-posters.py
+
+# Regenerasi hanya ubin aljabar, mempertahankan dua model/poster lainnya:
+blender --background --factory-startup --python-exit-code 1 --python scripts/refine-ui-assets.py -- algebra-kit
+python3 scripts/encode-ui-posters.py algebra-kit
 ```
 
 Authoring memerlukan Blender 4.3.2 dan Pillow; menjalankan/build aplikasi tidak

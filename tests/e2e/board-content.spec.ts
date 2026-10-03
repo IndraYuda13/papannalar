@@ -167,9 +167,7 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
       exact: true,
     })
     .click();
-  await board
-    .getByText("Menu papan · kemampuan dan cadangan", { exact: true })
-    .click();
+  await board.getByText("Menu papan", { exact: true }).click();
   await board
     .getByRole("button", { name: "Buka paket tersimpan", exact: true })
     .click();
@@ -189,9 +187,7 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
       .getByRole("region", { name: "Latihan dari cache", exact: true })
       .innerText(),
   ).not.toMatch(/Absen|Segitiga Biru|D[1-6]|A[1-4]/);
-  await board
-    .getByText("Menu papan · kemampuan dan cadangan", { exact: true })
-    .click();
+  await board.getByText("Menu papan", { exact: true }).click();
   await board.screenshot({ path: "artifacts/qa/M15/board-offline-cache.png" });
   await packageFixture(board);
   expect(

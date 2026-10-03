@@ -50,7 +50,8 @@ function savePending(value: { code: string; expiresAt: number }) {
   }
 }
 // Call in the teacher entry shell before login/navigation. Nothing is claimed
-// until the teacher chooses a class/run and explicitly submits the code.
+// until the teacher chooses an active class/run. Its pairing control can then
+// submit the already scanned challenge once without a second manual action.
 export function capturePairingLink(): string | null {
   const url = new URL(window.location.href);
   if (!url.searchParams.has("pair")) return pendingPairingCode();

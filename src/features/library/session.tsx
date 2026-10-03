@@ -1,5 +1,19 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CircleCheck,
+  LoaderCircle,
+  Unplug,
+  Monitor,
+} from "lucide-react";
+import { ActivityIcon } from "@/ui/components/activity-icon";
+import {
+  MotionSwap,
+  SwipeNavigation,
+} from "@/ui/components/interactive-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTeacher } from "@/features/guru/app-context";
 import {
@@ -67,7 +81,7 @@ export function SessionPage({ id }: { id: string }) {
         }
       />
     );
-  return <SessionWorkspace key={id} initial={detail} reload={load} />;
+  return <SessionWorkspace key={id} initial={detail} />;
 }
 function projection(run: LibraryRun): PresentationState {
   const item = run.document.items[run.position];
@@ -92,19 +106,15 @@ async function publishRun(env: PresentationEnvelope, next: LibraryRun) {
     }),
   );
 }
-export function SessionWorkspace({
-  initial,
-  reload,
-}: {
-  initial: Detail;
-  reload: () => Promise<void>;
-}) {
+export function SessionWorkspace({ initial }: { initial: Detail }) {
+  const router = useRouter();
   const { scope, refresh } = useTeacher(),
     [run, setRun] = useState(initial.run),
     [responses, setResponses] = useState(initial.responses),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false),
     [preview, setPreview] = useState(false),
+    [closing, setClosing] = useState(false),
     [manual, setManual] = useState(false),
     [attendance, setAttendance] = useState(
       initial.run.roster[0]?.attendanceNumber ?? 1,
@@ -169,7 +179,13 @@ export function SessionWorkspace({
         .catch(() => {});
   }, [presentId, connected, envelopeRevision, latestSnapshot, run, receive]);
   async function move(position: number) {
-    if (mutating.current) return;
+    if (
+      mutating.current ||
+      run.status !== "active" ||
+      position < 0 ||
+      position >= run.document.items.length
+    )
+      return;
     mutating.current = true;
     setBusy(true);
     setMessage("");
@@ -294,6 +310,42 @@ export function SessionWorkspace({
       setBusy(false);
     }
   }
+  async function finish() {
+    if (
+      mutating.current ||
+      !window.confirm("Akhiri sesi? Materi dan jawaban tetap tersimpan.")
+    )
+      return;
+    mutating.current = true;
+    setBusy(true);
+    setClosing(true);
+    setMessage("");
+    try {
+      const next = runSchema.parse(
+        await libraryCall({
+          action: "close",
+          id: run.id,
+          revision: run.revision,
+        }),
+      );
+      setRun(next);
+      // A successful close is final even if refreshing the index fails offline.
+      await libraryCache(scope, "detail", run.id, {
+        run: next,
+        responses,
+      }).catch(() => {});
+      await refresh().catch(() => {});
+      router.replace("/guru");
+    } catch {
+      setMessage(
+        "Sesi belum dapat diakhiri. Periksa sambungan lalu coba lagi.",
+      );
+      setClosing(false);
+    } finally {
+      mutating.current = false;
+      setBusy(false);
+    }
+  }
   return (
     <div className="space-y-5">
       <Link
@@ -302,7 +354,10 @@ export function SessionWorkspace({
       >
         ← Simpan & keluar
       </Link>
-      <div>
+      <SwipeNavigation
+        disabled={busy || run.status !== "active"}
+        onStep={(direction) => void move(run.position + direction)}
+      >
         <p className="text-sm text-primary">
           Kelas {run.classLabel} ·{" "}
           {run.mode === "assessment" ? "Cek pemahaman" : "Mengajar"}
@@ -314,7 +369,7 @@ export function SessionWorkspace({
           {run.date.split("-").reverse().join("/")} · Soal {run.position + 1}/
           {run.document.items.length}
         </p>
-      </div>
+      </SwipeNavigation>
       <div
         className="studio-session-progress"
         aria-label={`Soal ${run.position + 1} dari ${run.document.items.length}`}
@@ -328,25 +383,37 @@ export function SessionWorkspace({
           <section
             className={`${panel} studio-session-pairing`}
             aria-label="Sambungan layar"
+            data-connected={transport.connected}
           >
-            <h2 className="font-bold">
-              {transport.snapshot && transport.online
-                ? "Layar tersambung"
-                : "Sambungkan Layar"}
+            <h2 className="flex items-center gap-2 font-bold">
+              {transport.connected ? (
+                <CircleCheck size={20} aria-hidden />
+              ) : (
+                <Monitor size={20} aria-hidden />
+              )}
+              {transport.connected ? "Layar tersambung" : "Sambungkan Layar"}
             </h2>
-            <p role="status" className="text-sm">
+            <p role="status" className="text-sm" hidden={transport.connected}>
               {transport.connection?.transport === "offline"
                 ? "Koneksi terputus. Menyambungkan kembali…"
-                : transport.message ||
-                  "Buka Layar Kelas di papan. Pindai QR atau masukkan kodenya."}
+                : transport.connected
+                  ? "Tampilan siap dikendalikan dari HP."
+                  : transport.message ||
+                    "Buka Layar Kelas di papan. Pindai QR atau masukkan kodenya."}
             </p>
-            <PairingCodeInput
-              onPair={transport.pair}
-              disabled={transport.busy || busy}
-            />
+            {!transport.connected && (
+              <PairingCodeInput
+                onPair={transport.pair}
+                disabled={transport.busy || busy}
+              />
+            )}
             {transport.snapshot && (
-              <Button variant="outline" onClick={() => void transport.revoke()}>
-                Putuskan layar
+              <Button
+                variant="outline"
+                disabled={transport.busy || busy}
+                onClick={() => void transport.revoke()}
+              >
+                <Unplug size={18} aria-hidden /> Putuskan layar
               </Button>
             )}
           </section>
@@ -357,7 +424,14 @@ export function SessionWorkspace({
           </p>
         )}
         <section className={`${panel} studio-session-question`}>
-          <p className="text-lg font-semibold">{item.prompt}</p>
+          <MotionSwap change={item.id} className="session-question-copy">
+            {item.kind !== "card" && (
+              <ActivityIcon
+                kind={item.kind === "writing" ? "writing" : item.tool.kind}
+              />
+            )}
+            <p className="text-lg font-semibold">{item.prompt}</p>
+          </MotionSwap>
           {item.kind === "card" && (
             <>
               <ul className="grid gap-2 sm:grid-cols-2">
@@ -372,13 +446,13 @@ export function SessionWorkspace({
               </p>
             </>
           )}
-          <div className="flex flex-wrap gap-2">
+          <div className="session-question-navigation flex flex-wrap gap-2">
             <Button
               variant="outline"
               disabled={busy || run.position === 0 || run.status !== "active"}
               onClick={() => void move(run.position - 1)}
             >
-              Sebelumnya
+              <ChevronLeft size={18} aria-hidden /> Sebelumnya
             </Button>
             <Button
               disabled={
@@ -388,7 +462,7 @@ export function SessionWorkspace({
               }
               onClick={() => void move(run.position + 1)}
             >
-              Soal berikutnya
+              Soal berikutnya <ChevronRight size={18} aria-hidden />
             </Button>
             <Button variant="outline" onClick={() => setPreview(!preview)}>
               Preview papan
@@ -399,6 +473,7 @@ export function SessionWorkspace({
               <LibraryItemView
                 item={publicLibraryItem(item)}
                 row={run.position + 1}
+                hidePrompt
               />
             </div>
           )}
@@ -527,37 +602,17 @@ export function SessionWorkspace({
         </section>
       )}
       <div className="flex flex-wrap gap-3">
-        {run.status === "active" && (
+        {(run.status === "active" || closing) && (
           <Button
             variant="outline"
-            disabled={busy}
-            onClick={async () => {
-              if (
-                !window.confirm(
-                  "Akhiri sesi? Materi dan jawaban tetap tersimpan.",
-                )
-              )
-                return;
-              setBusy(true);
-              try {
-                const next = runSchema.parse(
-                  await libraryCall({
-                    action: "close",
-                    id: run.id,
-                    revision: run.revision,
-                  }),
-                );
-                setRun(next);
-                await refresh();
-                await reload();
-              } catch {
-                setMessage("Sesi belum dapat diakhiri. Periksa sambungan.");
-              } finally {
-                setBusy(false);
-              }
-            }}
+            disabled={busy || closing}
+            aria-busy={closing}
+            onClick={() => void finish()}
           >
-            Akhiri sesi
+            {closing && (
+              <LoaderCircle className="pending-spinner" size={18} aria-hidden />
+            )}
+            {closing ? "Mengakhiri sesi…" : "Akhiri sesi"}
           </Button>
         )}
         <Button asChild variant="outline">

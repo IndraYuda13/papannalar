@@ -140,19 +140,13 @@ export function PairingCodeInput({
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState("");
   const locked = useRef(false);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setCode(capturePairingLink() ?? "");
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
-  async function submit() {
-    if (locked.current || disabled || !/^\d{6}$/.test(code)) return;
+  async function submit(value = code) {
+    if (locked.current || disabled || !/^\d{6}$/.test(value)) return;
     locked.current = true;
     setSending(true);
     try {
       setNotice("");
-      await onPair(code);
+      await onPair(value);
     } catch {
       setNotice(
         "Belum tersambung. Periksa internet dan kode di papan, lalu coba lagi.",
@@ -162,8 +156,24 @@ export function PairingCodeInput({
       setSending(false);
     }
   }
+  const submitLink = useRef(submit);
+  useEffect(() => {
+    submitLink.current = submit;
+  });
+  useEffect(() => {
+    // A QR opened in the phone camera is claimed only after an active teacher
+    // session has mounted this control, never in the login or selection screen.
+    const timer = setTimeout(() => {
+      const captured = capturePairingLink();
+      if (captured) {
+        setCode(captured);
+        void submitLink.current(captured);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" aria-busy={sending}>
       <Button
         type="button"
         variant="outline"
@@ -178,6 +188,7 @@ export function PairingCodeInput({
           onCode={(value) => {
             setCode(value);
             setScanning(false);
+            void submit(value);
           }}
           onClose={() => setScanning(false)}
         />
@@ -211,7 +222,7 @@ export function PairingCodeInput({
           className="h-12 self-end px-4 py-2"
           disabled={disabled || sending}
         >
-          Hubungkan papan
+          {sending ? "Menyambungkan…" : "Hubungkan papan"}
         </Button>
       </form>
       {notice && <p role="status">{notice}</p>}

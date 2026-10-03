@@ -12,6 +12,9 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
   page,
   browser,
 }) => {
+  // Nine viewport/preset combinations plus the complete ink privacy lifecycle.
+  // Each assertion retains its normal timeout; revocation has a separate bound.
+  test.setTimeout(60000);
   const errors: string[] = [];
   await loginTeacher(page);
   await page.getByLabel("Data kelas").selectOption("demo");
@@ -226,10 +229,18 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
     )
       revokedResponses.push(403);
   });
+  const revokeStartedAt = Date.now();
+  const revokeResponse = page.waitForResponse((response) => {
+    if (!response.url().endsWith("/api/v1/pairing")) return false;
+    return response.request().postDataJSON()?.action === "revoke";
+  });
   await controls
     .getByRole("button", { name: "Putuskan layar", exact: true })
     .click();
+  expect((await revokeResponse).ok()).toBe(true);
   await expect(canvas).toHaveCount(0);
+  const revokeElapsedMs = Date.now() - revokeStartedAt;
+  expect(revokeElapsedMs).toBeLessThan(5000);
   await board.reload();
   await expect(canvas).toHaveCount(0);
   expect(revokedResponses.length).toBeGreaterThan(0);
@@ -250,6 +261,7 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
         clearOnMode: true,
         clearOnAccessLock: true,
         clearOnRevoke: true,
+        revokeElapsedMs,
         clearOnReload: true,
         runtimeErrors: 0,
         expectedRevokedResponses: revokedResponses.length,

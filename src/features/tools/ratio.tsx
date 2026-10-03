@@ -10,6 +10,7 @@ import {
 } from "@/core/tools/ratio";
 import type { ToolModel } from "@/core/tools/patterns";
 import { rational, type Rational } from "@/core/math/rational";
+import { ObjectFace } from "@/ui/components/activity-icon";
 import { Button } from "@/ui/components/button";
 const text = (value: Rational) =>
   value.denominator === 1n
@@ -91,8 +92,18 @@ export function RatioTable({
                     {i === 0 ? (
                       state.history.length === 0 &&
                       task[axis === "x" ? "baseX" : "baseY"] <= 12 ? (
-                        <span aria-label={`${row === 0 ? "A" : "B"} awal`}>
-                          {"●".repeat(task[axis === "x" ? "baseX" : "baseY"])}
+                        <span
+                          className="ratio-objects"
+                          aria-label={`${row === 0 ? "A" : "B"} awal`}
+                        >
+                          {Array.from(
+                            { length: task[axis === "x" ? "baseX" : "baseY"] },
+                            (_, n) => (
+                              <span className="ratio-object" key={n}>
+                                <ObjectFace />
+                              </span>
+                            ),
+                          )}
                         </span>
                       ) : (
                         text(c[axis])

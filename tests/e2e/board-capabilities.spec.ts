@@ -129,7 +129,7 @@ for (const touches of [0, 1, 2, 4])
     expect(sent.p95Ms).toBeGreaterThanOrEqual(sent.medianMs);
     await page.reload();
     await expect(panel).toHaveCount(0);
-    const menu = page.getByText("Menu papan · kemampuan dan cadangan", {
+    const menu = page.getByText("Menu papan", {
       exact: true,
     });
     if (
@@ -229,9 +229,7 @@ for (const touches of [0, 1, 2, 4])
           fullPage: false,
         });
       }
-      await page
-        .getByText("Menu papan · kemampuan dan cadangan", { exact: true })
-        .click();
+      await page.getByText("Menu papan", { exact: true }).click();
       await teacherContext.close();
     }
     if (

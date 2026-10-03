@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck, SlidersHorizontal, ChevronDown } from "lucide-react";
 import {
   challengeSchema,
   pairingStatusSchema,
@@ -292,9 +292,10 @@ export function BoardWorkspace() {
           )}
         </>
       ) : null}
-      <details className="board-menu my-4 space-y-3 text-[26px]">
-        <summary className="min-h-24 cursor-pointer p-6">
-          Menu papan · kemampuan dan cadangan
+      <details className="board-menu space-y-3 text-[26px]">
+        <summary className="board-menu-trigger">
+          <SlidersHorizontal size={20} aria-hidden /> Menu papan{" "}
+          <ChevronDown className="board-menu-chevron" size={18} aria-hidden />
         </summary>
         <section aria-label="Status papan" className="space-y-2 text-base">
           <h2 className="font-bold">Status papan</h2>

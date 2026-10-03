@@ -3,7 +3,6 @@ import { Brand } from "@/ui/components/brand";
 import { LoginForm } from "@/features/guru/login-form";
 import { SampleLogin } from "@/features/guru/sample-login";
 import { DecorativeScene } from "@/ui/components/decorative-scene";
-import { VisualSettings } from "@/ui/components/visual-preferences";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Masuk" };
@@ -44,7 +43,6 @@ export default function LoginPage() {
         >
           Buka Layar Kelas
         </a>
-        <VisualSettings />
       </div>
     </main>
   );

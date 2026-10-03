@@ -1,0 +1,220 @@
+{
+  "status": "PASS",
+  "recordedAt": "2026-10-03T00:48:34.948Z",
+  "baseCommit": "4ce1227a7b4831e1a8d9e3dda5e9042a2d5eb501",
+  "buildId": "ANeazQh8M22lxHU2tCNGE",
+  "source": {
+    "sha256": "cabf4f62d5300e949e48855744ddab57e45b2a7cc1a9d6724aeef7465f0b5adb",
+    "fileCount": 501
+  },
+  "verification": {
+    "command": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm build && pnpm test:e2e",
+    "exitCode": 0,
+    "logPath": "/workspace/.papannalar-cloud/logs/session-ux-final-candidate.log",
+    "logContents": "E2E stdout/stderr; preceding format/typecheck/lint/build output is recorded by the execution tool. Exit 0 is for the complete sequential command.",
+    "serial": true,
+    "unit": {
+      "files": 70,
+      "passed": 1086
+    },
+    "integration": {
+      "files": 1,
+      "passed": 9,
+      "transport": "native HTTP fixture + real loopback PostgreSQL/RLS",
+      "authAndContentReviewHooks": "SYNTHETIC; production manifests were not changed"
+    },
+    "sql": {
+      "allExistingRlsScripts": "PASS",
+      "llmBudgetPrivacyAssertions": 27,
+      "dualProtocolLedgerAssertions": 28
+    },
+    "coveredChecks": {
+      "command": "pnpm verify (unit, SQL and integration stages PASS; browser phase stopped for visual audit)",
+      "logPath": "/workspace/.papannalar-cloud/logs/session-ux-final-verified.log",
+      "inputProof": {
+        "coveredSourceSha256": "a7d52afae5c3b3b05643e8f53690a8b67cf5b1544e3f7d6506511f516dda5ae5",
+        "currentSourceSha256": "cabf4f62d5300e949e48855744ddab57e45b2a7cc1a9d6724aeef7465f0b5adb",
+        "fileCount": 501,
+        "unchangedFiles": 499,
+        "changedFiles": [
+          "src/app/globals.css",
+          "tests/e2e/session-ux-v3.spec.ts"
+        ],
+        "reconstructionSha256": "a7d52afae5c3b3b05643e8f53690a8b67cf5b1544e3f7d6506511f516dda5ae5",
+        "verified": true,
+        "coveredStages": "Unit 1086, integration 9 and SQL/RLS all passed before visual audit; application TypeScript, contracts, adapters, database code, unit and integration inputs are byte-identical"
+      },
+      "repeated": false
+    },
+    "e2e": {
+      "startTime": "2026-10-03T00:31:17.857Z",
+      "duration": 1021668.9789999999,
+      "expected": 129,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "providers": [
+    {
+      "protocol": "openai-chat-completions",
+      "local": "PASS",
+      "sampleAccount": "PASS",
+      "live": "NOT_RUN"
+    },
+    {
+      "protocol": "anthropic-messages",
+      "local": "PASS",
+      "sampleAccount": "PASS",
+      "live": "NOT_RUN"
+    }
+  ],
+  "ui": {
+    "phoneWidths": [
+      360,
+      390
+    ],
+    "otherTeacherWidths": [
+      1024,
+      1366
+    ],
+    "boardWidths": [
+      1280,
+      1366,
+      1920
+    ],
+    "previews": [
+      "number-line",
+      "fractions",
+      "ratio",
+      "algebra",
+      "balance",
+      "graphs",
+      "writing",
+      "card"
+    ],
+    "numberLineResult": "-1 + 4 = 3",
+    "fractionWholesEqual": true,
+    "axisLabelsNoOverlapOrClipping": true,
+    "qr": "Actual QR pixels in synthetic camera MediaStream → jsQR → one claim → real SQL/board ACK; foreign QR never fetched",
+    "pairing": "ACK hides form; disconnect restores it; captured challenge waits for active class/session",
+    "finish": "503 remains retryable; successful close displays progress and replaces route with /guru",
+    "motion": "Shared 160ms marker/face transform; 10-frame alignment check; no transition while dragging; reduced-motion honored",
+    "boardMenuClosedHeightPx": 48,
+    "cartoonObjects": "Original decorative SVG faces, labels/counts and deterministic reducers preserved",
+    "reflectionRevocationMs": 2431
+  },
+  "assets": {
+    "license": "CC0-1.0",
+    "authoringTool": "Blender 4.3.2",
+    "samples": 96,
+    "externalDownloads": 0,
+    "paidApiCalls": 0,
+    "modelBytes": 317492,
+    "posterBytes": 355382,
+    "maxModelBytes": 127860,
+    "models": [
+      {
+        "id": "learning-board",
+        "sha256": "94cabd59012543917201e80c50fd215adc6311536513a67ebabae96777827112",
+        "bytes": 68160,
+        "triangles": 4260,
+        "posterSha256": "ebf1724d67628e6bcd46e58760c7fbdaa34c2a65bfec4e720f763e2772e88766",
+        "posterBytes": 116794
+      },
+      {
+        "id": "balance-scale",
+        "sha256": "35b5ea5b3b7b0d5c29d2e7de5d3e8d30a7c1ac50640c13ddd1bb113ddc748a1c",
+        "bytes": 121472,
+        "triangles": 8196,
+        "posterSha256": "7bab1ed1df0d69c59fab290ca58c589991b9f107f768393e82b66b22f51b8b69",
+        "posterBytes": 139374
+      },
+      {
+        "id": "algebra-kit",
+        "sha256": "3d2790376b9da5f00f981055775557d5b6817215012a076103574d3157b18e90",
+        "bytes": 127860,
+        "triangles": 8376,
+        "posterSha256": "27d443f8ea524c8abe42e672677115d9ee6d5bd16e28f2724a76552117447aa9",
+        "posterBytes": 99214
+      }
+    ],
+    "preservedOtherFiles": [
+      "public/assets/pn-ui-v2/models/learning-board.glb",
+      "public/assets/pn-ui-v2/models/balance-scale.glb",
+      "public/assets/pn-ui-v2/posters/learning-board.webp",
+      "public/assets/pn-ui-v2/posters/balance-scale.webp",
+      "design/pn-ui-v2/learning-board.blend",
+      "design/pn-ui-v2/balance-scale.blend"
+    ],
+    "optionalVisualGzipBytes": 154310,
+    "optionalAssetsExcludedFromOfflinePrecache": true
+  },
+  "preservation": {
+    "paths": [
+      "src/core",
+      "src/content",
+      "src/local",
+      "src/server/auth",
+      "src/server/llm/reviews.ts",
+      "supabase/migrations",
+      "pnpm-lock.yaml"
+    ],
+    "unchanged": true,
+    "oldDocuments": 9,
+    "oldBodiesAndJournalPreserved": true,
+    "oldMigrationsUnchanged": 38
+  },
+  "priorFinalAttempt": {
+    "buildId": "Lx-0GrwPnjXx5dZthlh6M",
+    "exitCode": 130,
+    "unitPassed": 1086,
+    "integrationPassed": 9,
+    "e2ePassed": 27,
+    "e2eInterrupted": 1,
+    "e2eNotRun": 101,
+    "reason": "Stopped during regression audit to retain marker motion and move face/marker as one visual group; not a full PASS"
+  },
+  "priorCompletedGate": {
+    "buildId": "waZ7xW6s4J_t931tl5c6p",
+    "sourceSha256": "a6774ec236ae6e7bf28b94dab9ace43c86740caf353f9b2871aa63e1fb63b95e",
+    "exitCode": 1,
+    "unitPassed": 1086,
+    "integrationPassed": 9,
+    "e2ePassed": 128,
+    "e2eFailed": 1,
+    "reason": "The final multi-viewport ink lifecycle test exhausted its 30s total deadline at revoke; isolated diagnostic PASS in 25.8s. Scoped total test budget is now 60s while default assertion deadlines remain unchanged, with an additional real revoke response and <5000ms clear assertion.",
+    "boundedTargetedRerun": {
+      "command": "pnpm exec playwright test tests/e2e/opening-reflection.spec.ts",
+      "passed": 1,
+      "durationSeconds": 32.1,
+      "testDurationSeconds": 27.8
+    },
+    "interruptedInstrumentation": {
+      "exitCode": 130,
+      "reason": "Corrected test-only revoke response URL from nonexistent /api/v1/teacher/pairing to actual /api/v1/pairing before rerunning; no application defect"
+    }
+  },
+  "priorVisualAuditGate": {
+    "buildId": "1_SKjulHq72o163c0t3K-",
+    "exitCode": 130,
+    "e2ePassed": 116,
+    "e2eInterrupted": 1,
+    "e2eNotRun": 12,
+    "reason": "Stopped after visual inspection found fraction toolbar label overlap on phone; changed only scoped CSS and added bounding-box assertions. Both phone tests then passed in 16.0s. Not a full PASS."
+  },
+  "boundaries": {
+    "realCameraAndPhysicalBoard": "NOT_RUN",
+    "liveHostedProvider": "NOT_RUN",
+    "productionReadiness": "NOT_CLAIMED",
+    "hostedDbMigration": "NOT_RUN",
+    "deployment": "NOT_RUN",
+    "actualPaidCostUsd": 0
+  },
+  "run": [
+    "source /workspace/.papannalar-cloud/activate.sh",
+    "pnpm build",
+    "pnpm video"
+  ],
+  "screenshots": "12 safe synthetic phone tool captures copied to ignored artifacts/qa/ui-ai-v2/session-ux-v3/; all six tool kinds visually inspected, including corrected fraction controls. GLB renders are in ignored artifacts/qa/ui-ai-v2/scene-*.png. No handwriting or raw QR images published."
+}
