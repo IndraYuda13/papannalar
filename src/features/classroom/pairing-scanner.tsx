@@ -4,6 +4,7 @@ import { QrCode } from "lucide-react";
 import { Button } from "../../ui/components/button";
 import { openCamera, type ImageAcquisition } from "../scanner/acquisition";
 import { capturePairingLink, parsePairingCode } from "./pairing-url";
+import { pairingFailureMessage } from "./transport";
 
 export function PairingQrCode({ url }: { url: string }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -147,10 +148,8 @@ export function PairingCodeInput({
     try {
       setNotice("");
       await onPair(value);
-    } catch {
-      setNotice(
-        "Belum tersambung. Periksa internet dan kode di papan, lalu coba lagi.",
-      );
+    } catch (error) {
+      setNotice(pairingFailureMessage(error));
     } finally {
       locked.current = false;
       setSending(false);
@@ -201,7 +200,7 @@ export function PairingCodeInput({
         className="flex flex-wrap items-end gap-3"
       >
         <label className="min-w-[min(100%,10rem)] flex-1">
-          Kode dari papan
+          Kode enam digit di layar kelas
           <input
             name="code"
             aria-label="Kode pasangan"

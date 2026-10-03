@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { test, expect, type Page, type Browser } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -33,8 +34,9 @@ async function paired(page: Page, browser: Browser) {
   await page.getByLabel("Nama rombel", { exact: true }).fill("7V");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7V/ }).click();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
       baseURL: "http://127.0.0.1:3100",
@@ -507,7 +509,7 @@ test("UI01 SD5 lower touch zone, 1.5x objects, SMA10 tariffs and explicit Berdua
     browser,
   );
   await page
-    .getByText("Pembuka bermakna dari katalog", { exact: true })
+    .getByText("Pertanyaan pembuka & giliran siswa", { exact: true })
     .click();
   await page
     .getByLabel("Konteks pembuka demo", { exact: true })

@@ -258,3 +258,23 @@ export function replacePackageQuestion(
 export function freezePackage(pkg: TeacherPackage): TeacherPackage {
   return rehash({ ...pkg, frozen: true });
 }
+
+export function changePackageOpening(
+  pkg: TeacherPackage,
+  stepId: StepId,
+): TeacherPackage {
+  if (pkg.frozen || !pkg.activities.some((a) => a.stepId === stepId))
+    throw new Error("Opening cannot change");
+  const context = CONTEXTS[stepId];
+  if (pkg.opening.prompt === context.opening) return pkg;
+  return rehash({
+    ...pkg,
+    revision: pkg.revision + 1,
+    opening: {
+      prompt: context.opening,
+      followup: context.followup,
+      objective: context.use,
+      why: context.why,
+    },
+  });
+}

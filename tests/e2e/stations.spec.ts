@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { openBoard } from "../browser/helpers";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
@@ -39,8 +40,9 @@ test("ROT01 teacher timer/three rounds and board projection preserve privacy", a
   await page.getByLabel("Nama rombel", { exact: true }).fill("7R");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7R/ }).click();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   for (const n of ["07", "12", "25"]) {
     await page

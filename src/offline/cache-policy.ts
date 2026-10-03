@@ -1,7 +1,10 @@
 export type ShellManifest = {
   cacheName: string;
   assets: string[];
-  shells: Record<"/guru" | "/layar", string> & { "/guru/latihan"?: string };
+  shells: Record<"/guru" | "/layar", string> & {
+    "/guru/latihan"?: string;
+    "/guru/simulasi"?: string;
+  };
 };
 
 export function cacheTarget(
@@ -14,7 +17,7 @@ export function cacheTarget(
   // Return the canonical public shell, never cache a teacher's query URL.
   const practiceContext =
     request.mode === "navigate" &&
-    url.pathname === "/guru/latihan" &&
+    ["/guru/latihan", "/guru/simulasi"].includes(url.pathname) &&
     new Set(context.map(([key]) => key)).size === context.length &&
     context.every(([key, value]) =>
       key === "mode"
@@ -44,6 +47,8 @@ export function cacheTarget(
     if (url.pathname === "/layar") return manifest.shells["/layar"];
     if (url.pathname === "/guru/latihan")
       return manifest.shells["/guru/latihan"];
+    if (url.pathname === "/guru/simulasi")
+      return manifest.shells["/guru/simulasi"];
     return undefined;
   }
   return manifest.assets.includes(url.pathname) ? url.pathname : undefined;

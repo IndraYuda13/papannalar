@@ -70,6 +70,16 @@ export function ActivityDisclosure({
 export function openTeacherActivity(id: string) {
   const section = document.getElementById(id);
   if (!(section instanceof HTMLDetailsElement)) return;
+  if (
+    document.querySelector(".practice-journey") &&
+    ["teacher-prepare", "teacher-ai", "teacher-teach"].includes(id)
+  ) {
+    for (const otherId of ["teacher-prepare", "teacher-ai", "teacher-teach"]) {
+      const other = document.getElementById(otherId);
+      if (otherId !== id && other instanceof HTMLDetailsElement)
+        other.open = false;
+    }
+  }
   section.open = true;
   section.scrollIntoView({ block: "start" });
   section.querySelector("summary")?.focus({ preventScroll: true });

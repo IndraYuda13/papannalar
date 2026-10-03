@@ -1,3 +1,93 @@
+<!-- BEGIN PRACTICE_V5 -->
+
+## Alur latihan, cerita AI dan sambungan layar — 3 Oktober 2026 (WIB)
+
+Permintaan terbaru pengguna: perbaiki manfaat AI, bahasa, alur latihan dan
+penyambungan kode yang benar, lalu commit/push. Baseline `8df9357`. Implementasi
+software dan verifikasi lokal selesai; commit/push menjadi langkah terakhir.
+Bagian setelah marker ini adalah laporan historis.
+
+| Bagian                      | Sebelum                                                                      | Sesudah                                                                                          |
+| --------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `/guru/latihan`             | Paket, AI dan dua sesi terpisah tanpa hasil yang jelas                       | Tiga langkah: siapkan soal → cerita/bantuan opsional → satu sesi memakai paket yang dipilih      |
+| Perpindahan langkah         | Bagian sebelumnya menumpuk setelah setiap tindakan                           | Bagian sebelumnya menutup; isian, pilihan bantuan dan sesi tetap tersimpan                       |
+| Cerita AI                   | Tiga paragraf mirip, tanpa lokasi soal atau perbedaan                        | Pilih topik/tema; bandingkan soal semula/cerita, centang yang cocok dan simpan ke tugas/PDF      |
+| Saran AI                    | Instruksi menunjuk tombol yang belum terlihat                                | **Minta saran AI** tampil pada kartu langkah 2 setelah sesi nyata dimulai                        |
+| Pembuka                     | Istilah formal, Rp6.000 berulang tanpa tujuan                                | Pertanyaan pembuka diskusi, tidak dinilai; topik bisa diganti dan panduan guru dibuka bila perlu |
+| Kode layar                  | Lease contoh tidak diperbarui; kode benar mendapat 409 dan dua pesan umum    | Renewal dan satu retry lease sendiri; pesan pemulihan sesuai penyebab; takeover tetap eksplisit  |
+| Contoh 32 jawaban           | Pengendali kedua di halaman latihan                                          | Halaman `/guru/simulasi` tersendiri; data dan alur PRELIM lama dipertahankan                     |
+| Tampilan                    | Tombol persiapan meregang 76 px desktop; daftar 32 kebutuhan tampil langsung | Tombol 48 px; kebutuhan individu/detail materi dibuka sesuai kebutuhan                           |
+| Cek lisan, hasil akhir, PDF | Kode level, pending, draft, replay dan pilot tanpa penjelasan                | Nama topik dan akibat tindakan; catatan materi dalam bahasa yang sama dengan halaman latihan     |
+
+Cara mencoba: **Coba dengan data contoh → Buka latihan & AI → Siapkan soal →
+Tambahkan cerita AI → Buat pilihan cerita → Simpan … soal cerita → Lihat tugas
+dengan cerita tersimpan/Unduh tugas mandiri PDF → Coba sesi dengan soal ini**.
+Cerita mengganti teks tugas mandiri yang dipilih. Soal cek, pembuka, angka dan
+kunci tetap sama. Saran mengajar membantu menjelaskan; tidak mengubah penilaian
+atau kelompok. [Panduan penggunaan](docs/13_GUIDE_LATIHAN_AI.md).
+
+Verifikasi akhir serial **PASS, exit 0**, build `AcxGagMd5dd7VgVnPgFrA`:
+
+```bash
+pnpm format:check && pnpm typecheck && pnpm lint && VITEST_MAX_WORKERS=1 pnpm exec vitest run tests/unit/independent-print.test.ts tests/unit/video-content-pdf.test.ts && pnpm build && pnpm exec playwright test tests/e2e/offline.spec.ts tests/e2e/practice-v5.spec.ts tests/e2e/teacher-flow-v4.spec.ts tests/e2e/package.spec.ts tests/e2e/freshclass.spec.ts tests/e2e/llm.spec.ts --reporter=list
+```
+
+Format/types/lint/build PASS; PDF unit **5/5 PASS**; **19/19 E2E PASS**, 3,4 menit,
+satu worker/retry 0. Sebelumnya `VITEST_MAX_WORKERS=1 pnpm verify` meluluskan
+**1089/1089 unit**, **167 assertion SQL/RLS**, **9/9 integrasi native HTTP +
+PostgreSQL**, serta build. Browser full memberi **139 PASS/1 FAIL** (19m52,375s):
+allowlist offline lama belum memuat halaman contoh baru. Pemeriksaan diperkuat
+menjadi empat shell dan navigasi offline ke `/guru/simulasi?mode=demo`.
+
+Setelah audit HP, empat input UI/PDF dan tiga file tes berubah. Bukti hash
+memastikan **574/581 input lainnya identik**, termasuk matematika, provider,
+ledger dan SQL. Perubahan PDF diuji lagi dengan lima tes; 19 regresi mencakup
+perpindahan langkah, draft/sesi tersimpan, cerita/PDF, offline, privasi dan
+fresh-class. Semua **140 skenario unik tercakup**, tanpa menduplikasi suite
+lengkap. Tidak diklaim bahwa run `pnpm verify` tadi memberi 140/140 PASS.
+Source SHA256 `356934061d4541de114247b7d7d9d4a6770f7d46d44d965ac0b66520607166a2`.
+Bukti aktual: [practice-v5.json](artifacts/qa/ui-ai-v2/practice-v5.json).
+
+Riwayat targeted: unit 44/4 file dan native integration 9 PASS. Attempt UI pertama
+0/4 gagal pada nama tombol ganda, diperbaiki lalu 4/4 PASS. Legacy development
+10 PASS/4 FAIL: satu status lama dan tiga service worker yang belum aktif di dev.
+Offline tetap diuji pada production build; tidak menaikkan timeout, mengurangi
+500 seed, melemahkan assertions atau mengarang hasil live.
+
+Audit produksi 21 capture/state pada 360/390/1366 dan teks besar 20 px:
+**overflow horizontal 0/pageerror 0**. Gambar diperiksa langsung; tidak dicommit.
+PDF unduhan nyata diekstrak dengan `pdftotext`: cerita suhu yang dipilih dan
+catatan materi baru benar-benar ada. Respons preview untuk audit tampilan diberi
+label **sintetis**, bukan bukti provider live. Tautan skip diperiksa di viewport:
+tersembunyi sebelum/sesudah long capture, terlihat saat Tab; kemunculan pada
+capture panjang merupakan artefak posisi elemen fixed, bukan overlay live.
+Audit ini bukan studi pengguna atau tes perangkat fisik.
+
+SQL039 hanya menambah referensi cerita pada validator sync. SQL lama dan review
+manifest tetap utuh. Tema suhu/kedalaman memerlukan approval hash nyata masing-
+masing; tidak ditandai reviewed dari fixture. Ledger, budget, token, privasi, RLS
+serta idempotensi tetap berlaku pada data contoh maupun akun biasa. Core
+matematika, auth/data, lockfile, aset Blender dan delapan dokumen asli utuh;
+helper memilih pembuka dan dua frame draft merupakan perubahan konten yang
+dinyatakan, bukan klaim seluruh konten unchanged. Prefix jurnal/handoff lama
+serta receipt lama dipertahankan.
+
+Kebutuhan eksternal sekali untuk run ini: endpoint/protokol/model/kunci server
+(`AI_API_BASE_URL`, `AI_PROTOCOL`, `AI_MODEL`, `AI_API_KEY`, `AI_ALLOWED_ORIGINS`
+dan `LLM_ENABLED`), profil/harga/anggaran DB, review materi berbasis hash serta
+review privasi untuk teks bebas. Migration39 hosted dan tes provider berbayar
+perlu otorisasi tersendiri; kamera/QR/perangkat fisik perlu perangkat nyata/HTTPS.
+Tidak ada paid/live API, deploy atau hosted migration pada run ini. Biaya API
+USD0, aset/dependency baru0; biaya cloud tidak diukur. Kedua protokol diuji
+native pada fixture HTTP/ledger lokal, bukan endpoint produksi.
+
+Jalankan di cloud ini: `source /workspace/.papannalar-cloud/activate.sh`,
+`pnpm build`, lalu `pnpm video`; buka `http://127.0.0.1:3100/masuk`. Launcher
+memakai PostgreSQL lokal existing dan Auth/transport fixture. Backend sendiri:
+`pnpm build && pnpm start` dengan konfigurasi server pada panduan historis.
+
+<!-- END PRACTICE_V5 -->
+
 <!-- BEGIN TEACHER_FLOW_V4 -->
 
 ## Perbaikan alur guru dan bantuan AI — 3 Oktober 2026 (WIB)

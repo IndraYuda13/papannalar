@@ -115,16 +115,16 @@ for (const width of [360, 390])
       .click();
     await expect(page.locator("#teacher-prepare > summary")).toBeFocused();
     await page
-      .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
+      .getByRole("button", { name: "Siapkan soal", exact: true })
       .click();
     await expect(page.locator("#teacher-prepare")).toContainText(
-      "Paket tersimpan lokal",
+      "Latihan tersimpan di perangkat ini",
     );
     await page
-      .getByRole("button", { name: "Coba bantuan AI", exact: true })
+      .getByRole("button", { name: "Tambahkan cerita AI", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "Pratinjau cerita AI", exact: true })
+      .getByRole("button", { name: "Buat pilihan cerita", exact: true })
       .click();
     await expect(
       page.getByLabel("Cerita Paket Sesi", { exact: true }),
@@ -134,7 +134,7 @@ for (const width of [360, 390])
     expect(recipe.grade).toBe(7);
     await expect(
       page.getByRole("button", {
-        name: "Makna sesuai · terapkan cerita",
+        name: "Simpan 3 soal cerita",
         exact: true,
       }),
     ).toHaveCount(0);
@@ -144,26 +144,25 @@ for (const width of [360, 390])
       page.getByRole("region", { name: "Bisik statis", exact: true }),
     ).toContainText("Pengurangan dari bilangan negatif");
     expect(await source.locator("option:checked").innerText()).not.toBe("D1.2");
-    await page.locator("#teacher-prepare > summary").click();
     await expect(
-      page.getByRole("button", { name: "Siapkan Paket Sesi", exact: true }),
+      page.getByRole("button", { name: "Buat latihan baru", exact: true }),
     ).toBeHidden();
     await page.locator("#teacher-prepare > summary").click();
-    await expect(page.locator("#teacher-prepare")).toContainText("Versi 1");
+    await expect(page.locator("#teacher-prepare")).toContainText("Versi 2");
     await page.getByRole("button", { name: /Buka kelas 7C/ }).click();
     await expect(
       page.getByRole("button", { name: "Siapkan latihan dahulu", exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Pratinjau cerita AI", exact: true }),
+      page.getByRole("button", { name: "Buat pilihan cerita", exact: true }),
     ).toHaveCount(0);
     await page.getByRole("button", { name: /Buka kelas 7B/ }).click();
-    await expect(page.locator("#teacher-prepare")).toContainText("Versi 1");
+    await expect(page.locator("#teacher-prepare")).toContainText("Versi 2");
     await page
-      .getByRole("button", { name: "Lanjut ke kegiatan", exact: true })
+      .getByRole("button", { name: "Coba sesi dengan soal ini", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "Mulai sesi dari paket", exact: true })
+      .getByRole("button", { name: "Mulai sesi dengan soal ini", exact: true })
       .click();
     const cycle = page.getByRole("region", {
       name: "Siklus kelas",
@@ -173,20 +172,20 @@ for (const width of [360, 390])
     await page.locator("#teacher-teach > summary").click();
     await page.locator("#teacher-teach > summary").click();
     await expect(cycle.getByTestId("cycle-status")).toContainText("Sesi 1");
-    await expect(page.locator("#teacher-rehearsal")).not.toHaveAttribute(
-      "open",
-      "",
+    await expect(page.locator("#teacher-rehearsal")).toHaveCount(0);
+    await expect(page.getByLabel("Kode pasangan", { exact: true })).toHaveCount(
+      1,
     );
     await context.setOffline(true);
     await expect(page.locator("#teacher-ai")).toContainText(
       "Tanpa internet: gunakan kartu saran",
     );
-    await page
-      .getByRole("button", { name: "Pratinjau cerita AI", exact: true })
-      .click();
+    await expect(
+      page.getByRole("button", { name: "Buat pilihan cerita", exact: true }),
+    ).toHaveCount(0);
     await expect(
       page.getByLabel("Cerita Paket Sesi", { exact: true }),
-    ).toContainText("Tanpa internet");
+    ).toContainText("Soal sudah digunakan dalam sesi");
     expect(aiRequests).toHaveLength(1);
     await context.setOffline(false);
     await expect(page.locator("#teacher-ai")).toContainText(
@@ -310,11 +309,9 @@ test("FLOW04 selected class reopens offline through canonical shell; essential s
   await expect(
     page.getByRole("button", { name: /Buka kelas 7OFF/ }),
   ).toHaveAttribute("aria-pressed", "true");
-  await page
-    .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
   await expect(page.locator("#teacher-prepare")).toContainText(
-    "Paket tersimpan lokal",
+    "Latihan tersimpan di perangkat ini",
   );
   await injectFixture(page);
   await waitForShellCache(page);
@@ -325,7 +322,7 @@ test("FLOW04 selected class reopens offline through canonical shell; essential s
   await expect(
     page.getByRole("button", { name: /Buka kelas 7OFF/ }),
   ).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator("#teacher-prepare")).toContainText("Versi 1");
+  await expect(page.locator("#teacher-prepare")).toContainText("Versi 2");
   await expect(page.locator("#teacher-device")).not.toHaveAttribute("open", "");
   expect(
     await page.evaluate(async (id) => {

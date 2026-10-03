@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { randomIdSchema } from "./domain";
+import { STORY_FRAME_IDS } from "../content/contexts/story-frames";
 
 export const storyChoiceSchema = z.strictObject({
-  frameId: z.enum(["lift-down-v1", "water-add-v1", "recipe-ratio-v1"]),
+  frameId: z.enum(STORY_FRAME_IDS),
   variant: z.union([z.literal(0), z.literal(1)]),
 });
 export const storySuggestionSchema = z.strictObject({

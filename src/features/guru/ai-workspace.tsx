@@ -8,15 +8,22 @@ import { EnrichmentControls } from "@/features/package/enrichment-controls";
 import { StaticBisik } from "@/features/bisik/static-card";
 import { Button } from "@/ui/components/button";
 import { openTeacherActivity } from "./activity-disclosure";
+import type { StepId } from "@/content/ladder/registry";
 
 export function AiWorkspace({
   pkg,
   scope,
   onUpdated,
+  preferredStep,
+  onViewTasks,
+  session,
 }: {
   pkg?: TeacherPackage;
   scope: LocalScope;
   onUpdated: (value: TeacherPackage) => void;
+  preferredStep: string;
+  onViewTasks: (stepId: StepId) => void;
+  session?: { classId: string; sessionId: string };
 }) {
   const [status, setStatus] =
     useState<ReturnType<typeof llmStatusSchema.parse>>();
@@ -77,20 +84,23 @@ export function AiWorkspace({
       <section className="space-y-3" aria-label="AI untuk cerita soal">
         <h3 className="flex items-center gap-2 text-lg font-bold">
           <BookOpen size={22} aria-hidden />
-          Buat cerita untuk soal
+          Ubah tugas mandiri menjadi soal cerita
         </h3>
         <p>
-          AI memilih cerita keseharian untuk latihan yang sudah disiapkan.
-          Periksa ceritanya sebelum menerapkan; angka dan jawaban tetap
-          mengikuti soal.
+          Gunakan ketika ingin mengaitkan matematika dengan kehidupan
+          sehari-hari. Pilih topik dan tema, lihat perbandingan soal, lalu
+          simpan cerita yang cocok. Cerita dipakai pada tugas mandiri dan PDF
+          yang Anda unduh.
         </p>
         {pkg ? (
           <EnrichmentControls
-            key={`${pkg.id}:${pkg.revision}`}
+            key={pkg.id}
             pkg={pkg}
             scope={scope}
             disabled={false}
             onUpdated={onUpdated}
+            preferredStep={preferredStep}
+            onViewTasks={onViewTasks}
           />
         ) : (
           <Button onClick={() => openTeacherActivity("teacher-prepare")}>
@@ -104,17 +114,21 @@ export function AiWorkspace({
           Cari cara menjelaskan
         </h3>
         <p>
-          Pilih kesulitan yang ditemui untuk membaca kartu saran. Saat rotasi
-          sesi berjalan, gunakan tombol “Minta saran AI” pada bantuan guru untuk
-          menyesuaikan saran dengan sesi tersebut.
+          Pilih kesulitan siswa, lalu baca pertanyaan dan peragaan yang bisa
+          Anda gunakan.{" "}
+          {session
+            ? "Tombol Minta saran AI di bawah meminta bantuan berdasarkan kartu tersebut untuk sesi yang sedang berjalan."
+            : "Mulai sesi pada langkah 3 untuk membuka tombol Minta saran AI. Kartu di bawah dapat dibaca sekarang tanpa AI."}
         </p>
-        <StaticBisik />
-        <Button
-          variant="outline"
-          onClick={() => openTeacherActivity("teacher-teach")}
-        >
-          Buka kegiatan mengajar
-        </Button>
+        <StaticBisik context={session ? { scope, ...session } : undefined} />
+        {!session && (
+          <Button
+            variant="outline"
+            onClick={() => openTeacherActivity("teacher-teach")}
+          >
+            Mulai sesi untuk meminta saran AI
+          </Button>
+        )}
       </section>
       <details className="text-sm">
         <summary className="min-h-12 cursor-pointer font-semibold">

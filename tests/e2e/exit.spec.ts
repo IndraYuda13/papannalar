@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
@@ -54,14 +55,13 @@ test("EXIT01 teacher freezes package, board gets each public row, manual review 
   await page.getByLabel("Nama rombel", { exact: true }).fill("7E");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7E/ }).click();
-  await page
-    .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Paket Sesi", exact: true }),
-  ).toContainText("Paket tersimpan lokal");
+  ).toContainText("Latihan tersimpan di perangkat ini");
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   for (const n of ["07", "12", "25"]) {
     await page

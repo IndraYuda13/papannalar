@@ -18,5 +18,5 @@ export async function requireSampleController(
     p_acquire: false,
   });
   if (error) throw new Error("UNAVAILABLE");
-  if (data?.error) throw new Error("CONFLICT");
+  if (data?.error) throw new Error("SAMPLE_CONTROL_REQUIRED");
 }

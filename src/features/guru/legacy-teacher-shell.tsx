@@ -7,7 +7,7 @@ export function LegacyTeacherShell() {
     <div className="studio-adaptive space-y-6">
       <PageHeader
         title="Latihan & bantuan AI"
-        description="Pilih kelas, siapkan latihan, lalu jalankan kegiatan. AI dapat membantu membuat cerita soal dan saran mengajar."
+        description="Siapkan soal, ubah beberapa tugas menjadi soal cerita bila perlu, lalu coba mengajar dengan layar kelas."
       />
       <TeacherWorkspace />
       <details id="teacher-print" className="teacher-disclosure">

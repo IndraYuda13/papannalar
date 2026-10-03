@@ -214,7 +214,15 @@ export async function enrichmentRequest(request: NextRequest) {
       if (history.records.some((r) => r.payload.package.id === pkg.id))
         return fallback("frozen");
       if (!cfg.enabled) return fallback("disabled");
-      const slots = approvedStorySlots(pkg);
+      if (
+        input.stepId &&
+        !pkg.activities.some((a) => a.stepId === input.stepId)
+      )
+        throw new Error("INVALID_INPUT");
+      const slots = approvedStorySlots(pkg, undefined, {
+        stepId: input.stepId,
+        context: input.context,
+      });
       if (!slots.length) return fallback("unreviewed");
       signal.throwIfAborted();
       const result = await runAssistant({

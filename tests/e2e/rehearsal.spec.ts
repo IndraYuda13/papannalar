@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
@@ -71,8 +72,9 @@ for (const run of [1, 2, 3]) {
       .getByRole("button", { name: "Simpan kelas", exact: true })
       .click();
     await page.getByRole("button", { name: /Buka kelas 7B/ }).click();
+    await openTeacherExample(page);
     await page
-      .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+      .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
       .click();
     await expect(page.getByTestId("scan-count")).toContainText("29/32");
     await openBoard(board);
@@ -238,11 +240,11 @@ for (const run of [1, 2, 3]) {
       await board.screenshot({ path: `${output}/round-${round}.png` });
     }
     await page
-      .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
+      .getByRole("button", { name: "Siapkan soal", exact: true })
       .click();
     await expect(
       page.getByRole("region", { name: "Paket Sesi", exact: true }),
-    ).toContainText("Paket tersimpan lokal");
+    ).toContainText("Latihan tersimpan di perangkat ini");
     const exit = page.getByRole("region", {
       name: "Hasil Kartu Keluar",
       exact: true,

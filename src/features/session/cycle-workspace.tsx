@@ -21,6 +21,9 @@ import { PresentationControls } from "./presentation-controls";
 import { ScanCapture } from "@/features/scanner/capture";
 import { MathPrompt } from "@/ui/components/math-prompt";
 import { Button } from "@/ui/components/button";
+import Link from "next/link";
+import type { TeacherPackage } from "@/core/package/build";
+import { getStep } from "@/content/ladder/registry";
 
 type Loaded = Awaited<
   ReturnType<ReturnType<typeof createCycleRepository>["read"]>
@@ -35,9 +38,15 @@ const field = "min-h-12 rounded-input border bg-white p-2";
 export function CycleWorkspace({
   scope,
   detail,
+  preparedPackage,
+  onSessionChange,
 }: {
   scope: LocalScope;
   detail?: { class: ClassDto; students: StudentDto[] };
+  preparedPackage?: TeacherPackage;
+  onSessionChange: (
+    value: { package: TeacherPackage; sessionId: string } | undefined,
+  ) => void;
 }) {
   const [data, setData] = useState<Loaded>(),
     [draft, setDraft] = useState<Draft>(),
@@ -46,6 +55,14 @@ export function CycleWorkspace({
     [ackMissing, setAckMissing] = useState(false);
   const { ownerId, mode } = scope;
   const [syncRevision, setSyncRevision] = useState(0);
+  const [legacyHistory, setLegacyHistory] = useState(false);
+  useEffect(() => {
+    onSessionChange(
+      data && !data.cycle.classEnded
+        ? { package: data.package, sessionId: data.cycle.id }
+        : undefined,
+    );
+  }, [data, onSessionChange]);
   useEffect(() => {
     const refresh = () => setSyncRevision((v) => v + 1);
     window.addEventListener("pn-sync-restored", refresh);
@@ -87,9 +104,11 @@ export function CycleWorkspace({
     const packages = createPackageRepository(scope),
       repo = createCycleRepository(scope);
     try {
-      const pkg = await packages.latest(detail.class.id);
-      if (!pkg) {
-        setMessage("Siapkan Paket Sesi terlebih dahulu.");
+      const pkg = preparedPackage
+        ? await packages.read(preparedPackage.id)
+        : undefined;
+      if (!pkg || pkg.classId !== detail.class.id) {
+        setMessage("Siapkan soal pada langkah 1 terlebih dahulu.");
         return;
       }
       const baselines =
@@ -129,12 +148,25 @@ export function CycleWorkspace({
       setData(await repo.read(cycle.id));
       setDraft(undefined);
       setAckMissing(false);
+      setLegacyHistory(false);
       setMessage(
         "Sesi baru siap, belum ada jawaban. Soal dan kelas dikunci selama sesi ini.",
       );
-    } catch {
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "";
+      setLegacyHistory(
+        reason === "Keep PRELIM and fresh-class histories separate",
+      );
       setMessage(
-        "Sesi belum dimulai. Finalisasi sesi sebelumnya, siapkan paket baru yang sesuai, dan gunakan kelas terpisah dari preset PRELIM.",
+        reason === "Keep PRELIM and fresh-class histories separate"
+          ? "Kelas ini sudah dipakai untuk contoh sesi dengan jawaban terisi. Lanjutkan contoh itu, atau buat kelas contoh baru untuk memakai soal Anda sendiri."
+          : reason === "Finalize previous assessment first"
+            ? "Sesi sebelumnya belum selesai. Tutup sesi dan simpan hasil penilaian di bawah sebelum memulai lagi."
+            : reason === "Prepare a new package for each session"
+              ? "Soal ini sudah digunakan. Buat latihan baru pada langkah 1 sebelum memulai sesi berikutnya."
+              : reason === "Use weekly package after initial placement"
+                ? "Kelas ini sudah menjalani cek pertama. Pilih Cek lanjutan pada langkah 1."
+                : "Sesi belum dimulai. Periksa soal dan penyimpanan perangkat, lalu coba lagi.",
       );
     } finally {
       repo.close();
@@ -153,8 +185,8 @@ export function CycleWorkspace({
       await refresh();
       setMessage(
         value.classEnded
-          ? "Kelas ditutup. Hasil keluar masih dapat dipindai; penilaian belum otomatis difinalisasi."
-          : "Perubahan tersimpan lokal.",
+          ? "Kegiatan kelas selesai. Simpan penilaian di bawah; jawaban yang terlambat masih bisa diperiksa."
+          : "Perubahan tersimpan di perangkat ini.",
       );
     } catch {
       setData(previous);
@@ -230,11 +262,11 @@ export function CycleWorkspace({
       );
       await refresh();
       setMessage(
-        `Penilaian difinalisasi; ${result.pending} hasil masih pending. Koreksi berikutnya me-replay sesi yang sama.`,
+        `Penilaian tersimpan. ${result.pending} hasil belum lengkap. Anda masih dapat mengoreksi jawaban sesi ini.`,
       );
     } catch {
       setMessage(
-        "Finalisasi belum tersimpan. Tutup kelas dan nyatakan hasil yang masih pending, atau muat ulang bila revisi berubah.",
+        "Penilaian belum tersimpan. Tutup kegiatan kelas dan centang persetujuan bila ada jawaban yang belum masuk, lalu coba lagi.",
       );
     } finally {
       repo.close();
@@ -256,29 +288,33 @@ export function CycleWorkspace({
       aria-label="Siklus kelas"
       className="space-y-4 rounded-kartu border-2 border-primary p-4"
     >
-      <h3 className="text-xl font-bold">Sesi dari latihan yang disiapkan</h3>
+      <h3 className="text-xl font-bold">Coba sesi mengajar</h3>
       <p>
-        Mulai dengan kartu kosong, periksa jawaban, lalu bagi kegiatan sesuai
-        kebutuhan siswa. Materi ini masih untuk percobaan.
+        Sesi memakai soal dari langkah 1. Mulai sesi dahulu, lalu sambungkan
+        layar kelas bila Anda memakai proyektor, TV atau papan interaktif.
       </p>
       {(!data || data.cycle.assessmentRevision > 0) && (
         <Button
-          disabled={busy || !detail || mode !== "demo"}
+          disabled={
+            busy ||
+            !detail ||
+            mode !== "demo" ||
+            !preparedPackage ||
+            preparedPackage.frozen
+          }
           onClick={() => void start()}
         >
-          {data
-            ? "Mulai sesi berikutnya dari paket baru"
-            : "Mulai sesi dari paket"}
+          {data ? "Mulai sesi berikutnya" : "Mulai sesi dengan soal ini"}
         </Button>
       )}
       {data && context && derived && (
         <>
-          <p data-testid="cycle-status">
+          <p data-testid="cycle-status" className="practice-feedback">
             Sesi {data.cycle.ordinal} ·{" "}
             {data.cycle.classEnded ? "kelas ditutup" : "kelas berlangsung"} ·{" "}
             {data.cycle.assessmentRevision
-              ? `penilaian final revisi ${data.cycle.assessmentRevision}`
-              : "penilaian belum final"}
+              ? "penilaian tersimpan"
+              : "penilaian belum disimpan"}
           </p>
           <Button
             variant="outline"
@@ -500,22 +536,33 @@ export function CycleWorkspace({
             aria-label="Penempatan dan kelompok sesi"
             className="space-y-2"
           >
-            <h4 className="font-bold">Penempatan guru</h4>
-            {derived.placements
-              .filter((p) => p.active)
-              .map((p) => (
-                <p key={p.studentId}>
-                  Absen {p.attendanceNumber}:{" "}
-                  {p.displayed?.kind === "step"
-                    ? p.displayed.stepId
-                    : p.displayed?.kind === "lanjut"
-                      ? "Lanjut"
-                      : "belum diperiksa"}
-                  {p.replay.belowRange.kind === "below-range"
-                    ? " · di bawah jangkauan cek; lanjutkan Cek Lisan"
-                    : ""}
-                </p>
-              ))}
+            <h4 className="font-bold">Bagi kegiatan sesuai kebutuhan siswa</h4>
+            {!derived.ready && !groups.length && (
+              <p className="text-sm">
+                Periksa jawaban siswa yang hadir terlebih dahulu. Setelah hasil
+                cek lengkap, pembagian kelompok dapat digunakan.
+              </p>
+            )}
+            <details>
+              <summary className="min-h-12 cursor-pointer font-semibold">
+                Lihat kebutuhan belajar per siswa · hanya untuk guru
+              </summary>
+              {derived.placements
+                .filter((p) => p.active)
+                .map((p) => (
+                  <p key={p.studentId}>
+                    Absen {p.attendanceNumber}:{" "}
+                    {p.displayed?.kind === "step"
+                      ? getStep(p.displayed.stepId).label
+                      : p.displayed?.kind === "lanjut"
+                        ? "Lanjut"
+                        : "belum diperiksa"}
+                    {p.replay.belowRange.kind === "below-range"
+                      ? " · di bawah jangkauan cek; lanjutkan Cek Lisan"
+                      : ""}
+                  </p>
+                ))}
+            </details>
             {!groups.length && (
               <Button
                 disabled={
@@ -530,13 +577,13 @@ export function CycleWorkspace({
                   )
                 }
               >
-                Bekukan kelompok sesi
+                Gunakan pembagian kelompok ini
               </Button>
             )}
             {groups.map((g) => (
               <p key={g.id}>
                 {g.label} · {g.members.length} siswa · aktivitas{" "}
-                {g.activityStep}
+                {getStep(g.activityStep).label}
               </p>
             ))}
           </section>
@@ -561,13 +608,33 @@ export function CycleWorkspace({
                 jawaban tidak diisi otomatis
               </label>
               <Button disabled={busy} onClick={() => void finalize()}>
-                Finalisasi penilaian
+                Simpan penilaian sesi
               </Button>
             </div>
           )}
+          {!!data.cycle.assessmentRevision && (
+            <Link
+              className="inline-flex min-h-12 items-center font-semibold text-primary underline"
+              href="/guru"
+            >
+              Selesai · kembali ke beranda
+            </Link>
+          )}
         </>
       )}
-      <p role="status">{message}</p>
+      {message && (
+        <p role="status" className="practice-feedback">
+          {message}
+        </p>
+      )}
+      {legacyHistory && (
+        <Link
+          className="inline-flex min-h-12 items-center font-semibold text-primary underline"
+          href={`/guru/simulasi?mode=${mode}${detail ? `&class=${detail.class.id}` : ""}`}
+        >
+          Lanjutkan contoh sesi yang sudah ada
+        </Link>
+      )}
     </section>
   );
 }

@@ -1,0 +1,497 @@
+{
+  "status": "PASS_LOCAL_IMPLEMENTABLE_ACCEPTANCE",
+  "recordedAt": "2026-10-03T13:05:35.249966+00:00",
+  "baseCommit": "8df935764b18002d7f32dfeaf287eae0a121affc",
+  "source": {
+    "baseCommit": "8df935764b18002d7f32dfeaf287eae0a121affc",
+    "sha256": "356934061d4541de114247b7d7d9d4a6770f7d46d44d965ac0b66520607166a2",
+    "fileCount": 581
+  },
+  "sourceHashDefinition": "SHA256 over sorted git-listed application/build/config/test/assets inputs: path + NUL + file SHA256 + newline. Documents and QA receipts excluded.",
+  "before": {
+    "sizes": [
+      {
+        "viewport": 360,
+        "width": 182,
+        "height": 48,
+        "overflow": 0
+      },
+      {
+        "viewport": 390,
+        "width": 182,
+        "height": 48,
+        "overflow": 0
+      },
+      {
+        "viewport": 1366,
+        "width": 182,
+        "height": 76,
+        "overflow": 0
+      }
+    ],
+    "pairingInputs": 2,
+    "expiredOwnSampleLeaseClaimStatus": 409,
+    "fixture": "loopback PostgreSQL + Auth fixture; lease expired for synthetic sample only"
+  },
+  "changes": [
+    "Three ordered activities: preparation, optional stories/advice, one session from the exact prepared package.",
+    "Story topic/context selection; original-vs-story comparison; partial apply/cancel; chosen stories persist in independent tasks and PDF. Math answers and parameters retained.",
+    "Actual session context enables the visible Minta saran AI action; static teaching cards remain usable without AI.",
+    "Discussion opening explains its ungraded purpose; topic selector chooses an existing context without changing assessment/tasks.",
+    "The preserved 32-response example is on /guru/simulasi; no duplicate session or pairing form in practice.",
+    "Sample lease renews every 30s/focus/online and expired own lease can be renewed once before a pairing retry. Different active controller requires explicit takeover.",
+    "Preparation action stays 48px high at desktop and mobile; technical/draft details are disclosed when requested.",
+    "Moving between journey steps closes the previous step without unmounting cached drafts or the ongoing session. Arrival collapses old three-open preferences; deliberate manual disclosure choices remain possible.",
+    "The printable independent-task review footer uses the same plain language as the UI."
+  ],
+  "targeted": [
+    {
+      "command": "VITEST_MAX_WORKERS=1 pnpm exec vitest run tests/unit/llm-enrichment.test.ts tests/unit/opening.test.ts tests/unit/package.test.ts tests/unit/llm-endpoints.test.ts tests/unit/offline.test.ts",
+      "exitCode": 0,
+      "passed": 44,
+      "files": 4,
+      "seconds": 8.52,
+      "note": "offline.test.ts is absent; this glob was not run. Actual cache-policy coverage is included in final full unit run.",
+      "log": "/workspace/.papannalar-cloud/logs/practice-v5-unit-targeted.log"
+    },
+    {
+      "command": "VITEST_MAX_WORKERS=1 pnpm exec vitest run --config vitest.ai-integration.config.ts",
+      "exitCode": 0,
+      "passed": 9,
+      "files": 1,
+      "seconds": 2.91,
+      "fixture": "Real native HTTP loopback OpenAI Chat Completions and Anthropic Messages plus local PostgreSQL ledger/SQL; synthetic auth/review hooks. New temperature frame included for sample requests; legacy frames for regular teachers.",
+      "log": "/workspace/.papannalar-cloud/logs/practice-v5-native-targeted.log"
+    },
+    {
+      "command": "PAPANNALAR_REUSE_LOCAL_DEMO=1 pnpm exec playwright test tests/e2e/practice-v5.spec.ts --reporter=list",
+      "exitCode": 1,
+      "passed": 0,
+      "failed": 4,
+      "cause": "Duplicate accessible label on navigation and preparation action; corrected navigation label without removing assertions.",
+      "log": "/workspace/.papannalar-cloud/logs/practice-v5-browser-targeted.log"
+    },
+    {
+      "command": "PAPANNALAR_REUSE_LOCAL_DEMO=1 pnpm exec playwright test tests/e2e/practice-v5.spec.ts --reporter=list",
+      "exitCode": 0,
+      "passed": 4,
+      "failed": 0,
+      "seconds": 49.4,
+      "workers": 1,
+      "retries": 0,
+      "fixture": "Three viewport UI tests use explicitly synthetic enrichment responses; the pairing test uses actual local Auth/PostgreSQL/board ACK, expired own lease and different active controller. Not a live provider or camera test.",
+      "log": "/workspace/.papannalar-cloud/logs/practice-v5-browser-targeted2.log"
+    },
+    {
+      "command": "PAPANNALAR_REUSE_LOCAL_DEMO=1 pnpm exec playwright test tests/e2e/teacher-flow-v4.spec.ts tests/e2e/package.spec.ts tests/e2e/llm.spec.ts tests/e2e/prelim.spec.ts tests/e2e/freshclass.spec.ts --reporter=list",
+      "exitCode": 1,
+      "passed": 10,
+      "failed": 4,
+      "minutes": 5.4,
+      "cause": "One obsolete status text; corrected expectation. Three wait for service worker unavailable in development; offline assertions retained for production verification.",
+      "log": "/workspace/.papannalar-cloud/logs/practice-v5-regressions-targeted.log"
+    }
+  ],
+  "verification": {
+    "status": "PASS_SCOPED_SERIAL_FINAL",
+    "command": "pnpm format:check && pnpm typecheck && pnpm lint && VITEST_MAX_WORKERS=1 pnpm exec vitest run tests/unit/independent-print.test.ts tests/unit/video-content-pdf.test.ts && pnpm build && pnpm exec playwright test tests/e2e/offline.spec.ts tests/e2e/practice-v5.spec.ts tests/e2e/teacher-flow-v4.spec.ts tests/e2e/package.spec.ts tests/e2e/freshclass.spec.ts tests/e2e/llm.spec.ts --reporter=list",
+    "exitCode": 0,
+    "serial": true,
+    "formatTypesLintBuild": "PASS; actual execution transcript before the browser log",
+    "pdfUnit": {
+      "passed": 5,
+      "files": 2,
+      "seconds": 1.93
+    },
+    "browser": {
+      "passed": 19,
+      "failed": 0,
+      "workers": 1,
+      "retries": 0,
+      "reportedDuration": "3.4m",
+      "log": "/workspace/.papannalar-cloud/logs/practice-v5-final-repair-browser.log"
+    },
+    "fullCandidateRun": {
+      "command": "VITEST_MAX_WORKERS=1 pnpm verify",
+      "exitCode": 1,
+      "log": "/workspace/.papannalar-cloud/logs/practice-v5-final-verify.log",
+      "browser": {
+        "startTime": "2026-10-03T12:18:56.536Z",
+        "duration": 1192374.908,
+        "expected": 139,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "failure": "One old offline public-asset allowlist omitted the new /offline/guru-simulasi.html. Exact four-shell assertion and offline navigation to /guru/simulasi?mode=demo were added; assertions were strengthened, not removed.",
+      "unit": {
+        "passed": 1089,
+        "files": 70,
+        "seconds": 211.94,
+        "coverage": {
+          "statements": 92.46,
+          "branches": 87.51,
+          "functions": 96.28,
+          "lines": 93.45
+        }
+      },
+      "sql": {
+        "status": "PASS",
+        "assertions": 167
+      },
+      "nativeIntegration": {
+        "passed": 9,
+        "files": 1,
+        "seconds": 2.65
+      },
+      "sourceSha256": "2d1abd42a20de57ab54e9c75b72040289176edbe909cac8a440ed44338017c00"
+    },
+    "refinementInputProof": {
+      "from": "2d1abd42a20de57ab54e9c75b72040289176edbe909cac8a440ed44338017c00",
+      "to": "356934061d4541de114247b7d7d9d4a6770f7d46d44d965ac0b66520607166a2",
+      "fileCount": 581,
+      "unchangedFiles": 574,
+      "changedFiles": [
+        "src/features/guru/activity-disclosure.tsx",
+        "src/features/guru/practice-activities.tsx",
+        "src/features/guru/teacher-workspace.tsx",
+        "src/features/package/independent-pdf.ts",
+        "tests/e2e/offline.spec.ts",
+        "tests/e2e/practice-v5.spec.ts",
+        "tests/e2e/teacher-flow-v4.spec.ts"
+      ]
+    },
+    "coveredChecks": {
+      "uniqueBrowserScenarios": 140,
+      "fullPassed": 139,
+      "updatedAndRerun": 19,
+      "singleRun140of140Claimed": false,
+      "notRepeated": "Full unit/SQL/native/full E2E suites were not duplicated. Only the changed PDF input was retested with its 5 unit cases; the 19 browser cases cover the affected preparation/AI/journey/offline/session/PDF boundaries. Math, data, server/provider/ledger and all other application/build inputs retain exact hashes."
+    },
+    "inputsUnchangedSinceSerialFinalGate": true
+  },
+  "visual": {
+    "status": "PASS",
+    "buildId": "AcxGagMd5dd7VgVnPgFrA",
+    "captures": [
+      {
+        "name": "login-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/masuk",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 844,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "home-empty-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 844,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "prepare-360",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/latihan",
+        "width": 360,
+        "height": 844,
+        "documentHeight": 3289,
+        "horizontalOverflow": 0,
+        "prepareButton": {
+          "width": 196,
+          "height": 48
+        }
+      },
+      {
+        "name": "prepare-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/latihan",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 3173,
+        "horizontalOverflow": 0,
+        "prepareButton": {
+          "width": 196,
+          "height": 48
+        }
+      },
+      {
+        "name": "prepare-1366",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/latihan",
+        "width": 1366,
+        "height": 844,
+        "documentHeight": 2577,
+        "horizontalOverflow": 0,
+        "prepareButton": {
+          "width": 196,
+          "height": 48
+        }
+      },
+      {
+        "name": "prepare-large-font-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/latihan",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 4106,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "ai-preview-synthetic-390",
+        "scope": "UI-only synthetic AI fixture; labeled in screenshot; no live provider/review claim",
+        "path": "/guru/latihan",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 4865,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "ai-preview-synthetic-1366",
+        "scope": "UI-only synthetic AI fixture; labeled in screenshot; no live provider/review claim",
+        "path": "/guru/latihan",
+        "width": 1366,
+        "height": 844,
+        "documentHeight": 3453,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "session-390",
+        "scope": "actual local session from prepared package; one task has a labeled UI-fixture story saved earlier",
+        "path": "/guru/latihan",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 3483,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "example-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/simulasi",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 1639,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "example-started-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/simulasi",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 2688,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "guru-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 1888,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "guru-1366",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru",
+        "width": 1366,
+        "height": 844,
+        "documentHeight": 977,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "guru-kelas-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/kelas",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 844,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "guru-kelas-1366",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/kelas",
+        "width": 1366,
+        "height": 844,
+        "documentHeight": 844,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "guru-soal-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/soal",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 1004,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "guru-soal-1366",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/soal",
+        "width": 1366,
+        "height": 844,
+        "documentHeight": 844,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "guru-mulai-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/mulai",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 844,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "guru-mulai-1366",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/mulai",
+        "width": 1366,
+        "height": 844,
+        "documentHeight": 844,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "guru-asesmen-390",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/asesmen",
+        "width": 390,
+        "height": 844,
+        "documentHeight": 1212,
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "guru-asesmen-1366",
+        "scope": "actual local server; AI disabled",
+        "path": "/guru/asesmen",
+        "width": 1366,
+        "height": 844,
+        "documentHeight": 844,
+        "horizontalOverflow": 0
+      }
+    ],
+    "pageErrors": [],
+    "pdf": {
+      "status": "PASS",
+      "suggestedFilename": "papannalar-tugas-mandiri.pdf",
+      "selectedStoryInActualDownloadedPdf": true,
+      "plainLanguageReviewFooter": true,
+      "source": "UI-only synthetic story persisted; actual local PDF generation and pdftotext extraction. No physical print/live provider claim."
+    },
+    "fixtures": "Synthetic QA teacher and absen-only local class; previews separately labeled as UI-only synthetic responses. Native HTTP tests are separate. No human usability study or physical-device claim.",
+    "command": "node .local/practice-v5-visual.mjs",
+    "exitCode": 0,
+    "inspectedScreenshots": [
+      "prepare-390.png",
+      "prepare-1366.png",
+      "ai-comparison-synthetic-390.png",
+      "ai-comparison-synthetic-1366.png",
+      "one-session-390.png",
+      "example-390.png",
+      "guru-mulai-390.png"
+    ],
+    "screenshotsCommitted": false,
+    "log": "/workspace/.papannalar-cloud/logs/practice-v5-visual.log",
+    "skipLink": {
+      "status": "PASS",
+      "beforeLongScreenshot": {
+        "focused": false,
+        "translate": "0px -128px",
+        "top": -112,
+        "bottom": -64,
+        "scrollY": 707,
+        "visibleInViewport": false
+      },
+      "afterLongScreenshot": {
+        "focused": false,
+        "translate": "0px -128px",
+        "top": -112,
+        "bottom": -64,
+        "scrollY": 707,
+        "visibleInViewport": false
+      },
+      "keyboardFocus": {
+        "focused": true,
+        "translate": "0px",
+        "top": 16,
+        "bottom": 64,
+        "scrollY": 0,
+        "visibleInViewport": true
+      },
+      "conclusion": "No live overlay. Off-viewport fixed elements can appear inside full-page captures at the current scroll offset. Existing keyboard skip behavior remains correct; no application change required."
+    }
+  },
+  "preservation": {
+    "status": "PASS",
+    "comparedTo": "8df935764b18002d7f32dfeaf287eae0a121affc",
+    "checkedDomainFiles": 144,
+    "changedProtectedFiles": [],
+    "originalDocuments": 8,
+    "changedOriginalDocuments": [],
+    "originalJournalPrefixPreserved": true,
+    "historicalHandoffPreserved": true,
+    "existingMigrations": 38,
+    "intentionalChanges": [
+      "src/core/package/build.ts: pure helper chooses an existing discussion opening; assessment/tasks/default build unchanged",
+      "src/content/contexts/story-frames.ts: two new draft contexts and membership selection; existing three frame texts unchanged",
+      "Shared contracts, server enrichment selection, sample lease recovery and additive local SQL039 are changed intentionally; no hosted DB change"
+    ],
+    "oldQaBundleReceiptRestored": true,
+    "existingThreeStoryFrameTextsUnchanged": true
+  },
+  "providers": {
+    "openAICompatible": "PASS local native HTTP + PostgreSQL",
+    "anthropicCompatible": "PASS local native HTTP + PostgreSQL",
+    "live": "NOT_RUN",
+    "paidApiCalls": 0,
+    "productionContentReviews": "Unchanged; no fabricated approvals. New frames remain drafts."
+  },
+  "database": {
+    "localMigrations": 39,
+    "newMigration": "202610030039_story_contexts.sql",
+    "existing38MigrationsUnchanged": true,
+    "hostedMigration": "NOT_RUN",
+    "deploy": "NOT_RUN"
+  },
+  "costs": {
+    "paidApiUsd": 0,
+    "newAssets": 0,
+    "newDependencies": 0,
+    "existingGlbPostersBlend": "Unchanged",
+    "cloudInfrastructure": "NOT_MEASURED"
+  },
+  "limitations": [
+    "Live credentials/provider traffic not used. Exact configuration and review requirements are documented once in latest UI_AI_HANDOFF section.",
+    "Physical phone/camera/QR/touch/HTTPS checks and human usability study NOT_RUN.",
+    "No production readiness claim."
+  ],
+  "publication": {
+    "status": "PENDING_COMMIT_AND_AUTHORIZED_PUSH",
+    "target": "origin/main"
+  },
+  "buildId": "AcxGagMd5dd7VgVnPgFrA",
+  "optionalBundleSnapshot": {
+    "buildId": "AcxGagMd5dd7VgVnPgFrA",
+    "optionalVisualChunks": [
+      {
+        "path": "/_next/static/chunks/2wluchj_q5z_j.js",
+        "bytes": 619410,
+        "gzipBytes": 154310
+      }
+    ],
+    "optionalVisualGzipBytes": 154310,
+    "budgetGzipBytes": 250000,
+    "excludedFromOfflinePrecache": true,
+    "precachedPosters": [
+      "/assets/pn-ui-v2/posters/learning-board.webp",
+      "/assets/pn-ui-v2/posters/balance-scale.webp",
+      "/assets/pn-ui-v2/posters/algebra-kit.webp"
+    ]
+  }
+}

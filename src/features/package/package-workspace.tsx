@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
+import { FilePlus2, MessageCircle, Download } from "lucide-react";
 import type { ClassDto } from "@/contracts/classes";
 import type { StudentDto } from "@/contracts/api";
 import {
   buildPackage,
   replacePackageQuestion,
+  changePackageOpening,
   type TeacherPackage,
   type PackageVariant,
 } from "@/core/package/build";
@@ -13,7 +15,9 @@ import { loadPackagePlacements } from "@/features/oral/package-placement";
 import { Button } from "@/ui/components/button";
 import { MathPrompt } from "@/ui/components/math-prompt";
 import type { GeneratedQuestion } from "@/content/templates/types";
-import { getStep } from "@/content/ladder/registry";
+import { getStep, STEP_IDS, type StepId } from "@/content/ladder/registry";
+import { getClassTarget } from "@/content/ladder/targets";
+import { CONTEXTS } from "@/content/contexts/registry";
 
 const field = "min-h-12 rounded-input border border-pn-ink-400 bg-white px-3";
 const freshSeed = () => crypto.getRandomValues(new Uint32Array(1))[0];
@@ -24,6 +28,9 @@ export function PackageWorkspace({
   students = [],
   pkg,
   onPackageChange: setPkg,
+  selectedStep,
+  onSelectedStepChange: setSelectedStep,
+  purpose = "session",
 }: {
   ownerId: string;
   mode: "demo" | "pilot";
@@ -31,11 +38,18 @@ export function PackageWorkspace({
   students?: readonly StudentDto[];
   pkg?: TeacherPackage;
   onPackageChange: (value: TeacherPackage | undefined) => void;
+  selectedStep: string;
+  onSelectedStepChange: (value: string) => void;
+  purpose?: "session" | "extra";
 }) {
   const [variant, setVariant] = useState<PackageVariant>(
     classroom && classroom.grade <= 3 ? "oral" : "initial",
   );
-  const [selectedStep, setSelectedStep] = useState("");
+  const [openingStep, setOpeningStep] = useState<StepId>(
+    classroom && classroom.grade >= 7
+      ? "D1"
+      : getClassTarget(classroom?.grade ?? 1).stepId,
+  );
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -46,7 +60,17 @@ export function PackageWorkspace({
       .then((last) => {
         if (active) {
           setPkg(last);
-          setSelectedStep(last?.activities[0].stepId ?? "");
+          setSelectedStep(
+            last?.activities.find((a) => a.stepId === "D1")?.stepId ??
+              last?.activities[0].stepId ??
+              "",
+          );
+          if (last)
+            setOpeningStep(
+              STEP_IDS.find(
+                (s) => CONTEXTS[s].opening === last.opening.prompt,
+              ) ?? last.target,
+            );
         }
       })
       .catch(() => {
@@ -59,7 +83,7 @@ export function PackageWorkspace({
     return () => {
       active = false;
     };
-  }, [ownerId, mode, classroom?.id, setPkg]);
+  }, [ownerId, mode, classroom?.id, setPkg, setSelectedStep]);
   async function prepare() {
     if (!classroom) return;
     setBusy(true);
@@ -73,11 +97,11 @@ export function PackageWorkspace({
       );
       if ((variant === "weekly" || variant === "short") && !occupied.length) {
         setMessage(
-          "Belum ada penempatan. Siapkan Cek Awal atau Cek Lisan terlebih dahulu.",
+          "Belum ada hasil cek siswa. Pilih Cek pertama, atau lakukan cek secara lisan, sebelum menyiapkan latihan lanjutan.",
         );
         return;
       }
-      const value = buildPackage({
+      const original = buildPackage({
         id: crypto.randomUUID(),
         classId: classroom.id,
         grade: classroom.grade,
@@ -85,6 +109,13 @@ export function PackageWorkspace({
         seed: freshSeed(),
         occupied,
       });
+      const value = original.activities.some((a) => a.stepId === openingStep)
+        ? changePackageOpening(original, openingStep)
+        : original;
+      setOpeningStep(
+        STEP_IDS.find((s) => CONTEXTS[s].opening === value.opening.prompt) ??
+          value.target,
+      );
       await repo.save(value, 0);
       setPkg(value);
       setSelectedStep(
@@ -92,11 +123,36 @@ export function PackageWorkspace({
           value.activities[0].stepId,
       );
       setMessage(
-        "Paket tersimpan lokal dan dapat dibuka tanpa internet. Konten draft menunggu review.",
+        "Latihan tersimpan di perangkat ini. Periksa soal di bawah, tambahkan cerita bila perlu, lalu coba sesi.",
       );
     } catch {
       setMessage(
         "Paket belum tersimpan. Periksa penyimpanan dan coba lagi; paket sebelumnya tetap ada.",
+      );
+    } finally {
+      repo.close();
+      setBusy(false);
+    }
+  }
+  async function changeOpening(value: StepId) {
+    setOpeningStep(value);
+    if (!pkg) return;
+    setBusy(true);
+    const repo = createPackageRepository({ ownerId, mode });
+    try {
+      const next = changePackageOpening(pkg, value);
+      await repo.save(next, pkg.revision);
+      setPkg(next);
+      setMessage(
+        "Pertanyaan pembuka diganti sesuai topik yang dipilih. Soal cek dan tugas tetap sama.",
+      );
+    } catch {
+      setOpeningStep(
+        STEP_IDS.find((s) => CONTEXTS[s].opening === pkg.opening.prompt) ??
+          pkg.target,
+      );
+      setMessage(
+        "Pembuka belum berubah. Latihan sudah digunakan atau berubah di tab lain.",
       );
     } finally {
       repo.close();
@@ -132,11 +188,13 @@ export function PackageWorkspace({
         </p>
         <p>{q.options.map((o) => `${o.label}. ${o.text}`).join(" · ")} · ?</p>
         {q.story && (
-          <p>Cerita dipilih AI dari frame terkurasi; angka diperiksa kode.</p>
+          <p className="text-sm text-primary">
+            Cerita tersimpan · angka dan jawaban tetap sama.
+          </p>
         )}
         <details>
           <summary className="min-h-12 cursor-pointer">
-            Kunci dan alasan guru
+            Jawaban dan petunjuk untuk guru
           </summary>
           <p>
             Kunci {q.answerKey} ·{" "}
@@ -199,47 +257,112 @@ export function PackageWorkspace({
       aria-label="Paket Sesi"
       className="space-y-4 rounded-kartu border border-primary/30 bg-white p-4"
     >
-      <h3 className="text-xl font-bold">Materi latihan</h3>
+      <h3 className="text-xl font-bold">
+        {purpose === "extra"
+          ? "Soal tambahan untuk contoh ini"
+          : "Soal untuk sesi Anda"}
+      </h3>
       <p className="text-sm">
-        Siapkan sebelum kelas. Soal, tugas, petunjuk dan kartu keluar tersedia
-        offline.
+        {purpose === "extra"
+          ? "Siapkan tugas cetak dan pertanyaan untuk cek akhir. Pembuka dan soal cek pada sesi contoh tetap memakai soal bawaan."
+          : "Latihan berisi pertanyaan pembuka, soal untuk memeriksa pemahaman, dan tugas untuk kegiatan kelompok."}
       </p>
       {classroom && (
-        <div className="flex flex-wrap gap-2">
-          <label className="flex flex-col gap-1">
-            Jenis paket
+        <div className="practice-prepare-fields">
+          <label className="practice-field">
+            Cara memeriksa pemahaman
             <select
               aria-label="Jenis paket"
               className={field}
               value={variant}
               onChange={(e) => setVariant(e.target.value as PackageVariant)}
             >
-              <option value="initial">Cek Awal · 10 soal</option>
+              <option value="initial">Cek pertama · 10 soal</option>
               <option value="weekly">
                 {classroom.grade <= 3
-                  ? "Mingguan lisan · level terakhir"
-                  : "Mingguan · 5 soal"}
+                  ? "Cek lanjutan · secara lisan"
+                  : "Cek lanjutan · 5 soal"}
               </option>
-              <option value="oral">Cek Lisan</option>
-              <option value="short">Sesi Singkat</option>
+              <option value="oral">Cek secara lisan</option>
+              <option value="short">Latihan singkat</option>
             </select>
           </label>
-          <Button disabled={busy} onClick={() => void prepare()}>
-            Siapkan Paket Sesi
+          <Button
+            className="practice-prepare-action"
+            disabled={busy}
+            onClick={() => void prepare()}
+          >
+            <FilePlus2 size={18} aria-hidden />
+            {busy ? "Menyiapkan…" : pkg ? "Buat latihan baru" : "Siapkan soal"}
           </Button>
+          <p className="text-sm text-muted-foreground sm:col-span-2">
+            {variant === "initial"
+              ? "Untuk sesi pertama: periksa pemahaman siswa sebelum membagi kelompok."
+              : variant === "oral"
+                ? "Guru bertanya langsung kepada siswa. Tidak memakai lembar jawaban."
+                : "Memakai hasil cek sebelumnya untuk menyiapkan latihan lanjutan."}
+          </p>
         </div>
       )}
       {pkg && (
         <>
-          <p className="rounded-input bg-pn-amber-100 p-3">
-            Materi percobaan · belum disahkan untuk kelas sungguhan. Versi{" "}
-            {pkg.revision}
-            {pkg.frozen ? " · terkunci" : ""}.
-          </p>
-          <h4 className="font-bold">Pembuka Bermakna</h4>
-          <p>{pkg.opening.prompt}</p>
-          <p>Lanjutan: {pkg.opening.followup}</p>
-          <p>Tujuan: {pkg.opening.objective}</p>
+          <details className="text-sm">
+            <summary className="min-h-12 cursor-pointer">
+              Tentang materi ini{pkg.frozen ? " · sedang digunakan" : ""}
+            </summary>
+            <p>
+              Materi ini untuk mencoba alur aplikasi. Isi soal belum diperiksa
+              oleh peninjau materi, sehingga belum dapat dipakai pada kelas
+              sungguhan. Versi {pkg.revision}.{" "}
+              {pkg.frozen
+                ? "Soal dikunci karena sudah digunakan dalam sesi; buat latihan baru untuk mengubahnya."
+                : "Anda masih dapat mengganti soal sebelum memulai sesi."}
+            </p>
+          </details>
+          {pkg.frozen && (
+            <p className="practice-feedback">
+              Soal sudah digunakan dalam sesi. Buat latihan baru untuk
+              mengubahnya; sesi yang sedang berjalan tetap memakai soal ini.
+            </p>
+          )}
+          <section
+            aria-label="Pertanyaan pembuka diskusi"
+            className="practice-opening"
+          >
+            <h4 className="flex items-center gap-2 font-bold">
+              <MessageCircle size={20} aria-hidden />
+              Pertanyaan pembuka diskusi
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              Ajukan sebelum soal cek untuk mengajak siswa berpikir. Jawaban
+              pembuka ini tidak dinilai.
+            </p>
+            <label className="practice-field">
+              Topik pembuka
+              <select
+                aria-label="Topik pembuka"
+                value={openingStep}
+                disabled={busy || pkg.frozen}
+                onChange={(e) => void changeOpening(e.target.value as StepId)}
+              >
+                {pkg.activities.map((a) => (
+                  <option key={a.stepId} value={a.stepId}>
+                    {getStep(a.stepId).label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p className="text-lg font-semibold">{pkg.opening.prompt}</p>
+            <details>
+              <summary className="min-h-12 cursor-pointer font-semibold">
+                Panduan diskusi untuk guru
+              </summary>
+              <p>Tanyakan setelah siswa mencoba: {pkg.opening.followup}</p>
+              <p>
+                Hubungkan dengan kehidupan sehari-hari: {pkg.opening.objective}
+              </p>
+            </details>
+          </section>
           {pkg.oralGeneralActivity && (
             <div>
               <p>{pkg.oralGeneralActivity}</p>
@@ -250,12 +373,12 @@ export function PackageWorkspace({
           )}
           <details>
             <summary className="min-h-12 cursor-pointer font-bold">
-              Pratinjau soal cek ({pkg.assessment.length})
+              Soal cek pemahaman ({pkg.assessment.length})
             </summary>
             <ol className="space-y-3">{pkg.assessment.map(preview)}</ol>
           </details>
           <label className="flex flex-col gap-1">
-            Materi untuk guru
+            Topik tugas kelompok
             <select
               aria-label="Materi paket"
               value={activity?.stepId ?? ""}
@@ -264,10 +387,7 @@ export function PackageWorkspace({
             >
               {pkg.activities.map((a) => (
                 <option key={a.stepId} value={a.stepId}>
-                  {getStep(a.stepId).label} ·{" "}
-                  {a.interactiveSupport === "unavailable"
-                    ? "alat belum tersedia"
-                    : "alat tersedia"}
+                  {getStep(a.stepId).label}
                 </option>
               ))}
             </select>
@@ -279,6 +399,7 @@ export function PackageWorkspace({
                 disabled={busy}
                 onClick={() => void printIndependent()}
               >
+                <Download size={18} aria-hidden />
                 Unduh tugas mandiri PDF
               </Button>
               {activity.interactiveSupport === "unavailable" && (
@@ -289,13 +410,13 @@ export function PackageWorkspace({
               )}
               <details>
                 <summary className="min-h-12 cursor-pointer font-bold">
-                  Tugas Papan ({activity.board.length})
+                  Soal untuk layar kelas ({activity.board.length})
                 </summary>
                 <ol className="space-y-3">{activity.board.map(preview)}</ol>
               </details>
-              <details>
+              <details id="practice-independent">
                 <summary className="min-h-12 cursor-pointer font-bold">
-                  Mandiri · 3 wajib + 1 boleh
+                  Tugas mandiri · 3 soal + 1 tambahan
                 </summary>
                 <ol className="space-y-3">
                   {[...activity.independent, activity.optional].map(preview)}
@@ -303,7 +424,7 @@ export function PackageWorkspace({
               </details>
               <details>
                 <summary className="min-h-12 cursor-pointer font-bold">
-                  Contoh terbimbing dan kartu keluar
+                  Contoh untuk dibahas bersama & cek akhir
                 </summary>
                 <ol className="space-y-3">
                   {[activity.guided, activity.exit, activity.exitContext].map(
@@ -311,7 +432,7 @@ export function PackageWorkspace({
                   )}
                 </ol>
                 <p>
-                  Alasan exit:{" "}
+                  Pilihan alasan pada cek akhir:{" "}
                   {activity.exit.reasons
                     .map((r) => `${r.label}. ${r.text}`)
                     .join(" · ")}

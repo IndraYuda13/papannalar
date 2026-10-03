@@ -16,7 +16,29 @@ export const STORY_FRAMES = {
     "Resep memakai {{a}} gelas teh untuk {{b}} gelas air. Untuk {{total}} gelas teh, berapa gelas air agar rasanya sama?",
     "Perbandingan teh dan air ialah {{a}} gelas teh untuk {{b}} gelas air. Tentukan air untuk {{total}} gelas teh dengan rasa yang sama.",
   ],
+  "temperature-drop-v1": [
+    "Suhu mula-mula {{a}}°C, lalu turun {{b}}°C. Berapa suhu sekarang?",
+    "Termometer menunjukkan {{a}}°C. Suhu turun {{b}}°C. Tentukan suhu akhirnya.",
+  ],
+  "diver-down-v1": [
+    "Penyelam berada pada posisi {{a}} meter terhadap permukaan laut, lalu turun {{b}} meter. Di posisi berapa penyelam sekarang?",
+    "Posisi penyelam adalah {{a}} meter; permukaan laut bernilai 0. Ia turun {{b}} meter. Tentukan posisi akhirnya.",
+  ],
 } as const;
+export const STORY_FRAME_IDS = [
+  "lift-down-v1",
+  "water-add-v1",
+  "recipe-ratio-v1",
+  "temperature-drop-v1",
+  "diver-down-v1",
+] as const;
+export const STORY_FRAME_LABELS: Record<StoryFrameId, string> = {
+  "lift-down-v1": "Lift",
+  "water-add-v1": "Takaran air",
+  "recipe-ratio-v1": "Resep minuman",
+  "temperature-drop-v1": "Perubahan suhu",
+  "diver-down-v1": "Kedalaman laut",
+};
 export type StoryFrameId = keyof typeof STORY_FRAMES;
 export type StoryChoice = Readonly<{ frameId: StoryFrameId; variant: 0 | 1 }>;
 export function storyFrameFor(q: GeneratedQuestion): StoryFrameId | null {
@@ -31,11 +53,22 @@ export function storyFrameFor(q: GeneratedQuestion): StoryFrameId | null {
 export function storyFrameHash(frameId: StoryFrameId): string {
   return contentHash(JSON.stringify(STORY_FRAMES[frameId]));
 }
+export function storyFramesFor(q: GeneratedQuestion): readonly StoryFrameId[] {
+  const base = storyFrameFor(q);
+  return q.stepId === "D1"
+    ? ["lift-down-v1", "temperature-drop-v1", "diver-down-v1"]
+    : base
+      ? [base]
+      : [];
+}
 export function applyStory(
   q: GeneratedQuestion,
   choice: StoryChoice,
 ): GeneratedQuestion {
-  if (storyFrameFor(q) !== choice.frameId || ![0, 1].includes(choice.variant))
+  if (
+    !storyFramesFor(q).includes(choice.frameId) ||
+    ![0, 1].includes(choice.variant)
+  )
     throw new Error("Unsupported story frame");
   const values: Record<string, number> = {
     a: q.params.a,

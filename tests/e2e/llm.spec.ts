@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { openBoard } from "../browser/helpers";
 import { expect, test } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -29,13 +30,11 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
   await page.getByLabel("Nama rombel", { exact: true }).fill("7V");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7V/ }).click();
-  await page
-    .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
   const story = page.getByLabel("Cerita Paket Sesi", { exact: true });
   const storyStart = Date.now();
   await story
-    .getByRole("button", { name: "Pratinjau cerita AI", exact: true })
+    .getByRole("button", { name: "Buat pilihan cerita", exact: true })
     .click();
   await expect(story).toContainText("Cerita AI belum tersedia");
   const storyMs = Date.now() - storyStart;
@@ -53,8 +52,9 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
       exact: true,
     }),
   ).toBeVisible();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   for (const n of ["07", "12", "25"]) {
     await page

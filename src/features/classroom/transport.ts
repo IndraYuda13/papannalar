@@ -14,7 +14,10 @@ import {
 } from "./connection-transport";
 export type Surface = "teacher" | "board";
 export class PairingError extends Error {
-  constructor(public readonly status: number) {
+  constructor(
+    public readonly status: number,
+    public readonly code?: "SAMPLE_CONTROL_REQUIRED",
+  ) {
     super("Pairing unavailable");
   }
 }
@@ -45,7 +48,21 @@ export async function pairingCall(
       },
     );
     observeServerClock(response.headers.get("date"), sentAt, Date.now());
-    if (!response.ok) throw new PairingError(response.status);
+    if (!response.ok) {
+      const body: unknown = await response.json().catch(() => undefined);
+      const sample =
+        typeof body === "object" &&
+        body !== null &&
+        "error" in body &&
+        typeof body.error === "object" &&
+        body.error !== null &&
+        "code" in body.error &&
+        body.error.code === "SAMPLE_CONTROL_REQUIRED";
+      throw new PairingError(
+        response.status,
+        sample ? "SAMPLE_CONTROL_REQUIRED" : undefined,
+      );
+    }
     const value: unknown = await response.json();
     if ("action" in input && input.action === "heartbeat") {
       const pulse = connectionPulseSchema.safeParse(value);
@@ -57,6 +74,22 @@ export async function pairingCall(
     clearTimeout(timeout);
     signal?.removeEventListener("abort", abort);
   }
+}
+
+export function pairingFailureMessage(error: unknown): string {
+  if (error instanceof PairingError) {
+    if (error.code === "SAMPLE_CONTROL_REQUIRED")
+      return "Data contoh sedang dikendalikan perangkat lain. Gunakan tombol Ambil alih kendali di atas, lalu sambungkan lagi.";
+    if (error.status === 404)
+      return "Kode sudah kedaluwarsa atau sudah dipakai. Masukkan enam digit terbaru dari layar kelas.";
+    if (error.status === 409 || error.status === 403)
+      return "Layar masih terhubung ke sesi lain atau kendali telah berpindah. Putuskan sambungan lama, lalu gunakan kode baru.";
+    if (error.status === 401)
+      return "Masuk kembali sebagai guru, lalu sambungkan layar.";
+    if (error.status === 429)
+      return "Terlalu banyak percobaan. Tunggu sebentar sebelum memakai kode terbaru.";
+  }
+  return "Belum tersambung. Periksa internet lalu coba lagi dengan kode terbaru.";
 }
 export function watchPresentation(
   surface: Surface,

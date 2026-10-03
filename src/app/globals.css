@@ -1792,3 +1792,133 @@ html:has([data-light-display="true"]) {
 .teacher-disclosure[data-motion-off="true"] > summary > svg {
   transition: none;
 }
+
+.practice-journey {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.practice-journey button {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+  color: var(--primary);
+  background: var(--card);
+  font-weight: 600;
+  text-align: left;
+}
+.practice-journey button span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--pn-teal-100);
+}
+.practice-journey button:hover {
+  background: var(--pn-teal-100);
+}
+.practice-prepare-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+.practice-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.practice-field select {
+  min-width: 0;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid var(--pn-ink-400);
+  border-radius: 8px;
+  background: white;
+  font-size: 16px;
+  font-weight: 400;
+}
+.practice-prepare-action {
+  align-self: end;
+  width: fit-content;
+  min-height: 48px;
+}
+.practice-opening {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: var(--pn-teal-100);
+  border-radius: 12px;
+}
+.practice-feedback {
+  border-left: 3px solid var(--primary);
+  padding: 10px 12px;
+  background: var(--pn-teal-100);
+  font-size: 14px;
+}
+.practice-example-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 48px;
+  padding: 12px;
+  font-size: 14px;
+}
+.practice-example-link svg {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+.practice-example-link a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.story-comparison {
+  padding: 12px 16px;
+  border: 1px solid var(--pn-ink-400);
+  border-radius: 12px;
+  background: white;
+}
+.story-comparison-text {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+.story-comparison-text p {
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+#practice-independent {
+  scroll-margin-top: 24px;
+}
+@media (max-width: 767px) {
+  .practice-journey button {
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    text-align: center;
+    padding: 10px 4px;
+  }
+  .practice-prepare-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .story-comparison-text {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .story-comparison-text > svg {
+    transform: rotate(90deg);
+  }
+}

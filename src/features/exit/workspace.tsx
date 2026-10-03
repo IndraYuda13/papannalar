@@ -16,6 +16,7 @@ import type { GroupSnapshot } from "@/core/groups/grouping";
 import { CARD_CHOICES, type CardChoice } from "@/core/assessment/card-response";
 import { ScanCapture } from "@/features/scanner/capture";
 import { Button } from "@/ui/components/button";
+import { getStep } from "@/content/ladder/registry";
 import { MathPrompt } from "@/ui/components/math-prompt";
 import type { TeacherPackage } from "@/core/package/build";
 type Draft = {
@@ -77,7 +78,7 @@ export function ExitWorkspace({
     try {
       const p = frozenPackage ?? (await packages.latest(parent.classroom.id));
       if (!p) {
-        setMessage("Siapkan Paket Sesi untuk kelas ini terlebih dahulu.");
+        setMessage("Siapkan soal untuk kelas ini terlebih dahulu.");
         return;
       }
       const value = createExitPlan({
@@ -339,12 +340,12 @@ export function ExitWorkspace({
               cards.map((c) => c.graded),
             ).map((row) => (
               <p key={row.stepId}>
-                {row.stepId}:{" "}
+                {getStep(row.stepId).label}:{" "}
                 {row.percent === null
                   ? "belum dinilai"
                   : `${Math.round(row.percent)}% benar dan paham`}{" "}
                 · {row.understood}/{row.assessed} pasangan dinilai ·{" "}
-                {row.pending} pending dari {row.expected}
+                {row.pending} jawaban belum lengkap dari {row.expected} siswa
               </p>
             ))}
           </div>
@@ -377,7 +378,8 @@ export function ExitWorkspace({
       )}
       <p role="status">{message}</p>
       <p className="text-sm">
-        Persentase hanya di HP. Konten draft belum disahkan untuk pilot.
+        Ringkasan hasil hanya tampil pada perangkat guru. Soal ini untuk mencoba
+        aplikasi dan belum diperiksa peninjau materi untuk kelas sungguhan.
       </p>
     </section>
   );

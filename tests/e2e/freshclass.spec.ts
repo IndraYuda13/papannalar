@@ -79,12 +79,10 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
   await page.getByRole("button", { name: /Buka kelas 7N/ }).click();
   const pkg = page.getByRole("region", { name: "Paket Sesi", exact: true }),
     cycle = page.getByRole("region", { name: "Siklus kelas", exact: true });
-  await pkg
-    .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
-    .click();
-  await expect(pkg).toContainText("Paket tersimpan lokal");
+  await pkg.getByRole("button", { name: "Siapkan soal", exact: true }).click();
+  await expect(pkg).toContainText("Latihan tersimpan di perangkat ini");
   await cycle
-    .getByRole("button", { name: "Mulai sesi dari paket", exact: true })
+    .getByRole("button", { name: "Mulai sesi dengan soal ini", exact: true })
     .click();
   await expect(cycle.getByTestId("cycle-status")).toContainText("Sesi 1");
   await expect(cycle.getByTestId("cycle-scan-count")).toContainText("0/32");
@@ -160,7 +158,10 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
     }),
   ).toContainText("di bawah jangkauan cek");
   await cycle
-    .getByRole("button", { name: "Bekukan kelompok sesi", exact: true })
+    .getByRole("button", {
+      name: "Gunakan pembagian kelompok ini",
+      exact: true,
+    })
     .click();
   await expect(
     cycle.getByLabel("Tidak hadir absen 32", { exact: true }),
@@ -348,7 +349,7 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
   ).toBeVisible();
   await cycle.getByRole("button", { name: "Tutup kelas", exact: true }).click();
   await expect(cycle.getByTestId("cycle-status")).toContainText(
-    "kelas ditutup · penilaian belum final",
+    "kelas ditutup · penilaian belum disimpan",
   );
   await photo(page, exit, "exit", 31, ["?", "?", "?"]);
   await exit
@@ -356,27 +357,27 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
     .click();
   await expect(exit.getByTestId("exit-count")).toContainText("31/31");
   await cycle
-    .getByRole("button", { name: "Finalisasi penilaian", exact: true })
+    .getByRole("button", { name: "Simpan penilaian sesi", exact: true })
     .click();
   await expect(cycle.getByTestId("cycle-status")).toContainText(
-    "penilaian final revisi 1",
+    "penilaian tersimpan",
   );
-  await expect(cycle).toContainText("0 hasil masih pending");
+  await expect(cycle).toContainText("0 hasil belum lengkap");
   await page.reload();
   await chooseTeacherMode(page, "demo");
   await page.getByRole("button", { name: /Buka kelas 7N/ }).click();
   await expect(cycle.getByTestId("cycle-status")).toContainText(
-    "penilaian final revisi 1",
+    "penilaian tersimpan",
   );
   await expect(cycle.getByTestId("cycle-scan-count")).toContainText("31/32");
   await pkg.getByLabel("Jenis paket", { exact: true }).selectOption("weekly");
   await pkg
-    .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
+    .getByRole("button", { name: "Buat latihan baru", exact: true })
     .click();
-  await expect(pkg).toContainText("Pratinjau soal cek (5)");
+  await expect(pkg).toContainText("Soal cek pemahaman (5)");
   await cycle
     .getByRole("button", {
-      name: "Mulai sesi berikutnya dari paket baru",
+      name: "Mulai sesi berikutnya",
       exact: true,
     })
     .click();

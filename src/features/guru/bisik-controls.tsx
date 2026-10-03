@@ -90,7 +90,7 @@ export function BisikControls({
     active.current = controller;
     setBusy(true);
     const timer = setTimeout(() => controller.abort(), 5000);
-    setMessage("Bisik sedang menyusun saran.");
+    setMessage("AI sedang menyusun saran mengajar…");
     try {
       if (question) {
         const names = createNameRepository(scope);
@@ -192,9 +192,16 @@ export function BisikControls({
         </Button>
       )}
       {result?.status === "ai" && (
-        <div>
+        <div className="space-y-3 rounded-input bg-pn-teal-100 p-3">
           <p>{result.answer}</p>
-          <p>Sumber: {result.sourceStrategyIds.join(", ")}</p>
+          <p className="text-sm">
+            Gunakan saran ini saat menjelaskan kepada siswa. Saran tidak
+            mengubah soal, jawaban atau pembagian kelompok.
+          </p>
+          <details>
+            <summary className="min-h-12 cursor-pointer">Sumber saran</summary>
+            <p>{result.sourceStrategyIds.join(", ")}</p>
+          </details>
         </div>
       )}
       <details>
@@ -239,8 +246,9 @@ export function BisikControls({
         )}
         {!freeText && (
           <p>
-            Tanya bebas belum aktif: menunggu review privasi. Kartu statis tetap
-            tersedia.
+            Pertanyaan yang Anda ketik belum bisa dikirim karena pemeriksaan
+            privasi belum selesai. Anda tetap dapat membaca kartu saran atau
+            meminta AI berdasarkan kartu yang sudah diizinkan.
           </p>
         )}
       </details>

@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { openBoard } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
@@ -22,8 +23,9 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
   await page.getByLabel("Nama rombel", { exact: true }).fill("7R");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7R/ }).click();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
       baseURL: "http://127.0.0.1:3100",
@@ -49,7 +51,7 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
     "Layar tersambung",
   );
   await page
-    .getByText("Pembuka bermakna dari katalog", { exact: true })
+    .getByText("Pertanyaan pembuka & giliran siswa", { exact: true })
     .click();
   const opening = page.getByRole("region", {
     name: "Giliran Pembuka",

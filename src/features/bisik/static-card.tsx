@@ -47,7 +47,8 @@ export function StaticBisik({
         <summary className="min-h-12 cursor-pointer">
           Sumber dan status materi
         </summary>
-        Sumber: {strategy.code} · Materi percobaan, belum direview manusia.
+        Sumber: {strategy.code} · Isi kartu belum diperiksa peninjau materi;
+        gunakan untuk mencoba aplikasi.
       </details>
       <ol className="list-inside list-decimal space-y-1">
         {strategy.prompts.map((p) => (

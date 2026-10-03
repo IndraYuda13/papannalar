@@ -16,6 +16,7 @@ import { createOralRepository } from "@/local/oral";
 import { loadOralBaseline } from "@/features/oral/baseline";
 import { Button } from "@/ui/components/button";
 import { MathPrompt } from "@/ui/components/math-prompt";
+import { getStep } from "@/content/ladder/registry";
 
 export function OralWorkspace({
   ownerId,
@@ -82,7 +83,7 @@ export function OralWorkspace({
       setRun(value);
       setCode("");
       setMessage(
-        "Bacakan soal; siswa menjawab lisan. Konten dan aturan tepi masih draft.",
+        "Bacakan soal dan catat jawaban lisan siswa. Materi ini untuk mencoba aplikasi, belum diperiksa peninjau materi.",
       );
     } catch {
       setMessage("Cek lisan belum tersimpan. Periksa penyimpanan perangkat.");
@@ -100,7 +101,7 @@ export function OralWorkspace({
       setRun(next);
       setCode("");
       setMessage(
-        "Tersimpan lokal. Koreksi memakai replay, tidak menambah bukti ganda.",
+        "Jawaban tersimpan di perangkat ini. Koreksi mengganti jawaban sebelumnya; siswa tidak dihitung dua kali.",
       );
     } catch {
       setMessage(
@@ -170,7 +171,7 @@ export function OralWorkspace({
         <>
           <p className="font-bold">
             {labels[run.studentId] ?? `Absen ${run.attendanceNumber}`} ·{" "}
-            {state.currentStep ?? "Selesai"}
+            {state.currentStep ? getStep(state.currentStep).label : "Selesai"}
           </p>
           {state.status === "active" && state.question && (
             <>
@@ -198,12 +199,14 @@ export function OralWorkspace({
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                 >
-                  <option value="">Lainnya / tanpa diagnosis</option>
+                  <option value="">
+                    Jawaban lain / belum tahu penyebabnya
+                  </option>
                   {state.question.options
                     .filter((o) => o.misconceptionCode)
                     .map((o) => (
                       <option key={o.label} value={o.misconceptionCode}>
-                        {o.text} · {o.misconceptionCode}
+                        {o.text}
                       </option>
                     ))}
                 </select>
@@ -251,7 +254,7 @@ export function OralWorkspace({
             <p>
               Penempatan lisan:{" "}
               {state.placement?.kind === "step"
-                ? state.placement.stepId
+                ? getStep(state.placement.stepId).label
                 : "Lanjut"}
               . Hasil cek lisan terpisah dari latihan tertulis. Cara penempatan
               ini masih perlu ditinjau sebelum dipakai pada kelas sungguhan.

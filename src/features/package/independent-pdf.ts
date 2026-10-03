@@ -123,7 +123,7 @@ export async function createIndependentPdf(
   for (const p of doc.getPages())
     text(
       p,
-      "Konten draft untuk demo · review guru diperlukan sebelum pilot.",
+      "Soal contoh; belum diperiksa peninjau materi untuk kelas sungguhan.",
       27,
       font,
       9,

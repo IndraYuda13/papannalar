@@ -57,13 +57,12 @@ import {
 import { createTeachingProvider } from "../../src/server/llm/provider";
 import { legacyProfile, type AIProfile } from "../../src/server/llm/profile";
 import { templateFor } from "../../src/content/templates/registry";
-import {
-  storyFrameHash,
-  STORY_FRAMES,
-} from "../../src/content/contexts/story-frames";
+import { storyFrameHash } from "../../src/content/contexts/story-frames";
 import { getStrategy } from "../../src/content/strategies/registry";
 import { buildPackage } from "../../src/core/package/build";
 import { toPackageRecipe } from "../../src/contracts/sync-package";
+import { enrichResponseSchema } from "../../src/contracts/bisik";
+import { applyPackageStories } from "../../src/core/package/enrichment";
 const owner = "39000000-0000-4000-8000-000000000001",
   classId = "39000000-0000-4000-8000-000000000005",
   sessionId = "39000000-0000-4000-8000-000000000006",
@@ -96,7 +95,7 @@ beforeAll(async () => {
       ? {
           status: "ok",
           stories: [
-            { slotId: "slot-0", segments: [STORY_FRAMES["lift-down-v1"][0]] },
+            { slotId: "slot-0", segments: [content.slots[0].choices[0]] },
           ],
         }
       : answer;
@@ -205,6 +204,7 @@ function approve() {
   for (const [id, hash] of [
     ["D1.2", getStrategy("D1.2").metadata.contentHash],
     ["lift-down-v1", storyFrameHash("lift-down-v1")],
+    ["temperature-drop-v1", storyFrameHash("temperature-drop-v1")],
     [templateFor("D1").id, templateFor("D1").metadata.contentHash],
   ])
     state.approvals.push({
@@ -264,19 +264,48 @@ for (const selected of [
           seed: 33,
           occupied: [{ kind: "step", stepId: "D1" }],
         });
-        expect(
+        const enriched = enrichResponseSchema.parse(
           await (
             await enrichmentRequest(
               request("enrich", {
                 requestId: crypto.randomUUID(),
                 recipe: toPackageRecipe(pkg),
+                stepId: "D1",
+                context: sample ? "temperature-drop-v1" : "lift-down-v1",
               }),
             )
           ).json(),
-        ).toMatchObject({
+        );
+        expect(enriched).toMatchObject({
           status: "ai",
-          stories: [{ choice: { frameId: "lift-down-v1", variant: 0 } }],
+          stories: [
+            {
+              choice: {
+                frameId: sample ? "temperature-drop-v1" : "lift-down-v1",
+                variant: 0,
+              },
+            },
+          ],
         });
+        const saved = toPackageRecipe(
+          applyPackageStories(pkg, enriched.revision, enriched.stories),
+        );
+        const schemaPath = "{properties,payload,anyOf,0,properties,package}";
+        const checkRecipe = (value: unknown) =>
+          sql(
+            `select pn_private.matches_sync_schema((select body#>'${schemaPath}' from pn_private.sync_schemas where id='mutation-v1'), '${JSON.stringify(value).replaceAll("'", "''")}'::jsonb)`,
+          );
+        expect(checkRecipe(saved)).toBe("t");
+        expect(
+          checkRecipe(
+            JSON.parse(
+              JSON.stringify(saved).replace(
+                /temperature-drop-v1|lift-down-v1/g,
+                "unapproved-unknown-frame",
+              ),
+            ),
+          ),
+        ).toBe("f");
         const rows = JSON.parse(
           sql(
             `select jsonb_agg(jsonb_build_object('usage',usage,'snapshot',profile_snapshot)) from pn_private.llm_usage where owner_id='${owner}'`,

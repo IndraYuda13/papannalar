@@ -1,17 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ArrowRight, FlaskConical } from "lucide-react";
 import { Button } from "@/ui/components/button";
 import type { ClassDto } from "@/contracts/classes";
 import type { StudentDto } from "@/contracts/api";
 import type { TeacherPackage } from "@/core/package/build";
 import { PackageWorkspace } from "@/features/package/package-workspace";
-import { SessionWorkspace } from "@/features/session/session-workspace";
 import { CycleWorkspace } from "@/features/session/cycle-workspace";
 import { OralWorkspace } from "./oral-workspace";
 import { ActivityDisclosure, openTeacherActivity } from "./activity-disclosure";
 import { AiWorkspace } from "./ai-workspace";
+import type { StepId } from "@/content/ladder/registry";
 export function PracticeActivities({
   ownerId,
   mode,
@@ -24,12 +24,63 @@ export function PracticeActivities({
   labels: Record<string, string>;
 }) {
   const [pkg, setPkg] = useState<TeacherPackage>();
+  const [selectedStep, setSelectedStep] = useState("");
+  const [session, setSession] = useState<{
+    classId: string;
+    sessionId: string;
+  }>();
+  const receiveSession = useCallback(
+    (value: { package: TeacherPackage; sessionId: string } | undefined) => {
+      setSession(
+        value
+          ? { classId: value.package.classId, sessionId: value.sessionId }
+          : undefined,
+      );
+      if (value)
+        setPkg((current) =>
+          current?.id === value.package.id &&
+          current.frozen !== value.package.frozen
+            ? value.package
+            : current,
+        );
+    },
+    [],
+  );
+  function viewTasks(stepId: StepId) {
+    setSelectedStep(stepId);
+    openTeacherActivity("teacher-prepare");
+    requestAnimationFrame(() => {
+      const tasks = document.getElementById("practice-independent");
+      if (tasks instanceof HTMLDetailsElement) {
+        tasks.open = true;
+        tasks.scrollIntoView({ block: "start" });
+        tasks.querySelector("summary")?.focus({ preventScroll: true });
+      }
+    });
+  }
   return (
     <>
+      <nav aria-label="Langkah menyiapkan latihan" className="practice-journey">
+        {[
+          ["teacher-prepare", "1", "Persiapan"],
+          ["teacher-ai", "2", "Cerita & bantuan"],
+          ["teacher-teach", "3", "Coba sesi"],
+        ].map(([id, n, label]) => (
+          <button
+            key={id}
+            aria-controls={id}
+            aria-label={`Buka langkah ${n}: ${label}`}
+            onClick={() => openTeacherActivity(id)}
+          >
+            <span aria-hidden>{n}</span>
+            {label}
+          </button>
+        ))}
+      </nav>
       <ActivityDisclosure
         id="teacher-prepare"
         title="1. Siapkan latihan"
-        description="Pilih jenis cek, periksa soal dan cetak tugas bila diperlukan."
+        description="Tentukan cara cek, pilih pembuka diskusi dan periksa soal."
         initiallyOpen
         scope={{ ownerId, mode }}
       >
@@ -41,18 +92,21 @@ export function PracticeActivities({
           classroom={detail?.class}
           pkg={pkg}
           onPackageChange={setPkg}
+          selectedStep={selectedStep}
+          onSelectedStepChange={setSelectedStep}
         />
         {pkg && (
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => openTeacherActivity("teacher-teach")}>
-              Lanjut ke kegiatan
+              Coba sesi dengan soal ini
+              <ArrowRight size={18} aria-hidden />
             </Button>
             <Button
               variant="outline"
               onClick={() => openTeacherActivity("teacher-ai")}
             >
               <Sparkles size={18} aria-hidden />
-              Coba bantuan AI
+              Tambahkan cerita AI
             </Button>
           </div>
         )}
@@ -61,16 +115,41 @@ export function PracticeActivities({
         )}
       </ActivityDisclosure>
       <ActivityDisclosure
+        id="teacher-ai"
+        title="2. Tambahkan cerita & bantuan mengajar"
+        description="Opsional: pilih soal cerita atau cari cara menjelaskan."
+        scope={{ ownerId, mode }}
+      >
+        <AiWorkspace
+          key={`${ownerId}/${mode}`}
+          pkg={pkg}
+          scope={{ ownerId, mode }}
+          onUpdated={setPkg}
+          preferredStep={selectedStep}
+          onViewTasks={viewTasks}
+          session={session}
+        />
+        {pkg && (
+          <Button
+            variant="outline"
+            onClick={() => openTeacherActivity("teacher-teach")}
+          >
+            Lanjut ke sesi
+            <ArrowRight size={18} aria-hidden />
+          </Button>
+        )}
+      </ActivityDisclosure>
+      <ActivityDisclosure
         id="teacher-teach"
-        title="2. Jalankan kegiatan"
-        description="Mulai sesi, sambungkan layar dan periksa jawaban."
+        title="3. Coba mengajar dengan soal ini"
+        description="Mulai satu sesi, lalu sambungkan satu layar kelas."
         scope={{ ownerId, mode }}
       >
         {mode !== "demo" && (
           <p className="rounded-input bg-pn-amber-100 p-3 text-sm">
-            Materi latihan ini masih percobaan dan belum disahkan untuk kelas
-            sungguhan. Untuk mencoba, pilih Data contoh di atas. Untuk mengajar
-            dengan materi yang sudah siap,{" "}
+            Isi soal pada latihan ini belum diperiksa oleh peninjau materi.
+            Pilih Data contoh untuk mencoba sesi. Untuk memakai kumpulan soal
+            Anda di kelas,{" "}
             <Link
               className="font-semibold text-primary underline"
               href="/guru/mulai"
@@ -84,41 +163,21 @@ export function PracticeActivities({
           key={`${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
           scope={{ ownerId, mode }}
           detail={detail}
-        />
-        <ActivityDisclosure
-          id="teacher-rehearsal"
-          title="Coba alur dengan 32 jawaban contoh"
-          description="Simulasi kelas 7: tiga kartu diperiksa, jawaban lainnya sudah diisi."
-          scope={{ ownerId, mode }}
-        >
-          {mode === "demo" ? (
-            <SessionWorkspace
-              key={`prelim/${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
-              ownerId={ownerId}
-              mode={mode}
-              detail={detail}
-            />
-          ) : (
-            <p>
-              Pilih Data contoh untuk menjalankan simulasi tanpa data siswa
-              nyata.
-            </p>
-          )}
-        </ActivityDisclosure>
-      </ActivityDisclosure>
-      <ActivityDisclosure
-        id="teacher-ai"
-        title="Bantuan AI & cara mengajar"
-        description="Buat cerita soal atau cari cara menjelaskan kesulitan siswa."
-        scope={{ ownerId, mode }}
-      >
-        <AiWorkspace
-          key={`${ownerId}/${mode}`}
-          pkg={pkg}
-          scope={{ ownerId, mode }}
-          onUpdated={setPkg}
+          preparedPackage={pkg}
+          onSessionChange={receiveSession}
         />
       </ActivityDisclosure>
+      {mode === "demo" && (
+        <p className="practice-example-link">
+          <FlaskConical size={20} aria-hidden />
+          <Link
+            href={`/guru/simulasi?mode=demo${detail ? `&class=${detail.class.id}` : ""}`}
+            prefetch={false}
+          >
+            Lihat contoh sesi lengkap dengan jawaban terisi
+          </Link>
+        </p>
+      )}
       <ActivityDisclosure
         id="teacher-oral"
         title="Cek pemahaman secara lisan"

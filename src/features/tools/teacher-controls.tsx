@@ -191,10 +191,7 @@ export function ToolControls({
       )}
       {kind === "fractions" && (
         <>
-          <p>
-            Batang Pecahan · latihan draft dari katalog. Parameter dapat diubah
-            guru.
-          </p>
+          <p>Batang Pecahan · contoh latihan. Angka dapat diubah guru.</p>
           <label>
             Aktivitas{" "}
             <select

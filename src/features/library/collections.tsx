@@ -604,7 +604,7 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
               disabled={busy}
               onClick={() => void save(false)}
             >
-              Simpan draft
+              Simpan untuk nanti
             </Button>
             <Button disabled={busy} onClick={() => void save(true)}>
               Simpan & siap digunakan

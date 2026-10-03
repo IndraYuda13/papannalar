@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
@@ -19,8 +20,9 @@ test("Seven patterns use actual paired board, distinct examples, repairs, unique
   await page.getByLabel("Nama rombel", { exact: true }).fill("7P");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7P/ }).click();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
     baseURL: "http://127.0.0.1:3100",

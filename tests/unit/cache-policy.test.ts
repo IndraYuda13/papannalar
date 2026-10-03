@@ -19,39 +19,42 @@ describe("Cache shell hanya allowlist build", () => {
       shells: {
         ...manifest.shells,
         "/guru/latihan": "/offline/guru-latihan.html",
+        "/guru/simulasi": "/offline/guru-simulasi.html",
       },
     };
     const id = "7b000002-0000-4000-8000-000000000001";
-    for (const query of [
-      "?mode=demo",
-      "?mode=pilot",
-      `?mode=demo&class=${id}`,
-      `?class=${id}`,
-    ]) {
-      expect(
-        cacheTarget(
-          { ...request, url: origin + "/guru/latihan" + query },
-          origin,
-          withPractice,
-        ),
-      ).toBe("/offline/guru-latihan.html");
-    }
-    for (const query of [
-      "?mode=student",
-      "?class=PRIVATE_CANARY",
-      "?mode=demo&name=PRIVATE_CANARY",
-      "?mode=demo&mode=pilot",
-      `?class=${id}&student=PRIVATE_CANARY`,
-      "?_rsc=test",
-    ]) {
-      expect(
-        cacheTarget(
-          { ...request, url: origin + "/guru/latihan" + query },
-          origin,
-          withPractice,
-        ),
-      ).toBeUndefined();
-    }
+    for (const route of ["latihan", "simulasi"])
+      for (const query of [
+        "?mode=demo",
+        "?mode=pilot",
+        `?mode=demo&class=${id}`,
+        `?class=${id}`,
+      ]) {
+        expect(
+          cacheTarget(
+            { ...request, url: origin + `/guru/${route}` + query },
+            origin,
+            withPractice,
+          ),
+        ).toBe(`/offline/guru-${route}.html`);
+      }
+    for (const route of ["latihan", "simulasi"])
+      for (const query of [
+        "?mode=student",
+        "?class=PRIVATE_CANARY",
+        "?mode=demo&name=PRIVATE_CANARY",
+        "?mode=demo&mode=pilot",
+        `?class=${id}&student=PRIVATE_CANARY`,
+        "?_rsc=test",
+      ]) {
+        expect(
+          cacheTarget(
+            { ...request, url: origin + `/guru/${route}` + query },
+            origin,
+            withPractice,
+          ),
+        ).toBeUndefined();
+      }
     expect(
       cacheTarget(
         { ...request, mode: "cors", url: origin + `/guru/latihan?class=${id}` },

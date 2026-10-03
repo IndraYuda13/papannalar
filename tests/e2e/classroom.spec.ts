@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { expect, test } from "@playwright/test";
 import {
@@ -17,8 +18,9 @@ test("teacher pairs board, public groups render and number line/lift respond loc
   await page.getByLabel("Nama rombel", { exact: true }).fill("7B");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7B/ }).click();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   await expect(page.getByTestId("scan-count")).toContainText("29/32");
   const boardContext = await browser.newContext({

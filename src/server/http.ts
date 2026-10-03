@@ -51,6 +51,7 @@ export function handleError(error: unknown) {
     UNAUTHENTICATED: 401,
     NOT_FOUND: 404,
     CONFLICT: 409,
+    SAMPLE_CONTROL_REQUIRED: 409,
     RATE_LIMITED: 429,
     AUTH_UNAVAILABLE: 503,
   };

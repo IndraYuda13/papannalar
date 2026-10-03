@@ -119,24 +119,44 @@ export function usePresentationTransport({
     locked.current = true;
     setBusy(true);
     try {
-      const next = snapshotSchema.parse(
-        await pairingCall("teacher", {
+      setMessage("");
+      const claim = () =>
+        pairingCall("teacher", {
           action: "claim",
           code,
           sessionId,
           classId,
           payload: publicPresentation(initialState()),
-        }),
-      );
+        });
+      let result: unknown;
+      try {
+        result = await claim();
+      } catch (error) {
+        if (
+          !(error instanceof PairingError) ||
+          error.code !== "SAMPLE_CONTROL_REQUIRED"
+        )
+          throw error;
+        // A suspended mobile tab can miss renewal. Renew its own lease once;
+        // takeover:false cannot displace a different, active sample browser.
+        const renewed = await fetch("/api/v1/sample/control", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ takeover: false }),
+          signal: AbortSignal.timeout(5000),
+          cache: "no-store",
+        });
+        if (!renewed.ok) {
+          window.dispatchEvent(new Event("focus"));
+          throw error;
+        }
+        result = await claim();
+      }
+      const next = snapshotSchema.parse(result);
       clearPairingLink();
       receive(next);
       setMessage("Menunggu layar menerapkan tampilan.");
     } catch (error) {
-      setMessage(
-        error instanceof PairingError && error.status === 409
-          ? "Kendali sedang dipakai atau sesi telah berubah. Periksa perangkat aktif sebelum mencoba lagi."
-          : "Kode belum dapat dipakai. Periksa koneksi dan enam digit terbaru di layar.",
-      );
       throw error;
     } finally {
       locked.current = false;

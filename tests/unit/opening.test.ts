@@ -10,6 +10,36 @@ import {
   startTurn,
   turnCounts,
 } from "../../src/core/turns/scheduler";
+import {
+  buildPackage,
+  changePackageOpening,
+  freezePackage,
+} from "../../src/core/package/build";
+import {
+  fromPackageRecipe,
+  toPackageRecipe,
+} from "../../src/contracts/sync-package";
+it("a teacher can choose the discussion topic without altering assessment/history; frozen and unavailable topics reject", () => {
+  const pkg = buildPackage({
+    id: "41000000-0000-4000-8000-000000000001",
+    classId: "41000000-0000-4000-8000-000000000002",
+    grade: 7,
+    variant: "initial",
+    seed: 9,
+    occupied: [],
+  });
+  const lift = changePackageOpening(pkg, "D1");
+  expect(lift.opening.prompt).toContain("basement");
+  expect(lift.assessment).toBe(pkg.assessment);
+  expect(lift.activities).toBe(pkg.activities);
+  expect(lift.revision).toBe(pkg.revision + 1);
+  expect(fromPackageRecipe(toPackageRecipe(lift), false)).toEqual(lift);
+  expect(openingFromPackage(lift).tool?.kind).toBe("number-line");
+  expect(changePackageOpening(lift, "D1")).toBe(lift);
+  expect(() => changePackageOpening(freezePackage(lift), "C3")).toThrow();
+  expect(() => changePackageOpening(lift, "E4")).toThrow();
+  expect(pkg.opening.prompt).toContain("Rp6.000");
+});
 it("catalog opening preserves context/objective, SD intuition and oral reflection without a target key", () => {
   const lift = demoOpening(7),
     sd = demoOpening(5),

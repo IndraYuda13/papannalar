@@ -86,21 +86,46 @@ export async function loginTeacher(
 // Functional regression scenarios explicitly open the tasks they exercise.
 // Dedicated teacher-flow tests keep the beginner's collapsed first-use view.
 export async function openTeacherSections(page: Page) {
-  for (const id of [
-    "teacher-prepare",
-    "teacher-teach",
-    "teacher-rehearsal",
-    "teacher-ai",
-    "teacher-oral",
-    "teacher-class",
-    "teacher-device",
-    "teacher-print",
-  ]) {
+  const ids =
+    new URL(page.url()).pathname === "/guru/simulasi"
+      ? ["teacher-prepare", "teacher-class", "teacher-device"]
+      : [
+          "teacher-prepare",
+          "teacher-teach",
+          "teacher-ai",
+          "teacher-oral",
+          "teacher-class",
+          "teacher-device",
+          "teacher-print",
+        ];
+  for (const id of ids) {
     const section = page.locator(`details#${id}`);
     if (!((await section.getAttribute("open")) !== null))
       await section.locator(":scope > summary").click();
     await expect(section).toHaveAttribute("open", "");
   }
+}
+export async function openTeacherExample(page: Page) {
+  if (new URL(page.url()).pathname === "/guru/simulasi") {
+    await openTeacherSections(page);
+    return;
+  }
+  const source = new URL(page.url());
+  const query = new URLSearchParams({ mode: "demo" });
+  const classId = source.searchParams.get("class");
+  if (classId) query.set("class", classId);
+  await page.goto(`/guru/simulasi?${query}`);
+  await expect(
+    page.getByRole("heading", {
+      name: "Coba contoh sesi lengkap",
+      exact: true,
+    }),
+  ).toBeVisible();
+  if (classId)
+    await expect(
+      page.locator('.teacher-class-picker [aria-pressed="true"]'),
+    ).toHaveCount(1);
+  await openTeacherSections(page);
 }
 export async function chooseTeacherMode(page: Page, mode: "demo" | "pilot") {
   await page.getByLabel("Gunakan kelas").selectOption(mode);

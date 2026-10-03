@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { test, expect, type Locator } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
 import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
@@ -274,8 +275,9 @@ test("REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot
   await page.getByLabel("Nama rombel", { exact: true }).fill("7Q");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7Q/ }).click();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
       baseURL: "http://127.0.0.1:3100",

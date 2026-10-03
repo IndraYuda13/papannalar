@@ -20,6 +20,12 @@ test("manifest build hanya shell publik, JS belajar, CSS/font dan poster lokal",
   );
   expect(manifest.assets.some((asset) => asset.endsWith(".woff2"))).toBe(true);
   expect(manifest.assets.some((asset) => asset.endsWith(".css"))).toBe(true);
+  expect(manifest.shells).toEqual({
+    "/guru": "/offline/guru.html",
+    "/guru/latihan": "/offline/guru-latihan.html",
+    "/guru/simulasi": "/offline/guru-simulasi.html",
+    "/layar": "/offline/layar.html",
+  });
   await page.goto("/guru/latihan");
   await injectFixture(page);
   await waitForShellCache(page);
@@ -39,6 +45,7 @@ test("manifest build hanya shell publik, JS belajar, CSS/font dan poster lokal",
         [
           "/offline/guru.html",
           "/offline/guru-latihan.html",
+          "/offline/guru-simulasi.html",
           "/offline/layar.html",
           "/icon.svg",
           "/omr-worker.js",
@@ -51,7 +58,7 @@ test("manifest build hanya shell publik, JS belajar, CSS/font dan poster lokal",
   ).toBe(true);
 });
 
-test("tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap bekerja", async ({
+test("tab baru offline membuka latihan, contoh sesi dan papan; font, IndexedDB dan fullscreen tetap bekerja", async ({
   page,
   context,
 }) => {
@@ -105,6 +112,18 @@ test("tab baru offline membuka kedua shell; font, IndexedDB dan fullscreen tetap
     path: "artifacts/qa/M01/m01b/guru-offline.png",
     fullPage: true,
   });
+  await fresh.goto("/guru/simulasi?mode=demo");
+  await expect(
+    fresh.getByRole("heading", {
+      name: "Coba contoh sesi lengkap",
+      exact: true,
+    }),
+  ).toBeVisible();
+  expect(
+    (await fresh.locator("body").innerText()).includes(
+      "LOCAL_ONLY_OFFLINE_CANARY",
+    ),
+  ).toBe(false);
   await openBoard(fresh);
   await fresh.setViewportSize({ width: 1920, height: 1080 });
   await expect(

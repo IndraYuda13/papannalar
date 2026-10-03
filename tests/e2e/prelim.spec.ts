@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { openBoard } from "../browser/helpers";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
@@ -11,8 +12,9 @@ async function start7b(page: Page) {
   await page.getByLabel("Nama rombel", { exact: true }).fill("7B");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7B/ }).click();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   await expect(page.getByTestId("scan-count")).toContainText("29/32");
 }
@@ -50,8 +52,9 @@ test("M05-a reset reproduces canonical inputs/groups, excluding three cards unti
   await page
     .getByRole("button", { name: "Reset sesi demo lokal", exact: true })
     .click();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   await expect(page.getByTestId("scan-count")).toContainText("29/32");
   const reset = await page.evaluate(() => window.__assessmentFixture.inspect());
@@ -102,12 +105,10 @@ test("M05-b recorded PRELIM regression: opening, check, scan, groups, station, a
     if (r.method() !== "GET") bodies.push(r.postData() ?? "");
   });
   await start7b(page);
-  await page
-    .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Paket Sesi", exact: true }),
-  ).toContainText("Paket tersimpan lokal");
+  ).toContainText("Latihan tersimpan di perangkat ini");
   const bc = await browser.newContext({
     baseURL: "http://127.0.0.1:3100",
     viewport: { width: 1920, height: 1080 },

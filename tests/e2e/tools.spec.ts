@@ -1,3 +1,4 @@
+import { openTeacherExample } from "../browser/helpers";
 import { openBoard, chooseTeacherMode } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
@@ -17,8 +18,9 @@ test("TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
   await page.getByLabel("Nama rombel", { exact: true }).fill("7T");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7T/ }).click();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
       baseURL: "http://127.0.0.1:3100",
@@ -149,8 +151,9 @@ test("TOOL02 fractions keep whole size, check the model, undo, and run offline o
   await page.getByLabel("Nama rombel", { exact: true }).fill("7F");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7F/ }).click();
+  await openTeacherExample(page);
   await page
-    .getByRole("button", { name: "Mulai Sesi Tepat Level", exact: true })
+    .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
     baseURL: "http://127.0.0.1:3100",

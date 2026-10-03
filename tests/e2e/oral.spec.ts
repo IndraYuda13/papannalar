@@ -1,5 +1,6 @@
 import { readFile, mkdir } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
+import { getStep } from "../../src/content/ladder/registry";
 import {
   loginTeacher,
   injectFixture,
@@ -51,9 +52,9 @@ test("oral grade 2 goes down on first wrong, skips without evidence, and resumes
   await oral
     .getByRole("button", { name: "Mulai atau buka cek lisan", exact: true })
     .click();
-  await expect(oral).toContainText("Absen 1 · A2");
+  await expect(oral).toContainText(`Absen 1 · ${getStep("A2").label}`);
   await oral.getByRole("button", { name: "Salah", exact: true }).click();
-  await expect(oral).toContainText("Absen 1 · A1");
+  await expect(oral).toContainText(`Absen 1 · ${getStep("A1").label}`);
   await oral.getByRole("button", { name: "Lewati siswa", exact: true }).click();
   await expect(oral).toContainText("Dilewati. Tidak ada observasi");
   await expect(oral).toContainText("1 jawaban lisan tersimpan");
@@ -64,7 +65,7 @@ test("oral grade 2 goes down on first wrong, skips without evidence, and resumes
     .getByRole("button", { name: "Lanjutkan cek lisan", exact: true })
     .click();
   await oral.getByRole("button", { name: "Benar", exact: true }).click();
-  await expect(oral).toContainText("Penempatan lisan: A2");
+  await expect(oral).toContainText(`Penempatan lisan: ${getStep("A2").label}`);
   await expect(oral).toContainText("2 jawaban lisan tersimpan");
   await oral
     .getByRole("button", { name: "Batalkan jawaban terakhir", exact: true })
@@ -72,7 +73,7 @@ test("oral grade 2 goes down on first wrong, skips without evidence, and resumes
   await oral
     .getByRole("button", { name: "Diam atau belum tahu", exact: true })
     .click();
-  await expect(oral).toContainText("Penempatan lisan: A1");
+  await expect(oral).toContainText(`Penempatan lisan: ${getStep("A1").label}`);
   await expect(oral).toContainText("2 jawaban lisan tersimpan");
   expect(errors).toEqual([]);
   await mkdir("artifacts/qa/M07", { recursive: true });

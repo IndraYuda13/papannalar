@@ -3,6 +3,8 @@ import { randomIdSchema } from "./domain";
 import { MISCONCEPTION_CODES } from "../content/strategies/registry";
 import { syncPackageSchema } from "./sync-package";
 import { storySuggestionSchema } from "./enrichment";
+import { STEP_IDS } from "../content/ladder/registry";
+import { STORY_FRAME_IDS } from "../content/contexts/story-frames";
 export const strategyCodeSchema = z.enum([
   ...MISCONCEPTION_CODES,
   "generic-error",
@@ -33,6 +35,8 @@ export const bisikRequestSchema = z.strictObject({
 export const enrichRequestSchema = z.strictObject({
   requestId: randomIdSchema,
   recipe: syncPackageSchema,
+  stepId: z.enum(STEP_IDS).optional(),
+  context: z.enum(STORY_FRAME_IDS).optional(),
 });
 export const bisikOutputSchema = z.strictObject({
   answer: z.string().trim().min(1).max(1200),

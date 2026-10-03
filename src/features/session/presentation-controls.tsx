@@ -428,7 +428,16 @@ export function PresentationControls({
       className="space-y-3 rounded-kartu border bg-white p-4"
     >
       <fieldset disabled={busy} className="space-y-3">
-        <h4 className="text-lg font-bold">Layar Kelas</h4>
+        <h4 className="text-lg font-bold">
+          {snapshot ? "Kendalikan layar kelas" : "Sambungkan layar kelas"}
+        </h4>
+        {!snapshot && (
+          <p className="text-sm">
+            Buka /layar pada TV, proyektor atau papan. Pindai QR dengan HP ini,
+            atau masukkan kode enam digit yang tampil di sana. Keduanya
+            membutuhkan internet.
+          </p>
+        )}
         {!snapshot ? (
           <PairingCodeInput onPair={pair} disabled={busy} />
         ) : (
@@ -621,7 +630,7 @@ export function PresentationControls({
         {snapshot && (
           <details>
             <summary className="min-h-12 cursor-pointer font-bold">
-              Pembuka bermakna dari katalog
+              Pertanyaan pembuka & giliran siswa
             </summary>
             {!suppliedLesson && (
               <label>

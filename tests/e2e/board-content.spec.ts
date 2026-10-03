@@ -72,14 +72,12 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
   await page.getByLabel("Nama rombel", { exact: true }).fill("7P");
   await page.getByRole("button", { name: "Simpan kelas", exact: true }).click();
   await page.getByRole("button", { name: /Buka kelas 7P/ }).click();
-  await page
-    .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Paket Sesi", exact: true }),
-  ).toContainText("Paket tersimpan lokal");
+  ).toContainText("Latihan tersimpan di perangkat ini");
   await page
-    .getByRole("button", { name: "Mulai sesi dari paket", exact: true })
+    .getByRole("button", { name: "Mulai sesi dengan soal ini", exact: true })
     .click();
   await openBoard(board);
   await page

@@ -34,6 +34,8 @@ import { libraryStateSchema } from "@/contracts/library";
 import { ActivityDisclosure } from "./activity-disclosure";
 import { DeviceControls } from "./device-controls";
 import { PracticeActivities } from "./practice-activities";
+import { ExampleActivities } from "./example-activities";
+import { SampleControl } from "./sample-control";
 import { libraryCache, removeLibraryCache } from "@/local/library";
 import type { LocalScope } from "@/local/scope";
 
@@ -55,7 +57,7 @@ async function requestJson(
   return response.json();
 }
 
-export function TeacherWorkspace() {
+export function TeacherWorkspace({ example = false }: { example?: boolean }) {
   const [ownerId, setOwnerId] = useState<string>();
   const [ready, setReady] = useState(false);
   const [classes, setClasses] = useState<ClassDto[]>([]);
@@ -69,6 +71,19 @@ export function TeacherWorkspace() {
   const [offline, setOffline] = useState(false);
   const accessOwner = useRef<string>(undefined);
   const requestVersion = useRef(0);
+
+  useEffect(() => {
+    if (!ready || !ownerId || example) return;
+    const steps = ["teacher-prepare", "teacher-ai", "teacher-teach"];
+    const hash = window.location.hash.slice(1);
+    const target = steps.includes(hash) ? hash : "teacher-prepare";
+    // Older preferences may leave all three steps open. Keep one in view on
+    // arrival; later manual choices and every mounted draft/session survive.
+    for (const id of steps) {
+      const section = document.getElementById(id);
+      if (section instanceof HTMLDetailsElement) section.open = id === target;
+    }
+  }, [ready, ownerId, example]);
 
   const showClass = useCallback(
     async (id: string, activeOwner: string, activeMode: "demo" | "pilot") => {
@@ -389,13 +404,14 @@ export function TeacherWorkspace() {
           nyata.
         </p>
       )}
+      <SampleControl active={sample && !!ownerId} />
       <section aria-labelledby="kelas-heading" className="teacher-class-picker">
         <h2
           id="kelas-heading"
           className="flex items-center gap-2 text-xl font-bold"
         >
           <School size={24} aria-hidden />
-          Pilih kelas untuk latihan
+          {example ? "Pilih kelas contoh" : "Pilih kelas untuk latihan"}
         </h2>
         <div className="flex flex-wrap items-center gap-2">
           {!sample && (
@@ -549,13 +565,35 @@ export function TeacherWorkspace() {
           </form>
         )}
       </section>
-      <PracticeActivities
-        key={`${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
-        ownerId={ownerId}
-        mode={mode}
-        detail={detail}
-        labels={labels}
-      />
+      {example ? (
+        <>
+          <p className="rounded-input bg-pn-teal-100 p-4">
+            Contoh ini memakai 32 siswa kelas 7 dan soal bawaan. Coba memeriksa
+            tiga kartu, membagi kelompok, lalu mengendalikan layar. Soal yang
+            Anda siapkan di halaman Latihan & AI tidak digunakan di sini.
+          </p>
+          <ExampleActivities
+            ownerId={ownerId}
+            mode={mode}
+            detail={detail}
+            key={`${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
+          />
+          <Link
+            href={`/guru/latihan?mode=${mode}${detail ? `&class=${detail.class.id}` : ""}`}
+            className="inline-flex min-h-12 items-center font-semibold text-primary underline"
+          >
+            Kembali ke latihan & AI
+          </Link>
+        </>
+      ) : (
+        <PracticeActivities
+          key={`${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
+          ownerId={ownerId}
+          mode={mode}
+          detail={detail}
+          labels={labels}
+        />
+      )}
       <ActivityDisclosure
         id="teacher-class"
         key={`class/${ownerId}/${mode}`}

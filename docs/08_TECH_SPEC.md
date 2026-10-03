@@ -199,6 +199,19 @@ produk/hasil belajar tidak disamarkan sebagai detail implementasi.
 | --- | --- | --- | --- |
 | K39 | Pengguna tidak menemukan latihan, mode contoh membingungkan dan informasi perangkat menumpuk | [S instruksi terbaru] Latihan/AI terlihat di menu/home/kelas; kelas contoh otomatis. [D] Persiapan/kegiatan terbuka bertahap, teknis tersembunyi kecuali peringatan; query kelas/mode dinormalisasi ke shell publik tanpa cache HTML pribadi | Gate review/privasi/budget/RLS tidak berubah. Tidak mengklaim studi guru, provider live atau hardware berdasarkan fixture. Jurnal/evidence PLAN9.60 dan UI_AI_HANDOFF |
 
+### 2.2 Addendum latihan dan cerita AI — 3 Oktober 2026
+
+K40 [S instruksi terbaru]: pengguna meminta alur latihan, hasil AI, pembuka dan
+penyambungan layar yang dapat dimengerti, lalu commit/push. [D] Satu sesi dari
+paket yang sedang dipilih, tiga langkah persiapan, perbandingan soal/cerita dan
+apply per soal ke tugas/PDF. Contoh PRELIM dipertahankan pada `/guru/simulasi`,
+tanpa pengendali kedua di latihan. Renewal lease contoh 30 detik dan pemulihan
+lease milik sendiri tidak mengambil alih perangkat lain. Tema suhu/kedalaman
+memerlukan approval hash nyata; SQL039 menambah enum tanpa mengganti SQL lama.
+Batas: draf/pilot, review, privasi, RLS, token, anggaran, CAS dan idempotensi tetap
+berlaku. Fixture bukan provider live atau studi pengguna; detail PLAN9.61 dan
+receipt `artifacts/qa/ui-ai-v2/practice-v5.json`.
+
 ## 3. Arsitektur dan dependensi
 
 ### 3.1 Satu aplikasi, modul terpisah [D; memenuhi S0 keputusan 9]

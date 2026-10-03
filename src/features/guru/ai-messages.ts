@@ -4,9 +4,9 @@ export function aiFallbackMessage(reason: FallbackReason): string {
     case "disabled":
       return "Layanan AI belum diaktifkan oleh pengelola.";
     case "unreviewed":
-      return "Materi ini belum disahkan untuk bantuan AI.";
+      return "Pengelola belum mengizinkan materi atau tema ini setelah pemeriksaan isinya.";
     case "privacy":
-      return "Pertanyaan bebas menunggu review privasi atau perlu dihapus identitasnya.";
+      return "Hapus identitas dari pertanyaan. Pengiriman pertanyaan yang Anda ketik juga memerlukan pemeriksaan privasi oleh pengelola.";
     case "budget":
       return "Anggaran AI untuk saat ini sudah habis.";
     case "rate":

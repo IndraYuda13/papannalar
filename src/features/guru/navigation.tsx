@@ -36,7 +36,8 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
     }
   }
   // Adaptive activities retain their offline repository and access boundaries.
-  const adaptive = pathname === "/guru/latihan";
+  const adaptive =
+    pathname === "/guru/latihan" || pathname === "/guru/simulasi";
   return (
     <div
       data-surface="guru"
@@ -67,6 +68,7 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
               href === "/guru"
                 ? pathname === href
                 : pathname.startsWith(href) ||
+                  (href === "/guru/latihan" && pathname === "/guru/simulasi") ||
                   (href === "/guru/asesmen" &&
                     pathname.startsWith("/guru/hasil"));
             return (

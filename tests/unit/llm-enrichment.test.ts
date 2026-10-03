@@ -19,6 +19,7 @@ import {
 import {
   STORY_FRAMES,
   storyFrameHash,
+  applyStory,
 } from "../../src/content/contexts/story-frames";
 import { templateFor } from "../../src/content/templates/registry";
 import type { ContentApproval } from "../../src/server/llm/reviews";
@@ -58,6 +59,65 @@ const raw = {
   stories: [{ slotId: "slot-0", segments: [STORY_FRAMES["lift-down-v1"][1]] }],
 };
 describe("GEN01 bounded story enrichment", () => {
+  it("topic/context selection diversifies only actually reviewed frames and preserves all numeric answers", () => {
+    const reviewed = [
+      ...approvals,
+      ...(["temperature-drop-v1", "diver-down-v1"] as const).map((id) => ({
+        id,
+        contentHash: storyFrameHash(id),
+        reviewer: "UNIT-ONLY",
+        reviewedAt: "2026-10-03",
+      })),
+    ];
+    const varied = approvedStorySlots(pkg, reviewed, { stepId: "D1" });
+    expect(varied.map((s) => s.frameId)).toEqual([
+      "lift-down-v1",
+      "temperature-drop-v1",
+      "diver-down-v1",
+    ]);
+    expect(new Set(varied.map((s) => s.questionId)).size).toBe(3);
+    expect(
+      approvedStorySlots(pkg, approvals, {
+        stepId: "D1",
+        context: "temperature-drop-v1",
+      }),
+    ).toEqual([]);
+    expect(
+      approvedStorySlots(pkg, reviewed, {
+        stepId: "D3",
+        context: "temperature-drop-v1",
+      }),
+    ).toEqual([]);
+    const stories = validateStories(
+      {
+        status: "ok",
+        stories: varied.map((s) => ({
+          slotId: s.slotId,
+          segments: [STORY_FRAMES[s.frameId][0]],
+        })),
+      },
+      varied,
+    );
+    const next = applyPackageStories(pkg, pkg.revision, stories);
+    expect(fromPackageRecipe(toPackageRecipe(next), false)).toEqual(next);
+    for (const frameId of ["temperature-drop-v1", "diver-down-v1"] as const)
+      for (const variant of [0, 1] as const) {
+        const original = pkg.activities.find((a) => a.stepId === "D1")!
+          .independent[0];
+        const changed = applyStory(original, { frameId, variant });
+        expect(changed.mathFingerprint).toBe(original.mathFingerprint);
+        expect(changed.params).toEqual(original.params);
+        expect(changed.answerKey).toBe(original.answerKey);
+        expect(changed.options).toEqual(original.options);
+      }
+    expect(() =>
+      applyStory(
+        pkg.activities.find((a) => a.stepId === "C3")!.independent[0],
+        { frameId: "temperature-drop-v1", variant: 0 },
+      ),
+    ).toThrow();
+    expect(approvedStorySlots(next, reviewed, { stepId: "D1" })).toEqual([]);
+  });
   it("draft content, stale approval hash and frozen packages never create provider slots", () => {
     expect(approvedStorySlots(pkg)).toEqual([]);
     expect(

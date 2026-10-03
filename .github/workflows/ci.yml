@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_TELEMETRY_DISABLED: "1"
+      VITEST_MAX_WORKERS: "1"
       TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55432/pn_m01c_test
     services:
       postgres:

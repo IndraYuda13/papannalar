@@ -2747,3 +2747,69 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
  cocok. Working tree bersih sesudah commit; patch berikut hanya mencatat
  hasil publikasi pada jurnal/handoff/receipt. CI post-push belum diperiksa;
  tidak ada deployment atau migration hosted. Task software lokal selesai.
+
+
+### 9.61 Perbaikan besar alur latihan dan manfaat AI — verifikasi lokal selesai (3 Oktober 2026, WIB)
+
+- Instruksi terbaru pengguna mengotorisasi audit/perbaikan terstruktur dan
+  commit/push. Baseline8df9357 bersih. Reproduksi Chromium360/390/1366 pada
+  development: tombol182x48 di HP tetapi182x76 desktop; dua formulir pairing
+  pada halaman latihan; expiry lease90detik akun contoh memberi HTTP409 untuk
+  kode yang benar. Tidak mengubah akun/data pengguna atau DB hosted.
+- Tiga langkah: siapkan soal, cerita/bantuan opsional, satu sesi dari paket
+  yang dipilih. Contoh PRELIM tersimpan tetap dapat diakses di /guru/simulasi;
+  soal tambahan cetak/cekakhir tersedia terpisah. Tidak unmount draft saat
+  menutup disclosure; cache query kedua route mengarah ke shell publik.
+- AI memilih topik/tema yang diizinkan, memperlihatkan soal semula/cerita,
+  apply hanya soal dicentang dengan CAS; feedback dan link tugas bertahan
+  setelah revisi. Tugas/PDF menggunakan teks yang disimpan, kunci/angka tetap.
+  Saran AI tersedia pada kartu di langkah2 setelah sesi nyata dimulai; tidak
+  membuat ID sesi atau approval palsu. Pertanyaan pembuka diskusi diberi
+  tujuan eksplisit, topik dapat diganti tanpa mengubah cek/tugas/histori.
+- Renewal30detik/focus/online dan satu retry setelah renewal tanpa takeover
+  memulihkan lease contoh sendiri. Kendali aktif perangkat lain tidak diambil
+  alih otomatis; kode expired/konflik/login/rate mempunyai langkah pemulihan.
+  SQL lama utuh; SQL039 generated menambah referensi suhu/kedalaman pada
+  validator sync, bukan approval. Review manifest produksi tetap kosong.
+- Bahasa draf/replay/pending/kodelevel diganti dengan tindakan/makna yang
+  dapat dibaca guru. Status konten dijelaskan pada detail, peringatan penting
+  tetap terlihat. Tombol persiapan48px tidak meregang. Kebutuhan tiap siswa
+  tersedia bila dibuka; tidak mendahului tindakan utama dengan32baris kosong.
+- Targeted unit44/4file PASS;9nativeHTTP+PostgreSQL integration PASS kedua
+  protokol, termasuk tema baru, SQL allowlist, ledger dan sample/non-sample.
+  Tidak memanggil provider live/berbayar; biayaAPIUSD0, aset/dependency baru0.
+- Attempt UI pertama0/4: nama akses tombol navigasi berduplikasi dengan aksi
+  persiapan. Nama/tujuan navigasi dibedakan; ulang4/4 PASS49,4detik, retry0.
+  Menguji partialapply/cancel, angka/kunci, PDF, paket sama/frozen, saran sesi,
+  satu pairing dan expiry409→renewal→200; pengendali lain tetap409.
+- Targeted legacy di development10PASS/4FAIL5,4menit: satu ekspektasi status
+  lama dan3menunggu serviceworker yang memang tidak aktif di dev. Status
+  diperbarui; assertion offline tetap dipertahankan untuk build production.
+  Tidak menaikkan timeout, mengurangi500seed atau melemahkan privasi/RLS.
+- Full verify serial: format/types/lint,1089unit/70file,167assertionSQL/RLS,
+ 9nativeHTTP+PostgreSQL dan build PASS. Browser139PASS/1FAIL19m52,375s:
+ allowlist shell publik lama belum memuat /offline/guru-simulasi.html.
+ Assertion diperkuat untuk4shell dan actual offline navigation ke route baru.
+- Audit HP menemukan langkah sebelumnya menumpuk. Navigasi/CTA menutup bagian
+ sebelumnya tanpa unmount. Pada arrival, preference lama yang membuka3bagian
+ dirapikan; pilihan manual setelah itu tetap bisa dipakai. Catatan PDF diubah
+ ke bahasa yang sama dengan UI. Perubahan4inputUI/PDF+3test,574/581input lain
+ identik; input matematika/provider/ledger/SQL tetap. Tidak duplicatefullsuite.
+- Final serial gate exit0: format/types/lint,5PDFunit/2file,build dan19E2E
+ PASS3,4menit/1worker/retry0. Cases latihan,AI,offline,PDF,privacy,freshclass
+ dan state terpelihara diuji. Full140skenario unik tercakup139+regresi; run
+ pnpmverify sebelumnya tetap dicatat FAIL, bukan dibuat140/140PASS.
+ BuildAcxGagMd5dd7VgVnPgFrA/source356934061d4541de114247b7d7d9d4a6770f7d46d44d965ac0b66520607166a2.
+- Audit21capture/state production360/390/1366+20pxfont: overflow0/pageerror0.
+ Gambar diperiksa; screenshot excluded. PDF asli diunduh/diekstrakpdftotext:
+ soal cerita suhu yang dipilih+footerplain hadir. PreviewUI diberi labelsintetis;
+ tidak mengarang liveprovider/review. Skiplink liveviewport hidden sebelum/
+ sesudahlongcapture danvisibleTab; overlay pada rawcapture ialah artefakfixed,
+ bukan buglive. Tidak mengubah aksesibilitas yang sudah benar.
+- Preservation PASS144domainfile,38SQLmigrationexisting,lockfile,GLB/poster/
+ blend,8dokumenoriginal serta prefixjurnal/handoff. Receiptbundle lama yang
+ diupdate builddipertahankan, measurement baru ada di practice-v5.json.
+ Tidak mengklaim seluruhkonten unchanged: helperpembuka+2framedraft disengaja.
+ Evidence artifacts/qa/ui-ai-v2/practice-v5.json; panduan novice docs/13.
+- Next exact: commit hasil terverifikasi dan fast-forward push main sesuai
+ instruksi. Hardware,providerlive,studiuser,hostedmigration/deploy NOT_RUN.

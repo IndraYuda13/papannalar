@@ -86,7 +86,7 @@ export function SessionWorkspace({
       setContext(ctx);
       setCards(saved.cards);
       setMessage(
-        "29 respons simulasi tersimpan. Kartu 07, 12, dan 25 belum masuk.",
+        "29 jawaban contoh sudah terisi. Coba periksa kartu absen 07, 12 dan 25 untuk melengkapi kelas.",
       );
     } catch {
       setMessage(
@@ -141,7 +141,9 @@ export function SessionWorkspace({
       setContext(undefined);
       setCards([]);
       setDraft(undefined);
-      setMessage("Sesi contoh dikosongkan. Mulai lagi dengan soal yang sama.");
+      setMessage(
+        "Jawaban contoh dihapus dari perangkat ini. Jalankan contoh lagi untuk mengisi ulang 29 jawaban bawaan.",
+      );
     } catch {
       setMessage("Reset belum tersimpan.");
     } finally {
@@ -156,10 +158,10 @@ export function SessionWorkspace({
       aria-label="Sesi Tepat Level"
       className="space-y-4 rounded-kartu border-2 border-primary/30 bg-pn-teal-100/30 p-4"
     >
-      <h3 className="text-xl font-bold">Sesi Tepat Level · demo 7B</h3>
+      <h3 className="text-xl font-bold">Contoh kegiatan · kelas 7, 32 siswa</h3>
       <p className="text-sm">
-        Simulasi dengan jawaban contoh. Materi belum disahkan untuk kelas
-        sungguhan.
+        Mulai dari jawaban yang sudah terisi, lalu coba memeriksa kartu, membagi
+        kelompok dan menjalankan kegiatan di layar.
       </p>
       {!context ? (
         <Button
@@ -171,7 +173,7 @@ export function SessionWorkspace({
             detail.class.grade !== 7
           }
         >
-          Mulai Sesi Tepat Level
+          Jalankan contoh sesi
         </Button>
       ) : (
         <>

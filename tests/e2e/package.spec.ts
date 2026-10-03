@@ -46,12 +46,12 @@ test("teacher prepares and replaces offline package, reloads its cache and sees 
   await waitForShellCache(page);
   await context.setOffline(true);
   const start = Date.now();
-  await page
-    .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
-    .click();
-  await expect(page.getByText(/Paket tersimpan lokal/)).toBeVisible();
+  await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
+  await expect(
+    page.getByText(/Latihan tersimpan di perangkat ini/),
+  ).toBeVisible();
   const packageMs = Date.now() - start;
-  await page.getByText("Pratinjau soal cek (10)", { exact: true }).click();
+  await page.getByText("Soal cek pemahaman (10)", { exact: true }).click();
   const question = page
     .getByRole("region", { name: "Paket Sesi", exact: true })
     .locator("ol > li")
@@ -67,7 +67,10 @@ test("teacher prepares and replaces offline package, reloads its cache and sees 
   ).toBeVisible();
   await page.reload();
   await chooseTeacherMode(page, "demo");
-  await expect(page.getByText(/Materi percobaan.*Versi 2/)).toBeVisible();
+  await page.getByText("Tentang materi ini", { exact: true }).click();
+  await expect(
+    page.getByText(/Isi soal belum diperiksa.*Versi 3/),
+  ).toBeVisible();
   expect(errors).toEqual([]);
   await mkdir("artifacts/qa/M06", { recursive: true });
   await page.screenshot({
@@ -152,10 +155,10 @@ test("static Bisik and printable independent tasks work offline", async ({
   await page.getByRole("button", { name: /Buka kelas 7T/ }).click();
   await injectFixture(page);
   await waitForShellCache(page);
-  await page
-    .getByRole("button", { name: "Siapkan Paket Sesi", exact: true })
-    .click();
-  await expect(page.getByText(/Paket tersimpan lokal/)).toBeVisible();
+  await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
+  await expect(
+    page.getByText(/Latihan tersimpan di perangkat ini/),
+  ).toBeVisible();
   await page.reload(); // newly controlled shell can serve lazy PDF chunks offline
   await chooseTeacherMode(page, "demo");
   await context.setOffline(true);
