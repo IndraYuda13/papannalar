@@ -2741,3 +2741,9 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
  Demo build final berjalan port3100 memakai DB existing + Auth/transport fixture.
  Next exact action: commit hasil terverifikasi dan push fast-forward main sesuai
  instruksi pengguna; catat SHA remote sesudah operasi aktual.
+
+- Publikasi aktual: commit implementasi 5a101f5f71b70892890204dbdf73f51878c5156f
+ berhasil fast-forward dari6a637a9 ke origin/main; push exit0 dan ls-remote
+ cocok. Working tree bersih sesudah commit; patch berikut hanya mencatat
+ hasil publikasi pada jurnal/handoff/receipt. CI post-push belum diperiksa;
+ tidak ada deployment atau migration hosted. Task software lokal selesai.

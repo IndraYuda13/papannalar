@@ -371,6 +371,14 @@
   },
   "publication": {
     "target": "origin refs/heads/main",
-    "authorization": "Latest user instruction; direct push requested. Actual commit and push recorded after execution."
+    "authorization": "Latest user instruction requesting direct push",
+    "implementationCommit": "5a101f5f71b70892890204dbdf73f51878c5156f",
+    "url": "https://github.com/IndraYuda13/papannalar/commit/5a101f5f71b70892890204dbdf73f51878c5156f",
+    "pushExitCode": 0,
+    "remoteSha": "5a101f5f71b70892890204dbdf73f51878c5156f",
+    "verified": true,
+    "observedAt": "2026-10-03T10:05:58.993Z",
+    "postPushCi": "NOT_CHECKED",
+    "deployment": "NOT_RUN"
   }
 }

@@ -7,6 +7,10 @@ menumpuk panel perangkat, dan fungsi AI harus jelas. Baseline `6a637a9`.
 Implementasi dan verifikasi software lokal selesai. Tidak ada deploy atau
 migration DB hosted. Bagian di bawah marker ini adalah laporan historis.
 
+Commit implementasi [5a101f5](https://github.com/IndraYuda13/papannalar/commit/5a101f5f71b70892890204dbdf73f51878c5156f)
+berhasil dipush ke main; SHA remote cocok dengan lokal. CI sesudah push belum
+diperiksa. Catatan publikasi ini tidak mengklaim deployment.
+
 | Halaman                         | Sebelum                                                                                   | Sesudah                                                                                                                                                                 |
 | ------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Seluruh menu guru               | Latihan tersembunyi di pengaturan kelas; empat menu                                       | Menu **Latihan & AI** terlihat di desktop dan navigasi bawah HP; label HP ringkas                                                                                       |
