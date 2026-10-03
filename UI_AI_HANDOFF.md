@@ -25,6 +25,10 @@ Implementasi tujuh permintaan terbaru selesai dan gerbang kandidat akhir
 Build `ANeazQh8M22lxHU2tCNGE`, source SHA256
 `cabf4f62d5300e949e48855744ddab57e45b2a7cc1a9d6724aeef7465f0b5adb`
 (501file). Bukti aktual: [session-ux-v3.json](artifacts/qa/ui-ai-v2/session-ux-v3.json).
+Commit implementasi [9d26efc](https://github.com/IndraYuda13/papannalar/commit/9d26efc91a0d404f16557f453b852962dffc41ef)
+berhasil dipush ke `main` pada3Oktober2026; remote SHA cocok dengan lokal.
+CI post-push belum diperiksa. Demo kandidat ini berjalan lokal pada port3100;
+`/masuk` memberi HTTP200. Publikasi tidak menjalankan deployment atau DB hosted.
 
 Command final serial:
 

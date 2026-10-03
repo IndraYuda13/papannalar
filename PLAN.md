@@ -2616,3 +2616,24 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
   Screenshot12preview HP serta GLB aktual diperiksa dan disimpan ignored.
   Next exact: commit/push sesuai otorisasi pengguna sebelumnya.
   Credential AI/HTTPS/hardware nyata tetap gap eksternal, bukan bukti production.
+
+### 9.59 Publikasi koreksi UX HP + akun contoh — DONE (3 Oktober 2026, WIB)
+
+- Commit implementasi `9d26efc91a0d404f16557f453b852962dffc41ef`:
+  `fix: polish mobile sessions and enable sample AI`,44file1976insert347delete.
+  Snapshot mencakup7permintaan terbaru, Blender algebra-kit dan receipt aktual.
+  Tidak menyertakan env terisi, DB, helper/log, screenshot mentah atau attachment.
+- `git push origin HEAD:refs/heads/main` exit0, fast-forward `4ce1227→9d26efc`.
+  `git ls-remote --heads origin main` sama persis dengan SHA lokal. Catatan
+  publikasi disimpan pada commit dokumentasi lanjutan; kode/aset tidak berubah.
+- Kandidat final `ANeazQh8M22lxHU2tCNGE`, SHA sumber `cabf4f62d5300e949e48855744ddab57e45b2a7cc1a9d6724aeef7465f0b5adb`
+  tetap sama dengan receipt129E2E PASS dan bukti reuse1086unit/9integration/SQL.
+  Dokumen akhir lolos format check; seluruh9body/jurnal lama dan38migration tetap.
+- `source /workspace/.papannalar-cloud/activate.sh` lalu `pnpm video` startup
+  sukses, `http://127.0.0.1:3100/masuk` HTTP200. Launcher memakai build final
+  existing, seed7B/7C serta cluster PostgreSQL loopback existing; runtime Auth/
+  transport tetap fixture, AI validation OFF. Tidak membangun ulang kandidat.
+- CI post-push NOT_CHECKED; hosted provider/perangkat nyata NOT_RUN;
+  deployment/migration DB hosted/paid API NOT_RUN. Next exact: pengguna dapat
+  membuka data contoh, lalu mengikuti konfigurasi/profile/review AI pada handoff
+  ketika siap. Uji live/hosted tetap memerlukan izin yang sesuai.
