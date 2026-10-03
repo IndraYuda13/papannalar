@@ -12,9 +12,18 @@
     "authorization": "User requested commit and push; no PR requested",
     "branch": "work",
     "target": "origin/main",
-    "status": "READY_TO_COMMIT_AND_PUSH",
+    "status": "PUSHED",
     "deployment": "NOT_RUN",
-    "ciAfterPush": "NOT_CHECKED"
+    "ciAfterPush": "NOT_CHECKED",
+    "implementationCommit": "1cbe5a8d5fa41adeb969252e224a4a238e6d1acd",
+    "implementationCommitUrl": "https://github.com/IndraYuda13/papannalar/commit/1cbe5a8d5fa41adeb969252e224a4a238e6d1acd",
+    "pushCommand": "git push origin work:main",
+    "pushExitCode": 0,
+    "beforeRemoteCommit": "c2a0593adfb73c8d683340b8ac588cd8309e112f",
+    "verifiedRemoteCommit": "1cbe5a8d5fa41adeb969252e224a4a238e6d1acd",
+    "workingTreeCleanAfterImplementationPush": true,
+    "publicationNote": "Following commit changes only PLAN.md, UI_AI_HANDOFF.md and this receipt; application/source/build unchanged. No new PR/deployment; CI not checked.",
+    "recordedAt": "2026-10-03 17:17:27 UTC"
   },
   "environment": {
     "cwd": "/workspace/papannalar",

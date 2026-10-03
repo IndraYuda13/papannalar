@@ -3,8 +3,13 @@
 ## Alur guru, soal sendiri, cetak kartu dan reset papan — 3 Oktober 2026
 
 Baseline `c2a0593`. Perubahan terbaru pengguna dikerjakan pada aplikasi existing;
-M00–M17, jurnal lama, data dan aset dipertahankan. Commit/push dicatat setelah
-hasil aktual tersedia; bagian setelah marker END PRACTICE_V6 adalah historis.
+M00–M17, jurnal lama, data dan aset dipertahankan. Commit aplikasi
+[1cbe5a8](https://github.com/IndraYuda13/papannalar/commit/1cbe5a8d5fa41adeb969252e224a4a238e6d1acd)
+berhasil dipush fast-forward dari `c2a0593` ke `main`, exit0; SHA remote sama
+dengan lokal dan working tree bersih sebelum catatan publikasi ini. Pembaruan
+publikasi berikut hanya tiga file dokumentasi/evidence; source dan build tetap.
+Tidak membuat PR atau menjalankan deployment. CI sesudah push belum diperiksa.
+Bagian setelah marker END PRACTICE_V6 adalah historis.
 
 | Halaman/bagian                | Sebelum                                                                   | Sesudah                                                                                                                                                                       |
 | ----------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
