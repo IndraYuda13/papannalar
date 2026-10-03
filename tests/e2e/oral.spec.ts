@@ -32,6 +32,14 @@ test("oral grade 2 goes down on first wrong, skips without evidence, and resumes
   context,
 }) => {
   const errors: string[] = [];
+  const failedRequests: { method: string; path: string; error: string }[] = [];
+  page.on("requestfailed", (request) => {
+    failedRequests.push({
+      method: request.method(),
+      path: new URL(request.url()).pathname,
+      error: request.failure()?.errorText ?? "unknown",
+    });
+  });
   page.on("pageerror", () => errors.push("pageerror"));
   page.on("console", (m) => {
     if (m.type() === "error")
@@ -75,6 +83,11 @@ test("oral grade 2 goes down on first wrong, skips without evidence, and resumes
     .click();
   await expect(oral).toContainText(`Penempatan lisan: ${getStep("A1").label}`);
   await expect(oral).toContainText("2 jawaban lisan tersimpan");
+  if (errors.length > 0)
+    await test.info().attach("offline-network.json", {
+      body: JSON.stringify(failedRequests),
+      contentType: "application/json",
+    });
   expect(errors).toEqual([]);
   await mkdir("artifacts/qa/M07", { recursive: true });
   await oral.screenshot({ path: "artifacts/qa/M07/oral-offline-mobile.png" });

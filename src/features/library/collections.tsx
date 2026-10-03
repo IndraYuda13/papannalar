@@ -21,9 +21,18 @@ import { templateItem } from "./templates";
 import { PageHeader, StateNotice } from "@/ui/components/studio";
 import { ToolPoster } from "@/ui/components/decorative-scene";
 import { FileQuestion, Plus } from "lucide-react";
-export function CollectionsPage() {
+export function CollectionsPage({
+  initialTab = "system",
+  savedId,
+}: { initialTab?: "system" | "teacher"; savedId?: string } = {}) {
   const { state } = useTeacher(),
-    [tab, setTab] = useState<"system" | "teacher">("system");
+    [tab, setTab] = useState<"system" | "teacher">(initialTab);
+  const savedCollection = savedId
+    ? state.collections.find(
+        (c) =>
+          c.id === savedId && c.source === "teacher" && c.status === "ready",
+      )
+    : undefined;
   const sets = state.collections.filter(
     (c) => c.source === tab && c.status !== "archived",
   );
@@ -42,6 +51,13 @@ export function CollectionsPage() {
           </Button>
         }
       />
+      {savedCollection && (
+        <p role="status" className="practice-feedback">
+          Kumpulan tersimpan dan siap digunakan.{" "}
+          <b>{savedCollection.document.title}</b> ada di Soal Saya. Buka
+          kumpulan untuk mengedit atau menggunakannya.
+        </p>
+      )}
       <div
         role="tablist"
         aria-label="Sumber soal"
@@ -120,7 +136,13 @@ export function CollectionsPage() {
     </div>
   );
 }
-export function CollectionPage({ id }: { id: string }) {
+export function CollectionPage({
+  id,
+  fromId,
+}: {
+  id: string;
+  fromId?: string;
+}) {
   const { state } = useTeacher();
   const existing = state.collections.find((c) => c.id === id);
   if (id !== "baru" && !existing)
@@ -133,15 +155,48 @@ export function CollectionPage({ id }: { id: string }) {
         Kumpulan mungkin diarsipkan. Pilih kumpulan lain dari daftar.
       </StateNotice>
     );
-  return <CollectionEditor key={id} initial={existing} />;
+  const assessmentSource =
+    id === "baru" && fromId
+      ? state.collections.find(
+          (c) => c.id === fromId && c.status !== "archived",
+        )
+      : undefined;
+  return (
+    <CollectionEditor
+      key={`${id}:${fromId ?? ""}`}
+      initial={existing}
+      assessmentSource={assessmentSource}
+    />
+  );
 }
-function CollectionEditor({ initial }: { initial?: Collection }) {
+function CollectionEditor({
+  initial,
+  assessmentSource,
+}: {
+  initial?: Collection;
+  assessmentSource?: Collection;
+}) {
   const { refresh } = useTeacher(),
     router = useRouter();
   const [id, setId] = useState(() => initial?.id ?? crypto.randomUUID()),
     [revision, setRevision] = useState(initial?.revision ?? 0),
     [document, setDocument] = useState<DraftDocument>(
-      initial?.document ?? { title: "", kind: "cards", items: [] },
+      () =>
+        initial?.document ??
+        (assessmentSource
+          ? {
+              title: `${assessmentSource.document.title.slice(0, 70)} · Kartu Nalar`,
+              kind: "cards",
+              items: assessmentSource.document.items.map((item) => ({
+                id: crypto.randomUUID(),
+                kind: "card",
+                prompt: item.prompt,
+                options: ["", "", "", ""],
+                key: "A",
+                explanation: "",
+              })),
+            }
+          : { title: "", kind: "cards", items: [] }),
     ),
     [source, setSource] = useState(initial?.source ?? "teacher"),
     [version, setVersion] = useState(initial?.version ?? 0),
@@ -150,7 +205,7 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
     [errors, setErrors] = useState<Record<string, string>>({}),
     [busy, setBusy] = useState(false),
     [saved, setSaved] = useState(initial?.status === "ready"),
-    [activeItem, setActiveItem] = useState(initial?.document.items[0]?.id),
+    [activeItem, setActiveItem] = useState(document.items[0]?.id),
     [templateUndo, setTemplateUndo] = useState<{
       index: number;
       item: DraftDocument["items"][number];
@@ -185,6 +240,10 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
         return;
       }
       await persist(ready);
+      if (ready) {
+        router.push(`/guru/soal?tab=teacher&saved=${id}`);
+        return;
+      }
       setMessage(
         ready ? "Kumpulan tersimpan dan siap digunakan." : "Draft tersimpan.",
       );
@@ -266,6 +325,13 @@ function CollectionEditor({ initial }: { initial?: Collection }) {
         }
         description="Susun pertanyaan, isi alat, lalu periksa tampilan yang akan dilihat kelas."
       />
+      {assessmentSource && (
+        <p className="practice-feedback">
+          Pertanyaan disalin dari “{assessmentSource.document.title}”. Isi empat
+          pilihan dan tentukan jawaban yang benar pada setiap soal. Kumpulan
+          asli tetap ada.
+        </p>
+      )}
       {readonly && (
         <p>Materi sistem dapat dipakai langsung. Salin untuk mengubah soal.</p>
       )}

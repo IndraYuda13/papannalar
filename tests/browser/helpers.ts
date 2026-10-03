@@ -88,11 +88,12 @@ export async function loginTeacher(
 export async function openTeacherSections(page: Page) {
   const ids =
     new URL(page.url()).pathname === "/guru/simulasi"
-      ? ["teacher-prepare", "teacher-class", "teacher-device"]
+      ? ["teacher-prepare", "teacher-extras", "teacher-class", "teacher-device"]
       : [
           "teacher-prepare",
           "teacher-teach",
           "teacher-ai",
+          "teacher-extras",
           "teacher-oral",
           "teacher-class",
           "teacher-device",

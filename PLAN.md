@@ -2817,3 +2817,95 @@ sampai9.48 sebelum catatan checksum ini (menghindari checksum melingkar).
  source/tests/buildcandidate tetap. CIpostpush belumdiperiksa,tidakdeploy.
  Tasksoftwarelokal selesai. Providerlive,reviewnyata,hardware/studiguru dan
  hostedmigration memerlukan langkahoperator sesuaihandoff; tetapNOT_RUN.
+
+
+### 9.62 Alur guru sederhana, cetak, asesmen sendiri dan reset papan — implementasi lokal selesai (3 Oktober 2026 UTC)
+
+- [S] Instruksi terbaru: topik pembuka tidak terkunci, hapus panduan operator
+  AI dari UI guru, siapkan materi lebih jelas tanpa approval palsu, reset papan
+  tersangkut, sederhanakan flow, jelaskan/cetak Kartu Nalar, tampilkan soal sendiri
+  pada asesmen dan kembali ke daftar setelah Simpan & siap digunakan. Commit/push
+  sudah diotorisasi pengguna; tidak perlu approval detail visual. Solo integrator;
+  tidak ada PR, subagent, scaffold, pengulangan M00–M17 atau perubahan lockfile.
+- Baseline c2a0593adfb73c8d683340b8ac588cd8309e112f/branch work bersih. Skill setup
+  dan cloud runtime digunakan; toolchain existing Node24.14.1/pnpm11.19.0/
+  PostgreSQL17.11/Chromium153 aktif. Runtime/network/Git read diperiksa; tidak
+  mengubah konfigurasi cloud atau meminta credential kembali. Dokumen Next16.3.6
+  use-client/Link/useRouter dibaca sebelum API diubah. K41 ada di TECH_SPEC2.3.
+- Flow kelas → soal → mengajar, satu klik mulai sesi dari paket tepat; AI opsional.
+  Kelas terpilih tampil; Ganti kelas menutup setelah pilihan. Cek lisan/pengaturan/
+  kartu lain berada di Alat & pengaturan tambahan; warning quota/eviction/conflict/
+  login tetap terlihat dan membuka ancestor detail saat recovery. Draft tetap mount.
+- Topik pembuka frozen memakai copyPackageForPreparation + transaksi Dexie CAS
+  source; UUID baru/revision1/frozenfalse, pointer kelas/paket diperbarui atomik.
+  Soal/jawaban sesi frozen lama tetap utuh. Checklist tiga bool tersimpan tenant/
+  mode/id dan fingerprint isi, bukan approval; perubahan isi reset centang. Parsing
+  schema menormalkan key order sebelum hash agar generated/parsed tidak berbeda.
+- Cetak kontekstual 10/5 baris pada persiapan/sesi, 3 pada cek akhir; cek lisan
+  tanpa kartu. Generic print tetap ada sebagai alat tambahan. Custom asesmen tetap
+  memakai PDF binding1–5 baris yang lama, bukan kartu generic. A4/100%/hitam putih,
+  satu kartu per siswa dan hitungan lembar dijelaskan. PDF tugas berbeda dari kartu.
+- AI tetap dua adapter existing/config/ledger/budget/privacy/static fallback;
+  panduan pengelola dihapus dari halaman guru. Keamanan/review tidak dibypass.
+  Katalog otomatis masih membutuhkan review dan uji kelas nyata. Own collection
+  dapat dipakai melalui Mulai mengajar; tidak melabeli katalog draft production.
+- Soal sendiri siap terlihat dalam dropdown asesmen tanpa tab sumber tersembunyi.
+  Draft/interaktif punya alasan dan tautan perbaikan/copy kartu, tanpa menebak
+  pilihan/kunci. Ready-save sukses kembali ke Soal Saya + banner; invalid tetap
+  draft, gagal503 tetap editor/isian utuh. Query saved/from strict UUID dan tidak
+  menjadi redirect eksternal. Original collection/run/binding lama tetap utuh.
+- Reset board: kontrak board-only resetUUID, service same-origin/auth anonim/IPhash;
+  additive SQL040 scope board sendiri, advisory lock sebelum row lock, rate limit,
+  private receipt RLS idempotent. Cabut grant/epoch/ACK/kode/mailbox own board,
+  pertahankan kelas/session/run/jawaban/progress guru. UI remount menghentikan
+  watcher/ACK, membersihkan RAM/ink/roster; offline menahan resume dan retry online.
+  Pending UUID bertahan reload jika storage tersedia; lost response tidak mencabut
+  grant baru. First-use wizard tidak muncul lagi karena reset; tidak memalsukan
+  profile capability. SQL040 hanya applied ke loopback55432, bukan hosted.
+- Target batch awal mencatat kegagalan panel tertutup/selector label/checkbox/
+  wizard reset; bug fingerprint nyata dan pointer UI diperbaiki. Tes memakai role
+  textbox/combobox dan memeriksa APIready, bukan locator getByLabel ambigu. Port
+  conflict pada target7 membuat0 tes berjalan (NOT_RUN); dua runner sendiri
+  dihentikan sebelum tes serial berikutnya. Tidak mengubah assertions/timeouts/
+  jumlah500seed/coverage atau memperlemah privasi. Target9 PASS18/1,9menit.
+- Attempt full verify awal interrupted exit130 saat unit untuk lima kalimat
+  bernomor yang usang; bukan PASS. Full verify berikutnya exit1: format/types/lint,
+  unit1094/72file PASS, coverage92,48/87,52/96,28/93,46; SQL306assertion +116guard
+  yang dilaporkan runner PASS; integrasi9nativeHTTP+PostgreSQL PASS; build3TvfUj...
+  PASS. Full147 browser143PASS/4FAIL,20m21,153s,1worker/retry0/skip0.
+- Auth test allowlist ditambah hanya teacher-extras; storage max8/open|closed,
+  HttpOnly/logout/canary tetap ketat. Closed-session test membuktikan FORBIDDEN
+  snapshot/heartbeat/channel/ack dan pesan sambungan berakhir, tanpa menerima403
+  lain. Assertion async di-await di akhir supaya tak menjadi rejection tak tertangani.
+- Dua offline error direproduksi (diagnostic6case4PASS/2FAIL lalu2FAIL scoped).
+  Requestfailed aman mencatat GET /guru/kelas ERR_INTERNET_DISCONNECTED; optional
+  panel memunculkan Link yang memprefetch RSC. prefetchfalse pada linkkelas serta
+  dua Linkmulai menghentikan request spekulatif; offline data tetap bekerja.
+- Gate serial format/types/lint/buildRQ1nEXwZvQDcxTfNo93tJ +44regresi PASS exit0,
+  4,7menit. Semua empat kasus gagal dipetakan ke PASS, termasuk actual fresh32
+  scanner/check/rotations/lateexit/finalize/nextsession, auth/offline/sync/privasi,
+  PDF/story, own authoring, reset loss/offline/reload, preparation/pilot separation.
+- Audit akhir menghapus instruksi konfirmasi yang berulang, satu literal saja.
+  Gate serial final format/types/lint/buildITd3O0CNAChqrrInootDA +3regresi PASS
+  exit0,24,9s (offline reload, one-click dan history360/390). 589/590 input
+  identik terhadap44gate; 583/590 identik terhadapfullverify. Source final
+  4172efa3fa27d35ca0130be2112029005589b84c48f038c0b5893ab1e3ea13b5.
+  147skenario unik tercakup lintasfull+scope, bukan klaim full147/147 pada build
+  final. Unit/SQL/native yang sudah PASS dan inputnya identik tidak diduplikasi.
+- Visual final15capture/state360/390/1366+font20px overflow0/pageerror0; gambar
+  diperiksa. Dua PDF aktual diunduh/diekstrakpdftotext, initial CekAwal/custom
+  unused rows benar; printer fisik NOT_RUN. Screenshot lokal sintetis/absen-only
+  excluded; fullpage artefak elemenfixed tidak dijadikan alasan mengubah a11y.
+- Preservation PASS181protectedfiles/39SQLexisting/8originaldocs/18oldreceipts/
+  journalprefix/handofftail; bundle receipt lama dipulihkan persis, measurement
+  final berada pada practice-v6.json. Core perubahan hanya pure copy helper/
+  transaksi tambahan, matematika/score/BKT/replay/OMR/tenant/auth tidak diganti.
+- Tidak ada dependency/aset/paidAPI baru; USD0paid, cloudcostNOT_MEASURED. GLB/
+  poster/blend unchanged; Three gzip154310byte (<250000) lazy terpisah/excluded
+  precache, poster cached. OpenAIChatCompletions/AnthropicMessages native HTTP
+  fixture + ledger/RLS lokal PASS, liveNOT_RUN; codingmodel bukan appdefault.
+- Panduan guru docs13, addendumK41, handoff terbaru dan receiptpractice-v6.json
+  disiapkan; kebutuhan operator/perangkat tepat dan rollout SQL040/backup/rollback
+  dicatat sekali di handoff. Tidak deploy/hostedmigration/paidprovider; review,
+  printer/QRHTTPS/camera/touch/studiguru nyata NOT_RUN. Next exact: commit dan
+  normal fast-forward push work:main sesuai izin, periksa SHAremote; tidak force.

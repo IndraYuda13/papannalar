@@ -50,6 +50,14 @@ if (mode === "prepare") {
       videoConnection + "\n",
     );
     console.log(videoConnection);
+    const boardReset = sql(
+      await readFile("supabase/tests/board-reset.sql", "utf8"),
+    );
+    await writeFile(
+      "artifacts/qa/ui-ai-v2/board-reset-sql.log",
+      boardReset + "\n",
+    );
+    console.log(boardReset);
     const pairing = await readFile("supabase/tests/presentations.sql", "utf8");
     const result = sql(pairing);
     await mkdir("artifacts/qa/M04/m04a", { recursive: true });

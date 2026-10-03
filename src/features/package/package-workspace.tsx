@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FilePlus2, MessageCircle, Download } from "lucide-react";
+import { FilePlus2, MessageCircle, Download, Copy } from "lucide-react";
 import type { ClassDto } from "@/contracts/classes";
 import type { StudentDto } from "@/contracts/api";
 import {
@@ -18,6 +18,8 @@ import type { GeneratedQuestion } from "@/content/templates/types";
 import { getStep, STEP_IDS, type StepId } from "@/content/ladder/registry";
 import { getClassTarget } from "@/content/ladder/targets";
 import { CONTEXTS } from "@/content/contexts/registry";
+import { PackagePreparation } from "./package-preparation";
+import { PrintCards } from "@/features/guru/print-cards";
 
 const field = "min-h-12 rounded-input border border-pn-ink-400 bg-white px-3";
 const freshSeed = () => crypto.getRandomValues(new Uint32Array(1))[0];
@@ -122,9 +124,7 @@ export function PackageWorkspace({
         value.activities.find((a) => a.stepId === "D1")?.stepId ??
           value.activities[0].stepId,
       );
-      setMessage(
-        "Latihan tersimpan di perangkat ini. Periksa soal di bawah, tambahkan cerita bila perlu, lalu coba sesi.",
-      );
+      setMessage("Latihan tersimpan di perangkat ini.");
     } catch {
       setMessage(
         "Paket belum tersimpan. Periksa penyimpanan dan coba lagi; paket sebelumnya tetap ada.",
@@ -140,11 +140,20 @@ export function PackageWorkspace({
     setBusy(true);
     const repo = createPackageRepository({ ownerId, mode });
     try {
-      const next = changePackageOpening(pkg, value);
-      await repo.save(next, pkg.revision);
+      const next = pkg.frozen
+        ? await repo.copyForPreparation(
+            pkg.id,
+            crypto.randomUUID(),
+            pkg.revision,
+            value,
+          )
+        : changePackageOpening(pkg, value);
+      if (!pkg.frozen) await repo.save(next, pkg.revision);
       setPkg(next);
       setMessage(
-        "Pertanyaan pembuka diganti sesuai topik yang dipilih. Soal cek dan tugas tetap sama.",
+        pkg.frozen
+          ? "Pembuka diganti pada salinan untuk sesi berikutnya. Soal cek dan tugas tetap sama; sesi sebelumnya tidak berubah."
+          : "Pertanyaan pembuka diganti sesuai topik yang dipilih. Soal cek dan tugas tetap sama.",
       );
     } catch {
       setOpeningStep(
@@ -153,6 +162,29 @@ export function PackageWorkspace({
       );
       setMessage(
         "Pembuka belum berubah. Latihan sudah digunakan atau berubah di tab lain.",
+      );
+    } finally {
+      repo.close();
+      setBusy(false);
+    }
+  }
+  async function editCopy() {
+    if (!pkg || busy) return;
+    setBusy(true);
+    const repo = createPackageRepository({ ownerId, mode });
+    try {
+      const copy = await repo.copyForPreparation(
+        pkg.id,
+        crypto.randomUUID(),
+        pkg.revision,
+      );
+      setPkg(copy);
+      setMessage(
+        "Salinan siap diedit untuk sesi berikutnya. Soal, cerita dan topik tetap sama; sesi sebelumnya tidak berubah.",
+      );
+    } catch {
+      setMessage(
+        "Salinan belum tersimpan. Periksa ruang penyimpanan atau muat ulang halaman, lalu coba lagi.",
       );
     } finally {
       repo.close();
@@ -262,68 +294,103 @@ export function PackageWorkspace({
           ? "Soal tambahan untuk contoh ini"
           : "Soal untuk sesi Anda"}
       </h3>
-      <p className="text-sm">
-        {purpose === "extra"
-          ? "Siapkan tugas cetak dan pertanyaan untuk cek akhir. Pembuka dan soal cek pada sesi contoh tetap memakai soal bawaan."
-          : "Latihan berisi pertanyaan pembuka, soal untuk memeriksa pemahaman, dan tugas untuk kegiatan kelompok."}
-      </p>
+      {purpose === "extra" && (
+        <p className="text-sm">
+          Siapkan tugas cetak dan pertanyaan untuk cek akhir. Pembuka dan soal
+          cek pada sesi contoh tetap memakai soal bawaan.
+        </p>
+      )}
       {classroom && (
-        <div className="practice-prepare-fields">
-          <label className="practice-field">
-            Cara memeriksa pemahaman
-            <select
-              aria-label="Jenis paket"
-              className={field}
-              value={variant}
-              onChange={(e) => setVariant(e.target.value as PackageVariant)}
+        <div className="space-y-3">
+          {!pkg && (
+            <Button
+              className="practice-prepare-action"
+              disabled={busy}
+              onClick={() => void prepare()}
             >
-              <option value="initial">Cek pertama · 10 soal</option>
-              <option value="weekly">
-                {classroom.grade <= 3
-                  ? "Cek lanjutan · secara lisan"
-                  : "Cek lanjutan · 5 soal"}
-              </option>
-              <option value="oral">Cek secara lisan</option>
-              <option value="short">Latihan singkat</option>
-            </select>
-          </label>
-          <Button
-            className="practice-prepare-action"
-            disabled={busy}
-            onClick={() => void prepare()}
-          >
-            <FilePlus2 size={18} aria-hidden />
-            {busy ? "Menyiapkan…" : pkg ? "Buat latihan baru" : "Siapkan soal"}
-          </Button>
-          <p className="text-sm text-muted-foreground sm:col-span-2">
-            {variant === "initial"
-              ? "Untuk sesi pertama: periksa pemahaman siswa sebelum membagi kelompok."
-              : variant === "oral"
-                ? "Guru bertanya langsung kepada siswa. Tidak memakai lembar jawaban."
-                : "Memakai hasil cek sebelumnya untuk menyiapkan latihan lanjutan."}
-          </p>
+              <FilePlus2 size={18} aria-hidden />
+              {busy ? "Menyiapkan…" : "Siapkan soal"}
+            </Button>
+          )}
+          <details className="text-sm">
+            <summary className="min-h-12 cursor-pointer font-semibold">
+              {pkg ? "Siapkan soal lain" : "Ganti cara cek (opsional)"}
+            </summary>
+            <div className="practice-prepare-fields pt-2">
+              <label className="practice-field">
+                Cara memeriksa pemahaman
+                <select
+                  aria-label="Jenis paket"
+                  className={field}
+                  value={variant}
+                  onChange={(e) => setVariant(e.target.value as PackageVariant)}
+                >
+                  <option value="initial">Cek pertama · 10 soal</option>
+                  <option value="weekly">
+                    {classroom.grade <= 3
+                      ? "Cek lanjutan · secara lisan"
+                      : "Cek lanjutan · 5 soal"}
+                  </option>
+                  <option value="oral">Cek secara lisan</option>
+                  <option value="short">Latihan singkat</option>
+                </select>
+              </label>
+              {pkg && (
+                <Button
+                  className="practice-prepare-action"
+                  disabled={busy}
+                  onClick={() => void prepare()}
+                >
+                  <FilePlus2 size={18} aria-hidden />
+                  {busy ? "Menyiapkan…" : "Buat latihan baru"}
+                </Button>
+              )}
+              <p className="text-sm text-muted-foreground sm:col-span-2">
+                {variant === "initial"
+                  ? "Untuk sesi pertama: periksa pemahaman siswa sebelum membagi kelompok."
+                  : variant === "oral"
+                    ? "Guru bertanya langsung kepada siswa. Tidak memakai lembar jawaban."
+                    : "Memakai hasil cek sebelumnya untuk menyiapkan latihan lanjutan."}
+              </p>
+            </div>
+          </details>
         </div>
       )}
       {pkg && (
         <>
-          <details className="text-sm">
-            <summary className="min-h-12 cursor-pointer">
-              Tentang materi ini{pkg.frozen ? " · sedang digunakan" : ""}
-            </summary>
-            <p>
-              Materi ini untuk mencoba alur aplikasi. Isi soal belum diperiksa
-              oleh peninjau materi, sehingga belum dapat dipakai pada kelas
-              sungguhan. Versi {pkg.revision}.{" "}
-              {pkg.frozen
-                ? "Soal dikunci karena sudah digunakan dalam sesi; buat latihan baru untuk mengubahnya."
-                : "Anda masih dapat mengganti soal sebelum memulai sesi."}
+          <PackagePreparation
+            key={`${pkg.id}:${pkg.contentHash}`}
+            pkg={pkg}
+            scope={{ ownerId, mode }}
+          />
+          {pkg.assessment.length > 0 ? (
+            <PrintCards
+              compact
+              fixedKind={pkg.variant === "initial" ? "initial" : "weekly"}
+              count={
+                students.filter((s) => s.active).length || classroom?.count
+              }
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Cek lisan: guru bertanya langsung. Tidak perlu mencetak Kartu
+              Nalar untuk cek ini.
             </p>
-          </details>
+          )}
           {pkg.frozen && (
-            <p className="practice-feedback">
-              Soal sudah digunakan dalam sesi. Buat latihan baru untuk
-              mengubahnya; sesi yang sedang berjalan tetap memakai soal ini.
-            </p>
+            <div className="practice-feedback space-y-3">
+              <p>
+                Soal ini sudah dipakai dalam sesi. Pilih topik pembuka lain atau
+                edit salinan untuk menyiapkan sesi berikutnya.
+              </p>
+              <Button
+                variant="outline"
+                disabled={busy}
+                onClick={() => void editCopy()}
+              >
+                <Copy size={18} aria-hidden /> Edit salinan soal
+              </Button>
+            </div>
           )}
           <section
             aria-label="Pertanyaan pembuka diskusi"
@@ -342,7 +409,10 @@ export function PackageWorkspace({
               <select
                 aria-label="Topik pembuka"
                 value={openingStep}
-                disabled={busy || pkg.frozen}
+                disabled={busy}
+                aria-describedby={
+                  pkg.frozen ? "opening-copy-notice" : undefined
+                }
                 onChange={(e) => void changeOpening(e.target.value as StepId)}
               >
                 {pkg.activities.map((a) => (
@@ -352,6 +422,15 @@ export function PackageWorkspace({
                 ))}
               </select>
             </label>
+            {pkg.frozen && (
+              <p
+                id="opening-copy-notice"
+                className="text-sm text-muted-foreground"
+              >
+                Mengubah topik membuat salinan yang bisa diedit. Sesi yang sudah
+                dimulai tetap memakai pembuka sebelumnya.
+              </p>
+            )}
             <p className="text-lg font-semibold">{pkg.opening.prompt}</p>
             <details>
               <summary className="min-h-12 cursor-pointer font-semibold">
@@ -371,75 +450,86 @@ export function PackageWorkspace({
               </p>
             </div>
           )}
-          <details>
+          <details id="practice-assessment">
             <summary className="min-h-12 cursor-pointer font-bold">
               Soal cek pemahaman ({pkg.assessment.length})
             </summary>
             <ol className="space-y-3">{pkg.assessment.map(preview)}</ol>
           </details>
-          <label className="flex flex-col gap-1">
-            Topik tugas kelompok
-            <select
-              aria-label="Materi paket"
-              value={activity?.stepId ?? ""}
-              className={field}
-              onChange={(e) => setSelectedStep(e.target.value)}
-            >
-              {pkg.activities.map((a) => (
-                <option key={a.stepId} value={a.stepId}>
-                  {getStep(a.stepId).label}
-                </option>
-              ))}
-            </select>
-          </label>
-          {activity && (
-            <>
-              <Button
-                variant="outline"
-                disabled={busy}
-                onClick={() => void printIndependent()}
-              >
-                <Download size={18} aria-hidden />
-                Unduh tugas mandiri PDF
-              </Button>
-              {activity.interactiveSupport === "unavailable" && (
-                <p role="note">
-                  Alat interaktif untuk materi ini belum tersedia. Soal dapat
-                  dipratinjau; cakupan interaktif belum lengkap.
-                </p>
-              )}
-              <details>
-                <summary className="min-h-12 cursor-pointer font-bold">
-                  Soal untuk layar kelas ({activity.board.length})
-                </summary>
-                <ol className="space-y-3">{activity.board.map(preview)}</ol>
-              </details>
-              <details id="practice-independent">
-                <summary className="min-h-12 cursor-pointer font-bold">
-                  Tugas mandiri · 3 soal + 1 tambahan
-                </summary>
-                <ol className="space-y-3">
-                  {[...activity.independent, activity.optional].map(preview)}
-                </ol>
-              </details>
-              <details>
-                <summary className="min-h-12 cursor-pointer font-bold">
-                  Contoh untuk dibahas bersama & cek akhir
-                </summary>
-                <ol className="space-y-3">
-                  {[activity.guided, activity.exit, activity.exitContext].map(
-                    preview,
+          <details id="practice-tasks">
+            <summary className="min-h-12 cursor-pointer font-bold">
+              Tugas kelompok & cetak tugas mandiri
+            </summary>
+            <div className="space-y-3 pt-2">
+              <label className="flex flex-col gap-1">
+                Topik tugas kelompok
+                <select
+                  aria-label="Materi paket"
+                  value={activity?.stepId ?? ""}
+                  className={field}
+                  onChange={(e) => setSelectedStep(e.target.value)}
+                >
+                  {pkg.activities.map((a) => (
+                    <option key={a.stepId} value={a.stepId}>
+                      {getStep(a.stepId).label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {activity && (
+                <>
+                  <Button
+                    variant="outline"
+                    disabled={busy}
+                    onClick={() => void printIndependent()}
+                  >
+                    <Download size={18} aria-hidden />
+                    Unduh tugas mandiri PDF
+                  </Button>
+                  {activity.interactiveSupport === "unavailable" && (
+                    <p role="note">
+                      Alat interaktif untuk materi ini belum tersedia. Soal
+                      dapat dipratinjau; cakupan interaktif belum lengkap.
+                    </p>
                   )}
-                </ol>
-                <p>
-                  Pilihan alasan pada cek akhir:{" "}
-                  {activity.exit.reasons
-                    .map((r) => `${r.label}. ${r.text}`)
-                    .join(" · ")}
-                </p>
-              </details>
-            </>
-          )}
+                  <details>
+                    <summary className="min-h-12 cursor-pointer font-bold">
+                      Soal untuk layar kelas ({activity.board.length})
+                    </summary>
+                    <ol className="space-y-3">{activity.board.map(preview)}</ol>
+                  </details>
+                  <details id="practice-independent">
+                    <summary className="min-h-12 cursor-pointer font-bold">
+                      Tugas mandiri · 3 soal + 1 tambahan
+                    </summary>
+                    <ol className="space-y-3">
+                      {[...activity.independent, activity.optional].map(
+                        preview,
+                      )}
+                    </ol>
+                  </details>
+                  <details>
+                    <summary className="min-h-12 cursor-pointer font-bold">
+                      Contoh untuk dibahas bersama & cek akhir
+                    </summary>
+                    <ol className="space-y-3">
+                      {[
+                        activity.guided,
+                        activity.exit,
+                        activity.exitContext,
+                      ].map(preview)}
+                    </ol>
+                    <p>
+                      Pilihan alasan pada cek akhir:{" "}
+                      {activity.exit.reasons
+                        .map((r) => `${r.label}. ${r.text}`)
+                        .join(" · ")}
+                    </p>
+                  </details>
+                </>
+              )}
+            </div>
+          </details>
         </>
       )}
       <p role="status">{message}</p>

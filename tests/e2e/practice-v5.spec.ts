@@ -211,32 +211,25 @@ for (const width of [360, 390, 1366])
       "papannalar-tugas-mandiri.pdf",
     );
     await page
-      .getByRole("button", { name: "Coba sesi dengan soal ini", exact: true })
+      .getByRole("button", { name: "Mulai mengajar", exact: true })
       .click();
     await expect(page.locator("#teacher-prepare")).not.toHaveAttribute(
       "open",
       "",
     );
-    await page
-      .getByRole("button", { name: "Mulai sesi dengan soal ini", exact: true })
-      .click();
     await expect(page.getByTestId("cycle-status")).toContainText("Sesi 1");
     expect((await savedPackage(page)).frozen).toBe(true);
     await expect(
       page.getByLabel("Topik pembuka", { exact: true }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     await expect(page.getByLabel("Kode pasangan", { exact: true })).toHaveCount(
       1,
     );
     await expect(
       page.getByRole("button", { name: "Jalankan contoh sesi", exact: true }),
     ).toHaveCount(0);
-    await page
-      .getByRole("button", {
-        name: "Buka langkah 2: Cerita & bantuan",
-        exact: true,
-      })
-      .click();
+    await page.locator("#teacher-teach > summary").click();
+    await page.locator("#teacher-ai > summary").click();
     await expect(page.locator("#teacher-teach")).not.toHaveAttribute(
       "open",
       "",
@@ -273,10 +266,7 @@ test("PRACTICE02 correct code recovers an expired own sample lease; a different 
   await sample(page);
   await page.getByRole("button", { name: "Siapkan soal", exact: true }).click();
   await page
-    .getByRole("button", { name: "Coba sesi dengan soal ini", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Mulai sesi dengan soal ini", exact: true })
+    .getByRole("button", { name: "Mulai mengajar", exact: true })
     .click();
   const boardContext = await browser.newContext({
     baseURL: origin,

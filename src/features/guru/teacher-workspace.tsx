@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type FormEvent,
+  type ReactNode,
 } from "react";
 import Link from "next/link";
 import { Check, School } from "lucide-react";
@@ -34,6 +35,7 @@ import { libraryStateSchema } from "@/contracts/library";
 import { ActivityDisclosure } from "./activity-disclosure";
 import { DeviceControls } from "./device-controls";
 import { PracticeActivities } from "./practice-activities";
+import { OralWorkspace } from "./oral-workspace";
 import { ExampleActivities } from "./example-activities";
 import { SampleControl } from "./sample-control";
 import { libraryCache, removeLibraryCache } from "@/local/library";
@@ -57,7 +59,13 @@ async function requestJson(
   return response.json();
 }
 
-export function TeacherWorkspace({ example = false }: { example?: boolean }) {
+export function TeacherWorkspace({
+  example = false,
+  children,
+}: {
+  example?: boolean;
+  children?: ReactNode;
+}) {
   const [ownerId, setOwnerId] = useState<string>();
   const [ready, setReady] = useState(false);
   const [classes, setClasses] = useState<ClassDto[]>([]);
@@ -482,7 +490,10 @@ export function TeacherWorkspace({ example = false }: { example?: boolean }) {
           </p>
         )}
         <ul className="grid gap-2 sm:grid-cols-2">
-          {classes.map((classroom) => (
+          {(detail
+            ? classes.filter((c) => c.id === detail.class.id)
+            : classes
+          ).map((classroom) => (
             <li key={classroom.id}>
               <Button
                 variant="outline"
@@ -502,6 +513,30 @@ export function TeacherWorkspace({ example = false }: { example?: boolean }) {
             </li>
           ))}
         </ul>
+        {detail && classes.length > 1 && (
+          <details key={detail.class.id}>
+            <summary className="min-h-12 cursor-pointer text-sm font-semibold text-primary">
+              Ganti kelas
+            </summary>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {classes
+                .filter((c) => c.id !== detail.class.id)
+                .map((classroom) => (
+                  <li key={classroom.id}>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between"
+                      disabled={busy}
+                      onClick={() => showClass(classroom.id, ownerId, mode)}
+                    >
+                      Buka kelas {classroom.label}
+                      <span className="text-sm">{classroom.count} siswa</span>
+                    </Button>
+                  </li>
+                ))}
+            </ul>
+          </details>
+        )}
         <Button
           variant={classes.length ? "outline" : "default"}
           onClick={() => {
@@ -591,111 +626,130 @@ export function TeacherWorkspace({ example = false }: { example?: boolean }) {
           ownerId={ownerId}
           mode={mode}
           detail={detail}
-          labels={labels}
         />
       )}
-      <ActivityDisclosure
-        id="teacher-class"
-        key={`class/${ownerId}/${mode}`}
-        title="Kelola kelas terpilih"
-        description="Nama lokal, daftar siswa dan pengaturan kelas."
-        scope={{ ownerId, mode }}
-      >
-        {detail ? (
-          <section
-            aria-label="Detail kelas"
-            className="space-y-3 border-t border-pn-ink-400/30 pt-4"
-          >
-            <h3 className="text-lg font-bold">Kelas {detail.class.label}</h3>
-            <p>
-              Tingkat {detail.class.grade} · {detail.class.count} siswa
-            </p>
-            <ul aria-label="Daftar absen" className="grid grid-cols-2 gap-2">
-              {detail.students.map((student) => (
-                <li
-                  key={student.id}
-                  className="rounded-input bg-pn-teal-100 px-3 py-2"
-                >
-                  {labels[student.id] ?? `Absen ${student.attendanceNumber}`}
-                </li>
-              ))}
-            </ul>
-            <LocalRoster
-              ownerId={ownerId}
-              mode={mode}
-              students={detail.students}
-              onSaved={async () => {
-                const names = createNameRepository({ ownerId, mode });
-                try {
-                  const views = await Promise.all(
-                    detail.students.map((s) =>
-                      readTeacherStudentView(s, names),
-                    ),
-                  );
-                  setLabels(
-                    Object.fromEntries(
-                      views.map((v) => [v.studentId, v.label]),
-                    ),
-                  );
-                } finally {
-                  names.close();
-                }
-              }}
-            />
-            <form
-              key={detail.class.revision}
-              onSubmit={update}
-              className="space-y-3"
-            >
-              <label className="block font-semibold">
-                Nama rombel
-                <input
-                  name="label"
-                  required
-                  maxLength={40}
-                  defaultValue={detail.class.label}
-                  className={inputClass}
-                />
-              </label>
-              <label className="block font-semibold">
-                Tingkat kelas
-                <input
-                  name="grade"
-                  type="number"
-                  min={1}
-                  max={12}
-                  required
-                  defaultValue={detail.class.grade}
-                  className={inputClass}
-                />
-              </label>
-              <Button type="submit" disabled={busy || offline}>
-                Simpan perubahan
-              </Button>
-            </form>
-            <Button
-              variant="outline"
-              disabled={busy || offline}
-              onClick={remove}
-            >
-              Hapus kelas
-            </Button>
-          </section>
-        ) : (
-          <p>Pilih kelas terlebih dahulu.</p>
-        )}
-        <Button asChild variant="outline">
-          <Link href="/guru/kelas">Buka daftar kelas</Link>
-        </Button>
-        <Button variant="outline" onClick={logout}>
-          Keluar
-        </Button>
-      </ActivityDisclosure>
       <DeviceControls
         key={`${ownerId}/${mode}`}
         scope={{ ownerId, mode }}
         classroom={detail?.class}
-      />
+      >
+        {!example && (
+          <ActivityDisclosure
+            id="teacher-oral"
+            title="Cek pemahaman secara lisan"
+            description="Ajukan pertanyaan satu per satu tanpa Kartu Nalar."
+            scope={{ ownerId, mode }}
+          >
+            <OralWorkspace
+              key={`oral/${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
+              ownerId={ownerId}
+              mode={mode}
+              detail={detail}
+              labels={labels}
+            />
+          </ActivityDisclosure>
+        )}
+        <ActivityDisclosure
+          id="teacher-class"
+          key={`class/${ownerId}/${mode}`}
+          title="Kelola kelas terpilih"
+          description="Nama lokal, daftar siswa dan pengaturan kelas."
+          scope={{ ownerId, mode }}
+        >
+          {detail ? (
+            <section
+              aria-label="Detail kelas"
+              className="space-y-3 border-t border-pn-ink-400/30 pt-4"
+            >
+              <h3 className="text-lg font-bold">Kelas {detail.class.label}</h3>
+              <p>
+                Tingkat {detail.class.grade} · {detail.class.count} siswa
+              </p>
+              <ul aria-label="Daftar absen" className="grid grid-cols-2 gap-2">
+                {detail.students.map((student) => (
+                  <li
+                    key={student.id}
+                    className="rounded-input bg-pn-teal-100 px-3 py-2"
+                  >
+                    {labels[student.id] ?? `Absen ${student.attendanceNumber}`}
+                  </li>
+                ))}
+              </ul>
+              <LocalRoster
+                ownerId={ownerId}
+                mode={mode}
+                students={detail.students}
+                onSaved={async () => {
+                  const names = createNameRepository({ ownerId, mode });
+                  try {
+                    const views = await Promise.all(
+                      detail.students.map((s) =>
+                        readTeacherStudentView(s, names),
+                      ),
+                    );
+                    setLabels(
+                      Object.fromEntries(
+                        views.map((v) => [v.studentId, v.label]),
+                      ),
+                    );
+                  } finally {
+                    names.close();
+                  }
+                }}
+              />
+              <form
+                key={detail.class.revision}
+                onSubmit={update}
+                className="space-y-3"
+              >
+                <label className="block font-semibold">
+                  Nama rombel
+                  <input
+                    name="label"
+                    required
+                    maxLength={40}
+                    defaultValue={detail.class.label}
+                    className={inputClass}
+                  />
+                </label>
+                <label className="block font-semibold">
+                  Tingkat kelas
+                  <input
+                    name="grade"
+                    type="number"
+                    min={1}
+                    max={12}
+                    required
+                    defaultValue={detail.class.grade}
+                    className={inputClass}
+                  />
+                </label>
+                <Button type="submit" disabled={busy || offline}>
+                  Simpan perubahan
+                </Button>
+              </form>
+              <Button
+                variant="outline"
+                disabled={busy || offline}
+                onClick={remove}
+              >
+                Hapus kelas
+              </Button>
+            </section>
+          ) : (
+            <p>Pilih kelas terlebih dahulu.</p>
+          )}
+          <Button asChild variant="outline">
+            <Link href="/guru/kelas" prefetch={false}>
+              Buka daftar kelas
+            </Link>
+          </Button>
+          <Button variant="outline" onClick={logout}>
+            Keluar
+          </Button>
+        </ActivityDisclosure>
+        {children}
+      </DeviceControls>
       <p role="status" className="text-sm text-muted-foreground">
         {message}
       </p>

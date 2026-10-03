@@ -6,11 +6,18 @@ import {
   type CardKind,
 } from "@/cards/layouts/layout-v1";
 import { Button } from "@/ui/components/button";
+import { Printer } from "lucide-react";
 
-export function PrintCards() {
+export function PrintCards({
+  fixedKind,
+  count,
+  compact = false,
+}: { fixedKind?: CardKind; count?: number; compact?: boolean } = {}) {
   const [kind, setKind] = useState<CardKind>("weekly");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const selectedKind = fixedKind ?? kind;
+  const perSheet = selectedKind === "initial" ? 2 : 4;
   async function download() {
     setBusy(true);
     setMessage("");
@@ -21,7 +28,7 @@ export function PrintCards() {
       ]);
       if (!response.ok) throw new Error("FONT_UNAVAILABLE");
       const bytes = await createCardPdf(
-        kind,
+        selectedKind,
         new Uint8Array(await response.arrayBuffer()),
       );
       const url = URL.createObjectURL(
@@ -29,7 +36,7 @@ export function PrintCards() {
       );
       const link = document.createElement("a");
       link.href = url;
-      link.download = `papannalar-${kind}-A4.pdf`;
+      link.download = `papannalar-${selectedKind}-A4.pdf`;
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       setMessage("PDF siap. Cetak 100% / ukuran asli, hitam putih.");
@@ -41,29 +48,51 @@ export function PrintCards() {
   }
   return (
     <section
-      className="mt-6 border-t border-pn-ink-400/30 pt-6"
+      className={
+        compact
+          ? "space-y-2 rounded-input border border-primary/20 p-3"
+          : "mt-6 border-t border-pn-ink-400/30 pt-6"
+      }
       aria-label="Cetak Kartu Nalar"
     >
-      <h2 className="mb-3 text-lg font-bold">Cetak Kartu Nalar</h2>
-      <label className="block">
-        Jenis kartu
-        <select
-          value={kind}
-          onChange={(e) => setKind(e.target.value as CardKind)}
-          className="my-2 min-h-12 w-full rounded-input border bg-white px-3"
-        >
-          {CARD_KINDS.map((kind) => (
-            <option key={kind} value={kind}>
-              {cardLayout(kind).title}
-            </option>
-          ))}
-        </select>
-      </label>
+      {!compact && (
+        <h2 className="mb-3 text-lg font-bold">Cetak Kartu Nalar</h2>
+      )}
+      {!fixedKind && (
+        <label className="block">
+          Jenis kartu
+          <select
+            value={kind}
+            onChange={(e) => setKind(e.target.value as CardKind)}
+            className="my-2 min-h-12 w-full rounded-input border bg-white px-3"
+          >
+            {CARD_KINDS.map((kind) => (
+              <option key={kind} value={kind}>
+                {cardLayout(kind).title}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      {compact && (
+        <p className="text-sm">
+          Kartu Nalar adalah lembar jawaban. Siswa mengisi nomor absen dan
+          memilih A, B, C, D atau ? untuk soal yang ditampilkan guru.
+        </p>
+      )}
       <Button disabled={busy} onClick={() => void download()}>
-        {busy ? "Menyiapkan PDF…" : "Unduh PDF A4"}
+        <Printer size={18} aria-hidden />
+        {busy
+          ? "Menyiapkan PDF…"
+          : compact
+            ? `Unduh Kartu Nalar · ${cardLayout(selectedKind).rows} baris`
+            : "Unduh PDF A4"}
       </Button>
       <p className="mt-2 text-sm text-muted-foreground">
-        Cek Awal: 2 kartu per lembar. Mingguan dan Keluar: 4 kartu per lembar.
+        {count
+          ? `${count} siswa: cetak ${Math.ceil(count / perSheet)} lembar A4 (${perSheet} kartu per lembar), lalu potong. Satu kartu per siswa.`
+          : `Cek Awal: 2 kartu per lembar. Mingguan dan Keluar: 4 kartu per lembar.`}{" "}
+        Cetak 100% / ukuran asli, hitam putih.
       </p>
       <p role="status" className="mt-2 text-sm">
         {message}

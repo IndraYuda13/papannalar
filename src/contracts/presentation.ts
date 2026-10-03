@@ -273,6 +273,7 @@ export type ConnectionPulse = z.infer<typeof connectionPulseSchema>;
 export const presentationResumeSchema = z.strictObject({
   snapshot: snapshotSchema.nullable(),
 });
+export const boardResetReceiptSchema = z.strictObject({ ok: z.literal(true) });
 export const channelSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("snapshot") }),
   z.strictObject({
@@ -318,6 +319,7 @@ export const teacherPairingSchema = z.discriminatedUnion("action", [
   }),
 ]);
 export const boardPairingSchema = z.discriminatedUnion("action", [
+  z.strictObject({ action: z.literal("reset"), resetId: randomIdSchema }),
   z.strictObject({
     action: z.literal("create"),
     presentationId: randomIdSchema.optional(),

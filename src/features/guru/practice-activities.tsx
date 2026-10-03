@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { Sparkles, ArrowRight, FlaskConical } from "lucide-react";
 import { Button } from "@/ui/components/button";
@@ -7,8 +7,10 @@ import type { ClassDto } from "@/contracts/classes";
 import type { StudentDto } from "@/contracts/api";
 import type { TeacherPackage } from "@/core/package/build";
 import { PackageWorkspace } from "@/features/package/package-workspace";
-import { CycleWorkspace } from "@/features/session/cycle-workspace";
-import { OralWorkspace } from "./oral-workspace";
+import {
+  CycleWorkspace,
+  type CycleActions,
+} from "@/features/session/cycle-workspace";
 import { ActivityDisclosure, openTeacherActivity } from "./activity-disclosure";
 import { AiWorkspace } from "./ai-workspace";
 import type { StepId } from "@/content/ladder/registry";
@@ -16,15 +18,15 @@ export function PracticeActivities({
   ownerId,
   mode,
   detail,
-  labels,
 }: {
   ownerId: string;
   mode: "pilot" | "demo";
   detail?: { class: ClassDto; students: StudentDto[] };
-  labels: Record<string, string>;
 }) {
   const [pkg, setPkg] = useState<TeacherPackage>();
   const [selectedStep, setSelectedStep] = useState("");
+  const cycleActions = useRef<CycleActions>(null);
+  const [starting, setStarting] = useState(false);
   const [session, setSession] = useState<{
     classId: string;
     sessionId: string;
@@ -50,6 +52,8 @@ export function PracticeActivities({
     setSelectedStep(stepId);
     openTeacherActivity("teacher-prepare");
     requestAnimationFrame(() => {
+      const container = document.getElementById("practice-tasks");
+      if (container instanceof HTMLDetailsElement) container.open = true;
       const tasks = document.getElementById("practice-independent");
       if (tasks instanceof HTMLDetailsElement) {
         tasks.open = true;
@@ -58,19 +62,41 @@ export function PracticeActivities({
       }
     });
   }
+  async function beginTeaching() {
+    if (starting) return;
+    openTeacherActivity("teacher-teach");
+    if (session) return;
+    setStarting(true);
+    try {
+      await cycleActions.current?.start();
+    } finally {
+      setStarting(false);
+    }
+  }
   return (
     <>
       <nav aria-label="Langkah menyiapkan latihan" className="practice-journey">
         {[
-          ["teacher-prepare", "1", "Persiapan"],
-          ["teacher-ai", "2", "Cerita & bantuan"],
-          ["teacher-teach", "3", "Coba sesi"],
+          ["kelas-heading", "1", "Kelas"],
+          ["teacher-prepare", "2", "Soal"],
+          ["teacher-teach", "3", "Mengajar"],
         ].map(([id, n, label]) => (
           <button
             key={id}
             aria-controls={id}
             aria-label={`Buka langkah ${n}: ${label}`}
-            onClick={() => openTeacherActivity(id)}
+            aria-current={
+              (n === "1" && !detail) ||
+              (n === "2" && detail && !session) ||
+              (n === "3" && session)
+                ? "step"
+                : undefined
+            }
+            onClick={() => {
+              if (id === "kelas-heading")
+                document.getElementById(id)?.scrollIntoView({ block: "start" });
+              else openTeacherActivity(id);
+            }}
           >
             <span aria-hidden>{n}</span>
             {label}
@@ -79,11 +105,58 @@ export function PracticeActivities({
       </nav>
       <ActivityDisclosure
         id="teacher-prepare"
-        title="1. Siapkan latihan"
-        description="Tentukan cara cek, pilih pembuka diskusi dan periksa soal."
+        title="Siapkan soal"
+        description={
+          pkg
+            ? "Soal siap. Periksa atau ubah bila perlu, lalu mulai mengajar."
+            : "Satu tombol untuk menyiapkan soal sesuai kelas."
+        }
         initiallyOpen
         scope={{ ownerId, mode }}
       >
+        {pkg && (
+          <div className="practice-next-action">
+            <div>
+              <h3 className="font-bold">
+                {mode === "pilot"
+                  ? "Gunakan kumpulan soal Anda"
+                  : session
+                    ? "Sesi Anda masih berjalan"
+                    : "Soal siap untuk kelas Anda"}
+              </h3>
+              <p className="text-sm">
+                {mode === "pilot"
+                  ? "Pilih soal yang sudah siap untuk kelas ini. Latihan otomatis di bawah dapat dicoba dengan data contoh."
+                  : session
+                    ? "Lanjutkan dari bagian terakhir. Mengubah persiapan tidak mengubah sesi ini."
+                    : "Mulai sesi, kemudian sambungkan layar kelas. AI boleh dilewati."}
+              </p>
+            </div>
+            {mode === "demo" ? (
+              <Button
+                disabled={starting || (!session && pkg.frozen)}
+                onClick={() => void beginTeaching()}
+              >
+                {starting
+                  ? "Memulai sesi…"
+                  : session
+                    ? "Lanjutkan sesi"
+                    : "Mulai mengajar"}
+                <ArrowRight size={18} aria-hidden />
+              </Button>
+            ) : (
+              <Button asChild>
+                <Link
+                  href={`/guru/mulai${detail ? `?class=${detail.class.id}` : ""}`}
+                  prefetch={false}
+                >
+                  Mulai mengajar
+                  <ArrowRight size={18} aria-hidden />
+                </Link>
+              </Button>
+            )}
+          </div>
+        )}
         <PackageWorkspace
           key={`package/${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
           ownerId={ownerId}
@@ -97,10 +170,6 @@ export function PracticeActivities({
         />
         {pkg && (
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => openTeacherActivity("teacher-teach")}>
-              Coba sesi dengan soal ini
-              <ArrowRight size={18} aria-hidden />
-            </Button>
             <Button
               variant="outline"
               onClick={() => openTeacherActivity("teacher-ai")}
@@ -116,7 +185,7 @@ export function PracticeActivities({
       </ActivityDisclosure>
       <ActivityDisclosure
         id="teacher-ai"
-        title="2. Tambahkan cerita & bantuan mengajar"
+        title="Cerita & bantuan mengajar (opsional)"
         description="Opsional: pilih soal cerita atau cari cara menjelaskan."
         scope={{ ownerId, mode }}
       >
@@ -141,7 +210,7 @@ export function PracticeActivities({
       </ActivityDisclosure>
       <ActivityDisclosure
         id="teacher-teach"
-        title="3. Coba mengajar dengan soal ini"
+        title="Mengajar"
         description="Mulai satu sesi, lalu sambungkan satu layar kelas."
         scope={{ ownerId, mode }}
       >
@@ -153,6 +222,7 @@ export function PracticeActivities({
             <Link
               className="font-semibold text-primary underline"
               href="/guru/mulai"
+              prefetch={false}
             >
               buka Mulai mengajar
             </Link>
@@ -165,6 +235,7 @@ export function PracticeActivities({
           detail={detail}
           preparedPackage={pkg}
           onSessionChange={receiveSession}
+          actionsRef={cycleActions}
         />
       </ActivityDisclosure>
       {mode === "demo" && (
@@ -178,20 +249,6 @@ export function PracticeActivities({
           </Link>
         </p>
       )}
-      <ActivityDisclosure
-        id="teacher-oral"
-        title="Cek pemahaman secara lisan"
-        description="Ajukan pertanyaan satu per satu tanpa Kartu Nalar."
-        scope={{ ownerId, mode }}
-      >
-        <OralWorkspace
-          key={`oral/${ownerId}/${mode}/${detail?.class.id ?? "cached"}`}
-          ownerId={ownerId}
-          mode={mode}
-          detail={detail}
-          labels={labels}
-        />
-      </ActivityDisclosure>
     </>
   );
 }

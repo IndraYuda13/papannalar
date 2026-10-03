@@ -19,6 +19,7 @@ import { Button } from "@/ui/components/button";
 import { getStep } from "@/content/ladder/registry";
 import { MathPrompt } from "@/ui/components/math-prompt";
 import type { TeacherPackage } from "@/core/package/build";
+import { PrintCards } from "@/features/guru/print-cards";
 type Draft = {
   studentId: string;
   choices: CardChoice[];
@@ -173,6 +174,9 @@ export function ExitWorkspace({
       className="space-y-4 rounded-kartu border-2 border-primary/30 bg-white p-4"
     >
       <h4 className="text-xl font-bold">Kartu Keluar · benar dan paham</h4>
+      {plan?.delivery === "card" && (
+        <PrintCards compact fixedKind="exit" count={parent.roster.length} />
+      )}
       {!plan ? (
         <Button
           disabled={busy || !groups.length || scope.mode !== "demo"}

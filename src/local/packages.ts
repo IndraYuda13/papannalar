@@ -1,7 +1,12 @@
 "use client";
 import type { Table } from "dexie";
 import { parseTeacherPackage } from "../contracts/package";
-import type { TeacherPackage } from "../core/package/build";
+import {
+  copyPackageForPreparation,
+  changePackageOpening,
+  type TeacherPackage,
+} from "../core/package/build";
+import type { StepId } from "../content/ladder/registry";
 import { parseBoundary, randomIdSchema } from "../contracts/domain";
 import { openDataDatabase } from "./data-database";
 import { localOperation, type LocalScope } from "./scope";
@@ -12,6 +17,36 @@ export function createPackageRepository(scope: LocalScope) {
   const meta: Table<{ key: string; value: string }, string> =
     db.table("localMeta");
   return {
+    copyForPreparation: (
+      sourceId: string,
+      newId: string,
+      expectedRevision: number,
+      openingStep?: StepId,
+    ) =>
+      localOperation(() =>
+        db.transaction("rw", packages, meta, async () => {
+          const source = await packages.get(
+            parseBoundary(randomIdSchema, sourceId),
+          );
+          if (!source || source.revision !== expectedRevision)
+            throw new Error("Package revision conflict");
+          if (await packages.get(parseBoundary(randomIdSchema, newId)))
+            throw new Error("Copy already exists");
+          const copy = copyPackageForPreparation(
+            parseTeacherPackage(source),
+            newId,
+          );
+          const value = openingStep
+            ? changePackageOpening(copy, openingStep)
+            : copy;
+          await packages.add(value);
+          await meta.bulkPut([
+            { key: "package:last", value: value.id },
+            { key: `package:class:${value.classId}`, value: value.id },
+          ]);
+          return value;
+        }),
+      ),
     save: (input: TeacherPackage, expectedRevision: number) =>
       localOperation(() =>
         db.transaction("rw", packages, meta, async () => {

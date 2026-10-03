@@ -1,5 +1,11 @@
 "use client";
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useState,
+  useImperativeHandle,
+  type FormEvent,
+  type Ref,
+} from "react";
 import type { ClassDto } from "@/contracts/classes";
 import type { StudentDto } from "@/contracts/api";
 import type { LocalScope } from "@/local/scope";
@@ -24,6 +30,9 @@ import { Button } from "@/ui/components/button";
 import Link from "next/link";
 import type { TeacherPackage } from "@/core/package/build";
 import { getStep } from "@/content/ladder/registry";
+import { PrintCards } from "@/features/guru/print-cards";
+
+export type CycleActions = { start: () => Promise<void> };
 
 type Loaded = Awaited<
   ReturnType<ReturnType<typeof createCycleRepository>["read"]>
@@ -40,10 +49,12 @@ export function CycleWorkspace({
   detail,
   preparedPackage,
   onSessionChange,
+  actionsRef,
 }: {
   scope: LocalScope;
   detail?: { class: ClassDto; students: StudentDto[] };
   preparedPackage?: TeacherPackage;
+  actionsRef?: Ref<CycleActions>;
   onSessionChange: (
     value: { package: TeacherPackage; sessionId: string } | undefined,
   ) => void;
@@ -99,7 +110,7 @@ export function CycleWorkspace({
     }
   }
   async function start() {
-    if (!detail) return;
+    if (!detail || busy || mode !== "demo") return;
     setBusy(true);
     const packages = createPackageRepository(scope),
       repo = createCycleRepository(scope);
@@ -108,7 +119,7 @@ export function CycleWorkspace({
         ? await packages.read(preparedPackage.id)
         : undefined;
       if (!pkg || pkg.classId !== detail.class.id) {
-        setMessage("Siapkan soal pada langkah 1 terlebih dahulu.");
+        setMessage("Siapkan soal terlebih dahulu pada bagian Soal.");
         return;
       }
       const baselines =
@@ -163,9 +174,9 @@ export function CycleWorkspace({
           : reason === "Finalize previous assessment first"
             ? "Sesi sebelumnya belum selesai. Tutup sesi dan simpan hasil penilaian di bawah sebelum memulai lagi."
             : reason === "Prepare a new package for each session"
-              ? "Soal ini sudah digunakan. Buat latihan baru pada langkah 1 sebelum memulai sesi berikutnya."
+              ? "Soal ini sudah digunakan. Buka Siapkan soal lain untuk membuat latihan sebelum sesi berikutnya."
               : reason === "Use weekly package after initial placement"
-                ? "Kelas ini sudah menjalani cek pertama. Pilih Cek lanjutan pada langkah 1."
+                ? "Kelas ini sudah menjalani cek pertama. Buka Siapkan soal lain lalu pilih Cek lanjutan."
                 : "Sesi belum dimulai. Periksa soal dan penyimpanan perangkat, lalu coba lagi.",
       );
     } finally {
@@ -174,6 +185,7 @@ export function CycleWorkspace({
       setBusy(false);
     }
   }
+  useImperativeHandle(actionsRef, () => ({ start }));
   async function change(value: Cycle) {
     if (!data) return;
     setBusy(true);
@@ -290,8 +302,8 @@ export function CycleWorkspace({
     >
       <h3 className="text-xl font-bold">Coba sesi mengajar</h3>
       <p>
-        Sesi memakai soal dari langkah 1. Mulai sesi dahulu, lalu sambungkan
-        layar kelas bila Anda memakai proyektor, TV atau papan interaktif.
+        Sesi memakai soal yang Anda siapkan. Sambungkan layar kelas bila Anda
+        memakai proyektor, TV atau papan interaktif.
       </p>
       {(!data || data.cycle.assessmentRevision > 0) && (
         <Button
@@ -412,6 +424,13 @@ export function CycleWorkspace({
                   ? "Cek Awal · kartu A5"
                   : "Cek Mingguan"}
               </h4>
+              <PrintCards
+                compact
+                fixedKind={
+                  data.package.variant === "initial" ? "initial" : "weekly"
+                }
+                count={context.roster.length}
+              />
               <p data-testid="cycle-scan-count">
                 {data.parent.cards.length}/{context.roster.length} kartu
                 tersimpan · {data.cycle.absentStudentIds.length} tidak hadir

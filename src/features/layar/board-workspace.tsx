@@ -1,10 +1,16 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CircleCheck, SlidersHorizontal, ChevronDown } from "lucide-react";
+import {
+  CircleCheck,
+  SlidersHorizontal,
+  ChevronDown,
+  RotateCcw,
+} from "lucide-react";
 import {
   challengeSchema,
   pairingStatusSchema,
   presentationResumeSchema,
+  boardResetReceiptSchema,
   type PresentationEnvelope,
   type PresentationState,
 } from "@/contracts/presentation";
@@ -29,8 +35,59 @@ import { RemoteBoard } from "./remote-board";
 import { useBoardPackage } from "./use-board-package";
 import { BoardNavigation } from "./board-navigation";
 import { HintReporting } from "./hint-reporting";
+import {
+  readPendingBoardReset,
+  rememberBoardReset,
+  finishBoardReset,
+} from "./board-reset";
 type Challenge = ReturnType<typeof challengeSchema.parse>;
 export function BoardWorkspace() {
+  const [ready, setReady] = useState(false);
+  const [resetRequest, setResetRequest] = useState<string>();
+  const [viewKey, setViewKey] = useState(0);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setResetRequest(readPendingBoardReset());
+      setReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const completeReset = useCallback((requestId: string) => {
+    finishBoardReset(requestId);
+    setResetRequest((current) => (current === requestId ? undefined : current));
+  }, []);
+  function reset() {
+    const requestId = crypto.randomUUID();
+    rememberBoardReset(requestId);
+    setResetRequest(requestId);
+    // Remounting cancels watchers/ACK/remote tools and clears all RAM-only ink,
+    // roster and local navigation. Cached content and display settings survive.
+    setViewKey((current) => current + 1);
+  }
+  return ready ? (
+    <BoardSessionWorkspace
+      key={viewKey}
+      resetRequest={resetRequest}
+      skipFirstUseCheck={viewKey > 0 || Boolean(resetRequest)}
+      onReset={reset}
+      onResetComplete={completeReset}
+    />
+  ) : (
+    <p role="status">Menyiapkan layar…</p>
+  );
+}
+function BoardSessionWorkspace({
+  resetRequest,
+  onReset,
+  onResetComplete,
+  skipFirstUseCheck,
+}: {
+  resetRequest?: string;
+  onReset: () => void;
+  onResetComplete: (requestId: string) => void;
+  skipFirstUseCheck: boolean;
+}) {
+  const [skipInitialCheck] = useState(skipFirstUseCheck);
   const [challenge, setChallenge] = useState<Challenge>();
   const [presentationId, setPresentationId] = useState<string>();
   const [envelope, setEnvelope] = useState<PresentationEnvelope>();
@@ -49,6 +106,8 @@ export function BoardWorkspace() {
   const [connection, setConnection] = useState<PresentationConnection>();
   const [showPairing, setShowPairing] = useState(false);
   const creating = useRef(false);
+  const startController = useRef<AbortController | undefined>(undefined);
+  useEffect(() => () => startController.current?.abort(), []);
   const [online, setOnline] = useState(false),
     [message, setMessage] = useState("Menyiapkan kode pasangan…");
   const [browserOnline, setBrowserOnline] = useState(true);
@@ -73,10 +132,10 @@ export function BoardWorkspace() {
     const timer = window.setTimeout(() => {
       const cached = readBoardProfile();
       setProfile(cached);
-      setTesting(!cached);
+      setTesting(!cached && !skipInitialCheck);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [skipInitialCheck]);
   async function completeTest(value: BoardProfile) {
     const saved = saveBoardProfile(value);
     setProfile(value);
@@ -105,21 +164,40 @@ export function BoardWorkspace() {
       if (creating.current) return;
       if (!navigator.onLine) {
         setMessage(
-          "Offline. Sambungkan internet untuk membuat pasangan; model yang sudah terbuka tetap dapat digunakan.",
+          resetRequest
+            ? "Soal dan goresan ditutup di papan ini. Sambungkan internet agar sesi lama diputus dan kode baru dibuat otomatis."
+            : "Offline. Sambungkan internet untuk membuat pasangan; model yang sudah terbuka tetap dapat digunakan.",
         );
         return;
       }
       creating.current = true;
+      const controller = new AbortController();
+      startController.current = controller;
+      const signal = AbortSignal.any([
+        controller.signal,
+        AbortSignal.timeout(8000),
+      ]);
       try {
         const response = await fetch("/api/v1/board/identity", {
           method: "POST",
           cache: "no-store",
+          signal,
         });
         if (!response.ok) throw new Error("identity");
         boardIdentitySchema.parse(await response.json());
-        if (resume) {
+        if (resetRequest) {
+          boardResetReceiptSchema.parse(
+            await pairingCall(
+              "board",
+              { action: "reset", resetId: resetRequest },
+              signal,
+            ),
+          );
+          controller.signal.throwIfAborted();
+          onResetComplete(resetRequest);
+        } else if (resume) {
           const restored = presentationResumeSchema.parse(
-            await pairingCall("board", { action: "resume" }),
+            await pairingCall("board", { action: "resume" }, signal),
           );
           if (restored.snapshot) {
             setEnvelope(restored.snapshot.envelope);
@@ -129,23 +207,34 @@ export function BoardWorkspace() {
         }
         setChallenge(
           challengeSchema.parse(
-            await pairingCall("board", {
-              action: "create",
-              ...(presentationId ? { presentationId } : {}),
-            }),
+            await pairingCall(
+              "board",
+              {
+                action: "create",
+                ...(presentationId ? { presentationId } : {}),
+              },
+              signal,
+            ),
           ),
         );
         setShowPairing(true);
         setMessage(
-          "Pindai QR dengan kamera HP guru, atau masukkan kode di Sambungkan Layar.",
+          resetRequest
+            ? "Sesi lama sudah dilepas dari papan. Pindai QR atau masukkan kode baru dari HP guru."
+            : "Pindai QR dengan kamera HP guru, atau masukkan kode di Sambungkan Layar.",
         );
       } catch {
-        setMessage("Kode belum tersedia. Periksa koneksi lalu coba lagi.");
+        if (!controller.signal.aborted)
+          setMessage(
+            resetRequest
+              ? "Sambungan lama belum dapat diputus. Periksa internet, lalu coba lagi. Papan tetap kosong sampai reset berhasil."
+              : "Kode belum tersedia. Periksa koneksi lalu coba lagi.",
+          );
       } finally {
         creating.current = false;
       }
     },
-    [presentationId],
+    [presentationId, resetRequest, onResetComplete],
   );
   useEffect(() => {
     if (!initialized.current) {
@@ -311,6 +400,27 @@ export function BoardWorkspace() {
             </p>
           )}
         </section>
+        <div className="space-y-2">
+          <Button
+            size="board"
+            variant="outline"
+            onClick={() => {
+              if (
+                !displayed ||
+                window.confirm(
+                  "Reset sesi di papan ini? Soal dan goresan di layar akan ditutup. Sesi dan hasil belajar di HP guru tetap tersimpan.",
+                )
+              )
+                onReset();
+            }}
+          >
+            <RotateCcw size={24} aria-hidden /> Reset sesi di papan
+          </Button>
+          <p className="text-base">
+            Lepaskan papan dari sesi lama dan buat kode baru. Hasil belajar di
+            HP guru tetap tersimpan.
+          </p>
+        </div>
         <Button size="board" variant="outline" onClick={() => setTesting(true)}>
           Tes Kemampuan Papan
         </Button>
@@ -329,7 +439,7 @@ export function BoardWorkspace() {
         </p>
         {packageView.content && (
           <div className="space-y-4">
-            {!displayed && (
+            {!displayed && !resetRequest && (
               <Button size="board" onClick={() => packageView.select(0)}>
                 Buka paket tersimpan
               </Button>

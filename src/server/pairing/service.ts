@@ -17,6 +17,7 @@ import {
   challengeSchema,
   connectionPulseSchema,
   presentationResumeSchema,
+  boardResetReceiptSchema,
 } from "../../contracts/presentation";
 
 export async function pairingRequest(
@@ -63,6 +64,16 @@ export async function pairingRequest(
         );
       return data;
     };
+    if (input.action === "reset") {
+      const data = await rpc("reset", {
+        resetId: input.resetId,
+        ipHash: hash(
+          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+            "unknown",
+        ),
+      });
+      return ctx.finish(NextResponse.json(boardResetReceiptSchema.parse(data)));
+    }
     if (input.action === "create") {
       const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
       const data = await rpc("create", {

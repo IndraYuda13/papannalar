@@ -106,7 +106,7 @@ test("magic link PKCE, reload session, cookie HttpOnly dan logout bekerja", asyn
     session: Object.entries(sessionStorage),
   }));
   const identity = await (await page.request.get("/api/v1/teacher")).json();
-  // Seven boolean presentation choices plus the independent controller UUID.
+  // Bounded boolean presentation choices plus the independent controller UUID.
   expect(browserStorage.session.length).toBeLessThanOrEqual(8);
   for (const [key, value] of browserStorage.session) {
     if (key === "pn-presentation-controller-v1")
@@ -116,7 +116,7 @@ test("magic link PKCE, reload session, cookie HttpOnly dan logout bekerja", asyn
     else {
       expect(key).toMatch(
         new RegExp(
-          `^pn-teacher-view:${identity.id}:pilot:teacher-(prepare|teach|rehearsal|ai|oral|class|device)$`,
+          `^pn-teacher-view:${identity.id}:pilot:teacher-(prepare|teach|rehearsal|ai|oral|class|device|extras)$`,
         ),
       );
       expect(value).toMatch(/^(open|closed)$/u);

@@ -118,7 +118,7 @@ export function AiWorkspace({
           Anda gunakan.{" "}
           {session
             ? "Tombol Minta saran AI di bawah meminta bantuan berdasarkan kartu tersebut untuk sesi yang sedang berjalan."
-            : "Mulai sesi pada langkah 3 untuk membuka tombol Minta saran AI. Kartu di bawah dapat dibaca sekarang tanpa AI."}
+            : "Pilih Mulai mengajar untuk membuka tombol Minta saran AI. Kartu di bawah dapat dibaca sekarang tanpa AI."}
         </p>
         <StaticBisik context={session ? { scope, ...session } : undefined} />
         {!session && (
@@ -130,25 +130,6 @@ export function AiWorkspace({
           </Button>
         )}
       </section>
-      <details className="text-sm">
-        <summary className="min-h-12 cursor-pointer font-semibold">
-          Panduan pengelola AI
-        </summary>
-        <p className="mb-3">
-          Konfigurasikan endpoint, model dan kunci di server, lalu lengkapi
-          anggaran serta review materi dan privasi. Data contoh dapat memakai AI
-          melalui pengaturan yang sama. Status konfigurasi bukan bukti bahwa
-          provider sudah diuji.
-        </p>
-        <a
-          href="https://github.com/IndraYuda13/papannalar/blob/main/UI_AI_HANDOFF.md"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-12 items-center font-semibold text-primary underline"
-        >
-          Baca panduan konfigurasi
-        </a>
-      </details>
     </div>
   );
 }

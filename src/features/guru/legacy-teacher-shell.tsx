@@ -7,15 +7,16 @@ export function LegacyTeacherShell() {
     <div className="studio-adaptive space-y-6">
       <PageHeader
         title="Latihan & bantuan AI"
-        description="Siapkan soal, ubah beberapa tugas menjadi soal cerita bila perlu, lalu coba mengajar dengan layar kelas."
+        description="Pilih kelas → siapkan soal → mulai mengajar. Bantuan AI bisa dipakai bila perlu."
       />
-      <TeacherWorkspace />
-      <details id="teacher-print" className="teacher-disclosure">
-        <summary>Cetak Kartu Nalar</summary>
-        <div className="teacher-disclosure-body">
-          <PrintCards />
-        </div>
-      </details>
+      <TeacherWorkspace>
+        <details id="teacher-print" className="teacher-disclosure">
+          <summary>Cetak Kartu Nalar</summary>
+          <div className="teacher-disclosure-body">
+            <PrintCards />
+          </div>
+        </details>
+      </TeacherWorkspace>
     </div>
   );
 }

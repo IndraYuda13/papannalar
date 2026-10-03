@@ -21,9 +21,6 @@ export function StartLesson({
     router = useRouter(),
     [cls, setClass] = useState(classId || classes[0]?.id || ""),
     [collection, setCollection] = useState(collectionId),
-    [tab, setTab] = useState<"system" | "teacher">(
-      state.collections.find((c) => c.id === collectionId)?.source ?? "system",
-    ),
     [date, setDate] = useState(jakartaDate()),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
@@ -32,13 +29,15 @@ export function StartLesson({
     runId = useRef<string>(crypto.randomUUID());
   const available = state.collections.filter(
     (c) =>
-      c.status === "ready" &&
-      c.source === tab &&
-      (mode === "teach" || c.document.kind === "cards"),
+      c.status === "ready" && (mode === "teach" || c.document.kind === "cards"),
   );
-  const selected = state.collections.find(
-      (c) => c.id === collection && c.status === "ready",
-    ),
+  const unavailable = state.collections.filter(
+    (c) =>
+      c.source === "teacher" &&
+      c.status !== "archived" &&
+      !available.some((a) => a.id === c.id),
+  );
+  const selected = available.find((c) => c.id === collection),
     active = state.runs.find(
       (r) =>
         r.status === "active" &&
@@ -123,27 +122,6 @@ export function StartLesson({
               required
             />
           </label>
-          <div
-            role="tablist"
-            aria-label="Sumber soal"
-            className="studio-tabs flex gap-2"
-          >
-            {(["system", "teacher"] as const).map((t) => (
-              <Button
-                key={t}
-                role="tab"
-                aria-selected={tab === t}
-                variant={tab === t ? "default" : "outline"}
-                onClick={() => {
-                  setTab(t);
-                  setCollection("");
-                  setPreview(false);
-                }}
-              >
-                {t === "system" ? "Dari Sistem" : "Soal Saya"}
-              </Button>
-            ))}
-          </div>
           <label className="block">
             <span className="studio-step" aria-hidden>
               2
@@ -158,16 +136,62 @@ export function StartLesson({
               }}
             >
               <option value="">Pilih kumpulan</option>
-              {available.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.document.title}
-                </option>
+              {(["teacher", "system"] as const).map((source) => (
+                <optgroup
+                  key={source}
+                  label={source === "teacher" ? "Soal saya" : "Soal siap pakai"}
+                >
+                  {available
+                    .filter((c) => c.source === source)
+                    .map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.document.title}
+                      </option>
+                    ))}
+                </optgroup>
               ))}
             </select>
           </label>
+          {mode === "assessment" && (
+            <p className="text-sm text-muted-foreground">
+              Pilih soal dengan pilihan jawaban dan kunci. Kartu Nalar dicetak
+              pada halaman asesmen setelah ini.
+            </p>
+          )}
+          {unavailable.length > 0 && (
+            <details className="text-sm">
+              <summary className="min-h-12 cursor-pointer font-semibold text-primary">
+                Soal saya belum muncul? ({unavailable.length})
+              </summary>
+              <ul className="space-y-3">
+                {unavailable.map((c) => (
+                  <li key={c.id} className="rounded-input border p-3">
+                    <b>{c.document.title || "Kumpulan tanpa judul"}</b>
+                    <p>
+                      {c.status !== "ready"
+                        ? "Masih berupa draft. Lengkapi soal lalu simpan sebagai siap digunakan."
+                        : "Soal ini untuk kegiatan interaktif. Asesmen dengan Kartu Nalar memerlukan pilihan jawaban dan kunci."}
+                    </p>
+                    <Link
+                      className="inline-flex min-h-12 items-center font-semibold text-primary underline"
+                      href={
+                        c.document.kind === "cards" || c.status !== "ready"
+                          ? `/guru/soal/${c.id}`
+                          : `/guru/soal/baru?from=${c.id}`
+                      }
+                    >
+                      {c.document.kind === "cards" || c.status !== "ready"
+                        ? "Lengkapi soal"
+                        : "Buat versi untuk Kartu Nalar"}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
           {!available.length && (
             <p>
-              Belum ada kumpulan jenis ini.{" "}
+              Belum ada soal siap digunakan.{" "}
               <Link href="/guru/soal/baru" className="text-primary underline">
                 Buat kumpulan soal
               </Link>

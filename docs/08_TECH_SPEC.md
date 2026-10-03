@@ -212,6 +212,26 @@ Batas: draf/pilot, review, privasi, RLS, token, anggaran, CAS dan idempotensi te
 berlaku. Fixture bukan provider live atau studi pengguna; detail PLAN9.61 dan
 receipt `artifacts/qa/ui-ai-v2/practice-v5.json`.
 
+### 2.3 Addendum alur sederhana, kartu dan reset papan — 3 Oktober 2026
+
+K41 [S instruksi terbaru]: sederhanakan penggunaan guru, perbaiki topik pembuka,
+hapus panduan operator dari UI guru, jelaskan persiapan/cetak kartu, tampilkan
+soal sendiri pada asesmen dan kembali ke daftar setelah simpan; sediakan reset
+papan yang tersangkut. [D] Tiga langkah kelas → soal → mengajar dengan satu
+tindakan mulai sesi; AI serta alat/pengaturan tambahan opsional. Pembuka yang
+sudah terikat sesi diedit melalui salinan atomik, tanpa mengubah histori.
+Checklist lokal mengikuti isi soal, bukan persetujuan reviewer. Kartu dicetak
+sesuai cek; asesmen buatan guru tetap memerlukan pilihan jawaban/kunci, dengan
+salinan pertanyaan interaktif untuk dilengkapi secara eksplisit. SQL040 memberi
+reset hanya pada board anon sendiri, idempotent saat respons hilang; grant,
+kode lama dan mailbox sementara dicabut, data/sesi/hasil guru dipertahankan.
+Reset offline menutup isi di RAM, kemudian mencoba pemutusan/kode baru ketika
+online; tidak me-resume sesi lama selama reset masih tertunda.
+Batas: katalog otomatis tetap draft sampai review isi/uji kelas nyata;
+auth/RLS, privasi, matematika, anggaran dan ledger tetap berlaku. Migration
+hosted, provider live, cetak/perangkat fisik dan studi guru bukan hasil fixture
+lokal. Jurnal PLAN9.62 dan receipt `artifacts/qa/ui-ai-v2/practice-v6.json`.
+
 ## 3. Arsitektur dan dependensi
 
 ### 3.1 Satu aplikasi, modul terpisah [D; memenuhi S0 keputusan 9]

@@ -70,6 +70,12 @@ export function ActivityDisclosure({
 export function openTeacherActivity(id: string) {
   const section = document.getElementById(id);
   if (!(section instanceof HTMLDetailsElement)) return;
+  // A warning or deep link can open a task inside the optional tools drawer.
+  let ancestor = section.parentElement?.closest("details");
+  while (ancestor instanceof HTMLDetailsElement) {
+    ancestor.open = true;
+    ancestor = ancestor.parentElement?.closest("details");
+  }
   if (
     document.querySelector(".practice-journey") &&
     ["teacher-prepare", "teacher-ai", "teacher-teach"].includes(id)

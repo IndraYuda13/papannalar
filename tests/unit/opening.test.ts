@@ -14,6 +14,7 @@ import {
   buildPackage,
   changePackageOpening,
   freezePackage,
+  copyPackageForPreparation,
 } from "../../src/core/package/build";
 import {
   fromPackageRecipe,
@@ -39,6 +40,39 @@ it("a teacher can choose the discussion topic without altering assessment/histor
   expect(() => changePackageOpening(freezePackage(lift), "C3")).toThrow();
   expect(() => changePackageOpening(lift, "E4")).toThrow();
   expect(pkg.opening.prompt).toContain("Rp6.000");
+});
+it("preparing a copy keeps checked math/stories and immutable history, with a new binding that round-trips", () => {
+  const source = freezePackage(
+    changePackageOpening(
+      buildPackage({
+        id: "41000000-0000-4000-8000-000000000001",
+        classId: "41000000-0000-4000-8000-000000000002",
+        grade: 7,
+        variant: "initial",
+        seed: 17,
+        occupied: [],
+      }),
+      "D1",
+    ),
+  );
+  const copy = copyPackageForPreparation(
+    source,
+    "41000000-0000-4000-8000-000000000003",
+  );
+  const next = changePackageOpening(copy, "C3");
+  expect(source.frozen).toBe(true);
+  expect(source.opening.prompt).toContain("basement");
+  expect(copy.frozen).toBe(false);
+  expect(copy.revision).toBe(1);
+  expect(copy.status).toBe("draft");
+  expect(copy.reviewNotice).toBe("NEEDS_REVIEW");
+  expect(next.assessment).toEqual(source.assessment);
+  expect(next.activities).toEqual(source.activities);
+  expect(next.id).not.toBe(source.id);
+  expect(next.contentHash).not.toBe(source.contentHash);
+  expect(fromPackageRecipe(toPackageRecipe(next), false)).toEqual(next);
+  expect(() => copyPackageForPreparation(source, source.id)).toThrow();
+  expect(() => copyPackageForPreparation(source, "invalid")).toThrow();
 });
 it("catalog opening preserves context/objective, SD intuition and oral reflection without a target key", () => {
   const lift = demoOpening(7),

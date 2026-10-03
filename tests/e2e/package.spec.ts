@@ -30,6 +30,14 @@ test("teacher prepares and replaces offline package, reloads its cache and sees 
   context,
 }) => {
   const errors: string[] = [];
+  const failedRequests: { method: string; path: string; error: string }[] = [];
+  page.on("requestfailed", (request) => {
+    failedRequests.push({
+      method: request.method(),
+      path: new URL(request.url()).pathname,
+      error: request.failure()?.errorText ?? "unknown",
+    });
+  });
   page.on("pageerror", () => errors.push("pageerror"));
   page.on("console", (m) => {
     if (m.type() === "error")
@@ -61,16 +69,25 @@ test("teacher prepares and replaces offline package, reloads its cache and sees 
     .getByRole("button", { name: "Ganti soal 1", exact: true })
     .click();
   await expect(question.locator("p").first()).not.toHaveText(original);
+  await page.locator("#practice-tasks > summary").click();
   await page.getByLabel("Materi paket").selectOption("A1");
   await expect(
     page.getByText(/Alat interaktif untuk materi ini belum tersedia/),
   ).toBeVisible();
   await page.reload();
   await chooseTeacherMode(page, "demo");
-  await page.getByText("Tentang materi ini", { exact: true }).click();
+  await page.getByText(/^Tentang materi ini/).click();
   await expect(
-    page.getByText(/Isi soal belum diperiksa.*Versi 3/),
+    page.getByText(/Soal dan kunci dibuat dengan aturan matematika.*Versi 3/),
   ).toBeVisible();
+  await expect(
+    page.getByText(/katalog ini masih menunggu pemeriksaan isi dan uji kelas/),
+  ).toBeVisible();
+  if (errors.length > 0)
+    await test.info().attach("offline-network.json", {
+      body: JSON.stringify(failedRequests),
+      contentType: "application/json",
+    });
   expect(errors).toEqual([]);
   await mkdir("artifacts/qa/M06", { recursive: true });
   await page.screenshot({
@@ -167,6 +184,7 @@ test("static Bisik and printable independent tasks work offline", async ({
     page.getByRole("region", { name: "Bisik statis" }),
   ).toContainText("Pengurangan dari bilangan negatif");
   const download = page.waitForEvent("download");
+  await page.locator("#practice-tasks > summary").click();
   await page
     .getByRole("button", { name: "Unduh tugas mandiri PDF", exact: true })
     .click();

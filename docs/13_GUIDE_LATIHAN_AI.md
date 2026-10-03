@@ -1,42 +1,101 @@
-# Memakai latihan dan bantuan AI
+# Memakai soal, Kartu Nalar dan bantuan AI
 
-Halaman **Latihan & AI** membantu Anda menyiapkan soal, mencoba cerita untuk
-tugas mandiri, lalu menjalankan satu sesi mengajar. Gunakan kelas contoh untuk
-mempelajari alurnya tanpa data siswa nyata.
+Alur utama adalah **pilih kelas → siapkan soal → mulai mengajar**.
+Bantuan AI boleh dilewati.
+Pengaturan kelas, cek lisan, kartu lain dan persiapan offline ada di
+**Alat & pengaturan tambahan**. Peringatan kehilangan/sinkronisasi data
+tetap terlihat dan dapat langsung membuka bagian yang perlu ditangani.
 
-1. Pilih kelas, lalu **Siapkan soal**. Pilih cara memeriksa pemahaman siswa.
-   Cek pertama memakai 10 soal; cek lanjutan memakai hasil yang sudah ada.
-2. **Pertanyaan pembuka diskusi** adalah pertanyaan untuk mengajak siswa
-   berpikir sebelum cek. Jawabannya tidak dinilai. Pilih **Topik pembuka**
-   bila pertanyaan awal kurang sesuai. Jenis cek menentukan cara pemeriksaan,
-   sedangkan topik pembuka menentukan pertanyaan diskusi.
-3. Jika ingin soal cerita, pilih **Tambahkan cerita AI**, topik dan tema.
-   **Buat pilihan cerita** menampilkan perbandingan soal semula dan cerita.
-   Belum ada soal yang berubah pada tahap ini.
-4. Centang cerita yang cocok, lalu **Simpan … soal cerita**. Teks soal tugas
-   mandiri yang dicentang diganti; angka, operasi, jawaban, soal cek dan pembuka
-   tetap. **Lihat tugas dengan cerita tersimpan** membuka soal tersebut.
-   **Unduh tugas mandiri PDF** mencetak tugas pada topik yang sedang dipilih.
-5. Pilih **Coba sesi dengan soal ini**, lalu **Mulai sesi dengan soal ini**.
-   Soal dikunci agar tidak berubah ketika jawaban sedang diperiksa. Buka
-   `/layar` pada TV/proyektor/papan, lalu pindai QR atau masukkan kode di HP.
-   Setelah tersambung, formulir kode menghilang dan kendali layar muncul.
-6. Untuk bantuan menjelaskan, buka langkah 2 dan pilih kesulitan siswa.
-   **Minta saran AI** muncul setelah sesi dimulai. Saran membantu guru
-   menjelaskan; tidak mengubah soal atau pembagian kelompok. Kartu saran tetap
-   dapat dibaca tanpa AI. Pertanyaan yang diketik memerlukan pemeriksaan
-   privasi dan pratinjau tanpa identitas sebelum dapat dikirim.
+## Memakai soal buatan sendiri
 
-**Contoh sesi lengkap dengan jawaban terisi** membuka `/guru/simulasi`. Contoh
-ini memakai 32 siswa kelas 7 dan soal bawaan, untuk mencoba memeriksa tiga
-kartu, membagi kelompok dan menjalankan kegiatan. Ini alur terpisah dari soal
-yang Anda siapkan sendiri; data lama tetap tersedia.
+1. Buka **Soal & Presentasi → Buat kumpulan soal**. Pilih soal dengan Kartu
+   Nalar jika ingin memeriksa jawaban A/B/C/D; pilih interaktif untuk kegiatan
+   dengan alat atau bidang tulis di layar.
+2. Isi pertanyaan. Untuk Kartu Nalar, isi empat pilihan yang berbeda dan
+   tentukan kunci. Klik **Simpan & siap digunakan**: setelah berhasil,
+   aplikasi kembali ke **Soal Saya**. Isian yang belum lengkap disimpan
+   sebagai draft dan tetap terbuka untuk diperbaiki.
+3. Dari beranda, buka **Mulai mengajar**, pilih kelas dan kumpulan soal.
+   Soal sendiri dan soal siap pakai ada di satu pilihan. Sambungkan layar
+   dari halaman sesi setelah dimulai.
+4. Untuk asesmen, buka **Asesmen & Hasil → Buat asesmen**. Kumpulan sendiri
+   yang siap dan memiliki pilihan jawaban serta kunci tersedia di sini.
+   **Soal saya belum muncul?** menjelaskan apa yang perlu dilengkapi.
+   Untuk soal interaktif, **Buat versi untuk Kartu Nalar** menyalin
+   pertanyaan ke kumpulan baru. Isi pilihan dan kunci; kumpulan asli tetap ada.
 
-**Tentang materi ini** menjelaskan bahwa isi soal masih perlu diperiksa
-peninjau materi sebelum digunakan pada kelas sungguhan. Versi hanya mencatat
-perubahan soal. Setelah sesi dimulai, buat latihan baru untuk mengubah soal.
+## Mencoba latihan dengan data contoh
 
-Pengelola menyiapkan konfigurasi server, anggaran dan pemeriksaan materi/privasi
-sesuai [panduan AI](../UI_AI_HANDOFF.md). AI memilih dari cerita yang diizinkan;
-tema suhu dan kedalaman juga perlu diperiksa sebelum diaktifkan. Pengaturan
-yang terisi belum membuktikan bahwa provider berhasil dihubungi.
+1. Klik **Coba dengan data contoh**, lalu **Buka latihan & AI**. Pilih kelas
+   yang sedang dipakai; kelas lainnya ada di **Ganti kelas**.
+2. Klik **Siapkan soal**. Pertanyaan pembuka adalah ajakan berdiskusi sebelum
+   cek dan tidak dinilai. **Topik pembuka** dapat diganti. Pilihan jenis cek
+   dan tugas kelompok tersedia bila dibuka, sehingga tidak perlu mengisi
+   semuanya untuk memulai.
+3. Unduh Kartu Nalar bila cek memakai kartu, lalu klik **Mulai mengajar**.
+   Satu klik membuat sesi dari soal yang sedang disiapkan. Buka `/layar`
+   pada TV/proyektor/papan, lalu pindai QR atau masukkan kode di HP guru.
+   Setelah tersambung, formulir kode ditutup dan kendali layar muncul.
+
+**Lanjutkan sesi** kembali ke sesi yang sedang berjalan. Mengganti topik
+setelah sesi dimulai membuat salinan untuk persiapan berikutnya; soal, jawaban
+dan penilaian sesi lama tetap sama. **Edit salinan soal** tersedia untuk
+menyiapkan perubahan lain tanpa mengubah histori.
+
+**Tentang materi ini** memuat tiga pemeriksaan yang bisa dicentang guru:
+soal/jawaban, bahasa/tingkat kesulitan, serta tugas cetak/alat. Catatan tersimpan
+lokal dan perlu diulang jika isi berubah. Centang guru bukan persetujuan
+peninjau materi. Katalog latihan otomatis masih memerlukan review isi dan
+uji kelas sebelum digunakan pada kelas sungguhan; versi mencatat perubahan,
+tanpa menyatakan bahwa materi sudah disahkan. Untuk kelas sendiri, gunakan
+kumpulan soal yang Anda siapkan melalui **Mulai mengajar**.
+
+## Mencetak Kartu Nalar
+
+Kartu Nalar adalah **lembar jawaban**, berisi nomor absen serta pilihan
+A/B/C/D/?. Pertanyaan ditampilkan guru; kartu tidak memuat nama siswa.
+
+- Latihan otomatis: tombol **Unduh Kartu Nalar** ada di persiapan dan sesi,
+  sebelum pemindai. Jenis kartu mengikuti cek: 10 baris untuk cek pertama,
+  5 baris untuk cek lanjutan atau cek singkat. Cek lisan tidak memerlukan kartu.
+- Cek akhir dengan kartu: unduh kartu 3 baris pada bagian cek akhir sesi.
+- Asesmen dari kumpulan buatan sendiri: pilih **Cetak kartu asesmen** pada
+  halaman asesmen/sesi. PDF mengikuti jumlah soal, 1–5 baris, dan terikat ke
+  asesmen tersebut.
+
+Cetak PDF pada kertas **A4, ukuran asli/100%, hitam putih**, lalu potong.
+Bagikan satu kartu per siswa. Cek pertama memuat dua kartu per lembar; kartu
+lanjutan dan cek akhir memuat empat. Pada latihan otomatis, aplikasi
+menghitung jumlah lembar dari jumlah siswa. Contoh: 32 siswa memerlukan
+16 lembar untuk cek pertama; asesmen buatan sendiri memerlukan delapan.
+**Unduh tugas mandiri PDF** pada **Tugas kelompok & cetak tugas mandiri**
+berisi pertanyaan untuk dikerjakan, berbeda dari lembar jawaban Kartu Nalar.
+
+## Memakai bantuan AI bila perlu
+
+1. Buka **Cerita & bantuan mengajar (opsional)** atau **Tambahkan cerita AI**.
+   Pilih topik dan tema, lalu **Buat pilihan cerita**. Anda melihat soal
+   semula dan pilihan cerita; belum ada soal yang berubah.
+2. Centang cerita yang cocok, lalu **Simpan … soal cerita**. Teks tugas mandiri
+   yang dipilih berubah; angka, operasi, jawaban, soal cek dan pembuka tetap.
+   **Lihat tugas dengan cerita tersimpan** membuka tugas tersebut.
+3. Setelah sesi dimulai, **Minta saran AI** tersedia pada bantuan menjelaskan.
+   Pilih kesulitan siswa; saran membantu guru menjelaskan tanpa mengubah
+   penilaian atau kelompok. Kartu saran statis tetap tersedia tanpa AI.
+   Teks bebas memerlukan pratinjau privasi tanpa identitas sebelum dikirim.
+
+Pengaturan endpoint/model/kunci dan anggaran berada di server sesuai
+[panduan pengelola](../UI_AI_HANDOFF.md). Data contoh memakai pengaturan yang
+sama. Status konfigurasi tidak membuktikan keberhasilan provider live.
+
+## Melepaskan papan dari sesi lama
+
+Di `/layar`, buka **Menu papan → Reset sesi di papan**. Soal dan goresan
+ditutup di papan itu, sambungan lama dicabut, lalu kode baru muncul. Sesi,
+kumpulan soal dan hasil belajar di HP guru tetap tersimpan. Saat offline,
+papan langsung dikosongkan; pemutusan dan pembuatan kode menunggu internet
+dan dicoba otomatis saat tersambung lagi, termasuk setelah memuat ulang.
+
+**Contoh sesi lengkap dengan jawaban terisi** tetap tersedia di `/guru/simulasi`.
+Contoh 32 siswa ini dipakai untuk mempelajari pemindaian, kelompok dan kegiatan;
+sesi yang Anda siapkan sendiri tetap terpisah.

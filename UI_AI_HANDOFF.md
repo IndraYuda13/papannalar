@@ -1,3 +1,161 @@
+<!-- BEGIN PRACTICE_V6 -->
+
+## Alur guru, soal sendiri, cetak kartu dan reset papan — 3 Oktober 2026
+
+Baseline `c2a0593`. Perubahan terbaru pengguna dikerjakan pada aplikasi existing;
+M00–M17, jurnal lama, data dan aset dipertahankan. Commit/push dicatat setelah
+hasil aktual tersedia; bagian setelah marker END PRACTICE_V6 adalah historis.
+
+| Halaman/bagian                | Sebelum                                                                   | Sesudah                                                                                                                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/guru/latihan`               | Memilih jenis paket, AI dan banyak alat sebelum tahu langkah berikutnya   | **Kelas → Soal → Mengajar**. **Siapkan soal**, lalu **Mulai mengajar** satu klik; AI opsional                                                                                 |
+| Kelas/alat tambahan           | Daftar kelas, cek lisan, kartu dan pengaturan menambah panjang alur utama | Kelas terpilih tampil; **Ganti kelas** dan **Alat & pengaturan tambahan** dibuka sesuai kebutuhan. Peringatan kehilangan/sinkronisasi data tetap langsung terlihat            |
+| Topik pembuka                 | Dropdown tidak dapat diubah setelah soal terikat sesi                     | Bisa diubah; transaksi membuat salinan persiapan baru dan menjaga soal/jawaban sesi lama                                                                                      |
+| Tentang materi ini            | Hanya peringatan materi belum diperiksa                                   | Tiga pemeriksaan persiapan guru tersimpan lokal; reset bila isi berubah. Tidak mengubah status review atau kelayakan AI/pilot                                                 |
+| Bantuan AI                    | Panduan endpoint/kunci server berada pada UI guru                         | Panduan pengelola dihapus dari UI. Cerita dan saran tetap opsional dengan hasil yang dijelaskan                                                                               |
+| `/guru/soal/baru` dan editor  | Simpan siap tetap berada di editor                                        | Setelah penyimpanan sukses, kembali ke **Soal Saya** dengan pemberitahuan. Draft/gagal simpan tetap terbuka, isian utuh                                                       |
+| `/guru/mulai?mode=assessment` | Sumber bawaan menyembunyikan soal buatan sendiri                          | Soal sendiri dan siap pakai tersedia dalam satu pilihan; alasan draft/interaktif belum tersedia dijelaskan. Pertanyaan interaktif bisa disalin untuk dilengkapi pilihan/kunci |
+| Cetak                         | Guru harus mencari alat dan menentukan jenis kartu sendiri                | Tombol pada persiapan/sesi mengikuti cek 10/5 baris; cek akhir 3 baris; cek lisan tanpa kartu. **Cetak kartu asesmen** tetap terikat ke 1–5 soal buatan guru                  |
+| `/layar`                      | Board dapat tersangkut pada grant/sesi lama                               | **Menu papan → Reset sesi di papan** mencabut sambungan/kode board sendiri dan membuat kode baru; histori guru tetap ada                                                      |
+| Offline                       | Membuka pengaturan dapat memicu prefetch `/guru/kelas`                    | Link tugas cloud tidak memuat RSC di latar; soal/jawaban lokal tetap tersedia                                                                                                 |
+
+Untuk soal sendiri: **Soal & Presentasi → Buat kumpulan soal → Simpan & siap
+digunakan → Soal Saya**. Untuk asesmen, pilih kumpulan **Kartu Nalar** yang siap
+pada **Asesmen & Hasil → Buat asesmen**. Soal interaktif tetap dapat dipakai
+untuk mengajar; asesmen A/B/C/D membutuhkan empat pilihan serta kunci.
+**Soal saya belum muncul?** menyediakan langkah memperbaiki draft atau membuat
+salinan kartu. Kumpulan asli dan asesmen/sesi sebelumnya dipertahankan.
+
+Untuk latihan contoh: **Coba dengan data contoh → Buka latihan & AI → pilih
+kelas → Siapkan soal → unduh kartu bila perlu → Mulai mengajar → sambungkan
+layar**. **Lanjutkan sesi** memakai sesi berjalan. AI tidak diperlukan untuk
+memulai. [Panduan guru dan cetak kartu](docs/13_GUIDE_LATIHAN_AI.md).
+
+Kartu adalah lembar jawaban; pertanyaan ditampilkan guru. Unduh PDF dari
+persiapan/sesi atau **Cetak kartu asesmen**, cetak **A4, 100%/ukuran asli,
+hitam putih**, potong dan bagikan satu per siswa. Cek pertama dua kartu per
+lembar; cek lanjutan/akhir dan asesmen buatan sendiri empat. Untuk 32 siswa,
+cek pertama 16 lembar; asesmen buatan sendiri delapan. PDF tugas mandiri
+berisi soal dan memiliki tombol tersendiri.
+
+### Bukti lokal dan batas hasil
+
+`VITEST_MAX_WORKERS=1 pnpm verify` meluluskan format/types/lint, **1094 unit/72
+file** (coverage statement92,48%, branch87,52%, function96,28%, line93,46%),
+**306 assertion SQL/RLS + 116 guard SQL yang dilaporkan runner**, **9 integrasi
+native HTTP + PostgreSQL**, serta build `3TvfUjUWe6ispWe_i65K2`. Browser lengkap
+memberi **143 PASS/4 FAIL**, 20m21,153s, 1 worker/retry0/skip0; command exit1.
+Riwayat ini tetap FAIL. Attempt sebelumnya dihentikan exit130 saat unit untuk
+memperbaiki lima kalimat langkah yang sudah usang; bukan full PASS.
+
+Dua kegagalan adalah ekspektasi tes: panel `teacher-extras` perlu masuk
+allowlist identitas/mode yang terbatas; grant yang ditutup memang mengembalikan
+FORBIDDEN pada snapshot/heartbeat/channel/ACK. Status403, isi error, pesan
+sambungan berakhir serta konsol tanpa error lain tetap diperiksa. Promise
+assertion ditampung sampai pemeriksaan akhir, sehingga tidak menjadi rejection
+tak tertangani. Batas jumlah/jenis storage, HttpOnly, logout, RLS dan privasi
+tidak dilemahkan.
+
+Dua kegagalan offline direproduksi. Diagnostic aman merekam metode/path/error
+saja; keduanya menunjuk prefetch GET `/guru/kelas` saat drawer dibuka. Link ini
+serta dua pintu masuk `/guru/mulai` memakai `prefetch={false}` sesuai dokumentasi
+Next16.3.6. Reload/penyimpanan offline diuji kembali dengan assertion konsol nol.
+
+Gate serial sesudah perbaikan **PASS, exit0**: format/types/lint/build
+`RQ1nEXwZvQDcxTfNo93tJ` dan **44/44 E2E**, 4,7 menit, 1 worker/retry0:
+
+```bash
+pnpm format:check && pnpm typecheck && pnpm lint && pnpm build && pnpm exec playwright test tests/e2e/auth-ownership.spec.ts tests/e2e/freshclass.spec.ts tests/e2e/oral.spec.ts tests/e2e/package.spec.ts tests/e2e/offline.spec.ts tests/e2e/privacy-storage.spec.ts tests/e2e/practice-v5.spec.ts tests/e2e/practice-v6.spec.ts tests/e2e/teacher-flow-v4.spec.ts tests/e2e/sync.spec.ts --reporter=list
+```
+
+Audit gambar terakhir menyederhanakan satu pesan konfirmasi menjadi “Latihan
+tersimpan di perangkat ini.”, tanpa instruksi posisi/tindakan yang berulang.
+**589/590 input tetap identik** terhadap gate44; satu perubahan hanya literal
+pada `package-workspace.tsx`. Final gate serial kandidat
+**`ITd3O0CNAChqrrInootDA`, PASS exit0**: format/types/lint/build dan **3/3 E2E**
+24,9s, cek penyimpanan/reload offline serta mulai satu klik/copy histori pada
+360/390px:
+
+```bash
+pnpm format:check && pnpm typecheck && pnpm lint && pnpm build && pnpm exec playwright test tests/e2e/package.spec.ts tests/e2e/practice-v6.spec.ts -g 'EASY01|teacher prepares and replaces' --reporter=list
+```
+
+Semua **147 skenario unik tercakup lintas full-run dan regresi**: empat kasus
+gagal sebelumnya ada dalam gate44 yang lulus. Tidak diklaim full147/147 PASS
+pada kandidat terakhir; receipt memisahkan tiap command/build/hasil.
+
+Hash final **4172efa3fa27d35ca0130be2112029005589b84c48f038c0b5893ab1e3ea13b5**, 590 input. Terhadap full verify, **583 input
+identik**; perubahan hanya dua komponen Link, satu pesan konfirmasi dan empat
+file tes browser.
+Matematika, generator, copy/checklist/reset, provider, ledger, auth dan SQL yang
+sudah lulus tetap identik. Final gate meliputi semua empat kasus gagal dan
+regresi alur/AI, authoring, cetak, offline, tenant, reset, sync serta privasi;
+tidak menduplikasi full unit/SQL/native/full147 yang sudah tercakup verify.
+
+Audit produksi akhir pada kandidat `ITd3O0CNAChqrrInootDA`: **15 capture/state**
+di 360/390/1366px dan font20px, **overflow horizontal0/pageerror0**. Gambar
+persiapan, soal sendiri/list/asesmen dan reset diperiksa. Dua PDF asli diunduh
+dan diekstrak `pdftotext`; kartu awal berisi Cek Awal, kartu asesmen buatan guru
+memiliki baris tidak dipakai yang dikosongkan. Pencetakan fisik NOT_RUN.
+Screenshot sintetis lokal tidak di-commit. Full-page capture dapat menempatkan
+elemen fixed di tengah gambar; skiplink pada viewport390 sebenarnya tersembunyi
+sebelum fokus. Tidak mengubah aksesibilitas karena artefak capture.
+
+Aset/dependency/lockfile tidak ditambah. GLB/poster/Blender existing tetap;
+Three terpisah dan opsional, **154310 byte gzip**, di bawah batas250000 dan tidak
+masuk precache offline; poster tetap dicache. Paid API **USD0**, biaya cloud
+bukan hasil pengukuran. OpenAI-compatible Chat Completions dan
+Anthropic-compatible Messages diuji pada native HTTP fixture + ledger/RLS
+PostgreSQL lokal, **bukan provider live**. Model aplikasi tetap konfigurabel;
+model coding bukan default aplikasi.
+
+Preservation: **181 file domain/keamanan/aset**, **39 migration existing**, **8 dokumen asli**, **18 receipt lama**, prefix jurnal dan tail handoff lama **identik/PASS**. Perubahan core hanya helper copy persiapan dan
+transaksi repository tambahan; penilaian, replay, frozen binding dan data lama
+utuh. Bukti [practice-v6.json](artifacts/qa/ui-ai-v2/practice-v6.json).
+
+### Kebutuhan operator/perangkat (dicatat sekali untuk run ini)
+
+Untuk live AI, operator perlu `LLM_ENABLED`, `LLM_GATEWAY_TOKEN` dan profil
+server lengkap: `AI_PROTOCOL`, `AI_API_BASE_URL`, `AI_ALLOWED_ORIGINS`,
+`AI_API_KEY`, `AI_MODEL`, `AI_PROFILE_ID`, `AI_CONFIG_VERSION`, batas
+`AI_MAX_INPUT_TOKENS`/`AI_MAX_OUTPUT_TOKENS` serta auth/JSON mode yang sesuai
+provider. DB harus memiliki profil harga/anggaran yang cocok, review konten
+sesuai hash dan review privasi teks bebas. Tidak ada binding credential live dalam lingkungan
+ini; konfigurasi valid tidak menjadi bukti sukses provider. Review pedagogi,
+studi guru, QR HTTPS/kamera HP, sentuh fisik dan pencetakan printer **NOT_RUN**.
+Checklist persiapan lokal tidak mengesahkan materi; katalog otomatis masih
+memerlukan pemeriksaan isi/uji kelas untuk penggunaan sungguhan.
+
+SQL040 **hanya dijalankan pada DB loopback55432**, tidak pada hosted. Untuk
+rilis reset papan, operator perlu menerapkan
+[`202610030040_board_reset.sql`](supabase/migrations/202610030040_board_reset.sql)
+melalui rollout yang berizin setelah backup `presentations/pairings/remote_tools`
+dan review RLS. Rollback: cabut grant aktif lalu pulihkan
+`presentation_action_before_board_reset` sebagai `presentation_action`, pertahankan
+receipt reset sampai retry kedaluwarsa. Reset menyimpan UUID permintaan lokal,
+menutup watcher/ACK serta RAM board, lalu menunggu internet sebelum resume/kode
+baru. Retry respons hilang idempotent dan tidak mencabut sambungan baru. Bila
+browser menolak localStorage, reset masih bekerja dalam RAM tetapi intent
+offline tidak bertahan melewati reload. Sesi/hasil guru tidak dihapus.
+Deployment/hosted migration/paid API tidak dijalankan; CI setelah push belum
+diperiksa.
+
+### Jalankan kandidat ini
+
+```bash
+cd /workspace/papannalar
+source /workspace/.papannalar-cloud/activate.sh
+pnpm build
+pnpm video
+```
+
+Buka `http://127.0.0.1:3100/masuk` dan `/layar` di tab lain. `pnpm video` memakai
+Auth/transport fixture loopback54325 dan PostgreSQL lokal55432; LLM dinonaktifkan
+oleh activation, kartu saran statis tetap dapat dicoba. Ctrl+C menghentikan demo.
+Pada checkout lain, `pnpm install --frozen-lockfile` dengan Node24.14.1/pnpm11.19.0;
+ikuti [setup lokal](docs/09_LOCAL_HANDOFF.md) dan [VIDEO_HANDOFF](VIDEO_HANDOFF.md).
+
+<!-- END PRACTICE_V6 -->
 <!-- BEGIN PRACTICE_V5 -->
 
 ## Alur latihan, cerita AI dan sambungan layar — 3 Oktober 2026 (WIB)

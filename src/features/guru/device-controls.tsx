@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { LocalScope } from "@/local/scope";
 import type { ClassDto } from "@/contracts/classes";
 import { Button } from "@/ui/components/button";
@@ -10,9 +10,11 @@ import { StorageStatus } from "./storage-status";
 export function DeviceControls({
   scope,
   classroom,
+  children,
 }: {
   scope: LocalScope;
   classroom?: ClassDto;
+  children?: ReactNode;
 }) {
   const [storageAttention, setStorageAttention] = useState("");
   const [syncAttention, setSyncAttention] = useState("");
@@ -33,17 +35,25 @@ export function DeviceControls({
         </div>
       )}
       <ActivityDisclosure
-        id="teacher-device"
-        title="Penyimpanan & internet"
-        description="Buka jika perlu menyimpan untuk offline atau memulihkan jawaban."
+        id="teacher-extras"
+        title="Alat & pengaturan tambahan"
+        description="Kelola kelas, cek lisan, kartu lain dan persiapan offline."
         scope={scope}
       >
-        <SyncControls
+        {children}
+        <ActivityDisclosure
+          id="teacher-device"
+          title="Penyimpanan & internet"
+          description="Buka jika perlu menyimpan untuk offline atau memulihkan jawaban."
           scope={scope}
-          classroom={classroom}
-          onAttention={setSyncAttention}
-        />
-        <StorageStatus scope={scope} onAttention={setStorageAttention} />
+        >
+          <SyncControls
+            scope={scope}
+            classroom={classroom}
+            onAttention={setSyncAttention}
+          />
+          <StorageStatus scope={scope} onAttention={setStorageAttention} />
+        </ActivityDisclosure>
       </ActivityDisclosure>
     </>
   );

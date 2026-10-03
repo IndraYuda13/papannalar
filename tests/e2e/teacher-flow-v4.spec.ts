@@ -149,6 +149,7 @@ for (const width of [360, 390])
     ).toBeHidden();
     await page.locator("#teacher-prepare > summary").click();
     await expect(page.locator("#teacher-prepare")).toContainText("Versi 2");
+    await page.getByText("Ganti kelas", { exact: true }).click();
     await page.getByRole("button", { name: /Buka kelas 7C/ }).click();
     await expect(
       page.getByRole("button", { name: "Siapkan latihan dahulu", exact: true }),
@@ -156,13 +157,11 @@ for (const width of [360, 390])
     await expect(
       page.getByRole("button", { name: "Buat pilihan cerita", exact: true }),
     ).toHaveCount(0);
+    await page.getByText("Ganti kelas", { exact: true }).click();
     await page.getByRole("button", { name: /Buka kelas 7B/ }).click();
     await expect(page.locator("#teacher-prepare")).toContainText("Versi 2");
     await page
-      .getByRole("button", { name: "Coba sesi dengan soal ini", exact: true })
-      .click();
-    await page
-      .getByRole("button", { name: "Mulai sesi dengan soal ini", exact: true })
+      .getByRole("button", { name: "Mulai mengajar", exact: true })
       .click();
     const cycle = page.getByRole("region", {
       name: "Siklus kelas",
@@ -254,6 +253,7 @@ test("FLOW02 empty pages offer a next action; personal and example classes remai
   await expect(
     page.getByRole("button", { name: /Buka kelas 7UX/ }),
   ).toHaveAttribute("aria-pressed", "true");
+  await page.locator("#teacher-extras > summary").click();
   await page.locator("#teacher-class > summary").click();
   await expect(page.getByLabel("Daftar absen")).toContainText("Absen 1");
   await page.locator("#teacher-device > summary").click();
@@ -408,7 +408,10 @@ test("FLOW03 AI status never claims tested readiness; changing source clears the
   await expect(
     page.getByRole("button", { name: /^Mulai sesi$|^Lanjutkan sesi$/ }),
   ).toBeEnabled();
-  await page.getByRole("tab", { name: "Soal Saya", exact: true }).click();
+  await expect(page.getByRole("tablist", { name: "Sumber soal" })).toHaveCount(
+    0,
+  );
+  await collection.selectOption("");
   await expect(collection).toHaveValue("");
   await expect(
     page.getByRole("button", { name: "Mulai sesi", exact: true }),

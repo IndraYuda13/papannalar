@@ -43,6 +43,9 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
   browser,
 }) => {
   test.setTimeout(240000);
+  let classClosing = false;
+  const terminalBoardRequests: Promise<void>[] = [];
+  const terminalBoardErrors: unknown[] = [];
   page.on("response", async (response) => {
     if (response.request().method() !== "POST") {
       if (response.status() >= 400)
@@ -103,6 +106,31 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
         action: `board:${new URL(response.url()).pathname}`,
         status: response.status(),
       });
+    if (
+      response.status() === 403 &&
+      new URL(response.url()).pathname === "/api/v1/board/pairing"
+    )
+      terminalBoardRequests.push(
+        (async () => {
+          // SQL034 deliberately denies a closed session. Verify that boundary
+          // instead of treating its browser resource message as a runtime bug.
+          expect(classClosing).toBe(true);
+          expect(response.request().postDataJSON()?.action).toMatch(
+            /^(snapshot|heartbeat|channel|ack)$/,
+          );
+          expect(await response.json()).toMatchObject({
+            error: { code: "FORBIDDEN" },
+          });
+          await expect(
+            board.getByText(
+              "Sambungan berakhir. Buat kode baru untuk sesi berikutnya.",
+              { exact: true },
+            ),
+          ).toBeVisible();
+        })().catch((error: unknown) => {
+          terminalBoardErrors.push(error);
+        }),
+      );
   });
   board.on("console", (m) => {
     if (m.type() === "error")
@@ -347,6 +375,7 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
   await expect(
     board.getByText("Hari ini aku belajar …", { exact: true }),
   ).toBeVisible();
+  classClosing = true;
   await cycle.getByRole("button", { name: "Tutup kelas", exact: true }).click();
   await expect(cycle.getByTestId("cycle-status")).toContainText(
     "kelas ditutup · penilaian belum disimpan",
@@ -370,11 +399,18 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
     "penilaian tersimpan",
   );
   await expect(cycle.getByTestId("cycle-scan-count")).toContainText("31/32");
+  await pkg.getByText("Siapkan soal lain", { exact: true }).click();
   await pkg.getByLabel("Jenis paket", { exact: true }).selectOption("weekly");
   await pkg
     .getByRole("button", { name: "Buat latihan baru", exact: true })
     .click();
   await expect(pkg).toContainText("Soal cek pemahaman (5)");
+  await expect(
+    pkg.getByRole("button", {
+      name: "Unduh Kartu Nalar · 5 baris",
+      exact: true,
+    }),
+  ).toBeVisible();
   await cycle
     .getByRole("button", {
       name: "Mulai sesi berikutnya",
@@ -387,7 +423,14 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
     "artifacts/qa/M10/freshclass-commands.json",
     JSON.stringify(commands, null, 2),
   );
-  expect(errors).toEqual([]);
+  await Promise.all(terminalBoardRequests);
+  if (terminalBoardErrors.length > 0) throw terminalBoardErrors[0];
+  expect(errors).toEqual(
+    terminalBoardRequests.map(
+      () =>
+        "board-console:Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    ),
+  );
   await writeFile(
     "artifacts/qa/M10/freshclass-browser.json",
     JSON.stringify(
@@ -403,6 +446,7 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
         lateExitAfterClosure: 1,
         logicalSessions: 2,
         runtimeErrors: 0,
+        verifiedClosedSessionDenials: terminalBoardRequests.length,
         physical: "NOT_RUN",
       },
       null,

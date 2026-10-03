@@ -508,7 +508,13 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
   await expect(page.getByRole("status")).toContainText(
     "Kumpulan tersimpan dan siap digunakan",
   );
-  const setId = new URL(page.url()).pathname.split("/").at(-1)!;
+  await expect(page).toHaveURL(/\/guru\/soal\?tab=teacher&saved=/);
+  const setId = new URL(page.url()).searchParams.get("saved")!;
+  expect(setId).toMatch(/^[a-f0-9-]{36}$/);
+  await expect(
+    page.getByRole("tab", { name: "Soal Saya", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
+  await page.goto(`/guru/soal/${setId}`);
   await page.reload();
   await expect(page.getByLabel("Nama kumpulan", { exact: true })).toHaveValue(
     title,
@@ -677,6 +683,10 @@ test("U10 teacher creates real interactive/writing collection and preview retain
   await expect(page.getByRole("status")).toContainText(
     "Kumpulan tersimpan dan siap digunakan",
   );
+  await expect(page).toHaveURL(/\/guru\/soal\?tab=teacher&saved=/);
+  const createdId = new URL(page.url()).searchParams.get("saved")!;
+  await page.goto(`/guru/soal/${createdId}`);
+  await page.getByRole("button", { name: /^Soal 2/ }).click();
   await page
     .getByRole("button", { name: "Preview soal 2", exact: true })
     .click();

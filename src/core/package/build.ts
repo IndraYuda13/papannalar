@@ -259,6 +259,16 @@ export function freezePackage(pkg: TeacherPackage): TeacherPackage {
   return rehash({ ...pkg, frozen: true });
 }
 
+/** A new preparation keeps the questions/stories; historical bindings stay frozen. */
+export function copyPackageForPreparation(
+  pkg: TeacherPackage,
+  newId: string,
+): TeacherPackage {
+  randomId(newId);
+  if (newId === pkg.id) throw new Error("A copy needs a new package identity");
+  return rehash({ ...pkg, id: newId, revision: 1, frozen: false });
+}
+
 export function changePackageOpening(
   pkg: TeacherPackage,
   stepId: StepId,

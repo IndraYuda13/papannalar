@@ -1,0 +1,1083 @@
+{
+  "task": "PRACTICE_V6: simple teacher journey, usable cards, own assessment questions and board reset",
+  "recordedAt": "2026-10-03 17:09:42 UTC",
+  "implementationStatus": "COMPLETE_LOCALLY",
+  "baselineCommit": "c2a0593adfb73c8d683340b8ac588cd8309e112f",
+  "source": {
+    "sha256": "4172efa3fa27d35ca0130be2112029005589b84c48f038c0b5893ab1e3ea13b5",
+    "fileCount": 590,
+    "algorithm": "SHA256 of sorted unique tracked/unignored source/build/config/test/asset paths joined as path + NUL + fileSHA256 + newline. Includes src/scripts/tests/supabase/public/design/config, package/lock/Next/TS/Vitest/Playwright/ESLint/CI config. Excludes docs, receipts and generated/ignored files."
+  },
+  "publication": {
+    "authorization": "User requested commit and push; no PR requested",
+    "branch": "work",
+    "target": "origin/main",
+    "status": "READY_TO_COMMIT_AND_PUSH",
+    "deployment": "NOT_RUN",
+    "ciAfterPush": "NOT_CHECKED"
+  },
+  "environment": {
+    "cwd": "/workspace/papannalar",
+    "runtime": "Managed cloud, existing activation /workspace/.papannalar-cloud/activate.sh",
+    "node": "24.14.1",
+    "pnpm": "11.19.0",
+    "next": "16.3.6",
+    "postgresql": "17.11, real local SQL/RLS, loopback 55432 pn_m01c_test",
+    "browser": "Playwright Chromium 153, one worker/retry0",
+    "authTransport": "Synthetic PKCE/Auth/Realtime loopback54325; real tenant/RPC PostgreSQL",
+    "normalBrowserLLM": "disabled; fixture/static UI does not prove paid/live success"
+  },
+  "beforeAfter": [
+    {
+      "page": "/guru/latihan",
+      "before": "Many simultaneous panels and package/AI/manual-session steps",
+      "after": "Class → prepared questions → one-click teaching; AI optional; selected class and optional tools"
+    },
+    {
+      "page": "/guru/latihan: opening",
+      "before": "Frozen topic dropdown disabled",
+      "after": "Atomic new editable preparation copy; original frozen session contents and history preserved"
+    },
+    {
+      "page": "/guru/latihan: material",
+      "before": "Passive draft disclaimer",
+      "after": "Three local preparation checks bound to actual content; does not grant human content/privacy/pilot approval"
+    },
+    {
+      "page": "Teacher AI panel",
+      "before": "Server/config GitHub guide mixed with teacher tasks",
+      "after": "Operator guide removed; optional story/coaching use described; existing provider/config/ledger/budget/privacy retained"
+    },
+    {
+      "page": "/guru/soal/baru and existing editor",
+      "before": "Ready save stays in editor",
+      "after": "Successful ready save redirects to own list and shows confirmation; invalid draft or failed persistence retains editor/data"
+    },
+    {
+      "page": "/guru/mulai?mode=assessment",
+      "before": "Default source filter hides teacher collections",
+      "after": "Own ready cards and system sets in one selector; draft/interactive reasons and explicit card-copy path"
+    },
+    {
+      "page": "Preparation/cycle/exit and own assessment",
+      "before": "Print entry not contextual to actual check",
+      "after": "Correct 10/5/3-row generic card downloads, no-card oral check; own assessment keeps immutable 1–5-row custom-card PDF"
+    },
+    {
+      "page": "/layar",
+      "before": "No board-owned escape from stale grant/session",
+      "after": "Menu reset clears only own board state/grants/old code; fresh code after successful server reset, durable offline intent and lost-response idempotency"
+    },
+    {
+      "page": "Optional class controls offline",
+      "before": "Next Link prefetch sends background GET /guru/kelas when opened",
+      "after": "Prefetch disabled for class list and two cloud session links; actual offline reload/data test zero console errors"
+    }
+  ],
+  "acceptance": {
+    "guidedPreparationAndOneClick": "PASS EASY01 360/390 and FLOW04, correct package/session/roster + old history retained",
+    "contentReadinessNotApproval": "PASS EASY02 + package-preparation unit, local checks persist offline and reset on contents",
+    "oralNoCards": "PASS EASY03, real package no assessment rows and no print action",
+    "authoringAndAssessment": "PASS AUTHOR, actual PostgreSQL save+ready response, redirect+own selection+run+download; invalid interactive URL blocked, source copy exact original; save503 retains input",
+    "boardRecovery": "PASS RESET response loss and offline/reload, real grant revoke/new pair, RAM ink cleared, old response idempotent; 16 board reset SQL assertions PASS",
+    "legacyDataAndSecurity": "PASS freshclass32 real synthetic-photo OMR, late exit/finalization/next session, tenant/auth/CSRF/HttpOnly/storage/canary and sync regression"
+  },
+  "verification": {
+    "initialTargetedBrowser": [
+      {
+        "log": "practice-v6-target-browser.log",
+        "passed": 7,
+        "failed": 8,
+        "duration": "2.6m",
+        "status": "FAIL",
+        "exitCode": 1
+      },
+      {
+        "log": "practice-v6-target-browser2.log",
+        "passed": 12,
+        "failed": 2,
+        "duration": "2.2m",
+        "status": "FAIL",
+        "exitCode": 1
+      },
+      {
+        "log": "practice-v6-target-browser3.log",
+        "passed": 9,
+        "failed": 4,
+        "duration": "5.4m",
+        "status": "FAIL",
+        "exitCode": 1
+      },
+      {
+        "log": "practice-v6-target-browser4.log",
+        "passed": 2,
+        "failed": 1,
+        "duration": "32.3s",
+        "status": "FAIL",
+        "exitCode": 1
+      },
+      {
+        "log": "practice-v6-target-browser5.log",
+        "passed": 2,
+        "failed": 0,
+        "duration": "1.5m",
+        "status": "PASS",
+        "exitCode": 0
+      },
+      {
+        "log": "practice-v6-target-browser6.log",
+        "passed": 1,
+        "failed": 0,
+        "duration": "1.4m",
+        "status": "PASS",
+        "exitCode": 0
+      },
+      {
+        "log": "practice-v6-target-browser7.log",
+        "passed": 0,
+        "failed": 0,
+        "duration": null,
+        "status": "NOT_RUN",
+        "exitCode": 1
+      },
+      {
+        "log": "practice-v6-target-browser8.log",
+        "passed": 3,
+        "failed": 0,
+        "duration": "20.2s",
+        "status": "PASS",
+        "exitCode": 0
+      },
+      {
+        "log": "practice-v6-target-browser9.log",
+        "passed": 18,
+        "failed": 0,
+        "duration": "1.9m",
+        "status": "PASS",
+        "exitCode": 0
+      }
+    ],
+    "earlyFullAttempt": {
+      "command": "VITEST_MAX_WORKERS=1 pnpm verify",
+      "status": "INTERRUPTED",
+      "exitCode": 130,
+      "reason": "Stopped during units for five outdated numbered-step strings; remaining stages NOT_RUN on that attempt",
+      "log": "practice-v6-final-verify-interrupted.log"
+    },
+    "completedFullVerify": {
+      "command": "VITEST_MAX_WORKERS=1 pnpm verify",
+      "exitCode": 1,
+      "status": "FAIL",
+      "format": "PASS",
+      "types": "PASS",
+      "lint": "PASS",
+      "unit": {
+        "passed": 1094,
+        "failed": 0,
+        "files": 72,
+        "durationSeconds": 197.45,
+        "coveragePercent": {
+          "statements": 92.48,
+          "branches": 87.52,
+          "functions": 96.28,
+          "lines": 93.46
+        }
+      },
+      "sql": {
+        "assertions": {
+          "count": 306,
+          "batches": [
+            {
+              "count": 34,
+              "reported": "PASS 34 real PostgreSQL ownership/security assertions"
+            },
+            {
+              "count": 23,
+              "reported": "23 library SQL assertions PASS"
+            },
+            {
+              "count": 15,
+              "reported": "15 video connection SQL assertions PASS"
+            },
+            {
+              "count": 16,
+              "reported": "16 board reset SQL assertions PASS"
+            },
+            {
+              "count": 35,
+              "reported": "PASS pairing/Realtime SQL assertions: 35"
+            },
+            {
+              "count": 15,
+              "reported": "PASS 15 guidance SQL assertions"
+            },
+            {
+              "count": 32,
+              "reported": "PASS 32 board capability/remote SQL assertions"
+            },
+            {
+              "count": 27,
+              "reported": "PASS 27 LLM budget/privacy SQL assertions"
+            },
+            {
+              "count": 28,
+              "reported": "PASS 28 dual-protocol profile/ledger SQL assertions"
+            },
+            {
+              "count": 35,
+              "reported": "PASS 35 board content SQL assertions"
+            },
+            {
+              "count": 25,
+              "reported": "PASS 25 sync SQL assertions"
+            },
+            {
+              "count": 12,
+              "reported": "PASS 12 writer SQL assertions"
+            },
+            {
+              "count": 9,
+              "reported": "PASS 9 history SQL assertions"
+            }
+          ]
+        },
+        "guards": {
+          "count": 116,
+          "batches": [
+            {
+              "count": 11,
+              "reported": "PASS 11 station/role SQL guards"
+            },
+            {
+              "count": 22,
+              "reported": "PASS 22 public tool SQL guards"
+            },
+            {
+              "count": 6,
+              "reported": "PASS 6 opening/reflection SQL guards"
+            },
+            {
+              "count": 8,
+              "reported": "PASS 8 balance SQL guards"
+            },
+            {
+              "count": 20,
+              "reported": "PASS 20 graph SQL guards (five source descriptors)"
+            },
+            {
+              "count": 22,
+              "reported": "PASS 22 board mode SQL guards"
+            },
+            {
+              "count": 10,
+              "reported": "PASS 10 exit SQL guards"
+            },
+            {
+              "count": 17,
+              "reported": "PASS 17 package presentation SQL guards"
+            }
+          ]
+        },
+        "combinedReported": 422,
+        "database": "PostgreSQL 17.11 loopback 55432 only"
+      },
+      "nativeIntegration": {
+        "passed": 9,
+        "failed": 0,
+        "files": 1,
+        "durationSeconds": 2.47,
+        "providerTransport": "Native HTTP test fixtures; real PostgreSQL profile/ledger/RLS"
+      },
+      "build": {
+        "status": "PASS",
+        "buildId": "3TvfUjUWe6ispWe_i65K2",
+        "bundle": {
+          "buildId": "3TvfUjUWe6ispWe_i65K2",
+          "optionalVisualChunks": [
+            {
+              "path": "/_next/static/chunks/2wluchj_q5z_j.js",
+              "bytes": 619410,
+              "gzipBytes": 154310
+            }
+          ],
+          "optionalVisualGzipBytes": 154310,
+          "budgetGzipBytes": 250000,
+          "excludedFromOfflinePrecache": true,
+          "precachedPosters": [
+            "/assets/pn-ui-v2/posters/learning-board.webp",
+            "/assets/pn-ui-v2/posters/balance-scale.webp",
+            "/assets/pn-ui-v2/posters/algebra-kit.webp"
+          ]
+        }
+      },
+      "browser": {
+        "passed": 143,
+        "failed": 4,
+        "skipped": 0,
+        "retries": 0,
+        "workers": 1,
+        "stats": {
+          "startTime": "2026-10-03T16:14:46.979Z",
+          "duration": 1221153.192,
+          "expected": 143,
+          "skipped": 0,
+          "unexpected": 4,
+          "flaky": 0
+        },
+        "failures": [
+          {
+            "file": "auth-ownership.spec.ts",
+            "title": "magic link PKCE, reload session, cookie HttpOnly dan logout bekerja",
+            "fullStatus": "FAIL",
+            "scopedStatus": "PASS",
+            "finalScopedCase": {
+              "file": "tests/e2e/auth-ownership.spec.ts",
+              "title": "magic link PKCE, reload session, cookie HttpOnly dan logout bekerja",
+              "duration": "2.2s",
+              "status": "PASS"
+            }
+          },
+          {
+            "file": "freshclass.spec.ts",
+            "title": "E2E02 fresh 32-student class uses UI/photo inputs through check, rotations, late exit, finalization and next session",
+            "fullStatus": "FAIL",
+            "scopedStatus": "PASS",
+            "finalScopedCase": {
+              "file": "tests/e2e/freshclass.spec.ts",
+              "title": "E2E02 fresh 32-student class uses UI/photo inputs through check, rotations, late exit, finalization and next session",
+              "duration": "1.4m",
+              "status": "PASS"
+            }
+          },
+          {
+            "file": "oral.spec.ts",
+            "title": "oral grade 2 goes down on first wrong, skips without evidence, and resumes offline",
+            "fullStatus": "FAIL",
+            "scopedStatus": "PASS",
+            "finalScopedCase": {
+              "file": "tests/e2e/oral.spec.ts",
+              "title": "oral grade 2 goes down on first wrong, skips without evidence, and resumes offline",
+              "duration": "8.3s",
+              "status": "PASS"
+            }
+          },
+          {
+            "file": "package.spec.ts",
+            "title": "teacher prepares and replaces offline package, reloads its cache and sees tool gaps",
+            "fullStatus": "FAIL",
+            "scopedStatus": "PASS",
+            "finalScopedCase": {
+              "file": "tests/e2e/package.spec.ts",
+              "title": "teacher prepares and replaces offline package, reloads its cache and sees tool gaps",
+              "duration": "5.5s",
+              "status": "PASS"
+            }
+          }
+        ]
+      },
+      "log": "practice-v6-final-verify.log"
+    },
+    "offlineDiagnosis": {
+      "firstCommand": "pnpm exec playwright test tests/e2e/oral.spec.ts tests/e2e/package.spec.ts --reporter=list",
+      "firstResult": {
+        "exitCode": 1,
+        "passed": 4,
+        "failed": 2,
+        "duration": "32.2s"
+      },
+      "secondCommand": "PLAYWRIGHT_JSON_OUTPUT_NAME=.local/practice-v6-offline-diagnostic.json pnpm exec playwright test tests/e2e/oral.spec.ts tests/e2e/package.spec.ts -g 'oral grade 2|teacher prepares and replaces' --reporter=json",
+      "secondResult": {
+        "exitCode": 1,
+        "passed": 0,
+        "failed": 2,
+        "durationSeconds": 20.590596
+      },
+      "failedRequest": {
+        "method": "GET",
+        "path": "/guru/kelas",
+        "failure": "net::ERR_INTERNET_DISCONNECTED"
+      },
+      "repair": "Disable Next Link prefetch on class-list and two pilot session links. Assertion still requires zero console errors; diagnostic never records queries, headers, cookies or pupil names."
+    },
+    "scopedGateAfterRepair": {
+      "command": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm build && pnpm exec playwright test tests/e2e/auth-ownership.spec.ts tests/e2e/freshclass.spec.ts tests/e2e/oral.spec.ts tests/e2e/package.spec.ts tests/e2e/offline.spec.ts tests/e2e/privacy-storage.spec.ts tests/e2e/practice-v5.spec.ts tests/e2e/practice-v6.spec.ts tests/e2e/teacher-flow-v4.spec.ts tests/e2e/sync.spec.ts --reporter=list",
+      "format": "PASS",
+      "types": "PASS",
+      "lint": "PASS",
+      "build": "PASS",
+      "browser": {
+        "exitCode": 0,
+        "status": "PASS",
+        "passed": 44,
+        "failed": 0,
+        "workers": 1,
+        "retries": 0,
+        "durationReported": "4.7m",
+        "buildId": "RQ1nEXwZvQDcxTfNo93tJ",
+        "cases": [
+          {
+            "file": "tests/e2e/auth-ownership.spec.ts",
+            "title": "refresh session mempertahankan cookie dan no-store meski resource tidak ditemukan",
+            "duration": "2.5s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/auth-ownership.spec.ts",
+            "title": "visitor dialihkan; cookie palsu dan callback invalid tidak mengautentikasi",
+            "duration": "589ms",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/auth-ownership.spec.ts",
+            "title": "magic link PKCE, reload session, cookie HttpOnly dan logout bekerja",
+            "duration": "2.2s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/auth-ownership.spec.ts",
+            "title": "board memakai anonymous identity terpisah tanpa teacher API atau nama lokal",
+            "duration": "2.7s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/auth-ownership.spec.ts",
+            "title": "CRUD kelas A/B melalui API tetap dibatasi RLS PostgreSQL",
+            "duration": "8.1s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/auth-ownership.spec.ts",
+            "title": "nama local-only bergabung di UI guru; API baru dan papan tidak menerima canary",
+            "duration": "4.1s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/auth-ownership.spec.ts",
+            "title": "logout offline mengunci akses lokal dan dicabut saat online kembali",
+            "duration": "2.4s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/auth-ownership.spec.ts",
+            "title": "CSRF dan field tambahan ditolak pada endpoint mutasi",
+            "duration": "1.9s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/freshclass.spec.ts",
+            "title": "E2E02 fresh 32-student class uses UI/photo inputs through check, rotations, late exit, finalization and next session",
+            "duration": "1.4m",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/offline.spec.ts",
+            "title": "manifest build hanya shell publik, JS belajar, CSS/font dan poster lokal",
+            "duration": "2.0s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/offline.spec.ts",
+            "title": "tab baru offline membuka latihan, contoh sesi dan papan; font, IndexedDB dan fullscreen tetap bekerja",
+            "duration": "3.3s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/offline.spec.ts",
+            "title": "audit cache mendeteksi aset hilang; tidak mengklaim siap hanya karena online",
+            "duration": "2.0s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/oral.spec.ts",
+            "title": "oral CAS/frozen baseline/reopen/undo/skip/resume use real IndexedDB",
+            "duration": "2.1s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/oral.spec.ts",
+            "title": "oral grade 2 goes down on first wrong, skips without evidence, and resumes offline",
+            "duration": "8.3s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/package.spec.ts",
+            "title": "package cache survives reopen with CAS, freeze and tenant isolation",
+            "duration": "2.2s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/package.spec.ts",
+            "title": "teacher prepares and replaces offline package, reloads its cache and sees tool gaps",
+            "duration": "5.5s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/package.spec.ts",
+            "title": "C01 CSV stays local, invalid batch changes nothing, and empty name deletes identity",
+            "duration": "2.5s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/package.spec.ts",
+            "title": "static Bisik and printable independent tasks work offline",
+            "duration": "3.9s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v5.spec.ts",
+            "title": "PRACTICE01 360: preview is reversible, selected stories persist in tasks/PDF, one session uses that package",
+            "duration": "14.2s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v5.spec.ts",
+            "title": "PRACTICE01 390: preview is reversible, selected stories persist in tasks/PDF, one session uses that package",
+            "duration": "9.8s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v5.spec.ts",
+            "title": "PRACTICE01 1366: preview is reversible, selected stories persist in tasks/PDF, one session uses that package",
+            "duration": "5.9s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v5.spec.ts",
+            "title": "PRACTICE02 correct code recovers an expired own sample lease; a different active controller is never taken over automatically",
+            "duration": "7.9s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v6.spec.ts",
+            "title": "EASY01 360: one click starts prepared session; frozen topic creates editable copy and keeps history",
+            "duration": "6.4s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v6.spec.ts",
+            "title": "EASY01 390: one click starts prepared session; frozen topic creates editable copy and keeps history",
+            "duration": "5.9s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v6.spec.ts",
+            "title": "EASY02 local preparation persists offline, resets on content edits and never changes content approval",
+            "duration": "5.3s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v6.spec.ts",
+            "title": "EASY03 oral checks need no printed answer card",
+            "duration": "4.0s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v6.spec.ts",
+            "title": "RESET lost response: old board escapes, history remains and fresh session pairs",
+            "duration": "5.1s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v6.spec.ts",
+            "title": "RESET offline/reload: old board escapes, history remains and fresh session pairs",
+            "duration": "5.1s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v6.spec.ts",
+            "title": "AUTHOR: ready save returns to own list, own cards appear in assessment and interactive copy requires real answers",
+            "duration": "9.9s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/sync.spec.ts",
+            "title": "SYNC04 automatic 401 raises an actionable notice while device settings stay collapsed and answers remain durable",
+            "duration": "2.0s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/sync.spec.ts",
+            "title": "SYNC04 automatic 409 raises an actionable notice while device settings stay collapsed and answers remain durable",
+            "duration": "1.6s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/sync.spec.ts",
+            "title": "SYNC01 offline queue survives restart, lost ACK retry is idempotent and late correction stays pending until accepted",
+            "duration": "4.0s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/sync.spec.ts",
+            "title": "SYNC02 401/409/429/503 retain durable data; class deletion purges the local dependency group",
+            "duration": "2.7s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/sync.spec.ts",
+            "title": "SYNC03 two teacher devices enforce read-only import, explicit takeover and reviewed conflict",
+            "duration": "8.2s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/teacher-flow-v4.spec.ts",
+            "title": "FLOW01 beginner reaches practice and AI from home at 360; class data, drafts and session survive disclosure",
+            "duration": "11.3s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/teacher-flow-v4.spec.ts",
+            "title": "FLOW01 beginner reaches practice and AI from home at 390; class data, drafts and session survive disclosure",
+            "duration": "7.0s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/teacher-flow-v4.spec.ts",
+            "title": "FLOW02 empty pages offer a next action; personal and example classes remain separate",
+            "duration": "6.5s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/teacher-flow-v4.spec.ts",
+            "title": "FLOW04 selected class reopens offline through canonical shell; essential storage warning stays visible",
+            "duration": "2.2s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/teacher-flow-v4.spec.ts",
+            "title": "FLOW03 AI status never claims tested readiness; changing source clears the previous lesson",
+            "duration": "3.7s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/privacy-storage.spec.ts",
+            "title": "IndexedDB kosong aman; nama optional dan operasi delete/update tidak crash",
+            "duration": "2.3s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/privacy-storage.spec.ts",
+            "title": "nama lokal dan referensi selamat setelah tutup/reload; join hanya di teacher view",
+            "duration": "1.9s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/privacy-storage.spec.ts",
+            "title": "namespace dua akun dan demo/pilot terpisah; clear hanya database nama aktif",
+            "duration": "2.3s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/privacy-storage.spec.ts",
+            "title": "transaksi bulk roster rollback penuh pada absen bentrok; schema menolak nama",
+            "duration": "2.0s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/privacy-storage.spec.ts",
+            "title": "browser canary: hanya DTO eksplisit masuk request, nama tidak di URL/log/cache/papan",
+            "duration": "2.7s",
+            "status": "PASS"
+          }
+        ]
+      },
+      "bundle": {
+        "buildId": "RQ1nEXwZvQDcxTfNo93tJ",
+        "optionalVisualChunks": [
+          {
+            "path": "/_next/static/chunks/2wluchj_q5z_j.js",
+            "bytes": 619410,
+            "gzipBytes": 154310
+          }
+        ],
+        "optionalVisualGzipBytes": 154310,
+        "budgetGzipBytes": 250000,
+        "excludedFromOfflinePrecache": true,
+        "precachedPosters": [
+          "/assets/pn-ui-v2/posters/learning-board.webp",
+          "/assets/pn-ui-v2/posters/balance-scale.webp",
+          "/assets/pn-ui-v2/posters/algebra-kit.webp"
+        ]
+      },
+      "log": "practice-v6-final-browser.log"
+    },
+    "finalCandidateGateAfterCopyAudit": {
+      "command": "pnpm format:check && pnpm typecheck && pnpm lint && pnpm build && pnpm exec playwright test tests/e2e/package.spec.ts tests/e2e/practice-v6.spec.ts -g 'EASY01|teacher prepares and replaces' --reporter=list",
+      "format": "PASS",
+      "types": "PASS",
+      "lint": "PASS",
+      "build": "PASS",
+      "browser": {
+        "exitCode": 0,
+        "status": "PASS",
+        "passed": 3,
+        "failed": 0,
+        "workers": 1,
+        "retries": 0,
+        "durationReported": "24.9s",
+        "buildId": "ITd3O0CNAChqrrInootDA",
+        "cases": [
+          {
+            "file": "tests/e2e/package.spec.ts",
+            "title": "teacher prepares and replaces offline package, reloads its cache and sees tool gaps",
+            "duration": "9.2s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v6.spec.ts",
+            "title": "EASY01 360: one click starts prepared session; frozen topic creates editable copy and keeps history",
+            "duration": "5.7s",
+            "status": "PASS"
+          },
+          {
+            "file": "tests/e2e/practice-v6.spec.ts",
+            "title": "EASY01 390: one click starts prepared session; frozen topic creates editable copy and keeps history",
+            "duration": "6.3s",
+            "status": "PASS"
+          }
+        ]
+      },
+      "log": "practice-v6-copy-check.log"
+    },
+    "repairScope": {
+      "fullVerifySource": "1eaa011fc130bea8a791128d4c8ccec2c3024650c06d8765a458fa732191ec58",
+      "gate44Source": "57b017bb5e3d4b1c1193691407b142546d1c1adce6ca309aefe8a22634c147c5",
+      "finalSource": "4172efa3fa27d35ca0130be2112029005589b84c48f038c0b5893ab1e3ea13b5",
+      "fullInputs": 590,
+      "finalInputs": 590,
+      "identicalFullInputs": 583,
+      "changedFullInputs": [
+        "src/features/guru/practice-activities.tsx",
+        "src/features/guru/teacher-workspace.tsx",
+        "src/features/package/package-workspace.tsx",
+        "tests/e2e/auth-ownership.spec.ts",
+        "tests/e2e/freshclass.spec.ts",
+        "tests/e2e/oral.spec.ts",
+        "tests/e2e/package.spec.ts"
+      ],
+      "newInputs": [],
+      "identicalGate44Inputs": 589,
+      "changedSinceGate44": [
+        "src/features/package/package-workspace.tsx"
+      ],
+      "copyOnlyChange": {
+        "before": "Latihan tersimpan di perangkat ini. Periksa soal di bawah, tambahkan cerita bila perlu, lalu coba sesi.",
+        "after": "Latihan tersimpan di perangkat ini."
+      },
+      "perFileDelta": {
+        "src/features/guru/practice-activities.tsx": {
+          "fullSha256": "7fa23ad60407d13c7a1331ed9c64cb5973d7410032b289b16c9db6b5560b1a93",
+          "finalSha256": "a3ffd5d6449e3f1877c5fc98f111d5f259570e5209d4dfd282be2719ecb9f5f8"
+        },
+        "src/features/guru/teacher-workspace.tsx": {
+          "fullSha256": "df8f0abc4296817212cef269051b32353cdd9cb806f2d1ed66eb41959f951086",
+          "finalSha256": "4340dbf196d9bb60d751435c3bf00f0acd721e393393cd50088d96a5ca149135"
+        },
+        "src/features/package/package-workspace.tsx": {
+          "fullSha256": "4890a5c8faf82ff883401fd1fa0ee7918e9d23fc3ff14c224de069b7026723ae",
+          "finalSha256": "41000d961d07bbbe93e4763b7d94366e9b2fca68a0cf424b46d156cde63182f8"
+        },
+        "tests/e2e/auth-ownership.spec.ts": {
+          "fullSha256": "d7c9ea08249a5fec542635e199a884b1cdc300d133c94ca847e8a0d09cf94740",
+          "finalSha256": "34166b776f4c40c3b616d3096fbdb4fdeacca3005d01834ec9685c3342441d84"
+        },
+        "tests/e2e/freshclass.spec.ts": {
+          "fullSha256": "b3ef9f7463896157a8f58c51b22920486357060371406e4659d17ef6ddeaf4a9",
+          "finalSha256": "55f07e3987e8d1c8ab59cc0cefdc6e97f15faafb4faa564aad3adb02e7e33a4f"
+        },
+        "tests/e2e/oral.spec.ts": {
+          "fullSha256": "72b4d9038c26426cb6a1fc954d49ede82b8b76ef402c90d582cbfd26a4a2e211",
+          "finalSha256": "30500a3220d6f479029afd04577e4d70f1c02945a0a9599e864f0885c28cec3a"
+        },
+        "tests/e2e/package.spec.ts": {
+          "fullSha256": "871ffc2b39781d25b3a28fc77f5aa9e2d75daea8fbe50c1a7a1e5206c0d5eeb9",
+          "finalSha256": "2299eb5e1e136d347f181e27b8b8a4a9703b14c4c49baa686f63de94b8c1d630"
+        }
+      }
+    },
+    "uniqueBrowserScenarios": {
+      "count": 147,
+      "coverage": "143 initial passes plus all four failed cases rerun successfully inside gate44; final three rerun only for one literal confirmation simplification. Does not claim a single 147/147 full PASS on final build."
+    },
+    "reuseJustification": "Unit/SQL/native inputs and imported core/provider/security modules byte-identical after full suite. 583/590 full inputs identical; deltas only three UI files (two prefetch props + one confirmation string) and four browser specs. 589/590 identical after gate44, remaining delta one confirmation literal. No duplicate full suite."
+  },
+  "visual": {
+    "status": "PASS",
+    "command": "node .local/practice-v6-visual.mjs",
+    "exitCode": 0,
+    "captures": [
+      {
+        "name": "prepare-360",
+        "path": "/guru/latihan",
+        "width": 360,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0,
+        "primaryButton": {
+          "width": 185,
+          "height": 48
+        }
+      },
+      {
+        "name": "prepare-390",
+        "path": "/guru/latihan",
+        "width": 390,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0,
+        "skipLink": {
+          "focused": false,
+          "top": -112,
+          "bottom": -64,
+          "translate": "0px -128px",
+          "visibleInViewport": false
+        },
+        "primaryButton": {
+          "width": 185,
+          "height": 48
+        }
+      },
+      {
+        "name": "prepare-1366",
+        "path": "/guru/latihan",
+        "width": 1366,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0,
+        "primaryButton": {
+          "width": 185,
+          "height": 48
+        }
+      },
+      {
+        "name": "prepare-large-font-390",
+        "path": "/guru/latihan",
+        "width": 390,
+        "height": 844,
+        "fontSize": "20px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "preparation-checklist-390",
+        "path": "/guru/latihan",
+        "width": 390,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "one-click-session-390",
+        "path": "/guru/latihan",
+        "width": 390,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "editable-opening-after-start-390",
+        "path": "/guru/latihan",
+        "width": 390,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "optional-ai-390",
+        "path": "/guru/latihan",
+        "width": 390,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "author-390",
+        "path": "/guru/soal/baru",
+        "width": 390,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "saved-own-list-390",
+        "path": "/guru/soal",
+        "width": 390,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "own-assessment-choice-390",
+        "path": "/guru/mulai",
+        "width": 390,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "own-assessment-choice-1366",
+        "path": "/guru/mulai",
+        "width": 1366,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "own-assessment-session-390",
+        "path": "/guru/sesi/[id]",
+        "width": 390,
+        "height": 844,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "board-reset-menu-1366",
+        "path": "/layar",
+        "width": 1366,
+        "height": 768,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      },
+      {
+        "name": "board-reset-fresh-code-1366",
+        "path": "/layar",
+        "width": 1366,
+        "height": 768,
+        "fontSize": "16px",
+        "horizontalOverflow": 0
+      }
+    ],
+    "pageErrors": [],
+    "downloads": [
+      {
+        "button": "Unduh Kartu Nalar · 10 baris",
+        "filename": "papannalar-initial-A4.pdf",
+        "contains": "Cek Awal",
+        "status": "PASS",
+        "physicalPrint": "NOT_RUN"
+      },
+      {
+        "button": "Cetak kartu asesmen",
+        "filename": "kartu-nalar-7V-2026-10-04.pdf",
+        "contains": "Tidak digunakan — kosongkan.",
+        "status": "PASS",
+        "physicalPrint": "NOT_RUN"
+      }
+    ],
+    "fixtures": "Actual local production server, PostgreSQL and synthetic QA teacher/absen-only classes; LLM disabled. No live provider, real pupil names, physical devices or human review.",
+    "screenshotsCommitted": false,
+    "buildId": "ITd3O0CNAChqrrInootDA",
+    "consoleClaim": "Only page runtime errors and horizontal layout measured here; offline console-zero assertions are in Playwright regressions.",
+    "reviewedCaptures": [
+      "prepare-390",
+      "prepare-1366",
+      "prepare-large-font-390",
+      "own-assessment-choice-390",
+      "saved-own-list-390",
+      "board-reset-fresh-code-1366"
+    ],
+    "before": {
+      "baseline": "c2a0593adfb73c8d683340b8ac588cd8309e112f",
+      "buildId": "AcxGagMd5dd7VgVnPgFrA",
+      "screenshots": "Existing local synthetic captures at390/1366; frozen opening disabled confirmed. Raw visibleButtons/height metrics unreliable and not used for improvement claims."
+    },
+    "finalCommand": "node .local/practice-v6-visual.mjs",
+    "finalExitCode": 0,
+    "log": "practice-v6-final-visual2.log"
+  },
+  "preservation": {
+    "status": "PASS",
+    "comparedTo": "c2a0593adfb73c8d683340b8ac588cd8309e112f",
+    "protectedFiles": 181,
+    "changedProtectedFiles": [],
+    "originalDocuments": 8,
+    "changedOriginalDocuments": [],
+    "oldReceiptCount": 18,
+    "changedOldReceipts": [],
+    "originalJournalPrefixPreserved": true,
+    "historicalHandoffPreserved": true,
+    "existingMigrations": 39,
+    "intentionalChanges": [
+      "src/core/package/build.ts: new pure preparation-copy helper; existing generation, grading and freeze rules untouched",
+      "src/local/packages.ts: atomic preparation-copy transaction and pointer updates; existing CAS save, read and history retained",
+      "Board reset extends the board contract, server pairing adapter and new local SQL040. Existing SQL001–039, teacher auth, RLS and review manifests retain exact bytes."
+    ]
+  },
+  "bundle": {
+    "buildId": "ITd3O0CNAChqrrInootDA",
+    "optionalVisualChunks": [
+      {
+        "path": "/_next/static/chunks/2wluchj_q5z_j.js",
+        "bytes": 619410,
+        "gzipBytes": 154310
+      }
+    ],
+    "optionalVisualGzipBytes": 154310,
+    "budgetGzipBytes": 250000,
+    "excludedFromOfflinePrecache": true,
+    "precachedPosters": [
+      "/assets/pn-ui-v2/posters/learning-board.webp",
+      "/assets/pn-ui-v2/posters/balance-scale.webp",
+      "/assets/pn-ui-v2/posters/algebra-kit.webp"
+    ]
+  },
+  "costAssets": {
+    "newDependencies": 0,
+    "newAssets": 0,
+    "paidApiUsd": 0,
+    "cloudCost": "NOT_MEASURED",
+    "existingGLBPostersBlender": "byte-identical",
+    "threeLazyChunkGzipBytes": 154310,
+    "budgetGzipBytes": 250000,
+    "optionalChunkExcludedFromOfflinePrecache": true,
+    "postersPrecached": true
+  },
+  "providers": {
+    "openaiChatCompletions": {
+      "nativeHttpLocal": "PASS",
+      "localConfigLedgerSql": "PASS",
+      "live": "NOT_RUN"
+    },
+    "anthropicMessages": {
+      "nativeHttpLocal": "PASS",
+      "localConfigLedgerSql": "PASS",
+      "live": "NOT_RUN"
+    },
+    "applicationModel": "Operator-supplied, no coding-model application default",
+    "paidCalls": 0
+  },
+  "migration": {
+    "name": "202610030040_board_reset.sql",
+    "localPrepareCommand": "pnpm test:db:prepare",
+    "localPrepareExitCode": 0,
+    "localSqlTests": "16/16 board-reset assertions inside full integration PASS",
+    "hostedApplied": false,
+    "rolloutRequirements": "Authorized backup/review/rollback described in UI_AI_HANDOFF; no deployment here",
+    "retainedExistingMigrations": 39
+  },
+  "limits": {
+    "realContentApproval": "NOT_GRANTED",
+    "realPrivacyApproval": "NOT_GRANTED",
+    "hostedMigration": "NOT_RUN",
+    "hostedDeployment": "NOT_RUN",
+    "liveProviders": "NOT_RUN",
+    "physicalPrint": "NOT_RUN",
+    "physicalPhoneQrCameraTouch": "NOT_RUN",
+    "teacherStudy": "NOT_RUN",
+    "deniedLocalStorageReset": "RAM reset available, pending offline reset does not survive reload if browser denies storage"
+  },
+  "guide": "docs/13_GUIDE_LATIHAN_AI.md",
+  "run": {
+    "cloudCommands": [
+      "cd /workspace/papannalar",
+      "source /workspace/.papannalar-cloud/activate.sh",
+      "pnpm build",
+      "pnpm video"
+    ],
+    "urls": [
+      "http://127.0.0.1:3100/masuk",
+      "http://127.0.0.1:3100/layar"
+    ],
+    "normalDemo": "LLM off, local static cards; fixture Auth/PostgreSQL, stop with Ctrl+C",
+    "freshCheckout": "pnpm install --frozen-lockfile; docs09 local setup and VIDEO_HANDOFF"
+  }
+}
