@@ -217,6 +217,8 @@ function CollectionEditor({
   const [dirty, setDirty] = useState(false);
   const [draftState, setDraftState] = useState("");
   const [deleted, setDeleted] = useState<DraftDocument>();
+  const [pendingKind, setPendingKind] = useState<DraftDocument["kind"]>();
+  const [kindUndo, setKindUndo] = useState<DraftDocument>();
   const writes = useRef(Promise.resolve());
   const saving = useRef(false);
   const edited = useRef(false);
@@ -286,6 +288,35 @@ function CollectionEditor({
       items: document.items.map((old, i) => (i === index ? item : old)),
     });
   }
+  function chooseKind(kind: DraftDocument["kind"]) {
+    if (readonly || busy || !canMutate || kind === document.kind) return;
+    if (document.items.length) setPendingKind(kind);
+    else change({ ...document, kind });
+  }
+  function convertKind() {
+    if (!pendingKind || readonly || busy || !canMutate) return;
+    setKindUndo(document);
+    change({
+      ...document,
+      kind: pendingKind,
+      items: document.items.map((item) =>
+        pendingKind === "cards"
+          ? {
+              id: item.id,
+              prompt: item.prompt,
+              kind: "card",
+              options: ["", "", "", ""],
+              key: "A",
+              explanation: "",
+            }
+          : { id: item.id, prompt: item.prompt, kind: "writing" },
+      ),
+    });
+    setPendingKind(undefined);
+    setTemplateUndo(undefined);
+    setDeleted(undefined);
+    setPreview(null);
+  }
   async function save(ready: boolean) {
     if (busy || saving.current || !canMutate) return;
     saving.current = true;
@@ -337,8 +368,9 @@ function CollectionEditor({
     );
     setDirty(false);
     setDraftState("");
+    setKindUndo(undefined);
     await refresh().catch(() => undefined);
-    if (!initial) history.replaceState(null, "", `/guru/soal/${id}`);
+    if (initial?.id !== id) history.replaceState(null, "", `/guru/soal/${id}`);
   }
   function add() {
     if (document.items.length >= 5) return;
@@ -406,7 +438,29 @@ function CollectionEditor({
         </p>
       )}
       {readonly && (
-        <p>Materi sistem dapat dipakai langsung. Salin untuk mengubah soal.</p>
+        <section className={panel} aria-label="Mengubah soal sistem">
+          <p>Soal sistem tidak diubah langsung.</p>
+          <p>
+            Salin ke Soal Saya untuk mengubah pertanyaan, jenis dan
+            aktivitasnya.
+          </p>
+          <Button
+            disabled={busy || !canMutate}
+            onClick={() => {
+              if (busy || !canMutate) return;
+              setId(crypto.randomUUID());
+              setRevision(0);
+              setVersion(0);
+              setSource("teacher");
+              setSaved(false);
+              setMessage(
+                "Salinan siap diedit. Simpan untuk menambahkannya ke Soal Saya.",
+              );
+            }}
+          >
+            Salin ke Soal Saya
+          </Button>
+        </section>
       )}
       {version > 0 && !readonly && (
         <p className="text-sm text-muted-foreground">
@@ -429,29 +483,80 @@ function CollectionEditor({
         />
         {errorAt("title")}
       </label>
-      <label className="block font-semibold">
-        Jenis kumpulan
-        <select
-          className={field}
-          disabled={readonly || busy || !canMutate || document.items.length > 0}
-          value={document.kind}
-          onChange={(e) =>
-            change({
-              ...document,
-              kind: e.target.value === "interactive" ? "interactive" : "cards",
-            })
-          }
-        >
-          <option value="cards">Soal dengan Kartu Nalar</option>
-          <option value="interactive">Interaktif di layar</option>
-        </select>
-      </label>
+      {readonly ? (
+        <p className="font-semibold">
+          Jenis kumpulan
+          <span className={`${field} block`}>
+            {document.kind === "cards"
+              ? "Soal dengan Kartu Nalar"
+              : "Interaktif di layar"}
+          </span>
+        </p>
+      ) : (
+        <label className="block font-semibold">
+          Jenis kumpulan
+          <select
+            className={field}
+            disabled={busy || !canMutate}
+            value={document.kind}
+            onChange={(e) =>
+              chooseKind(
+                e.target.value === "interactive" ? "interactive" : "cards",
+              )
+            }
+          >
+            <option value="cards">Soal dengan Kartu Nalar</option>
+            <option value="interactive">Interaktif di layar</option>
+          </select>
+        </label>
+      )}
       <p className="text-sm text-muted-foreground">
         Maksimal 5 soal. Untuk Kartu Nalar, satu soal memakai satu baris.
-        {!readonly &&
-          document.items.length > 0 &&
-          " Jenis kumpulan tetap selama ada soal. Buat kumpulan baru untuk memakai jenis lain."}
       </p>
+      {pendingKind && (
+        <section className={panel} aria-label="Ganti jenis kumpulan">
+          <h2 className="font-bold">Ganti jenis kumpulan?</h2>
+          <p>
+            {pendingKind === "cards"
+              ? "Pertanyaan tetap disimpan. Isi pilihan jawaban dan kunci untuk memakai Kartu Nalar. Aktivitas layar dapat dipulihkan dengan membatalkan pergantian jenis."
+              : "Pertanyaan tetap disimpan sebagai kegiatan menulis di papan. Anda bisa memilih alat interaktif setelahnya. Pilihan jawaban dan kunci tidak dipakai; keduanya dapat dipulihkan dengan membatalkan pergantian jenis."}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button disabled={busy || !canMutate} onClick={convertKind}>
+              {pendingKind === "cards"
+                ? "Ganti ke Kartu Nalar"
+                : "Ganti ke interaktif"}
+            </Button>
+            <Button variant="outline" onClick={() => setPendingKind(undefined)}>
+              Tetap dengan jenis sekarang
+            </Button>
+          </div>
+        </section>
+      )}
+      {kindUndo && (
+        <div className="practice-feedback">
+          <p>
+            Jenis diganti. Batalkan untuk memulihkan isian sebelum pergantian,
+            atau simpan setelah isian selesai.
+          </p>
+          <Button
+            variant="outline"
+            disabled={busy || !canMutate}
+            onClick={() => {
+              if (busy || !canMutate) return;
+              change(kindUndo);
+              setActiveItem(kindUndo.items[0]?.id);
+              setKindUndo(undefined);
+              setPendingKind(undefined);
+              setTemplateUndo(undefined);
+              setDeleted(undefined);
+              setPreview(null);
+            }}
+          >
+            Batalkan pergantian jenis
+          </Button>
+        </div>
+      )}
       {deleted && (
         <div className="practice-feedback">
           Soal dihapus.{" "}
@@ -581,24 +686,32 @@ function CollectionEditor({
                     ))}
                   </div>
                   {errorAt(`items.${index}.options`)}
-                  <label className="block">
-                    Kunci jawaban
-                    <select
-                      className={field}
-                      value={item.key}
-                      disabled={readonly || busy || !canMutate}
-                      onChange={(e) =>
-                        changeItem(index, {
-                          ...item,
-                          key: CHOICES.find((c) => c === e.target.value) ?? "A",
-                        })
-                      }
-                    >
-                      {CHOICES.map((c) => (
-                        <option key={c}>{c}</option>
-                      ))}
-                    </select>
-                  </label>
+                  {readonly ? (
+                    <p>
+                      Kunci jawaban
+                      <span className={`${field} block`}>{item.key}</span>
+                    </p>
+                  ) : (
+                    <label className="block">
+                      Kunci jawaban
+                      <select
+                        className={field}
+                        value={item.key}
+                        disabled={readonly || busy || !canMutate}
+                        onChange={(e) =>
+                          changeItem(index, {
+                            ...item,
+                            key:
+                              CHOICES.find((c) => c === e.target.value) ?? "A",
+                          })
+                        }
+                      >
+                        {CHOICES.map((c) => (
+                          <option key={c}>{c}</option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                   <label className="block">
                     Penjelasan guru (opsional)
                     <textarea
@@ -621,39 +734,56 @@ function CollectionEditor({
                 </>
               ) : (
                 <>
-                  <label className="block">
-                    Aktivitas
-                    <select
-                      className={field}
-                      disabled={readonly || busy || !canMutate}
-                      value={
-                        item.kind === "writing" ? "writing" : item.tool.kind
-                      }
-                      onChange={(e) =>
-                        changeItem(
-                          index,
-                          e.target.value === "writing"
-                            ? {
-                                id: item.id,
-                                prompt: item.prompt,
-                                kind: "writing",
-                              }
-                            : {
-                                id: item.id,
-                                prompt: item.prompt,
-                                kind: "interactive",
-                                tool: defaultTool(e.target.value),
-                              },
-                        )
-                      }
-                    >
-                      {TOOL_LABELS.map(([kind, label]) => (
-                        <option key={kind} value={kind}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  {readonly ? (
+                    <p>
+                      Aktivitas
+                      <span className={`${field} block`}>
+                        {
+                          TOOL_LABELS.find(
+                            ([kind]) =>
+                              kind ===
+                              (item.kind === "writing"
+                                ? "writing"
+                                : item.tool.kind),
+                          )?.[1]
+                        }
+                      </span>
+                    </p>
+                  ) : (
+                    <label className="block">
+                      Aktivitas
+                      <select
+                        className={field}
+                        disabled={readonly || busy || !canMutate}
+                        value={
+                          item.kind === "writing" ? "writing" : item.tool.kind
+                        }
+                        onChange={(e) =>
+                          changeItem(
+                            index,
+                            e.target.value === "writing"
+                              ? {
+                                  id: item.id,
+                                  prompt: item.prompt,
+                                  kind: "writing",
+                                }
+                              : {
+                                  id: item.id,
+                                  prompt: item.prompt,
+                                  kind: "interactive",
+                                  tool: defaultTool(e.target.value),
+                                },
+                          )
+                        }
+                      >
+                        {TOOL_LABELS.map(([kind, label]) => (
+                          <option key={kind} value={kind}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                   {!readonly && (
                     <InteractiveHelp
                       key={item.kind === "writing" ? "writing" : item.tool.kind}
@@ -753,24 +883,7 @@ function CollectionEditor({
         </div>
       </div>
       <div className="studio-action-bar flex flex-wrap gap-3">
-        {readonly ? (
-          <Button
-            variant="outline"
-            disabled={busy || !canMutate}
-            onClick={() => {
-              setId(crypto.randomUUID());
-              setRevision(0);
-              setVersion(0);
-              setSource("teacher");
-              setSaved(false);
-              setMessage(
-                "Salinan siap diedit. Simpan untuk menambahkannya ke Soal Saya.",
-              );
-            }}
-          >
-            Salin ke Soal Saya
-          </Button>
-        ) : (
+        {!readonly && (
           <>
             <Button
               variant="outline"

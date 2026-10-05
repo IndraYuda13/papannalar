@@ -1,0 +1,69 @@
+{
+  "kind": "library-dropdown-regression",
+  "recordedAtUtc": "2026-10-05T11:25:48.815065+00:00",
+  "baseCommit": "8b15da5a71cd5c462aafba68adeeb27fb2635f44",
+  "buildId": "MZg1wICxp2F2iRlCdyEEk",
+  "runtimeFile": "src/features/library/collections.tsx",
+  "runtimeSha256": "0db7602083ea43e0a6bd90e4eaf97733b0d6f6e839fdb0e9658d9a457fef8798",
+  "cause": [
+    "System collections displayed disabled selects without a nearby copy action.",
+    "Collection type was disabled once any question existed.",
+    "A system copy saved as a draft kept the system URL until ready-save navigation."
+  ],
+  "baseline": {
+    "command": "pnpm exec playwright test tests/e2e/library-dropdowns.spec.ts --grep 'D02.*360px' --reporter=list",
+    "exitCode": 1,
+    "result": "Reproduced: collection type is disabled after adding one question.",
+    "initialProbe": "Earlier attempt timed out on an exact label locator; replaced by the combobox role before reproducing the type lock."
+  },
+  "validation": [
+    {
+      "command": "pnpm format:check && pnpm typecheck && pnpm lint",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec playwright test tests/e2e/library-dropdowns.spec.ts --reporter=list",
+      "exitCode": 1,
+      "result": "3 passed, 2 failed: test assumed system card collection; sample catalog contains system interactive collections. Setup corrected, assertions retained."
+    },
+    {
+      "command": "pnpm exec playwright test tests/e2e/library-dropdowns.spec.ts tests/e2e/ui-polish-editor.spec.ts tests/e2e/video-library.spec.ts tests/e2e/workflow-v7.spec.ts --grep 'D0[123]|Polish T01|U08-U13|U10 teacher|FLOW04|FLOW07' --reporter=list",
+      "exitCode": 0,
+      "result": "12 passed, 1 worker, retries 0",
+      "duration": "1.5m reported by Playwright"
+    }
+  ],
+  "coverage": [
+    "System-copy path and dropdown edits at 360/1366px",
+    "All seven activity choices; keyboard key/direction changes; fraction operations",
+    "Conversion cancel/undo and questions preserved",
+    "Save/reload dropdown values; system originals and frozen assessment history unchanged",
+    "Own copied draft URL after reload",
+    "Existing template/preview and five-card/cross-class workflows",
+    "Draft recovery and read-only sample control"
+  ],
+  "visual": {
+    "screenshots": 4,
+    "widths": [
+      360,
+      1366
+    ],
+    "mobileScreensInspected": 2,
+    "horizontalOverflowCheck": "PASS: document width exceeds viewport by at most 1px."
+  },
+  "environment": {
+    "node": "24.14.1",
+    "pnpm": "11.19.0",
+    "postgresql": "17 local",
+    "browser": "Chromium via Playwright",
+    "data": "synthetic sample only",
+    "hostedServices": "NOT_RUN"
+  },
+  "scope": "Targeted UI fix; full suite not rerun. No paid provider call, deploy or hosted migration."
+}

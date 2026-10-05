@@ -265,6 +265,20 @@ langsung pairing dengan preset balanced dan sentuhan konservatif yang belum
 terverifikasi; tes kemampuan tetap opsional. Navigasi bisa diklik/Enter dan tidak
 menghilang saat fokus di dalam. Tidak ada migration/dependency/aset baru.
 
+### 2.5 Dropdown Soal & Presentasi — 5 Oktober 2026
+
+K43 [S]: beberapa dropdown pada Soal & Presentasi tidak dapat dipakai.
+[D] Nilai pada materi sistem ditampilkan sebagai informasi, dengan tindakan
+Salin ke Soal Saya di atas editor. Dropdown pada salinan tetap memakai guard
+kendali akun contoh. Jenis kumpulan dapat diganti ketika sudah berisi soal:
+konfirmasi menjelaskan isian yang perlu diganti, teks/ID pertanyaan dipertahankan,
+dan pembatalan memulihkan dokumen sebelum konversi selama belum disimpan.
+Konversi ke interaktif memakai bidang tulis, tanpa mengasumsikan model matematika;
+konversi ke kartu meminta pilihan dan kunci baru. Simpan tetap melewati schema,
+CAS dan versioning existing. Sesi lama memakai versi beku, bukan hasil konversi.
+Simpan draft salinan sistem memperbarui URL ke ID salinan agar reload membuka
+editor yang benar. Bukti lokal ada di `artifacts/qa/ui-ai-v2/library-dropdowns.json`.
+
 ## 3. Arsitektur dan dependensi
 
 ### 3.1 Satu aplikasi, modul terpisah [D; memenuhi S0 keputusan 9]

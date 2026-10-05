@@ -46,6 +46,12 @@ tindakan tetap terlihat.
 1. Buka **Soal & Presentasi → Buat kumpulan soal**. Pilih soal dengan Kartu
    Nalar jika ingin memeriksa jawaban A/B/C/D; pilih interaktif untuk kegiatan
    dengan alat atau bidang tulis di layar.
+   Untuk mengubah soal sistem, buka kumpulannya lalu klik **Salin ke Soal Saya**
+   di bagian atas. Dropdown jenis dan aktivitas tersedia pada salinan.
+   **Jenis kumpulan** tetap dapat diganti setelah soal ditambahkan. Pertanyaan
+   dipertahankan; pilihan/kunci atau alat perlu disesuaikan untuk jenis baru.
+   **Batalkan pergantian jenis** memulihkan seluruh isian sebelum pergantian,
+   sebelum disimpan.
 2. Isi pertanyaan. Untuk Kartu Nalar, isi empat pilihan yang berbeda dan
    tentukan kunci. Klik **Simpan & siap digunakan**: setelah berhasil,
    aplikasi kembali ke **Soal Saya**. Isian yang belum lengkap disimpan

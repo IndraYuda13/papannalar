@@ -46,3 +46,4 @@ artifacts/qa/ui-polish/*
 !artifacts/qa/ui-ai-v2/practice-v5.json
 !artifacts/qa/ui-ai-v2/practice-v6.json
 !artifacts/qa/ui-ai-v2/workflow-v7.json
+!artifacts/qa/ui-ai-v2/library-dropdowns.json
