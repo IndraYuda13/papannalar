@@ -1,13 +1,14 @@
 # Rencana kerja dan pengujian U0-U5
 
-Antrean baru setelah source terakhir. Jangan mengulang M00-M17 atau menyatakan
-milestone lama belum ada. U0-U5 menggambarkan pekerjaan baru, bukan waktu pasti.
+Dokumen ini mencatat rencana upgrade UI/AI terdahulu dan matriks acceptance.
+Bukan antrean pekerjaan aktif atau bukti kelulusan. Hasil aktual tersedia di
+[artifacts/qa](../artifacts/qa/); perintah validasi saat ini ada di [README](../README.md).
 
 ## U0 - Integrasi dokumen dan baseline pendek
 
 Inspect git/HEAD, route actual, provider config, ledger/RPC dan available tests.
-Cocokkan `SOURCE_FINDINGS.md`. Jalankan apply-doc-updates dry run lalu apply;
-periksa diff dan backup. Simpan route/state matrix sebelum mulai.
+Cocokkan `SOURCE_FINDINGS.md` dengan versi kode yang diperiksa. Addendum sudah
+terpasang; script pemasangan sekali pakai telah dihapus. Simpan route/state matrix.
 Buka login, beranda, editor, board dan hasil pada data sintetis untuk baseline.
 Tidak perlu menjalankan semua tes generator ribuan kali hanya untuk baseline UI.
 

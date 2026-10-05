@@ -1,73 +1,68 @@
-# Handoff kandidat software lokal
+# Demo dan pemulihan lokal
 
-Snapshot 30 September 2026; bukan pelaksanaan freeze atau final bulan Oktober.
-Rujukan status: PLAN §9.44 dan seterusnya. Delapan dokumen sumber tidak diubah.
+Prasyarat dan perintah build ada di [README](../README.md). Panduan ini berlaku
+untuk lingkungan uji terpisah, tanpa data siswa nyata atau layanan hosted.
 
-## Jalankan
+## Memilih demo
 
-Node 24.14.1, pnpm 11.19.0, PostgreSQL 17. Dari repository:
+- `pnpm video`: menyiapkan data contoh dan membuka alur aplikasi utama melalui
+  `/masuk` → **Coba dengan data contoh**. Gunakan panduan guru untuk mencoba
+  kelas, soal, asesmen, cetak kartu dan hasil.
+- `pnpm demo`: menyediakan akses fixture terpisah melalui `/demo`.
+- `pnpm demo --smoke`: memeriksa startup launcher lalu menghentikannya.
 
-```powershell
-pnpm install --frozen-lockfile
-pnpm build
-pnpm demo
+Aplikasi berjalan pada `http://127.0.0.1:3100`, provider Auth/HTTP khusus tes pada
+port 54325, dan PostgreSQL uji pada port 55432 dengan database `pn_m01c_test`.
+Siapkan database terlebih dahulu. Launcher dapat memulai cluster existing di
+`.local/m01c-pg`, tetapi tidak membuat cluster atau database baru otomatis.
+
+Launcher menyiapkan schema uji dan migration, menghasilkan secret HMAC sementara,
+dan tidak mengirim email. Ctrl+C menghentikan proses miliknya. Jangan menjalankan
+launcher bersamaan dengan full verify. Untuk melihat papan, buka `/layar` di
+jendela lain. Loopback bukan akses kamera/QR lintas perangkat melalui HTTPS.
+
+## Menghasilkan manifest kandidat
+
+```sh
+pnpm exec node scripts/release-manifest.mjs
 ```
 
-`http://127.0.0.1:3100/demo` → masuk demo lokal; papan di `/layar` pada jendela
-terpisah. Proses launcher harus tetap hidup. Ia memakai cluster uji lokal yang
-sudah ada; setup mesin baru dijelaskan di README. Demo tidak memakai email live.
-Untuk kelas baru tanpa seed: pilih data pilot dan jalur paket sesi; jangan membawa
-data anak nyata ke lingkungan demo/uji.
+Setelah build tersedia, script menghasilkan
+`artifacts/releases/local-final-mvp/manifest.json` dengan hash source, migration,
+dependency, build ID, aset dan hasil gladi lokal bila tersedia. Hasil dari build
+berbeda ditolak. Output ini diabaikan Git; bukan tautan ke bukti yang sudah
+tersedia dalam repository. Bukti yang disertakan ada di [artifacts/qa](../artifacts/qa/).
 
-## Identitas build dan evidence
+## Memulihkan backup uji
 
-`pnpm exec node scripts/release-manifest.mjs` menghasilkan
-`artifacts/releases/local-final-mvp/manifest.json`: hash source, migration,
-dependency, build ID, aset offline/font dan hasil gladi lokal bila sudah tersedia.
-Manifest menolak hasil gladi dari build berbeda. PLAN/jurnal tidak ikut hash source.
-File aplikasi belum di-commit; base Git saja tidak mengidentifikasi implementasi.
+Backup lokal tidak disertakan dalam Git. Gunakan hanya backup emulator uji milik
+Anda, bukan backup Supabase hosted. Sediakan cluster terpisah dengan database
+kosong bernama `pn_m01c_test`; tentukan port sebenarnya melalui
+`TEST_DATABASE_URL`. Script menolak database berisi dan tujuan nonlokal/nonuji.
 
-Audit13 fitur ada di `artifacts/qa/M15/feature-audit.md`. Rekaman M17 berlabel
-**REKAMAN UJI LOKAL · kartu sintetis**; kode pairing disembunyikan. Tiga pengulangan
-otomatis mengikuti urutan sumber dengan waktu dipercepat, bukan gladi panggung
-enam menit. Pratinjau alat tidak menambah giliran; rekaman membedakannya dari
-actual-start. Bisik memakai strategi statis dan hasil exit menunjukkan denominator
-nyata; hasil kelas lengkap tidak direkayasa untuk presentasi.
+Contoh pada cluster uji terpisah di port 55435:
 
-## Backup dan pemulihan lokal
-
-Backup PostgreSQL uji berada di `.local/` yang diabaikan Git. Salinan ini memuat
-auth/realtime emulator, sehingga **tidak untuk restore ke Supabase hosted**.
-Pertahankan backup/build lama; jangan menghapus DB atau mengubah migration lama.
-Pada cluster loopback baru dengan database kosong bernama `pn_m01c_test`:
-
-```powershell
-$env:PSQL_BIN='C:\Program Files\PostgreSQL\17\bin\psql.exe'
-$env:PG_RESTORE_BIN='C:\Program Files\PostgreSQL\17\bin\pg_restore.exe'
-$env:TEST_DATABASE_URL='postgresql://postgres@127.0.0.1:55435/pn_m01c_test'
-pnpm exec node scripts/restore-local-backup.mjs .local/pre-m15-release-pg.dump
+```sh
+export TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:55435/pn_m01c_test
+pnpm exec node scripts/restore-local-backup.mjs /path/to/test-backup.dump
 pnpm test:db:prepare
 pnpm test:rls
 ```
 
-Pilih port cluster kosong yang sebenarnya;55435 telah dipakai pengujian restore.
-Script menolak DB berisi, mengurutkan data skema validator sebelum paket, dan
-menjaga CHECK/RLS/grant/trigger. Restore dijalankan satu transaksi. Uji aktual:
-32 migration,7 skema validator,3 paket valid;340 SQL assertions lulus sesudahnya.
-Nama lokal guru tidak ada dalam backup server. Rollback perangkat/browser belum
-boleh menghapus IndexedDB guru atau antrean yang belum tersinkron.
+`PSQL_BIN` dan `PG_RESTORE_BIN` dapat menunjuk executable PostgreSQL bila tidak
+ada pada PATH. Restore berjalan dalam transaksi dan mempertahankan CHECK, RLS,
+grant serta trigger. Jangan menghapus IndexedDB guru atau antrean jawaban yang
+belum tersinkron untuk memulihkan database uji.
 
-## Cadangan dan batas final
+## Batas demo
 
-- Kartu A4 kosong: `artifacts/qa/M03/m03a/{initial,weekly,exit}.pdf`.
-- Font terdistribusi melalui dependency berlisensi; build mengemas shell dan font
-  lokal. Buka online sekali dan cek Kesiapan offline sebelum mencabut koneksi.
-- Kamera gagal: Input manual; layar tanpa sentuhan: kendali HP saat terhubung;
-  aplikasi gagal: rekaman lokal yang dilabeli rekaman. Salinan flashdisk belum diuji.
-- Cloud pairing tetap perlu internet. Hotspot tanpa internet tidak menggantikan
-  provider cloud. Cache papan hanya konten; roster dan goresan tidak dipersistkan.
-- K01: asesmen22 langkah/enam alat tidak berarti alat interaktif untuk semua langkah.
-  F9–F13 ditunda; F14/F15 dan empat alat tambahan di luar MVP.
-- Kamera/cetak/fotokopi/digitizer/latensi nyata, hosted Auth/Realtime/staging,
-  panggilan AI live, review pedagogi/privasi dan consent/pilot: NOT_RUN/NEEDS_REVIEW.
-  Tidak ada klaim99% scanner,3 detik atau95% satu Pilot berdasarkan data sintetis.
+- Auth/HTTP disimulasikan; data diuji dengan RLS PostgreSQL nyata. Hasil lokal
+  tidak membuktikan layanan Auth/Realtime hosted atau pengiriman email.
+- Kartu diunduh melalui UI; lihat [panduan cetak](13_GUIDE_LATIHAN_AI.md#mencetak-kartu-nalar).
+  Pemindaian fisik, pencetakan dan papan sentuh memerlukan uji perangkat.
+- Cache offline disiapkan dari build, bukan dev server. Buka online terlebih
+  dahulu; pairing cloud tetap memerlukan internet.
+- AI live memerlukan konfigurasi, anggaran dan review sesuai
+  [panduan pengelola](12_AI_COMPAT_SPEC.md#panduan-pengelola-ai).
+- Materi otomatis masih memerlukan review pedagogi dan uji kelas. Fixture bukan
+  persetujuan penggunaan di kelas sungguhan.

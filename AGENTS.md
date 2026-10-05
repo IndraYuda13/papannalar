@@ -1,133 +1,48 @@
-# AGENTS.md - PapanNalar
+# Panduan pengembangan PapanNalar
 
-<!-- BEGIN PN_UI_AI_V2 -->
-## Instruksi tambahan aktif: UI dan AI v2
+## Mulai bekerja
 
-Pengguna mengotorisasi implementasi UI seluruh halaman dan dua protokol AI.
-Baca [instruksi upgrade](EXECUTE_UI_AI_UPGRADE.md) dan [PRD tambahan](docs/10_PRD_UI_AI_V2.md) seperlunya.
-Aturan continuous U0-U5 menggantikan berhenti setelah setiap task pada run ini.
-3D dekoratif/motion terbatas diizinkan; model matematika, privasi, RLS, review,
-idempotensi dan histori tetap dijaga. Jangan mengubah baseline atau mengulang
-M00-M17. Dua adapter wajib disambungkan ke config, validators, ledger dan SQL.
-Satu final verify serial yang lulus; fixture bukan live. Jangan melakukan paid API,
-deploy atau migration DB nyata tanpa otorisasi. Jangan menimpa perubahan pengguna.
-<!-- END PN_UI_AI_V2 -->
+- Baca README, spesifikasi yang relevan di `docs/08_TECH_SPEC.md` (termasuk
+  register konflik), kode terkait, dan status Git sebelum mengubah implementasi.
+- Instruksi terbaru pengguna menentukan ruang lingkup. Jangan menjalankan ulang
+  rencana milestone historis atau scaffold proyek existing.
+- Sumber produk ada di `docs/00`–`docs/07`; pertahankan isi sumber tersebut.
+  Proposal desain, hasil pengujian dan persetujuan manusia harus dibedakan.
+- Gunakan Node/pnpm yang dipin, satu lockfile, dan pola arsitektur existing.
+  Pertahankan perubahan pengguna; jangan reset atau force-push.
 
-## Misi dan cara mulai
+## Kontrak yang wajib dijaga
 
-Bangun PapanNalar sesuai sumber produk, bukan aplikasi edukasi generik.
-Prioritas pertama adalah rantai demo kelas 7B: kartu -> pindai nyata -> level dan
-kelompok -> Layar Kelas -> Garis Bilangan. Target final tetap 13 fitur wajib sumber.
+- Nama siswa hanya di perangkat guru; tidak ke server, papan, AI, URL atau log.
+  Foto kartu diproses lokal; tulisan/refleksi bebas hanya di RAM.
+- Proyeksi papan menggunakan allowlist, tanpa nama, skor, kunci individu,
+  level/mastery atau state privat guru.
+- Matematika, generator soal/kunci, BKT, grouping, scheduler dan OMR deterministik.
+  Core tidak mengimpor AI/network. Scan, koreksi dan sync ulang harus idempoten.
+  Jawaban kosong/tidak terbaca berbeda dari pilihan “Belum tahu”.
+- Pertahankan auth/RLS, pemisahan data contoh dan kelas asli, versi soal serta
+  histori jawaban. Secret hanya di server, bukan variabel publik/bundle browser.
+- AI opsional dengan fallback statis. Konfigurasi provider harus sesuai ledger,
+  batas token, harga dan anggaran. Review materi/privasi tidak boleh dipalsukan.
+- Jangan deploy, menjalankan migration DB nyata atau API berbayar tanpa izin.
+  Gunakan data sintetis untuk tes; fixture bukan bukti provider/perangkat live.
 
-Pada awal setiap run:
-1. Baca [PLAN.md](PLAN.md): status, task aktif, blocker dan jurnal terakhir.
-2. Baca bagian relevan [08_TECH_SPEC.md](docs/08_TECH_SPEC.md), termasuk register
-   konflik bagian 2. Tidak perlu menyalin seluruh spesifikasi ke respons.
-3. Periksa repo/manifest/lockfile/git status dan kode yang akan diubah. Jangan
-   scaffold ulang proyek existing atau menimpa perubahan pengguna.
-4. Pilih SATU task berukuran terbatas dari milestone aktif. Nyatakan acceptance
-   dan validasi yang akan dijalankan; selesaikan task itu sebelum berpindah.
+## UI dan pengujian
 
-Tidak ada ketergantungan pada STATUS.md atau dokumen lain yang belum dibuat.
-Status/jurnal ada di PLAN.md. Register konflik ada di TECH_SPEC bagian 2.
-Nomor M00-M17 adalah plan baru, bukan 17 langkah lama yang tidak tersedia.
-
-## Sumber kebenaran
-
-Instruksi terbaru pengguna > keputusan kunci `docs/00_RINGKASAN_RUBRIK.md` dan
-acceptance `docs/01_PRD.md` > dokumen domain yang relevan > desain usulan TECH_SPEC.
-Detail pembelajaran: 02; konten: 03; brand: 04; UX: 05; bisnis: 06; build/QA/pitch: 07.
-
-Delapan sumber `docs/00` sampai `docs/07` adalah salinan asli. Jangan mengubahnya,
-termasuk untuk "memperbaiki" inkonsistensi. TECH_SPEC memakai label [S] sumber,
-[D] usulan engineering, [K] gap, [V] dokumentasi platform. Jangan mengubah usulan
-menjadi persetujuan pengguna. Catat keputusan baru pada jurnal PLAN dan register.
-
-Jika gap hanya memengaruhi satu fitur, blokir fitur itu dan lanjut task independen.
-Default [D] dapat diimplementasikan pada demo bila tidak melanggar sumber. Gate
-pilot, perubahan scope/pedagogi, akses data dan persetujuan manusia tidak boleh
-lulus dari asumsi. Jangan meminta seluruh arsitektur disetujui ulang setiap run.
-Kanvas Claude/gambar embedded belum tersedia dalam paket: jangan mengklaim telah
-melihatnya atau membuat screenshot sebagai representasi sumber yang sebenarnya.
-
-## Invarian wajib
-
-- Satu stack Next.js + TypeScript strict + Supabase; tidak menambah layanan Python,
-  framework kedua, monorepo kompleks atau library berat tanpa kebutuhan tercatat.
-- Nama siswa hanya di perangkat guru. Tidak ke server, LLM, board, URL, log,
-  telemetry, screenshot QA atau file fixture publik. CSV nama diproses lokal.
-- Board hanya menerima public projection allowlist: tanpa nama, StepId/level,
-  mastery, kunci penilaian individu, skor atau peringkat. Jangan broadcast TeacherState.
-- Goresan refleksi/tulisan bebas hanya RAM; tidak disimpan atau dikirim.
-- BKT, soal/kunci/pengecoh, grouping, scheduler, OMR dan tool check deterministik.
-  Core tidak mengimpor LLM/network. Pasangan exit dua tingkat = satu observasi.
-- Scan ulang/koreksi/sync ulang tidak menambah bukti. Gunakan idempotency, revisi,
-  frozen binding dan replay; satu sesi tidak dihitung dua kali untuk hysteresis.
-- ? yang benar-benar dipilih/baris terbaca kosong berbeda dari kartu belum masuk.
-- Offline scanner/core membutuhkan cache/storage siap; pairing cloud butuh internet.
-  Jangan mengklaim hotspot tanpa internet otomatis menyinkronkan HP-papan.
-- LLM gagal -> templat/kartu strategi statis. Jangan membuat mock seolah live AI.
-- RLS seluruh data tenant; board anon bukan guru; private Realtime punya policy
-  sendiri. Service/admin key hanya server, tidak `NEXT_PUBLIC_*` atau bundle client.
-- Data demo dan pilot terpisah. Jangan memasukkan seed ke kelas sungguhan.
-- Konten/strategi draft tidak otomatis reviewed; reviewer dan izin pilot harus nyata.
-- Enam alat MVP, sepuluh mode board, 22 langkah registry. Empat alat lain/F14/F15
-  di luar MVP. Coverage semua jenjang belum otomatis lulus (K01).
-
-## Batas pekerjaan dan kualitas
-
-Ikuti scope task. Jangan mendahulukan billing, landing page kompleks, chatbot siswa,
-OCR tulisan, leaderboard, dashboard dinas atau fitur opsional sebelum rantai wajib.
-F9-F13 opsional tidak membatalkan audit dasar, cetak tugas mandiri dan hasil exit
-minimum yang sudah wajib. Pertahankan demo 7B yang sudah lulus sebagai regression.
-
-Gunakan pure function/reducer untuk domain, schema strict pada batas luar, adapter
-untuk storage/network/provider. Hindari `any`, suppressions, duplicated rules dan
-bypass test tanpa alasan tertulis. Lock dependency/version; pertahankan package
-manager repo existing. Cek dokumentasi resmi sebelum memakai API versi baru.
-Paket baru perlu alasan, dampak bundle/compatibility dan lisensi. Jangan menyematkan
-secret atau data anak nyata. Jangan menyebarkan file font dari lingkungan alat.
-
-UI mengikuti token/typography/microcopy sumber. Bahasa Indonesia, target sentuh
-48 px HP; objek 88 px/tombol 96 px pada board 1920 x 1080; no gradients. Implementasi visual
-harus diperiksa pada browser, bukan hanya dianggap benar karena build berhasil.
-Model 2D manipulatif, bukan 3D dekoratif. Tidak memakai lint substring yang melarang
-nama resmi "Cari Kesalahan" atau tanda kali matematika.
-
-## Validasi dan definisi selesai
-
-Buat script sesuai kontrak TECH_SPEC bagian 20 pada milestone terkait. Minimal:
-`lint`, `format:check`, `typecheck`, tes relevan dan `build`. Selanjutnya jalankan
-`test:unit`, `test:content`, `test:omr`, `test:integration`, `test:rls`, `test:e2e`,
-`test:offline`, `test:privacy`, `simulate:turns` sesuai modul yang berubah.
-`verify` mencakup checks yang diwajibkan untuk milestone aktif.
-
-Jangan menghapus/memperlemah test agar hijau. Jangan script no-op/echo-success.
-Jika test belum ada, buat; jika belum bisa dijalankan, laporkan NOT_RUN/BLOCKED
-beserta alasannya, bukan PASS. Uji hardware/kelas tetap manual; fixture browser
-bukan bukti kamera/multitouch fisik. Target 99% / 3 detik / 95% bukan hasil pengukuran.
-Jangan menjalankan API berbayar/load test dengan credential pengguna tanpa izin.
-
-Simpan evidence aman pada `artifacts/qa/<milestone>/` saat implementasi: command,
-exit code, commit, environment, sample count, screenshot data contoh, hasil aktual.
-Perbarui PLAN: status task, keputusan, hasil validasi, blocker, next exact action.
-Jangan membuat semua milestone DONE hanya karena satu alur demo berhasil.
-
-## Git, keamanan operasi dan handoff
-
-Jangan reset/clean/rebase destruktif, menghapus uncommitted work, forcepush atau
-menimpa baseline. Jangan mengubah production DB, mengirim email, membeli resource,
-publish data, atau deploy publik tanpa otorisasi yang sesuai. Gunakan local/staging
-untuk tes. Deploy/migration memerlukan backup/rollback dan review RLS.
-
-Satu integrator untuk shared schema, lockfile dan core contracts. Paralel hanya pada
-modul yang kontraknya stabil dan worktree/path ownership terpisah; reviewer tidak
-mengubah file implementer secara bersamaan. Model spesifik tidak diwajibkan file ini.
-
-Akhiri setiap run dengan ringkasan: task dan file diubah; acceptance terbukti;
-command/hasil aktual; blocker/batas yang belum diuji; next task. Lalu berhenti.
-Jangan menjanjikan pekerjaan background, mengarang output terminal, atau mengatakan
-aplikasi siap produksi sebelum semua gate benar-benar terbukti.
+- Bahasa Indonesia yang jelas; alur utama guru mengikuti panduan penggunaan di
+  `docs/13_GUIDE_LATIHAN_AI.md`. Utamakan HP, keyboard dan target sentuh memadai.
+- Model matematika tetap akurat dan berfungsi tanpa WebGL. 3D pendukung dimuat
+  terpisah/lazy, dengan poster dan dukungan reduced motion.
+- Gunakan schema strict pada batas sistem, adapter storage/network dan fungsi
+  domain murni. Hindari aturan duplikat, `any` dan suppression tanpa alasan.
+- Jalankan tes terarah sesuai perubahan. `pnpm verify` mencakup format, types,
+  lint, unit, integrasi/RLS, build dan E2E; siapkan DB uji terlebih dahulu.
+- Jangan menghapus atau melemahkan tes agar lulus. Perubahan visual diperiksa
+  di browser; jangan mengklaim semua alur lulus hanya karena build berhasil.
+- Bukti pengujian berada di `artifacts/qa/`. Catat command, hasil aktual,
+  identitas kandidat serta batas yang belum diuji. Pertahankan bukti historis.
+- Laporkan perubahan, validasi dan blocker tanpa mengarang approval atau
+  kesiapan production. Keputusan baru dicatat pada spesifikasi yang relevan.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

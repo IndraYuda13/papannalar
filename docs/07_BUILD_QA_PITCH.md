@@ -3,8 +3,8 @@
 <!-- BEGIN PN_UI_AI_V2 -->
 ## Rencana tambahan implementasi dan validasi
 
-Ikuti [U0-U5](13_EXECUTION_QA.md) dan [instruksi implementasi](../EXECUTE_UI_AI_UPGRADE.md) tanpa mengulang milestone
-lama. Targeted tests tiap batch; satu gerbang verify serial pada candidate final
+Gunakan [matriks pengujian](13_EXECUTION_QA.md) tanpa mengulang milestone lama.
+Targeted tests tiap batch; satu gerbang verify serial pada candidate final
 yang lulus. Jika gate gagal lalu kode berubah, ulang gate setelah perbaikan.
 Pisahkan local fixtures, live endpoint dan hardware. Screenshot bukan bukti API
 aktif, dan concept paper tidak menyebut kebutuhan baru sebagai fitur selesai.

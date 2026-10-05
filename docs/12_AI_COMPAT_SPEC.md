@@ -241,3 +241,77 @@ gagal. Dua protocol diuji memakai mock HTTP terisolasi dan respons representativ
 Harga/alias/missing usage/truncated/JSON refusal/401/429/503/timeout diuji. Secret
 hanya server. Live smoke hanya sesudah operator memberi config/approval/biaya
 semestinya; satu sukses tidak berarti semua model/gateway kompatibel.
+
+## Panduan pengelola AI
+
+
+| Protocol                  | Endpoint dari API root    | Uji lokal                                           | Live    |
+| ------------------------- | ------------------------- | --------------------------------------------------- | ------- |
+| `openai-chat-completions` | `<base>/chat/completions` | HTTP fixture + Bisik/enrichment → ledger PostgreSQL | NOT_RUN |
+| `anthropic-messages`      | `<base>/messages`         | HTTP fixture + Bisik/enrichment → ledger PostgreSQL | NOT_RUN |
+
+Model fixture `configured-model` / `fixture-requested-alias` bukan model default
+aplikasi. Model reported alias/snapshot boleh berbeda. Operator wajib mengisi
+`AI_MODEL`; model coding Codex tidak dipakai sebagai default.
+
+Gunakan [.env.example](../.env.example) atau
+[config/.env.ui-ai.example](../config/.env.ui-ai.example), **OFF** secara default.
+Isi server saja: `AI_PROFILE_ID`, `AI_CONFIG_VERSION`, `AI_PROTOCOL`,
+`AI_API_BASE_URL` (API root dengan `/v1` bila diperlukan), `AI_ALLOWED_ORIGINS`,
+`AI_MODEL`, `AI_API_KEY`, `AI_MAX_INPUT_TOKENS`, `AI_MAX_OUTPUT_TOKENS` dan
+`LLM_GATEWAY_TOKEN`. Untuk native Anthropic pilih `x-api-key` +
+`AI_ANTHROPIC_VERSION=2023-06-01`; gateway bearer harus dipilih eksplisit.
+OpenAI memilih tepat satu token field; JSON prompt/object/schema mengikuti profil
+dan schema task Bisik/cerita sebenarnya. Respons tetap divalidasi domain.
+
+Ganti endpoint/model/protocol melalui env server lalu restart, tanpa edit UI.
+Jalur legacy hanya berlaku bila **seluruh `AI_*` dihilangkan** dan key Anthropic
+lama disediakan; konfigurasi campur/setengah lengkap fail-closed. Tidak ada retry
+otomatis, vendor failover, key browser atau API listing saat startup.
+URL harus HTTPS, origin operator exact, tanpa credentials/query/fragment/redirect;
+HTTP loopback hanya dengan flag local-dev. Fetch tidak mem-pin DNS: deployment
+memerlukan kebijakan egress yang sesuai; ini bukan klaim SSRF-proof.
+
+### Ledger, budget dan review
+
+Migration [038](../supabase/migrations/202610020038_ai_profiles.sql) additive.
+Histori migration dan receipt lama harus dipertahankan. V1 rows/receipt tetap utuh; V2 menyimpan snapshot
+profile/protocol/requested model/config/price/date/currency/limits/prompt saat reserve.
+Complete harus cocok snapshot, bukan harga/profile yang mungkin sudah berubah.
+Counter hilang tetap `null`, `usageKnown=false`; reservation konservatif tetap
+ditagihkan terhadap budget. Ledger mencatat ceiling, bukan invoice vendor aktual.
+Duplikasi requestId tidak memicu paid attempt kedua; receipt identik idempoten,
+receipt berbeda ditolak. SQL mengunci policy/profile/account untuk concurrency.
+
+Provisioning profil adalah tugas operator DB tepercaya **setelah izin yang sesuai**.
+Di `pn_private.llm_profiles`, identity/limits harus sama dengan server. Isi
+`price_version`, `pricing_date`, `currency=USD`, empat
+`*_per_million_microusd`, `cap_microusd`, `request_cap`, `token_cap` dan
+`configured_free` dari kontrak harga aktual. USD 1 = 1.000.000 microusd;
+USD 1/juta token = 1.000.000 pada kolom harga per million. Harga `NULL`/tanpa tanggal
+tidak bisa diaktifkan. Free memerlukan empat angka nol eksplisit dan tetap punya
+request/token cap. Policy global/account/gateway hash juga harus diprovision.
+Tambahkan config version saat mengganti model/harga; jangan relabel receipt lama.
+
+Status operator memisahkan configured, connectionTested, contentEligible,
+privacyReviewed dan budgetEnabled/reason. Hash review stale tidak membuat konten
+eligible. `connectionTested` pada status aplikasi tetap false; receipt diagnosis
+terpisah tidak otomatis menjadi approval kelas. Manifest review konten masih kosong,
+privacy review masih null. Akun contoh memakai aturan konfigurasi/review/budget
+yang sama dengan guru; gate khusus akun contoh sudah dihapus. Kartu strategi
+statis tetap tersedia, tanpa nama/foto/ink/QR/identity kelas pada payload provider.
+
+### Diagnosis aman
+
+```bash
+pnpm ai:diagnose
+```
+
+Default membaca konfigurasi dengan **0 request**, tidak menulis approval.
+Uji vendor live belum dibuktikan oleh pengujian lokal. Bila operator
+kemudian mengotorisasi probe sintetis, CLI mensyaratkan `--allow-paid`,
+`--max-requests 1..3`, dan `--policy-file` yang cocok dengan profil/harga/cap.
+[Template policy](../config/ai-diagnostic-policy.example.json) sengaja memiliki harga
+unknown sehingga gagal sampai operator mengisinya. Deadline 5 detik per probe,
+stop setelah failure, tidak retry; receipt sanitized `.local/ai-connection-receipt.json`
+tidak memuat raw body/key. Ceiling konservatif terpisah dari biaya aktual.

@@ -18,10 +18,14 @@ Target awal: prototipe penyisihan kelas 7B. Target final: seluruh fitur wajib su
 
 ## 0. Cara memakai spesifikasi dan asal keputusan
 
-Baca bersama `../AGENTS.md` dan `../PLAN.md`. File ini mengubah delapan dokumen
-produk menjadi kontrak rekayasa. Tidak menggantikan atau mengedit sumber asli.
-Tidak memerlukan file STATUS.md, CONFLICTS.md, atau TECH_SPEC lain: status kerja
-ada di PLAN.md; register konflik ada di bagian 2 file ini.
+Baca bersama [panduan pengembangan](../AGENTS.md) dan [README](../README.md).
+File ini mengubah delapan dokumen produk menjadi kontrak rekayasa. Register
+konflik ada di bagian 2; bukti hasil pengujian ada di [artifacts/qa](../artifacts/qa/).
+
+Rujukan PLAN, VIDEO_HANDOFF dan UI_AI_HANDOFF pada catatan milestone di bawah
+adalah rujukan historis. Dokumen tersebut telah dihapus dari pohon kerja; versi
+aslinya tetap tersedia pada [snapshot sebelum perapian](https://github.com/IndraYuda13/papannalar/tree/eaa4bcbdb5d488312ed71467fcc3eccfa0242ef9).
+Rujukan itu bukan instruksi untuk membuat ulang jurnal atau mengulang milestone.
 
 Label yang digunakan:
 
@@ -141,7 +145,7 @@ siswa. Jangan mengklaim data tersebut anonim total hanya karena tanpa nama.
 
 Keputusan sementara berlaku untuk implementasi yang disebutkan, bukan persetujuan
 uji anak atau pengubahan sumber. Kolom "batas" menentukan kapan harus ditinjau.
-Setiap penyelesaian dicatat di jurnal keputusan PLAN.md dengan tanggal dan alasan.
+Catat keputusan baru pada register ini dengan tanggal, alasan dan bukti terkait.
 
 | ID | Bukti / masalah | Usulan sementara [D], tidak mengubah sumber | Batas / status |
 | --- | --- | --- | --- |
@@ -342,7 +346,6 @@ dependency latest atau mencampur package manager/lockfile.
 
 ```text
 AGENTS.md
-PLAN.md
 docs/00_...md ... docs/08_TECH_SPEC.md
 src/app/(public)/masuk/page.tsx
 src/app/auth/callback/route.ts
@@ -1780,7 +1783,8 @@ Paket ini belum berisi kode aplikasi. Di repo pengguna, inspect dahulu manifest,
 lockfile, struktur, migration, dan git status. Pertahankan perubahan pengguna;
 jangan menjalankan generator yang menimpa proyek yang sudah ada. Jika kosong,
 M01 scaffold sesuai bagian 3. Exact dependency versions ditentukan dari rilis
-stabil yang kompatibel pada hari eksekusi dan dicatat di PLAN; gunakan satu lockfile.
+stabil yang kompatibel pada hari eksekusi dan dicatat dalam perubahan terkait;
+gunakan satu lockfile.
 Node/package manager version harus dikunci, mengikuti dukungan Next versi terpilih,
 bukan menebak dari versi lama. Tidak menggunakan flag experimental sebagai fondasi
 fungsi offline yang wajib.
@@ -1802,7 +1806,7 @@ fungsi offline yang wajib.
 
 Sebelum script dibuat, tulis NOT_IMPLEMENTED; jangan membuat script `echo passed`.
 `verify` tidak boleh melewatkan tes relevan secara diam-diam. Jika repo existing
-menggunakan pnpm/bun/yarn, pertahankan lockfile dan tulis padanan command di PLAN.
+menggunakan pnpm/bun/yarn, pertahankan lockfile dan tulis padanan command di README.
 Tidak mencampur beberapa package manager hanya untuk melewati error install.
 
 Contoh runbook setelah M01 dan dependencies tersedia (bukan command yang sudah
@@ -1895,7 +1899,8 @@ maskot daripada rantai inti. Prettypage bukan pengganti kartu nyata yang terbaca
 
 Satu task selesai hanya jika perubahan dapat dibaca, acceptance yang relevan
 terpenuhi, regression test berjalan, affectedUI diperiksa, evidence nyata dicatat,
-dan PLAN diperbarui. Satu milestone selesai hanya jika semua subtugas wajibnya
+dan dokumentasi terkait diperbarui. Satu milestone selesai hanya jika semua
+subtugas wajibnya
 selesai; blocked gate tidak diubah menjadi done. Satu rilis selesai hanya jika
 seluruh fitur/gate rilisnya lulus pada commit yang benar.
 

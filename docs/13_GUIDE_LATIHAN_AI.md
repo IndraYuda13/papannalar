@@ -120,7 +120,7 @@ berisi pertanyaan untuk dikerjakan, berbeda dari lembar jawaban Kartu Nalar.
    Teks bebas memerlukan pratinjau privasi tanpa identitas sebelum dikirim.
 
 Pengaturan endpoint/model/kunci dan anggaran berada di server sesuai
-[panduan pengelola](../UI_AI_HANDOFF.md). Data contoh memakai pengaturan yang
+[panduan pengelola](12_AI_COMPAT_SPEC.md#panduan-pengelola-ai). Data contoh memakai pengaturan yang
 sama. Status konfigurasi tidak membuktikan keberhasilan provider live.
 
 ## Melepaskan papan dari sesi lama
