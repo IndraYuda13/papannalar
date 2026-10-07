@@ -67,13 +67,13 @@ for (const width of [360, 390])
     }
     const menu = page.getByRole("navigation", { name: "Menu utama" });
     await expect(
-      menu.getByRole("link", { name: "Latihan & AI", exact: true }),
+      menu.getByRole("link", { name: "Belajar berkelompok", exact: true }),
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Sinkronkan jawaban", exact: true }),
     ).toBeHidden();
     const practiceLink = page.getByRole("link", {
-      name: "Buka latihan & AI",
+      name: "Siapkan belajar berkelompok",
       exact: true,
     });
     const selectedId = new URL(
@@ -87,10 +87,10 @@ for (const width of [360, 390])
     expect(selectedClass).toBeDefined();
     await practiceLink.click();
     await expect(
-      page.getByRole("heading", { name: "Latihan & bantuan AI", exact: true }),
+      page.getByRole("heading", { name: "Belajar berkelompok", exact: true }),
     ).toBeVisible();
     await expect(
-      menu.getByRole("link", { name: "Latihan & AI", exact: true }),
+      menu.getByRole("link", { name: "Belajar berkelompok", exact: true }),
     ).toHaveAttribute("aria-current", "page");
     // Home resumes the latest class; shared sample history need not end in 7B.
     await expect(
@@ -258,7 +258,7 @@ test("FLOW02 empty pages offer a next action; personal and example classes remai
   await expect(page).toHaveURL(/\/guru\/kelas$/);
   await page
     .getByRole("navigation", { name: "Menu utama" })
-    .getByRole("link", { name: "Latihan & AI", exact: true })
+    .getByRole("link", { name: "Belajar berkelompok", exact: true })
     .click();
   await page.getByLabel("Gunakan kelas").selectOption("demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
@@ -382,7 +382,7 @@ test("FLOW03 AI status never claims tested readiness; changing source clears the
   await sample(page);
   await page
     .getByRole("navigation", { name: "Menu utama" })
-    .getByRole("link", { name: "Latihan & AI", exact: true })
+    .getByRole("link", { name: "Belajar berkelompok", exact: true })
     .click();
   await page.locator("#teacher-ai > summary").click();
   for (const contentEligible of [false, true]) {

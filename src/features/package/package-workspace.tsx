@@ -322,7 +322,7 @@ export function PackageWorkspace({
               {busy ? "Menyiapkan…" : "Siapkan soal"}
             </Button>
           )}
-          <details className="text-sm">
+          <details id="practice-new-package" className="text-sm">
             <summary className="min-h-12 cursor-pointer font-semibold">
               {pkg ? "Siapkan soal lain" : "Ganti cara cek (opsional)"}
             </summary>

@@ -74,6 +74,9 @@ for (const width of [360, 390])
     expect(frozen.id).toBe(prepared.id);
     expect(frozen.frozen).toBe(true);
     await page
+      .getByText("Periksa persiapan atau ganti kelas", { exact: true })
+      .click();
+    await page
       .getByRole("button", { name: "Buka langkah 2: Soal", exact: true })
       .click();
     const topic = page.getByLabel("Topik pembuka", { exact: true });

@@ -73,43 +73,67 @@ export function PracticeActivities({
       setStarting(false);
     }
   }
+  function prepareNext() {
+    openTeacherActivity("teacher-prepare");
+    const section = document.getElementById("practice-new-package");
+    if (section instanceof HTMLDetailsElement) {
+      section.open = true;
+      section.scrollIntoView({ block: "start" });
+      section.querySelector("summary")?.focus({ preventScroll: true });
+    }
+  }
+  const needsNewPackage = Boolean(pkg?.frozen && !session);
+  const preparationNavigation = (
+    <nav aria-label="Langkah menyiapkan latihan" className="practice-journey">
+      {[
+        ["kelas-heading", "1", "Kelas"],
+        ["teacher-prepare", "2", "Soal"],
+        ["teacher-teach", "3", "Mengajar"],
+      ].map(([id, n, label]) => (
+        <button
+          key={id}
+          aria-controls={id}
+          aria-label={`Buka langkah ${n}: ${label}`}
+          aria-current={
+            (n === "1" && !detail) ||
+            (n === "2" && detail && !session) ||
+            (n === "3" && session)
+              ? "step"
+              : undefined
+          }
+          onClick={() => {
+            if (id === "kelas-heading")
+              document.getElementById(id)?.scrollIntoView({ block: "start" });
+            else openTeacherActivity(id);
+          }}
+        >
+          <span aria-hidden>{n}</span>
+          {label}
+        </button>
+      ))}
+    </nav>
+  );
   return (
     <>
-      <nav aria-label="Langkah menyiapkan latihan" className="practice-journey">
-        {[
-          ["kelas-heading", "1", "Kelas"],
-          ["teacher-prepare", "2", "Soal"],
-          ["teacher-teach", "3", "Mengajar"],
-        ].map(([id, n, label]) => (
-          <button
-            key={id}
-            aria-controls={id}
-            aria-label={`Buka langkah ${n}: ${label}`}
-            aria-current={
-              (n === "1" && !detail) ||
-              (n === "2" && detail && !session) ||
-              (n === "3" && session)
-                ? "step"
-                : undefined
-            }
-            onClick={() => {
-              if (id === "kelas-heading")
-                document.getElementById(id)?.scrollIntoView({ block: "start" });
-              else openTeacherActivity(id);
-            }}
-          >
-            <span aria-hidden>{n}</span>
-            {label}
-          </button>
-        ))}
-      </nav>
+      {session ? (
+        <details className="rounded-input border px-4">
+          <summary className="min-h-12 cursor-pointer content-center font-semibold text-primary">
+            Periksa persiapan atau ganti kelas
+          </summary>
+          {preparationNavigation}
+        </details>
+      ) : (
+        preparationNavigation
+      )}
       <ActivityDisclosure
         id="teacher-prepare"
         title="Siapkan soal"
         description={
-          pkg
-            ? "Soal siap. Periksa atau ubah bila perlu, lalu mulai mengajar."
-            : "Satu tombol untuk menyiapkan soal sesuai kelas."
+          needsNewPackage
+            ? "Soal ini sudah dipakai. Siapkan soal untuk pertemuan berikutnya."
+            : pkg
+              ? "Soal siap. Periksa atau ubah bila perlu, lalu mulai mengajar."
+              : "Satu tombol untuk menyiapkan soal sesuai kelas."
         }
         initiallyOpen
         scope={{ ownerId, mode }}
@@ -122,26 +146,34 @@ export function PracticeActivities({
                   ? "Gunakan kumpulan soal Anda"
                   : session
                     ? "Sesi Anda masih berjalan"
-                    : "Soal siap untuk kelas Anda"}
+                    : needsNewPackage
+                      ? "Siapkan pertemuan berikutnya"
+                      : "Soal siap untuk kelas Anda"}
               </h3>
               <p className="text-sm">
                 {mode === "pilot"
                   ? "Pilih soal yang sudah siap untuk kelas ini. Latihan otomatis di bawah dapat dicoba dengan data contoh."
                   : session
                     ? "Lanjutkan dari bagian terakhir. Mengubah persiapan tidak mengubah sesi ini."
-                    : "Mulai sesi, kemudian sambungkan layar kelas. AI boleh dilewati."}
+                    : needsNewPackage
+                      ? "Soal berikutnya disiapkan dari hasil cek yang sudah disimpan. Jawaban pertemuan sebelumnya tetap tersimpan."
+                      : "Mulai sesi, kemudian sambungkan layar kelas. AI boleh dilewati."}
               </p>
             </div>
             {mode === "demo" ? (
               <Button
-                disabled={starting || (!session && pkg.frozen)}
-                onClick={() => void beginTeaching()}
+                disabled={starting}
+                onClick={() =>
+                  needsNewPackage ? prepareNext() : void beginTeaching()
+                }
               >
                 {starting
                   ? "Memulai sesi…"
                   : session
                     ? "Lanjutkan sesi"
-                    : "Mulai mengajar"}
+                    : needsNewPackage
+                      ? "Siapkan soal berikutnya"
+                      : "Mulai mengajar"}
                 <ArrowRight size={18} aria-hidden />
               </Button>
             ) : (

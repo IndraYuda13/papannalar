@@ -88,7 +88,7 @@ test("tab baru offline membuka latihan, contoh sesi dan papan; font, IndexedDB d
   await fresh.setViewportSize({ width: 390, height: 844 });
   await fresh.goto("/guru/latihan");
   await expect(
-    fresh.getByRole("heading", { name: "Latihan & bantuan AI", exact: true }),
+    fresh.getByRole("heading", { name: "Belajar berkelompok", exact: true }),
   ).toBeVisible();
   await injectFixture(fresh);
   expect(

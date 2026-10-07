@@ -1,5 +1,5 @@
 "use client";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import type { LocalScope } from "@/local/scope";
 import { useVisualPreferences } from "@/ui/components/visual-preferences";
@@ -35,6 +35,9 @@ export function ActivityDisclosure({
     return initiallyOpen;
   });
   const { reduced, light, saveData } = useVisualPreferences();
+  useEffect(() => {
+    if (window.location.hash === `#${id}`) openTeacherActivity(id);
+  }, [id]);
   return (
     <details
       id={id}

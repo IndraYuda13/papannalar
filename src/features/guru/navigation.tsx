@@ -2,14 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import {
-  Home,
-  UsersRound,
-  Layers,
-  ClipboardCheck,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
+import { Home, UsersRound, Layers, ClipboardCheck, LogOut } from "lucide-react";
 import { Brand } from "@/ui/components/brand";
 import { TeacherProvider } from "./app-context";
 import { logoutTeacher } from "@/features/classroom/logout-transport";
@@ -19,7 +12,7 @@ const entries = [
   ["/guru", "Beranda", "Beranda", Home],
   ["/guru/kelas", "Kelas", "Kelas", UsersRound],
   ["/guru/soal", "Soal & Presentasi", "Soal", Layers],
-  ["/guru/latihan", "Latihan & AI", "Latihan & AI", Sparkles],
+  ["/guru/latihan", "Belajar berkelompok", "Kelompok", UsersRound],
   ["/guru/asesmen", "Asesmen & Hasil", "Hasil", ClipboardCheck],
 ] as const;
 export function TeacherNavigation({ children }: { children: ReactNode }) {

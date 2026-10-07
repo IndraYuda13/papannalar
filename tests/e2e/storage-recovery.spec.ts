@@ -110,7 +110,7 @@ test("OFF03 a new service worker stays waiting during class and activates only a
   await waitForShellCache(page);
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Latihan & bantuan AI", exact: true }),
+    page.getByRole("heading", { name: "Belajar berkelompok", exact: true }),
   ).toBeVisible();
   await fixtures(page);
   expect(
@@ -174,7 +174,7 @@ test("OFF03 a new service worker stays waiting during class and activates only a
     )
     .toBe(false);
   await expect(
-    page.getByRole("heading", { name: "Latihan & bantuan AI", exact: true }),
+    page.getByRole("heading", { name: "Belajar berkelompok", exact: true }),
   ).toBeVisible();
 });
 

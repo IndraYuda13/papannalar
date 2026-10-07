@@ -603,7 +603,7 @@ export function TeacherWorkspace({
           <p className="rounded-input bg-pn-teal-100 p-4">
             Contoh ini memakai 32 siswa kelas 7 dan soal bawaan. Coba memeriksa
             tiga kartu, membagi kelompok, lalu mengendalikan layar. Soal yang
-            Anda siapkan di halaman Latihan & AI tidak digunakan di sini.
+            Anda siapkan di halaman Belajar berkelompok tidak digunakan di sini.
           </p>
           <ExampleActivities
             ownerId={ownerId}
@@ -615,7 +615,7 @@ export function TeacherWorkspace({
             href={`/guru/latihan?mode=${mode}${detail ? `&class=${detail.class.id}` : ""}`}
             className="inline-flex min-h-12 items-center font-semibold text-primary underline"
           >
-            Kembali ke latihan & AI
+            Kembali ke belajar berkelompok
           </Link>
         </>
       ) : (

@@ -1945,3 +1945,24 @@ kompatibel tanpa memeriksa lockfile dan dokumentasinya.
 
 Akhir spesifikasi. Dokumen sumber tetap utuh; keputusan baru dan hasil implementasi
 harus memiliki jejak, bukan ditambahkan seolah telah ada dalam sumber.
+
+
+## UX guru bertahap — 8 Oktober 2026
+
+Permintaan pengguna: guru awam memahami tindakan berikutnya sejak membuka
+aplikasi. Jalur `/guru/latihan` memakai nama **Belajar berkelompok**. Persiapan
+kelas/soal tetap dipisahkan dari empat langkah sesi: cek siswa, periksa kelompok,
+kegiatan, cek akhir dan selesai. Kontrol yang tidak relevan disembunyikan tanpa
+melepas formulir atau state rotasi. Pilihan tampilan tambahan tetap tersedia.
+
+Halaman kelas menambah **Kebutuhan belajar**, pembacaan timeline siklus/lisan
+existing pada perangkat dan lingkup akun/mode kelas yang sama. Ringkasan tidak
+mengonversi skor koleksi bebas menjadi mastery. Hasil sementara, siswa tanpa
+bukti dan ketidakhadiran dibedakan. Selesai sesi mengarah ke ringkasan kelas;
+bukti jawaban hanya di permukaan guru. Tidak ada perubahan schema, migration,
+parameter BKT, pemilihan kelompok, auth/RLS, atau persetujuan konten.
+
+Batas implementasi ini: belum menyelesaikan seluruh rekomendasi audit produk.
+Manual move, pemetaan keterampilan pada soal buatan guru, tren lintas minggu,
+review materi/privasi dan pembukaan siklus untuk kelas nyata tetap pekerjaan
+terpisah. Nama menu dan petunjuk diperbarui bersama panduan dan tes browser.

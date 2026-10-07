@@ -51,7 +51,7 @@ async function sample(page: Page) {
   ).toBe(true);
   await page
     .getByRole("navigation", { name: "Menu utama" })
-    .getByRole("link", { name: "Latihan & AI", exact: true })
+    .getByRole("link", { name: "Belajar berkelompok", exact: true })
     .click();
 }
 for (const width of [360, 390, 1366])

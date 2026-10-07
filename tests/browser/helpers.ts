@@ -72,7 +72,7 @@ export async function loginTeacher(
   await expect(page).toHaveURL(/\/guru$/);
   await page
     .getByRole("navigation", { name: "Menu utama" })
-    .getByRole("link", { name: "Latihan & AI", exact: true })
+    .getByRole("link", { name: "Belajar berkelompok", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Buat kelas", exact: true }),

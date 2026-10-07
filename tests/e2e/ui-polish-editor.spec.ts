@@ -62,7 +62,7 @@ for (const viewport of [
     await expect(
       page
         .getByRole("navigation", { name: "Menu utama" })
-        .getByRole("link", { name: "Latihan & AI", exact: true }),
+        .getByRole("link", { name: "Belajar berkelompok", exact: true }),
     ).toBeVisible();
     await noHorizontalOverflow(page);
     await page.screenshot({

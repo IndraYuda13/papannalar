@@ -67,7 +67,7 @@ tindakan tetap terlihat.
 
 ## Mencoba latihan dengan data contoh
 
-1. Klik **Coba dengan data contoh**, lalu **Buka latihan & AI**. Pilih kelas
+1. Klik **Coba dengan data contoh**, lalu **Siapkan belajar berkelompok**. Pilih kelas
    yang sedang dipakai; kelas lainnya ada di **Ganti kelas**.
 2. Klik **Siapkan soal**. Pertanyaan pembuka adalah ajakan berdiskusi sebelum
    cek dan tidak dinilai. **Topik pembuka** dapat diganti. Pilihan jenis cek
@@ -77,6 +77,33 @@ tindakan tetap terlihat.
    Satu klik membuat sesi dari soal yang sedang disiapkan. Buka `/layar`
    pada TV/proyektor/papan, lalu pindai QR atau masukkan kode di HP guru.
    Setelah tersambung, formulir kode ditutup dan kendali layar muncul.
+
+Saat sesi berjalan, ikuti empat langkah berikut:
+
+1. **Cek siswa.** Bagikan kartu, tampilkan soal, lalu pindai atau masukkan
+   jawaban. Tandai siswa yang tidak hadir. Pilih **Lanjut · periksa kelompok**.
+2. **Periksa kelompok.** Baca saran kegiatan dan anggota tiap kelompok.
+   Jawaban yang belum cukup tidak dianggap siswa belum mampu. Setelah siap,
+   pilih **Gunakan pembagian kelompok ini**, lalu **Lanjut · kegiatan kelompok**.
+3. **Kegiatan.** Ikuti rotasi guru, papan dan latihan mandiri. Tombol
+   **Tampilan lainnya** membuka pilihan tambahan bila diperlukan.
+4. **Cek akhir & selesai.** Periksa jawaban beserta alasan siswa. Tutup kelas,
+   simpan penilaian, lalu pilih **Selesai · lihat kebutuhan kelas**. Jawaban
+   yang belum masuk tetap ditandai belum lengkap.
+
+**Kelas → Kebutuhan belajar** menampilkan hasil pemeriksaan pada perangkat ini.
+Ketuk siswa untuk melihat bukti jawaban. Hasil soal buatan sendiri tetap berada
+pada **Asesmen & Hasil**; skor tersebut tidak otomatis dianggap level kemampuan.
+Nama dan hasil individu tidak tampil di papan. Cek lisan dapat dibuka dari
+siswa yang membutuhkan pemeriksaan lanjutan.
+
+Setelah hasil disimpan, pilih **Siapkan pertemuan berikutnya → Siapkan soal
+berikutnya → Buat latihan baru**. Aplikasi memilih cek lanjutan berdasarkan
+hasil sebelumnya. Setelah soal siap, klik **Mulai mengajar**. Jawaban dari
+pertemuan sebelumnya tetap tersimpan.
+
+Untuk mengubah persiapan ketika sesi berjalan, buka **Periksa persiapan atau
+ganti kelas**. Berpindah langkah tidak menghapus formulir yang sedang diisi.
 
 **Lanjutkan sesi** kembali ke sesi yang sedang berjalan. Mengganti topik
 setelah sesi dimulai membuat salinan untuk persiapan berikutnya; soal, jawaban

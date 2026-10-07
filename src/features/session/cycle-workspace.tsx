@@ -34,6 +34,7 @@ import Link from "next/link";
 import type { TeacherPackage } from "@/core/package/build";
 import { getStep } from "@/content/ladder/registry";
 import { PrintCards } from "@/features/guru/print-cards";
+import { LearningJourney, type LearningStep } from "./learning-journey";
 
 export type CycleActions = { start: () => Promise<void> };
 
@@ -70,6 +71,16 @@ export function CycleWorkspace({
   const { ownerId, mode } = scope;
   const [syncRevision, setSyncRevision] = useState(0);
   const [legacyHistory, setLegacyHistory] = useState(false);
+  const [view, setView] = useState<{ sessionId: string; step: LearningStep }>();
+  function selectStep(step: LearningStep) {
+    if (!data) return;
+    setView({ sessionId: data.cycle.id, step });
+    requestAnimationFrame(() => {
+      const heading = document.getElementById("learning-step-title");
+      heading?.scrollIntoView({ block: "start" });
+      heading?.focus({ preventScroll: true });
+    });
+  }
   const starting = useRef(false);
   useEffect(() => {
     onSessionChange(
@@ -322,6 +333,14 @@ export function CycleWorkspace({
     : undefined;
   const groups = data?.cycle.groups ?? [];
   const context = data?.parent.context;
+  const step: LearningStep =
+    view?.sessionId === data?.cycle.id && view
+      ? view.step
+      : data?.cycle.classEnded
+        ? "results"
+        : groups.length
+          ? "activities"
+          : "check";
   return (
     <section
       aria-label="Siklus kelas"
@@ -355,18 +374,30 @@ export function CycleWorkspace({
               ? "penilaian tersimpan"
               : "penilaian belum disimpan"}
           </p>
-          <Button
-            variant="outline"
-            disabled={busy}
-            onClick={() =>
-              void refresh().catch(() =>
-                setMessage("Sesi belum dapat dimuat ulang."),
-              )
-            }
-          >
-            Muat ulang sesi
-          </Button>
+          <LearningJourney
+            step={step}
+            grouped={groups.length > 0}
+            ended={data.cycle.classEnded}
+            onChange={selectStep}
+          />
+          <details>
+            <summary className="min-h-12 cursor-pointer text-sm text-primary">
+              Jika data sesi belum diperbarui
+            </summary>
+            <Button
+              variant="outline"
+              disabled={busy}
+              onClick={() =>
+                void refresh().catch(() =>
+                  setMessage("Sesi belum dapat dimuat ulang."),
+                )
+              }
+            >
+              Muat ulang sesi
+            </Button>
+          </details>
           <PresentationControls
+            guidedStep={step}
             key={data.cycle.id}
             scope={scope}
             classId={context.classroom.id}
@@ -409,263 +440,317 @@ export function CycleWorkspace({
               );
             }}
           />
-          <details>
-            <summary className="min-h-12 cursor-pointer font-bold">
-              Kehadiran sesi
-            </summary>
-            <p>
-              Tidak hadir tetap tanpa jawaban. Kehadiran dikunci bersama
-              kelompok.
-            </p>
-            <div className="grid grid-cols-2">
-              {context.roster.map((s) => (
-                <label key={s.id} className="flex min-h-12 items-center gap-2">
-                  <input
-                    aria-label={`Tidak hadir absen ${s.attendanceNumber}`}
-                    type="checkbox"
-                    disabled={busy || !!groups.length || data.cycle.classEnded}
-                    checked={data.cycle.absentStudentIds.includes(s.id)}
-                    onChange={(e) => {
-                      void change(
-                        setAttendance(
-                          data.cycle,
-                          e.target.checked
-                            ? [...data.cycle.absentStudentIds, s.id]
-                            : data.cycle.absentStudentIds.filter(
-                                (id) => id !== s.id,
-                              ),
-                          context.roster.map((s) => s.id),
-                        ),
-                      );
-                    }}
-                  />
-                  Absen {s.attendanceNumber}
-                </label>
-              ))}
-            </div>
-          </details>
-          {!context.oralOnly && (
-            <section aria-label="Hasil cek sesi" className="space-y-3">
-              <h4 className="font-bold">
-                {data.package.variant === "initial"
-                  ? "Cek pertama · kartu A5"
-                  : "Cek lanjutan"}
-              </h4>
-              <PrintCards
-                compact
-                fixedKind={
-                  data.package.variant === "initial" ? "initial" : "weekly"
-                }
-                count={context.roster.length}
-              />
-              <p data-testid="cycle-scan-count">
-                {data.parent.cards.length}/{context.roster.length} kartu
-                tersimpan · {data.cycle.absentStudentIds.length} tidak hadir
+          <div hidden={step !== "check"} className="space-y-4">
+            <details>
+              <summary className="min-h-12 cursor-pointer font-bold">
+                Kehadiran sesi
+              </summary>
+              <p>
+                Tidak hadir tetap tanpa jawaban. Kehadiran dikunci bersama
+                kelompok.
               </p>
-              <ScanCapture
-                kind={data.package.variant === "initial" ? "initial" : "weekly"}
-                roster={context.roster.map((s) => s.attendanceNumber)}
-                onManual={() => review()}
-                onRead={(r, source) =>
-                  review(
-                    context.roster.find(
-                      (s) => s.attendanceNumber === r.attendanceNumber,
-                    )?.id,
-                    r.answers.map((a) => a.result),
-                    source,
-                  )
-                }
-              />
-              {draft && (
-                <form
-                  aria-label="Review cek sesi"
-                  className="space-y-3"
-                  onSubmit={save}
-                >
-                  <label>
-                    Absen{" "}
-                    <select
-                      className={field}
-                      aria-label="Absen cek sesi"
-                      value={draft.studentId}
-                      onChange={(e) => review(e.target.value)}
-                    >
-                      {context.roster.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.attendanceNumber}
-                        </option>
-                      ))}
-                    </select>
+              <div className="grid grid-cols-2">
+                {context.roster.map((s) => (
+                  <label
+                    key={s.id}
+                    className="flex min-h-12 items-center gap-2"
+                  >
+                    <input
+                      aria-label={`Tidak hadir absen ${s.attendanceNumber}`}
+                      type="checkbox"
+                      disabled={
+                        busy || !!groups.length || data.cycle.classEnded
+                      }
+                      checked={data.cycle.absentStudentIds.includes(s.id)}
+                      onChange={(e) => {
+                        void change(
+                          setAttendance(
+                            data.cycle,
+                            e.target.checked
+                              ? [...data.cycle.absentStudentIds, s.id]
+                              : data.cycle.absentStudentIds.filter(
+                                  (id) => id !== s.id,
+                                ),
+                            context.roster.map((s) => s.id),
+                          ),
+                        );
+                      }}
+                    />
+                    Absen {s.attendanceNumber}
                   </label>
-                  {draft.choices.map((c, i) => (
-                    <label key={i} className="block">
-                      Baris {i + 1}{" "}
+                ))}
+              </div>
+            </details>
+            {!context.oralOnly && (
+              <section aria-label="Hasil cek sesi" className="space-y-3">
+                <h4 className="font-bold">
+                  {data.package.variant === "initial"
+                    ? "Cek pertama · kartu A5"
+                    : "Cek lanjutan"}
+                </h4>
+                <PrintCards
+                  compact
+                  fixedKind={
+                    data.package.variant === "initial" ? "initial" : "weekly"
+                  }
+                  count={context.roster.length}
+                />
+                <p data-testid="cycle-scan-count">
+                  {data.parent.cards.length}/{context.roster.length} kartu
+                  tersimpan · {data.cycle.absentStudentIds.length} tidak hadir
+                </p>
+                <ScanCapture
+                  kind={
+                    data.package.variant === "initial" ? "initial" : "weekly"
+                  }
+                  roster={context.roster.map((s) => s.attendanceNumber)}
+                  onManual={() => review()}
+                  onRead={(r, source) =>
+                    review(
+                      context.roster.find(
+                        (s) => s.attendanceNumber === r.attendanceNumber,
+                      )?.id,
+                      r.answers.map((a) => a.result),
+                      source,
+                    )
+                  }
+                />
+                {draft && (
+                  <form
+                    aria-label="Review cek sesi"
+                    className="space-y-3"
+                    onSubmit={save}
+                  >
+                    <label>
+                      Absen{" "}
                       <select
                         className={field}
-                        aria-label={`Cek baris ${i + 1}`}
-                        value={c}
-                        onChange={(e) =>
-                          setDraft({
-                            ...draft,
-                            source: "manual",
-                            choices: draft.choices.map((v, j) =>
-                              j === i ? (e.target.value as CardChoice) : v,
-                            ),
-                          })
-                        }
+                        aria-label="Absen cek sesi"
+                        value={draft.studentId}
+                        onChange={(e) => review(e.target.value)}
                       >
-                        {CARD_CHOICES.map((choice) => (
-                          <option key={choice} value={choice}>
-                            {choice === "missing" ? "Belum terbaca" : choice}
+                        {context.roster.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.attendanceNumber}
                           </option>
                         ))}
                       </select>
                     </label>
+                    {draft.choices.map((c, i) => (
+                      <label key={i} className="block">
+                        Baris {i + 1}{" "}
+                        <select
+                          className={field}
+                          aria-label={`Cek baris ${i + 1}`}
+                          value={c}
+                          onChange={(e) =>
+                            setDraft({
+                              ...draft,
+                              source: "manual",
+                              choices: draft.choices.map((v, j) =>
+                                j === i ? (e.target.value as CardChoice) : v,
+                              ),
+                            })
+                          }
+                        >
+                          {CARD_CHOICES.map((choice) => (
+                            <option key={choice} value={choice}>
+                              {choice === "missing" ? "Belum terbaca" : choice}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ))}
+                    <Button type="submit" disabled={busy}>
+                      {draft.revision ? "Ganti hasil cek" : "Simpan hasil cek"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setDraft(undefined)}
+                    >
+                      Lewati hasil cek
+                    </Button>
+                  </form>
+                )}
+                <details>
+                  <summary className="min-h-12 cursor-pointer">
+                    Soal dan kunci cek guru
+                  </summary>
+                  <ol>
+                    {data.package.assessment.map((q, i) => (
+                      <li
+                        key={q.id}
+                        data-testid={`teacher-check-${i + 1}`}
+                        data-answer={q.answerKey}
+                      >
+                        {i + 1}. <MathPrompt value={q.prompt} /> · Kunci{" "}
+                        {q.answerKey}
+                      </li>
+                    ))}
+                  </ol>
+                </details>
+                <details>
+                  <summary className="min-h-12 cursor-pointer">
+                    Koreksi cek tersimpan
+                  </summary>
+                  {data.parent.cards.map((c) => (
+                    <Button
+                      key={c.id}
+                      variant="outline"
+                      onClick={() => review(c.studentId)}
+                    >
+                      Koreksi cek absen{" "}
+                      {
+                        context.roster.find((s) => s.id === c.studentId)
+                          ?.attendanceNumber
+                      }
+                    </Button>
                   ))}
-                  <Button type="submit" disabled={busy}>
-                    {draft.revision ? "Ganti hasil cek" : "Simpan hasil cek"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setDraft(undefined)}
-                  >
-                    Lewati hasil cek
-                  </Button>
-                </form>
+                </details>
+              </section>
+            )}
+            {context.oralOnly && (
+              <p>
+                Cek mingguan kelas 1–3 dilakukan lisan bersama guru. Penempatan
+                dari Cek Lisan yang selesai. Siswa yang belum diperiksa tetap
+                menunggu.
+              </p>
+            )}
+            <Button
+              onClick={() => selectStep("groups")}
+              variant={derived.ready ? "default" : "outline"}
+            >
+              {derived.ready
+                ? "Lanjut · periksa kelompok"
+                : "Lihat kebutuhan yang sudah diperiksa"}
+            </Button>
+          </div>
+          <div hidden={step !== "groups"}>
+            <section
+              aria-label="Penempatan dan kelompok sesi"
+              className="space-y-2"
+            >
+              <h4 className="font-bold">
+                Bagi kegiatan sesuai kebutuhan siswa
+              </h4>
+              {!derived.ready && !groups.length && (
+                <p className="text-sm">
+                  Periksa jawaban siswa yang hadir terlebih dahulu. Setelah
+                  hasil cek lengkap, pembagian kelompok dapat digunakan.
+                </p>
               )}
               <details>
-                <summary className="min-h-12 cursor-pointer">
-                  Soal dan kunci cek guru
+                <summary className="min-h-12 cursor-pointer font-semibold">
+                  Lihat kebutuhan belajar per siswa · hanya untuk guru
                 </summary>
-                <ol>
-                  {data.package.assessment.map((q, i) => (
-                    <li
-                      key={q.id}
-                      data-testid={`teacher-check-${i + 1}`}
-                      data-answer={q.answerKey}
-                    >
-                      {i + 1}. <MathPrompt value={q.prompt} /> · Kunci{" "}
-                      {q.answerKey}
-                    </li>
+                {derived.placements
+                  .filter((p) => p.active)
+                  .map((p) => (
+                    <p key={p.studentId}>
+                      Absen {p.attendanceNumber}:{" "}
+                      {p.displayed?.kind === "step"
+                        ? getStep(p.displayed.stepId).label
+                        : p.displayed?.kind === "lanjut"
+                          ? "Lanjut"
+                          : "belum diperiksa"}
+                      {p.replay.belowRange.kind === "below-range"
+                        ? " · di bawah jangkauan cek; lanjutkan Cek Lisan"
+                        : ""}
+                    </p>
                   ))}
-                </ol>
               </details>
-              <details>
-                <summary className="min-h-12 cursor-pointer">
-                  Koreksi cek tersimpan
-                </summary>
-                {data.parent.cards.map((c) => (
-                  <Button
-                    key={c.id}
-                    variant="outline"
-                    onClick={() => review(c.studentId)}
-                  >
-                    Koreksi cek absen{" "}
-                    {
-                      context.roster.find((s) => s.id === c.studentId)
-                        ?.attendanceNumber
-                    }
+              {!groups.length && derived.grouping.groups.length > 0 && (
+                <div className="learning-groups" aria-label="Saran kelompok">
+                  {derived.grouping.groups.map((g) => (
+                    <article key={g.id}>
+                      <h5>
+                        {g.label} · {g.members.length} siswa
+                      </h5>
+                      <p>Latihan: {getStep(g.activityStep).label}</p>
+                      <p className="text-sm">
+                        Nomor absen:{" "}
+                        {g.members.map((s) => s.attendanceNumber).join(", ")}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              )}
+              {!groups.length && (
+                <Button
+                  disabled={
+                    busy ||
+                    !derived.ready ||
+                    !derived.grouping.groups.length ||
+                    data.cycle.classEnded
+                  }
+                  onClick={() =>
+                    void change(
+                      freezeCycleGroups(data.cycle, derived.grouping.groups),
+                    )
+                  }
+                >
+                  Gunakan pembagian kelompok ini
+                </Button>
+              )}
+              {groups.map((g) => (
+                <p key={g.id}>
+                  {g.label} · {g.members.length} siswa · aktivitas{" "}
+                  {getStep(g.activityStep).label}
+                </p>
+              ))}
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" onClick={() => selectStep("check")}>
+                  Kembali ke jawaban siswa
+                </Button>
+                {!!groups.length && !data.cycle.classEnded && (
+                  <Button onClick={() => selectStep("activities")}>
+                    Lanjut · kegiatan kelompok
                   </Button>
-                ))}
-              </details>
+                )}
+              </div>
             </section>
-          )}
-          {context.oralOnly && (
-            <p>
-              Cek mingguan kelas 1–3 dilakukan lisan bersama guru. Penempatan
-              dari Cek Lisan yang selesai. Siswa yang belum diperiksa tetap
-              menunggu.
-            </p>
-          )}
-          <section
-            aria-label="Penempatan dan kelompok sesi"
-            className="space-y-2"
-          >
-            <h4 className="font-bold">Bagi kegiatan sesuai kebutuhan siswa</h4>
-            {!derived.ready && !groups.length && (
-              <p className="text-sm">
-                Periksa jawaban siswa yang hadir terlebih dahulu. Setelah hasil
-                cek lengkap, pembagian kelompok dapat digunakan.
-              </p>
-            )}
-            <details>
-              <summary className="min-h-12 cursor-pointer font-semibold">
-                Lihat kebutuhan belajar per siswa · hanya untuk guru
-              </summary>
-              {derived.placements
-                .filter((p) => p.active)
-                .map((p) => (
-                  <p key={p.studentId}>
-                    Absen {p.attendanceNumber}:{" "}
-                    {p.displayed?.kind === "step"
-                      ? getStep(p.displayed.stepId).label
-                      : p.displayed?.kind === "lanjut"
-                        ? "Lanjut"
-                        : "belum diperiksa"}
-                    {p.replay.belowRange.kind === "below-range"
-                      ? " · di bawah jangkauan cek; lanjutkan Cek Lisan"
-                      : ""}
-                  </p>
-                ))}
-            </details>
-            {!groups.length && (
-              <Button
-                disabled={
-                  busy ||
-                  !derived.ready ||
-                  !derived.grouping.groups.length ||
-                  data.cycle.classEnded
-                }
-                onClick={() =>
-                  void change(
-                    freezeCycleGroups(data.cycle, derived.grouping.groups),
-                  )
-                }
-              >
-                Gunakan pembagian kelompok ini
-              </Button>
-            )}
-            {groups.map((g) => (
-              <p key={g.id}>
-                {g.label} · {g.members.length} siswa · aktivitas{" "}
-                {getStep(g.activityStep).label}
-              </p>
-            ))}
-          </section>
-          {!data.cycle.classEnded && (
-            <Button
-              variant="outline"
-              disabled={busy}
-              onClick={() => void change(closeCycle(data.cycle))}
-            >
-              Tutup kelas
+          </div>
+          {step === "activities" && (
+            <Button onClick={() => selectStep("results")}>
+              Lanjut · cek akhir siswa
             </Button>
           )}
-          {data.cycle.classEnded && !data.cycle.assessmentRevision && (
-            <div className="space-y-3">
-              <label className="flex min-h-12 items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={ackMissing}
-                  onChange={(e) => setAckMissing(e.target.checked)}
-                />
-                Selesaikan penilaian meskipun ada jawaban yang belum masuk;
-                jawaban tidak diisi otomatis
-              </label>
-              <Button disabled={busy} onClick={() => void finalize()}>
-                Simpan penilaian sesi
+          <div hidden={step !== "results"} className="space-y-3">
+            {!data.cycle.classEnded && (
+              <Button
+                variant="outline"
+                disabled={busy}
+                onClick={() => void change(closeCycle(data.cycle))}
+              >
+                Tutup kelas
               </Button>
-            </div>
-          )}
-          {!!data.cycle.assessmentRevision && (
-            <Link
-              className="inline-flex min-h-12 items-center font-semibold text-primary underline"
-              href="/guru"
-            >
-              Selesai · kembali ke beranda
-            </Link>
-          )}
+            )}
+            {data.cycle.classEnded && !data.cycle.assessmentRevision && (
+              <div className="space-y-3">
+                <label className="flex min-h-12 items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={ackMissing}
+                    onChange={(e) => setAckMissing(e.target.checked)}
+                  />
+                  Selesaikan penilaian meskipun ada jawaban yang belum masuk;
+                  jawaban tidak diisi otomatis
+                </label>
+                <Button disabled={busy} onClick={() => void finalize()}>
+                  Simpan penilaian sesi
+                </Button>
+              </div>
+            )}
+            {!!data.cycle.assessmentRevision && (
+              <Link
+                className="inline-flex min-h-12 items-center font-semibold text-primary underline"
+                href={`/guru/kelas/${data.cycle.classId}?view=learning`}
+              >
+                Selesai · lihat kebutuhan kelas
+              </Link>
+            )}
+          </div>
         </>
       )}
       {message && (

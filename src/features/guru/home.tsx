@@ -130,18 +130,23 @@ export function TeacherHome() {
             <span className="activity-icon" aria-hidden>
               <Sparkles size={24} />
             </span>
-            Latihan & bantuan AI
+            Belajar berkelompok
           </h2>
           <p>
-            Butuh latihan tambahan? Siapkan soal otomatis. Jika diperlukan,
-            gunakan AI untuk mengganti cerita soal atau mencari cara
-            menjelaskan.
+            Cari tahu siswa yang perlu bantuan, lalu siapkan kegiatan sesuai
+            kebutuhannya. Anda akan dipandu dari pemeriksaan jawaban sampai
+            pembagian kelompok.
           </p>
+          {!state.sample && (
+            <p className="text-sm text-muted-foreground">
+              Alur berkelompok saat ini dapat dicoba dengan data contoh.
+            </p>
+          )}
           <Button asChild variant="outline" className="mt-auto">
             <Link
               href={`/guru/latihan?mode=${state.sample ? "demo" : "pilot"}${last ? `&class=${last.id}` : ""}`}
             >
-              Buka latihan & AI
+              Siapkan belajar berkelompok
               <ArrowRight size={18} aria-hidden />
             </Link>
           </Button>

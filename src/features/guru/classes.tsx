@@ -19,6 +19,7 @@ import {
 import { createNameRepository } from "@/local/names";
 import { libraryCache } from "@/local/library";
 import { LocalRoster } from "./local-roster";
+import { LearningSummary } from "./learning-summary";
 import { classPresence } from "@/local/class-presence";
 import { PageHeader, StateNotice } from "@/ui/components/studio";
 import { Search, UsersRound } from "lucide-react";
@@ -164,6 +165,12 @@ export function ClassesPage() {
   );
 }
 export function ClassPage({ id }: { id: string }) {
+  const [tab, setTab] = useState<"students" | "learning">(() =>
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("view") === "learning"
+      ? "learning"
+      : "students",
+  );
   const { scope, state, refresh, canMutate } = useTeacher(),
     [detail, setDetail] = useState<{
       class: ClassDto;
@@ -343,9 +350,13 @@ export function ClassPage({ id }: { id: string }) {
       <PageHeader
         eyebrow="Ruang kelas"
         title={`Kelas ${classroom.label}`}
-        description={`${classroom.count} siswa · Tingkat ${classroom.grade} · Catatan hadir hari ini`}
+        description={
+          tab === "learning"
+            ? `${classroom.count} siswa · Lihat kebutuhan belajar dan tentukan bantuan berikutnya.`
+            : `${classroom.count} siswa · Tingkat ${classroom.grade} · Catatan hadir hari ini`
+        }
       />
-      <div className="flex flex-wrap gap-3">
+      <div className={tab === "learning" ? "hidden" : "flex flex-wrap gap-3"}>
         <Button asChild>
           <Link href={`/guru/mulai?class=${id}`}>Mulai mengajar</Link>
         </Button>
@@ -355,12 +366,41 @@ export function ClassPage({ id }: { id: string }) {
           </Link>
         </Button>
         <Button asChild variant="outline">
-          <Link href={`/guru/latihan?class=${id}&mode=${mode}`}>
-            Siapkan latihan & AI
+          <Link href={`/guru/latihan?class=${id}&mode=${classroom.mode}`}>
+            Siapkan belajar berkelompok
           </Link>
         </Button>
       </div>
-      <section className={panel}>
+      <div
+        role="group"
+        aria-label="Isi kelas"
+        className="studio-tabs flex gap-2"
+      >
+        <Button
+          variant={tab === "students" ? "default" : "outline"}
+          aria-pressed={tab === "students"}
+          onClick={() => setTab("students")}
+        >
+          Daftar siswa
+        </Button>
+        <Button
+          variant={tab === "learning" ? "default" : "outline"}
+          aria-pressed={tab === "learning"}
+          onClick={() => setTab("learning")}
+        >
+          Kebutuhan belajar
+        </Button>
+      </div>
+      {tab === "learning" && (
+        <LearningSummary
+          key={`${owner}/${mode}/${id}`}
+          scope={{ ownerId: owner, mode: classroom.mode }}
+          classId={id}
+          students={detail.students}
+          names={names}
+        />
+      )}
+      <section className={panel} hidden={tab !== "students"}>
         <h2 className="text-xl font-bold">Daftar siswa</h2>
         <p className="text-sm text-muted-foreground">
           Nama hanya tersimpan pada perangkat ini. Riwayat mengikuti siswa walau

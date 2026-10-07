@@ -179,6 +179,9 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
       `${n}/32`,
     );
   }
+  await cycle
+    .getByRole("button", { name: "Lanjut · periksa kelompok", exact: true })
+    .click();
   await expect(
     cycle.getByRole("region", {
       name: "Penempatan dan kelompok sesi",
@@ -194,6 +197,10 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
   await expect(
     cycle.getByLabel("Tidak hadir absen 32", { exact: true }),
   ).toBeDisabled();
+  await cycle
+    .getByRole("button", { name: "Lanjut · kegiatan kelompok", exact: true })
+    .click();
+  await cycle.getByText("Tampilan lainnya", { exact: true }).click();
   await cycle
     .getByRole("button", { name: "Panel Terbagi", exact: true })
     .click();
@@ -340,6 +347,9 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
       })
       .click();
   }
+  await cycle
+    .getByRole("button", { name: "Lanjut · cek akhir siswa", exact: true })
+    .click();
   const exit = cycle.getByRole("region", {
     name: "Hasil Kartu cek akhir",
     exact: true,

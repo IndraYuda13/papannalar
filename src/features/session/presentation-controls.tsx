@@ -45,6 +45,7 @@ import {
 import { splitProjection } from "./split-projection";
 import { PackageTransfer } from "./package-transfer";
 import { GuidanceControls } from "./guidance-controls";
+import type { LearningStep } from "./learning-journey";
 
 // Simple library runs reuse exactly the same claim/resume/heartbeat/revoke path.
 export function PresentationConnectionControls({
@@ -110,6 +111,7 @@ export function PresentationControls({
   assessmentContext,
   sessionPackage,
   onEvidenceSaved,
+  guidedStep,
 }: {
   sessionId: string;
   classId: string;
@@ -124,6 +126,7 @@ export function PresentationControls({
   assessmentContext?: AssessmentContext;
   sessionPackage?: TeacherPackage;
   onEvidenceSaved?: () => void;
+  guidedStep?: LearningStep;
 }) {
   const transport = usePresentationTransport({
     sessionId,
@@ -420,6 +423,63 @@ export function PresentationControls({
     )
       throw new Error("Station publication failed");
   }
+  const suggestedModes: readonly PresentationState["mode"][] =
+    guidedStep === "check"
+      ? ["opening", "check", "continuation"]
+      : guidedStep === "groups"
+        ? ["groups"]
+        : guidedStep === "results"
+          ? ["reflection"]
+          : [];
+  const modeButton = (mode: PresentationState["mode"]) => {
+    if (!snapshot) return null;
+    return (
+      <Button
+        key={mode}
+        variant={
+          snapshot.envelope.payload.mode === mode ? "default" : "outline"
+        }
+        disabled={
+          busy ||
+          !online ||
+          (!complete && ["groups", "station"].includes(mode)) ||
+          (mode === "check" &&
+            !!sessionPackage &&
+            sessionPackage.assessment.length === 0) ||
+          (mode === "split" &&
+            (!sessionPackage || !complete || rotationGroups.length < 2)) ||
+          (mode === "together" &&
+            (verifiedTouches < 2 ||
+              !(
+                snapshot.envelope.payload.tool ??
+                snapshot.envelope.payload.lesson?.tool
+              ))) ||
+          (mode === "spotlight" &&
+            (!RESUMABLE_MODES.some(
+              (m) => m === snapshot.envelope.payload.mode,
+            ) ||
+              !(snapshot.envelope.payload.mode === "split"
+                ? snapshot.envelope.payload.split?.panels.some((p) =>
+                    p.exercises.some((e) => e.tool),
+                  )
+                : (snapshot.envelope.payload.tool ??
+                  snapshot.envelope.payload.split?.panels
+                    .flatMap((p) => p.exercises)
+                    .find((e) => e.tool)?.tool ??
+                  snapshot.envelope.payload.lesson?.tool))))
+        }
+        onClick={() =>
+          void selectMode(mode).catch(() =>
+            setMessage(
+              "Konten kelompok belum siap. Buka kembali paket sesi sebelum menerbitkan mode ini.",
+            ),
+          )
+        }
+      >
+        {mode === "exit" ? "Kartu cek akhir" : MODE_LABELS[mode]}
+      </Button>
+    );
+  };
   const connected =
     online && snapshot && boardAcknowledged(snapshot, classroomNow());
   return (
@@ -459,56 +519,21 @@ export function PresentationControls({
               />
             )}
             <div className="flex flex-wrap gap-2">
-              {BOARD_MODES.map((mode) => (
-                <Button
-                  key={mode}
-                  variant={
-                    snapshot.envelope.payload.mode === mode
-                      ? "default"
-                      : "outline"
-                  }
-                  disabled={
-                    busy ||
-                    !online ||
-                    (!complete && ["groups", "station"].includes(mode)) ||
-                    (mode === "check" &&
-                      !!sessionPackage &&
-                      sessionPackage.assessment.length === 0) ||
-                    (mode === "split" &&
-                      (!sessionPackage ||
-                        !complete ||
-                        rotationGroups.length < 2)) ||
-                    (mode === "together" &&
-                      (verifiedTouches < 2 ||
-                        !(
-                          snapshot.envelope.payload.tool ??
-                          snapshot.envelope.payload.lesson?.tool
-                        ))) ||
-                    (mode === "spotlight" &&
-                      (!RESUMABLE_MODES.some(
-                        (m) => m === snapshot.envelope.payload.mode,
-                      ) ||
-                        !(snapshot.envelope.payload.mode === "split"
-                          ? snapshot.envelope.payload.split?.panels.some((p) =>
-                              p.exercises.some((e) => e.tool),
-                            )
-                          : (snapshot.envelope.payload.tool ??
-                            snapshot.envelope.payload.split?.panels
-                              .flatMap((p) => p.exercises)
-                              .find((e) => e.tool)?.tool ??
-                            snapshot.envelope.payload.lesson?.tool))))
-                  }
-                  onClick={() =>
-                    void selectMode(mode).catch(() =>
-                      setMessage(
-                        "Konten kelompok belum siap. Buka kembali paket sesi sebelum menerbitkan mode ini.",
-                      ),
-                    )
-                  }
-                >
-                  {mode === "exit" ? "Kartu cek akhir" : MODE_LABELS[mode]}
-                </Button>
-              ))}
+              {BOARD_MODES.filter(
+                (mode) => !guidedStep || suggestedModes.includes(mode),
+              ).map(modeButton)}
+              {guidedStep && (
+                <details className="w-full">
+                  <summary className="min-h-12 cursor-pointer content-center text-sm text-primary">
+                    Tampilan lainnya
+                  </summary>
+                  <div className="flex flex-wrap gap-2">
+                    {BOARD_MODES.filter(
+                      (mode) => !suggestedModes.includes(mode),
+                    ).map(modeButton)}
+                  </div>
+                </details>
+              )}
             </div>
             {snapshot.envelope.payload.mode === "split" && (
               <label className="block">
@@ -670,43 +695,47 @@ export function PresentationControls({
             )}
           </details>
         )}
-        {complete && (
-          <StationControls
-            verifiedTouches={verifiedTouches}
-            disabled={busy}
-            scope={scope}
-            sessionId={sessionId}
-            classId={classId}
-            grade={grade}
-            groups={rotationGroups}
-            strategyCodes={strategyCodes}
-            packageVariant={sessionPackage?.variant}
-            onPublish={publishStation}
-          />
-        )}
-        {complete && assessmentContext && (
-          <ExitWorkspace
-            scope={scope}
-            parent={assessmentContext}
-            groups={rotationGroups}
-            frozenPackage={sessionPackage}
-            onSaved={onEvidenceSaved}
-            onPublish={async (value) => {
-              if (
-                !(await publish(
-                  "exit",
-                  value.row,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  value,
-                ))
-              )
-                throw new Error("Exit publication failed");
-            }}
-          />
-        )}
+        <div hidden={Boolean(guidedStep && guidedStep !== "activities")}>
+          {complete && (
+            <StationControls
+              verifiedTouches={verifiedTouches}
+              disabled={busy}
+              scope={scope}
+              sessionId={sessionId}
+              classId={classId}
+              grade={grade}
+              groups={rotationGroups}
+              strategyCodes={strategyCodes}
+              packageVariant={sessionPackage?.variant}
+              onPublish={publishStation}
+            />
+          )}
+        </div>
+        <div hidden={Boolean(guidedStep && guidedStep !== "results")}>
+          {complete && assessmentContext && (
+            <ExitWorkspace
+              scope={scope}
+              parent={assessmentContext}
+              groups={rotationGroups}
+              frozenPackage={sessionPackage}
+              onSaved={onEvidenceSaved}
+              onPublish={async (value) => {
+                if (
+                  !(await publish(
+                    "exit",
+                    value.row,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    value,
+                  ))
+                )
+                  throw new Error("Exit publication failed");
+              }}
+            />
+          )}
+        </div>
         {snapshot && !sessionPackage && (
           <ToolControls
             disabled={busy || !online}
