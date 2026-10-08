@@ -34,7 +34,7 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
   return (
     <div
       data-surface="guru"
-      className="studio-shell min-h-dvh md:grid md:grid-cols-[232px_1fr]"
+      className="studio-shell min-h-dvh md:grid md:grid-cols-[248px_1fr]"
     >
       <a className="skip-link" href="#konten">
         Langsung ke isi
@@ -71,9 +71,9 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
                 prefetch={false}
                 aria-label={label}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-input px-1 py-2 text-center text-[11px] font-semibold md:flex-row md:justify-start md:gap-3 md:px-3 md:text-sm ${active ? "bg-pn-teal-100 text-primary" : "text-muted-foreground"}`}
+                className={`flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-input px-1 py-2 text-center text-[11px] font-semibold md:flex-row md:justify-start md:text-left md:gap-3 md:px-3 md:text-sm ${active ? "bg-pn-teal-100 text-primary" : "text-muted-foreground"}`}
               >
-                <span className="nav-icon" aria-hidden>
+                <span className="nav-icon shrink-0" aria-hidden>
                   <Icon size={22} strokeWidth={1.8} />
                 </span>
                 <span className="md:hidden">{mobileLabel}</span>
