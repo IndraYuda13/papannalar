@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isLocalDemoEnvironment } from "@/contracts/local-demo";
+import {
+  isLocalDemoEnvironment,
+  isLoopbackHostHeader,
+} from "@/contracts/local-demo";
 import { isSameOrigin } from "@/contracts/auth";
 import { authContext } from "@/server/auth/client";
 import { apiError, handleError } from "@/server/http";
@@ -12,7 +15,7 @@ export async function POST(request: NextRequest) {
       provider,
       origin,
     ) ||
-    request.headers.get("host") !== "127.0.0.1:3100"
+    !isLoopbackHostHeader(request.headers.get("host"))
   )
     return apiError("NOT_FOUND", 404);
   if (!isSameOrigin(request, origin!)) return apiError("FORBIDDEN", 403);

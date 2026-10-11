@@ -1,5 +1,8 @@
 import "server-only";
-import { isLocalDemoEnvironment } from "../../contracts/local-demo";
+import {
+  isLocalDemoEnvironment,
+  isLoopbackHostHeader,
+} from "../../contracts/local-demo";
 import { createHmac, randomInt } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { authContext, requireTeacher } from "../auth/client";
@@ -130,7 +133,7 @@ export async function pairingRequest(
           url,
           process.env["APP_ORIGIN"],
         ) &&
-        request.headers.get("host") === "127.0.0.1:3100"
+        isLoopbackHostHeader(request.headers.get("host"))
       )
         return ctx.finish(NextResponse.json({ kind: "snapshot" }));
       const { data } = await ctx.client.auth.getSession();

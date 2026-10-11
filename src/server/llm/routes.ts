@@ -137,7 +137,6 @@ export async function bisikRequest(request: NextRequest) {
         return fallback("privacy");
       if (!cfg.enabled) return fallback("disabled");
       if (!strategy) return fallback("unreviewed");
-      const history = await readSync(ctx.client, input.classId);
       // In-progress or sample sessions may not yet be uploaded to sync records.
       // Class ownership is strictly verified above via classDetail(ctx.client, input.classId).
       signal.throwIfAborted();
