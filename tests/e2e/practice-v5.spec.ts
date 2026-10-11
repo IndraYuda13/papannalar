@@ -52,10 +52,9 @@ async function sample(page: Page) {
       })
     ).ok(),
   ).toBe(true);
-  await page
-    .getByRole("navigation", { name: "Menu utama" })
-    .getByRole("link", { name: "Belajar berkelompok", exact: true })
-    .click();
+  // v4: practice is reached from home, not from the nav (V3).
+  await page.getByRole("link", { name: /^Latihan kelompok/ }).click();
+  await expect(page).toHaveURL(/\/guru\/latihan/);
 }
 for (const width of [360, 390, 1366])
   test(`PRACTICE01 ${width}: preview is reversible, selected stories persist in tasks/PDF, one session uses that package`, async ({

@@ -169,8 +169,13 @@ export function TeacherHome() {
           </div>
         </Section>
       )}
-      {/* §9.1(c): the two workflow entries sit in one shared list, not one Section each —
-          a Section whose whole body is a single row is just a bigger row (V7/V8's lesson). */}
+      {/* §9.1(c): the workflow entry sits in a shared list, not a Section whose whole body is
+          one row (V7/V8's lesson).
+          DELIBERATE DEVIATION, recorded for LENS/PRIME: §9.1(d) also lists `Layar Kelas` as a
+          secondary row, while F3's resolution promotes the board action into the header. Doing
+          both would put two `Layar Kelas` affordances on one screen — precisely the "two
+          competing go paths" F4 measured. The header keeps it (always present, on every route);
+          this list keeps the one action that has no other home. */}
       <Section label="Langkah berikutnya">
         <ul className="studio-row-list">
           <li>
@@ -187,26 +192,6 @@ export function TeacherHome() {
                 <ArrowRight size={18} strokeWidth={1.8} aria-hidden />
               </span>
             </Link>
-          </li>
-          <li>
-            <a
-              className="studio-row"
-              href="/layar"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span className="studio-row-icon" aria-hidden>
-                <Presentation size={22} strokeWidth={1.8} />
-              </span>
-              <span className="studio-row-content">
-                <h2>Layar Kelas</h2>
-                <p>Untuk papan atau proyektor di kelas.</p>
-              </span>
-              <span className="studio-row-action" data-row-action>
-                Buka
-                <ArrowRight size={18} strokeWidth={1.8} aria-hidden />
-              </span>
-            </a>
           </li>
         </ul>
         {!state.sample && (

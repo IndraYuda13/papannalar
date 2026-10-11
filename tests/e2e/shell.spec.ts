@@ -37,7 +37,7 @@ test("Aplikasi Guru terbuka pada HP, font lokal siap dan navigasi ke papan beker
   await expect(page).toHaveURL(/\/guru$/);
   await expect(page).toHaveTitle("Aplikasi Guru | PapanNalar");
   await expect(
-    page.getByRole("heading", { name: "Siap belajar hari ini?", exact: true }),
+    page.getByRole("heading", { name: "Ruang mengajar", exact: true }),
   ).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   expect(
@@ -50,7 +50,11 @@ test("Aplikasi Guru terbuka pada HP, font lokal siap dan navigasi ke papan beker
       document.fonts.check('400 16px "Plus Jakarta Sans"'),
     ),
   ).toBe(true);
-  const openBoard = page.getByRole("link", { name: "Buka Layar Kelas" });
+  // §9.1: the board action is the header's persistent `Layar Kelas`, not a text link (F3).
+  const openBoard = page.getByRole("link", {
+    name: "Layar Kelas",
+    exact: true,
+  });
   const buttonBox = await openBoard.boundingBox();
   expect(buttonBox?.height).toBeGreaterThanOrEqual(48);
   await noHorizontalOverflow(page);
@@ -157,7 +161,7 @@ test("Ukuran teks guru 130% tetap dapat dibaca tanpa scroll horizontal", async (
   await page.goto("/guru");
   await page.addStyleTag({ content: "html { font-size: 130%; }" });
   await expect(
-    page.getByRole("link", { name: "Buka Layar Kelas" }),
+    page.getByRole("link", { name: "Layar Kelas", exact: true }),
   ).toBeVisible();
   await noHorizontalOverflow(page);
 });

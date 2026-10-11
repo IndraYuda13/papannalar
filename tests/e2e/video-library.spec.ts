@@ -26,7 +26,7 @@ async function call(page: Page, data: object) {
 async function sample(page: Page) {
   await sampleLogin(page);
   await expect(
-    page.getByRole("heading", { name: "Siap belajar hari ini?" }),
+    page.getByRole("heading", { name: "Ruang mengajar" }),
   ).toBeVisible();
   // Explicit operator takeover is separately tested; set up one controlled context.
   const claim = await page.request.post("/api/v1/sample/control", {
@@ -55,7 +55,7 @@ test("U01 sample login uses persistent teacher/classes/results on main routes", 
   );
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Siap belajar hari ini?" }),
+    page.getByRole("heading", { name: "Ruang mengajar" }),
   ).toBeVisible();
   const other = await browser.newContext(),
     second = await other.newPage();
@@ -647,12 +647,15 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
   await expect(resultLinks).toHaveAttribute("href", `/guru/hasil/${secondId}`);
   await page.getByLabel("Dari tanggal", { exact: true }).fill("2100-01-01");
   await expect(resultLinks).toHaveCount(0);
+  // A filter that matches nothing is its own state (v4 §6.5), not "no data yet".
   await expect(
-    page.getByRole("heading", { name: "Hasil akan muncul setelah asesmen" }),
+    page.getByRole("heading", { name: "Belum ada yang cocok" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Mulai cek pemahaman", exact: true }),
-  ).toHaveAttribute("href", "/guru/mulai?mode=assessment");
+    page
+      .getByRole("status")
+      .getByRole("button", { name: "Tampilkan semua", exact: true }),
+  ).toBeVisible();
   await page.getByLabel("Dari tanggal", { exact: true }).fill(detail.run.date);
   await page
     .getByRole("combobox", { name: "Kelas", exact: true })
@@ -740,9 +743,15 @@ test("U16 teacher navigation fits phone and desktop with no runtime errors", asy
       ).toBe(true);
     }
     await page.goto("/guru");
-    const box = await page
+    // §9.1b: with an active session the resume row *is* the primary action, so the header
+    // carries no `Mulai mengajar`; when nothing is active it carries exactly one.
+    const primary = (await page
       .getByRole("link", { name: "Mulai mengajar", exact: true })
-      .boundingBox();
+      .count())
+      ? page.getByRole("link", { name: "Mulai mengajar", exact: true })
+      : page.locator("#teacher-home-resume [data-primary-row]");
+    await expect(primary.first()).toBeVisible();
+    const box = await primary.first().boundingBox();
     expect(box).toBeTruthy();
     expect(box!.y + box!.height).toBeLessThan(height);
     await page.screenshot({

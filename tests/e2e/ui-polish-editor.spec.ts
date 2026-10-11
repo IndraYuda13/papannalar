@@ -57,11 +57,11 @@ for (const viewport of [
     await sample(page);
     await expect(
       page.getByRole("navigation", { name: "Menu utama" }).locator("svg"),
-    ).toHaveCount(5);
+    ).toHaveCount(4);
     await expect(
       page
         .getByRole("navigation", { name: "Menu utama" })
-        .getByRole("link", { name: "Belajar berkelompok", exact: true }),
+        .getByRole("link", { name: "Kelas", exact: true }),
     ).toBeVisible();
     await noHorizontalOverflow(page);
     await page.screenshot({

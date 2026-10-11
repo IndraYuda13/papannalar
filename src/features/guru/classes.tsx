@@ -212,14 +212,14 @@ export function ClassesPage() {
         )}
         {classes.length > 0 && !shown.length && (
           <StateNotice
-            title="Belum ada yang cocok"
+            title="Kelas belum ditemukan"
             action={
               <Button variant="outline" onClick={() => setSearch("")}>
                 Tampilkan semua
               </Button>
             }
           >
-            Coba kosongkan pencarian atau ubah tanggal.
+            Coba nama kelas lain atau kosongkan pencarian.
           </StateNotice>
         )}
       </Section>

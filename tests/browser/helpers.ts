@@ -88,10 +88,10 @@ export async function loginTeacher(
   const link: { url: string } = await response.json();
   await page.goto(link.url);
   await expect(page).toHaveURL(/\/guru$/);
-  await page
-    .getByRole("navigation", { name: "Menu utama" })
-    .getByRole("link", { name: "Belajar berkelompok", exact: true })
-    .click();
+  // v4 (V3): adaptive practice is a workflow reached from home, not a nav destination — the
+  // duplicate nav silhouette is gone, so the helper follows the real user path instead.
+  await page.getByRole("link", { name: /^Latihan kelompok/ }).click();
+  await expect(page).toHaveURL(/\/guru\/latihan/);
   await expect(
     page.getByRole("button", { name: "Buat kelas", exact: true }),
   ).toBeVisible();

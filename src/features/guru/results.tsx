@@ -32,6 +32,7 @@ export function AssessmentsPage() {
       (!to || r.date <= to) &&
       (tab === "results" || r.status === "active"),
   );
+  const filtered = Boolean(cls || collection || from || to);
   return (
     <div className="space-y-6">
       <PageHeader
@@ -181,13 +182,17 @@ export function AssessmentsPage() {
         )}
         {!runs.length && (
           <StateNotice
+            /* Three distinct empty states, because "no data yet" and "your filter matched nothing"
+               are different facts and only one of them is the teacher's to fix (§6.5). */
             title={
-              tab === "results"
+              filtered
                 ? "Belum ada yang cocok"
-                : "Belum ada sesi hari ini"
+                : tab === "results"
+                  ? "Belum ada hasil"
+                  : "Belum ada sesi hari ini"
             }
             action={
-              cls || collection || from || to ? (
+              filtered ? (
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -206,9 +211,11 @@ export function AssessmentsPage() {
               )
             }
           >
-            {cls || collection || from || to
+            {filtered
               ? "Coba kosongkan pencarian atau ubah tanggal."
-              : "Pilih kelas dan Kartu Nalar untuk memeriksa pemahaman siswa."}
+              : tab === "results"
+                ? "Hasil akan muncul setelah asesmen selesai diperiksa."
+                : "Pilih kelas dan soal, lalu mulai cek pemahaman."}
           </StateNotice>
         )}
       </Section>

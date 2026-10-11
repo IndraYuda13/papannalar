@@ -40,7 +40,7 @@ for (const width of [360, 390])
     await sample(page);
     await expect(
       page.getByRole("heading", {
-        name: "Siap belajar hari ini?",
+        name: "Ruang mengajar",
         exact: true,
       }),
     ).toBeVisible();
@@ -54,7 +54,9 @@ for (const width of [360, 390])
       (run: { status: string }) => run.status === "active",
     ).length;
     const resume = page.locator("#teacher-home-resume");
-    await expect(resume.locator(":scope > ul > li")).toHaveCount(
+    // `Section` renders its children inside `.studio-section-body`, so the list is one level
+    // down from the section root; the body child selector still excludes the disclosure list.
+    await expect(resume.locator(".studio-section-body > ul > li")).toHaveCount(
       Math.min(activeCount, 3),
     );
     if (activeCount > 3) {
@@ -64,15 +66,16 @@ for (const width of [360, 390])
       await resume.locator("summary").click();
     }
     const menu = page.getByRole("navigation", { name: "Menu utama" });
+    // v4 (V3): four destinations; adaptive practice moved out of the nav to a home entry.
+    await expect(menu.getByRole("link")).toHaveCount(4);
     await expect(
-      menu.getByRole("link", { name: "Belajar berkelompok", exact: true }),
+      menu.getByRole("link", { name: "Soal", exact: true }),
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Sinkronkan jawaban", exact: true }),
     ).toBeHidden();
     const practiceLink = page.getByRole("link", {
-      name: "Siapkan belajar berkelompok",
-      exact: true,
+      name: /^Latihan kelompok/,
     });
     const selectedId = new URL(
       (await practiceLink.getAttribute("href"))!,
@@ -87,9 +90,8 @@ for (const width of [360, 390])
     await expect(
       page.getByRole("heading", { name: "Belajar berkelompok", exact: true }),
     ).toBeVisible();
-    await expect(
-      menu.getByRole("link", { name: "Belajar berkelompok", exact: true }),
-    ).toHaveAttribute("aria-current", "page");
+    // The workflow entry is still the way in, so it is the class page that must stay reachable.
+    await expect(page).toHaveURL(/\/guru\/latihan/);
     // Home resumes the latest class; shared sample history need not end in 7B.
     await expect(
       page.getByRole("button", {
@@ -254,10 +256,14 @@ test("FLOW02 empty pages offer a next action; personal and example classes remai
     .getByRole("link", { name: "Tambahkan kelas", exact: true })
     .click();
   await expect(page).toHaveURL(/\/guru\/kelas$/);
+  // The workflow entry lives on home and on a class page, not on the class list, so the
+  // canonical path from here is back through Beranda (V3 keeps practice out of the nav).
   await page
     .getByRole("navigation", { name: "Menu utama" })
-    .getByRole("link", { name: "Belajar berkelompok", exact: true })
+    .getByRole("link", { name: "Beranda", exact: true })
     .click();
+  await page.getByRole("link", { name: /^Latihan kelompok/ }).click();
+  await expect(page).toHaveURL(/\/guru\/latihan/);
   await page.getByLabel("Gunakan kelas").selectOption("demo");
   await page.getByRole("button", { name: "Buat kelas", exact: true }).click();
   await page.getByLabel("Nama kelas", { exact: true }).fill("7UX");
@@ -378,10 +384,8 @@ test("FLOW03 AI status never claims tested readiness; changing source clears the
 }) => {
   test.setTimeout(60000);
   await sample(page);
-  await page
-    .getByRole("navigation", { name: "Menu utama" })
-    .getByRole("link", { name: "Belajar berkelompok", exact: true })
-    .click();
+  await page.getByRole("link", { name: /^Latihan kelompok/ }).click();
+  await expect(page).toHaveURL(/\/guru\/latihan/);
   await page.locator("#teacher-ai > summary").click();
   for (const contentEligible of [false, true]) {
     await page.route("**/api/v1/llm/status", (route) =>

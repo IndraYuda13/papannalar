@@ -180,6 +180,8 @@ test("U2 all three bundled models render only on selection with one canvas", asy
   test.setTimeout(60000);
   await page.setViewportSize({ width: 1366, height: 900 });
   await sample(page);
+  // §9.1(e): the tool explorer ships collapsed, so the shelf is opened before its controls exist.
+  await page.getByText("Buka alat belajar", { exact: true }).click();
   const scene = page.locator(".studio-tools");
   await mkdir(evidence, { recursive: true });
   for (const [title, asset] of [
