@@ -1,13 +1,13 @@
 {
-  "buildId": "4On_98y_-AgREsppMxk9m",
+  "buildId": "MvgR0uXJzDrKPhoCFXEll",
   "optionalVisualChunks": [
     {
-      "path": "/_next/static/chunks/2wluchj_q5z_j.js",
-      "bytes": 619410,
-      "gzipBytes": 154310
+      "path": "/_next/static/chunks/116a64pv2sy3z.js",
+      "bytes": 619409,
+      "gzipBytes": 154309
     }
   ],
-  "optionalVisualGzipBytes": 154310,
+  "optionalVisualGzipBytes": 154309,
   "budgetGzipBytes": 250000,
   "excludedFromOfflinePrecache": true,
   "precachedPosters": [

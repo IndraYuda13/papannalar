@@ -1,2 +1,6 @@
 allowBuilds:
   unrs-resolver: true
+# SECURITY (F-08): force the patched source-map-js (GHSA-68fv-2mgg-jv7q) pulled
+# transitively through next>postcss. pnpm 11 reads overrides from here.
+overrides:
+  source-map-js: ">=1.2.2"
