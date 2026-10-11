@@ -221,15 +221,14 @@ describe("bounded end-to-end request budget", () => {
           }),
       );
       const action = runAssistant(input);
-      await vi.advanceTimersByTimeAsync(
-        (feature === "bisik" ? 5000 : 30000) - 1200,
-      );
+      // The bisik deadline is 15000 ms (raised from 5000 for provider latency);
+      // enrichment is 30000 ms. Advance to the real boundary.
+      const deadline = feature === "bisik" ? 15_000 : 30_000;
+      await vi.advanceTimersByTimeAsync(deadline - 1200);
       expect(await action).toEqual({ value: null, reason: "timeout" });
       expect(aborted).toBe(true);
       expect(input.call).toHaveBeenCalledTimes(1);
-      expect(input.log.mock.calls[0][0].durationMs).toBe(
-        feature === "bisik" ? 5000 : 30000,
-      );
+      expect(input.log.mock.calls[0][0].durationMs).toBe(deadline);
     },
   );
   it("budget store hanging cannot extend response budget or invoke provider", async () => {
@@ -239,7 +238,7 @@ describe("bounded end-to-end request budget", () => {
       () => new Promise(() => {}),
     );
     const action = runAssistant(input);
-    await vi.advanceTimersByTimeAsync(5000);
+    await vi.advanceTimersByTimeAsync(15_000);
     expect(await action).toEqual({ value: null, reason: "timeout" });
     expect(input.call).not.toHaveBeenCalled();
   });
