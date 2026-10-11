@@ -19,9 +19,13 @@ async function call(page: Page, data: object) {
 }
 async function sample(page: Page) {
   await page.goto("/masuk");
+  // This suite asserts the beginner compact view; keep the check, then use the
+  // shared sample login (which supplies the required access code).
   await expect(page.getByText("Tampilan nyaman", { exact: true })).toHaveCount(
     0,
   );
+  const code = page.getByLabel("Kode akses rekaman");
+  if (await code.isVisible()) await code.fill("local-e2e-sample-access-code");
   await page
     .getByRole("button", { name: "Coba dengan data contoh", exact: true })
     .click();

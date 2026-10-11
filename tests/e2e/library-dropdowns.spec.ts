@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { sampleLogin } from "../browser/helpers";
 import {
   libraryStateSchema,
   runDetailSchema,
@@ -8,9 +9,7 @@ import { appOrigin } from "../harness/ports.mjs";
 
 const origin = appOrigin;
 async function sample(page: Page) {
-  await page.goto("/masuk");
-  await page.getByRole("button", { name: "Coba dengan data contoh" }).click();
-  await expect(page).toHaveURL(/\/guru$/);
+  await sampleLogin(page);
   const claim = await page.request.post("/api/v1/sample/control", {
     headers: { Origin: origin },
     data: { takeover: true },

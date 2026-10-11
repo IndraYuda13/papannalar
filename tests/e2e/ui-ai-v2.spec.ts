@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { mkdir, readFile } from "node:fs/promises";
-import { openBoard, loginTeacher } from "../browser/helpers";
+import { openBoard, loginTeacher, sampleLogin } from "../browser/helpers";
 import { appOrigin } from "../harness/ports.mjs";
 declare global {
   interface Window {
@@ -10,11 +10,7 @@ declare global {
 const origin = appOrigin,
   evidence = "artifacts/qa/ui-ai-v2";
 async function sample(page: Page) {
-  await page.goto("/masuk");
-  await page
-    .getByRole("button", { name: "Coba dengan data contoh", exact: true })
-    .click();
-  await expect(page).toHaveURL(/\/guru$/);
+  await sampleLogin(page);
   const response = await page.request.post("/api/v1/sample/control", {
     headers: { Origin: origin },
     data: { takeover: true },

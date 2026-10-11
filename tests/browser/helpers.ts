@@ -53,6 +53,23 @@ export async function openBoard(
     .toBe(true);
 }
 
+// The sample login now requires SAMPLE_ACCESS_CODE (fail-closed; an empty code
+// is refused). The e2e webServer sets a fixed code; fill it when the code field
+// is present, otherwise just submit (no-code deployments).
+export async function sampleLoginOn(page: Page) {
+  await page.goto("/masuk");
+  const code = page.getByLabel("Kode akses rekaman");
+  if (await code.isVisible()) await code.fill("local-e2e-sample-access-code");
+  await page
+    .getByRole("button", { name: "Coba dengan data contoh", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/guru$/);
+}
+
+export async function sampleLogin(page: Page) {
+  await sampleLoginOn(page);
+}
+
 export async function loginTeacher(
   page: Page,
   options: { guided?: boolean } = {},

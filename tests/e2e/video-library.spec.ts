@@ -9,6 +9,7 @@ import {
   injectFixture,
   waitForShellCache,
   loginTeacher,
+  sampleLogin,
 } from "../browser/helpers";
 import { customFormBindingSchema } from "../../src/contracts/custom-form";
 import { readFile } from "node:fs/promises";
@@ -23,9 +24,7 @@ async function call(page: Page, data: object) {
   return response.json();
 }
 async function sample(page: Page) {
-  await page.goto("/masuk");
-  await page.getByRole("button", { name: "Coba dengan data contoh" }).click();
-  await expect(page).toHaveURL(/\/guru$/);
+  await sampleLogin(page);
   await expect(
     page.getByRole("heading", { name: "Siap belajar hari ini?" }),
   ).toBeVisible();

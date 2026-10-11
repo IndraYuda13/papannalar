@@ -1,6 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { loginTeacher, openBoard } from "../browser/helpers";
+import {
+  loginTeacher,
+  openBoard,
+  sampleLogin,
+  sampleLoginOn,
+} from "../browser/helpers";
 import { fromPackageRecipe } from "../../src/contracts/sync-package";
 import type { TeacherPackage } from "../../src/core/package/build";
 import { appOrigin } from "../harness/ports.mjs";
@@ -38,11 +43,7 @@ async function savedPackage(page: Page): Promise<TeacherPackage> {
   });
 }
 async function sample(page: Page) {
-  await page.goto("/masuk");
-  await page
-    .getByRole("button", { name: "Coba dengan data contoh", exact: true })
-    .click();
-  await expect(page).toHaveURL(/\/guru$/);
+  await sampleLogin(page);
   expect(
     (
       await page.request.post("/api/v1/sample/control", {
@@ -328,11 +329,7 @@ test("PRACTICE02 correct code recovers an expired own sample lease; a different 
   );
   const otherContext = await browser.newContext({ baseURL: origin });
   const other = await otherContext.newPage();
-  await other.goto("/masuk");
-  await other
-    .getByRole("button", { name: "Coba dengan data contoh", exact: true })
-    .click();
-  await expect(other).toHaveURL(/\/guru$/);
+  await sampleLoginOn(other);
   expect(
     (
       await other.request.post("/api/v1/sample/control", {

@@ -160,7 +160,10 @@ test("displaced sample observer logout cannot revoke the active device even if t
   );
   const [observer, active, board] = clients;
   try {
-    const accessCode = process.env["SAMPLE_ACCESS_CODE"] ?? "";
+    // The sample route now requires a >=12-char code (fail-closed); match the
+    // e2e webServer's SAMPLE_ACCESS_CODE.
+    const accessCode =
+      process.env["SAMPLE_ACCESS_CODE"] || "local-e2e-sample-access-code";
     expect((await post(observer, "/auth/sample", { accessCode })).ok()).toBe(
       true,
     );

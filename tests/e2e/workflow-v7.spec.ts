@@ -6,7 +6,7 @@ import {
   runSchema,
   runDetailSchema,
 } from "../../src/contracts/library";
-import { injectFixture } from "../browser/helpers";
+import { injectFixture, sampleLogin } from "../browser/helpers";
 import { appOrigin } from "../harness/ports.mjs";
 const origin = appOrigin;
 async function call(page: Page, data: object) {
@@ -18,11 +18,7 @@ async function call(page: Page, data: object) {
   return response.json();
 }
 async function sample(page: Page) {
-  await page.goto("/masuk");
-  await page
-    .getByRole("button", { name: "Coba dengan data contoh", exact: true })
-    .click();
-  await expect(page).toHaveURL(/\/guru$/);
+  await sampleLogin(page);
   expect(
     (
       await page.request.post("/api/v1/sample/control", {

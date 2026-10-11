@@ -1,13 +1,11 @@
 import { expect, test, type Page, type Locator } from "@playwright/test";
 import { libraryStateSchema } from "../../src/contracts/library";
-import { openBoard } from "../browser/helpers";
+import { openBoard, sampleLogin } from "../browser/helpers";
 import { appOrigin } from "../harness/ports.mjs";
 
 const origin = appOrigin;
 async function sample(page: Page) {
-  await page.goto("/masuk");
-  await page.getByRole("button", { name: "Coba dengan data contoh" }).click();
-  await expect(page).toHaveURL(/\/guru$/);
+  await sampleLogin(page);
   const claim = await page.request.post("/api/v1/sample/control", {
     headers: { Origin: origin },
     data: { takeover: true },
