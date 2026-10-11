@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { loginTeacher } from "../browser/helpers";
-const headers = { Origin: "http://127.0.0.1:3100" };
+import { appOrigin } from "../harness/ports.mjs";
+const headers = { Origin: appOrigin };
 const post = (page: Page, path: string, data: object) =>
   page.request.post(path, { headers, data });
 test("pairing HTTP uses separate board auth, owner checks, public schema, CAS, ACK and revoke", async ({
@@ -21,7 +22,7 @@ test("pairing HTTP uses separate board auth, owner checks, public schema, CAS, A
     ).ok(),
   ).toBe(true);
   const context = await browser.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
   });
   const board = await context.newPage();
   // This is the HTTP protocol scenario. A mounted board would issue its own

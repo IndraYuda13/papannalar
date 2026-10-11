@@ -9,12 +9,13 @@ import {
 } from "../../src/contracts/remote";
 import { publicTool, type PublicTool } from "../../src/contracts/tools";
 import { GRAPH_EXAMPLES } from "../../src/core/tools/graph-tasks";
+import { appOrigin } from "../harness/ports.mjs";
 for (const touches of [0, 1, 2, 4])
   test(`BOARD01 six checks, ${touches} touch fallback, local profile and public payload`, async ({
     browser,
   }) => {
     const context = await browser.newContext({
-        baseURL: "http://127.0.0.1:3100",
+        baseURL: appOrigin,
         viewport: { width: 1920, height: 1080 },
         hasTouch: true,
       }),
@@ -152,11 +153,11 @@ for (const touches of [0, 1, 2, 4])
       ).toBeVisible();
     if (touches === 0 || touches === 2) {
       const teacherContext = await browser.newContext({
-          baseURL: "http://127.0.0.1:3100",
+          baseURL: appOrigin,
         }),
         teacher = await teacherContext.newPage();
       await loginTeacher(teacher);
-      const headers = { Origin: "http://127.0.0.1:3100" },
+      const headers = { Origin: appOrigin },
         classId = crypto.randomUUID();
       expect(
         (
@@ -281,7 +282,7 @@ test("REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot
     .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
       viewport: { width: 1920, height: 1080 },
     }),
     board = await context.newPage();
@@ -410,7 +411,7 @@ test("REMOTE01 teacher trackpad changes actual tool, ACKs terminal input, cannot
   ).toBeVisible();
   expect(lastInput).toBeDefined();
   const stale = await page.request.post("/api/v1/remote", {
-    headers: { Origin: "http://127.0.0.1:3100" },
+    headers: { Origin: appOrigin },
     data: lastInput,
   });
   expect(stale.status()).toBe(409);
@@ -442,7 +443,7 @@ test("REMOTE02 fractions, ratio, algebra, balance and graphs use the bounded inp
 }) => {
   test.setTimeout(120000);
   await loginTeacher(page);
-  const headers = { Origin: "http://127.0.0.1:3100" },
+  const headers = { Origin: appOrigin },
     classId = crypto.randomUUID();
   expect(
     (
@@ -453,7 +454,7 @@ test("REMOTE02 fractions, ratio, algebra, balance and graphs use the bounded inp
     ).status(),
   ).toBe(201);
   const context = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
       viewport: { width: 1920, height: 1080 },
     }),
     board = await context.newPage(),

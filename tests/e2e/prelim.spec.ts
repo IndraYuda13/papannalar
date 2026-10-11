@@ -4,6 +4,7 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
 import { snapshotSchema } from "../../src/contracts/presentation";
+import { appOrigin } from "../harness/ports.mjs";
 
 async function start7b(page: Page) {
   await loginTeacher(page);
@@ -110,7 +111,7 @@ test("M05-b recorded PRELIM regression: opening, check, scan, groups, station, a
     page.getByRole("region", { name: "Paket Sesi", exact: true }),
   ).toContainText("Latihan tersimpan di perangkat ini");
   const bc = await browser.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
     viewport: { width: 1920, height: 1080 },
     recordVideo: {
       dir: "artifacts/qa/M05/video",

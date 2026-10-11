@@ -7,6 +7,7 @@ import { snapshotSchema } from "../../src/contracts/presentation";
 import { loginTeacher } from "../browser/helpers";
 import type { PublicTool } from "../../src/contracts/tools";
 import { INTERACTIVE_HELP } from "../../src/features/library/templates";
+import { appOrigin } from "../harness/ports.mjs";
 
 const fixtureId = "7b000001-0000-4000-8000-000000000099";
 const legacyCapabilities = {
@@ -694,7 +695,7 @@ test("V2 touch result waits for release and fresh one/two/four contacts; mouse n
   browser,
 }) => {
   const context = await browser.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
     viewport: { width: 1280, height: 720 },
     hasTouch: true,
   });

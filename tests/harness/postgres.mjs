@@ -4,12 +4,15 @@ export const databaseUrl =
   process.env.TEST_DATABASE_URL ??
   "postgresql://postgres@127.0.0.1:55432/pn_m01c_test";
 const parsed = new URL(databaseUrl);
+// Loopback only, and only this project's isolated test databases. The default
+// stays pn_m01c_test; audit/staging runs point TEST_DATABASE_URL at their own
+// pn_m01c_* database so a parallel instance never writes the shared one.
 if (
   !["127.0.0.1", "localhost"].includes(parsed.hostname) ||
-  parsed.pathname !== "/pn_m01c_test"
+  !/^\/pn_m01c_[a-z0-9_]+$/.test(parsed.pathname)
 ) {
   throw new Error(
-    "Tests require an isolated loopback database named pn_m01c_test",
+    "Tests require an isolated loopback database named pn_m01c_<suffix>",
   );
 }
 export function sql(query) {

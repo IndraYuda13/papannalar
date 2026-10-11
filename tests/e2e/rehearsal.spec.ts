@@ -7,6 +7,7 @@ import {
   loginTeacher,
   waitForShellCache,
 } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 
 test.use({ actionTimeout: 15000 });
 
@@ -25,7 +26,7 @@ for (const run of [1, 2, 3]) {
     const expectedOfflineErrors: string[] = [];
     let offline = false;
     const context = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
       viewport: { width: 1920, height: 1080 },
       recordVideo: {
         dir: `${output}/video`,

@@ -13,6 +13,7 @@ import {
   injectFixture,
   waitForShellCache,
 } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 async function paired(page: Page, browser: Browser) {
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
@@ -25,7 +26,7 @@ async function paired(page: Page, browser: Browser) {
     .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
       viewport: { width: 1920, height: 1080 },
     }),
     board = await context.newPage(),

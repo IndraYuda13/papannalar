@@ -6,8 +6,9 @@ import {
   waitForShellCache,
 } from "../browser/helpers";
 import { mkdir } from "node:fs/promises";
+import { appOrigin } from "../harness/ports.mjs";
 
-const origin = "http://127.0.0.1:3100";
+const origin = appOrigin;
 const headers = { Origin: origin };
 
 test("refresh session mempertahankan cookie dan no-store meski resource tidak ditemukan", async ({

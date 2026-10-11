@@ -6,6 +6,7 @@ import {
   injectFixture,
   waitForShellCache,
 } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 test.use({ trace: "off" });
 async function packageFixture(page: Page) {
   await page.addScriptTag({
@@ -62,7 +63,7 @@ test("CACHE02 teacher uploads package, board navigates offline, explicit handoff
   await mkdir("artifacts/qa/M15", { recursive: true });
   const errors: string[] = [];
   const context = await browser.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
     viewport: { width: 1920, height: 1080 },
   });
   const board = await context.newPage();

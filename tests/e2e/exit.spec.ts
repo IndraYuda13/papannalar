@@ -7,6 +7,7 @@ import {
   injectFixture,
   waitForShellCache,
 } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 test("exit storage is atomic, frozen, idempotent, isolated and can reopen offline", async ({
   page,
   context,
@@ -75,7 +76,7 @@ test("EXIT01 teacher freezes package, board gets each public row, manual review 
     );
   }
   const context = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
       viewport: { width: 1920, height: 1080 },
     }),
     board = await context.newPage();

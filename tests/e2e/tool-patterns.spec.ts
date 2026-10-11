@@ -7,6 +7,7 @@ import {
   injectFixture,
   waitForShellCache,
 } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 
 test("Seven patterns use actual paired board, distinct examples, repairs, unique models and independent turns", async ({
   page,
@@ -25,7 +26,7 @@ test("Seven patterns use actual paired board, distinct examples, repairs, unique
     .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
     viewport: { width: 1920, height: 1080 },
     hasTouch: true,
   });

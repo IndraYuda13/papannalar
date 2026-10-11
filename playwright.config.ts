@@ -1,5 +1,8 @@
 import { defineConfig } from "@playwright/test";
+import { appOrigin, appPort, providerOrigin } from "./tests/harness/ports.mjs";
 
+// PNL_APP_PORT / PNL_PROVIDER_PORT (defaults 3100/54325) let a staging instance
+// run its browser suite on its own loopback pair instead of production's.
 export default defineConfig({
   testDir: "./tests/e2e",
   globalSetup: "./tests/browser/setup.ts",
@@ -12,22 +15,22 @@ export default defineConfig({
     ["json", { outputFile: "artifacts/qa/M01/m01c/playwright-results.json" }],
   ],
   use: {
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
     browserName: "chromium",
     trace: "off", // Auth cookies/callback codes must not enter shared artifacts.
   },
   webServer: [
     {
       command: "node tests/harness/provider.mjs",
-      url: "http://127.0.0.1:54325/health",
+      url: `${providerOrigin}/health`,
       reuseExistingServer: process.env["PAPANNALAR_REUSE_LOCAL_DEMO"] === "1",
     },
     {
-      command: "pnpm start --port 3100",
-      url: "http://127.0.0.1:3100/masuk",
+      command: `pnpm start --port ${appPort}`,
+      url: `${appOrigin}/masuk`,
       env: {
-        APP_ORIGIN: "http://127.0.0.1:3100",
-        NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54325",
+        APP_ORIGIN: appOrigin,
+        NEXT_PUBLIC_SUPABASE_URL: providerOrigin,
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "test-only-publishable-key",
         PAIRING_SECRET: "test-only-pairing-pepper-never-production-2026",
         PAPANNALAR_LOCAL_ADAPTER: "1",

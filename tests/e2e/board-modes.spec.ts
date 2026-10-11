@@ -26,7 +26,8 @@ import {
   spotlightView,
   resumeView,
 } from "../../src/features/layar/presentation-view";
-const headers = { Origin: "http://127.0.0.1:3100" };
+import { appOrigin } from "../harness/ports.mjs";
+const headers = { Origin: appOrigin };
 async function paired(page: Page, browser: Browser) {
   await loginTeacher(page);
   await chooseTeacherMode(page, "demo");
@@ -39,7 +40,7 @@ async function paired(page: Page, browser: Browser) {
     .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
       viewport: { width: 1920, height: 1080 },
     }),
     board = await context.newPage(),

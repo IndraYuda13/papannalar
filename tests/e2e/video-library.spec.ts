@@ -12,7 +12,8 @@ import {
 } from "../browser/helpers";
 import { customFormBindingSchema } from "../../src/contracts/custom-form";
 import { readFile } from "node:fs/promises";
-const origin = "http://127.0.0.1:3100";
+import { appOrigin } from "../harness/ports.mjs";
+const origin = appOrigin;
 async function call(page: Page, data: object) {
   const response = await page.request.post("/api/v1/library", {
     headers: { Origin: origin },

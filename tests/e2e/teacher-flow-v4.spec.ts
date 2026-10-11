@@ -5,7 +5,8 @@ import {
   injectFixture,
   waitForShellCache,
 } from "../browser/helpers";
-const origin = "http://127.0.0.1:3100";
+import { appOrigin } from "../harness/ports.mjs";
+const origin = appOrigin;
 async function sample(page: Page) {
   await page.goto("/masuk");
   await page

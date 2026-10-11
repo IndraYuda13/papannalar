@@ -3,6 +3,7 @@ import { openBoard } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 test.use({ trace: "off", screenshot: "off", video: "off" });
 declare global {
   interface Window {
@@ -28,7 +29,7 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
     .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
       viewport: { width: 1920, height: 1080 },
     }),
     board = await context.newPage();

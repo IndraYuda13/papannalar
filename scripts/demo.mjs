@@ -5,6 +5,7 @@ import { resolve, dirname } from "node:path";
 import { createRequire } from "node:module";
 import { randomBytes } from "node:crypto";
 import { SAMPLE_ID } from "./sample-data.mjs";
+import { appOrigin, appPort, providerOrigin } from "../tests/harness/ports.mjs";
 const require = createRequire(import.meta.url),
   root = process.cwd();
 const psql =
@@ -12,12 +13,18 @@ const psql =
   (process.platform === "win32"
     ? "C:\\Program Files\\PostgreSQL\\17\\bin\\psql.exe"
     : "psql");
+// PNL_APP_PORT / PNL_PROVIDER_PORT override the local loopback pair
+// (defaults 3100/54325) so a parallel staging instance never binds production's
+// ports. TEST_DATABASE_URL keeps its documented default; export it to prepare
+// another isolated database.
 const env = {
   ...process.env,
   PSQL_BIN: psql,
-  TEST_DATABASE_URL: "postgresql://postgres@127.0.0.1:55432/pn_m01c_test",
-  APP_ORIGIN: "http://127.0.0.1:3100",
-  NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54325",
+  TEST_DATABASE_URL:
+    process.env.TEST_DATABASE_URL ??
+    "postgresql://postgres@127.0.0.1:55432/pn_m01c_test",
+  APP_ORIGIN: appOrigin,
+  NEXT_PUBLIC_SUPABASE_URL: providerOrigin,
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-test-publishable-key",
   PAIRING_SECRET: randomBytes(32).toString("hex"),
   PAPANNALAR_LOCAL_ADAPTER: "1",
@@ -66,7 +73,7 @@ try {
   } catch {
     if (!existsSync(resolve(cluster, "PG_VERSION")))
       throw new Error(
-        "Start isolated PostgreSQL on port 55432, database pn_m01c_test. No database is created or replaced automatically.",
+        `Start isolated PostgreSQL for ${env.TEST_DATABASE_URL}. No database is created or replaced automatically.`,
       );
     run(pgctl, [
       "-D",
@@ -98,7 +105,7 @@ try {
       "--hostname",
       "127.0.0.1",
       "--port",
-      "3100",
+      String(appPort),
     ],
   ]) {
     const child = spawn(process.execPath, args, {
@@ -114,14 +121,14 @@ try {
   }
   console.log(
     process.argv.includes("--video")
-      ? "Rekaman lokal: http://127.0.0.1:3100/masuk → Coba dengan data contoh → /guru | papan /layar. PostgreSQL nyata; Auth/Realtimenya provider uji loopback. Ctrl+C untuk berhenti."
-      : "Demo adapter lokal: http://127.0.0.1:3100/demo | papan: http://127.0.0.1:3100/layar | Ctrl+C untuk berhenti. Auth/email/WebSocket live tidak dipakai.",
+      ? `Rekaman lokal: ${appOrigin}/masuk → Coba dengan data contoh → /guru | papan /layar. PostgreSQL nyata; Auth/Realtimenya provider uji loopback. Ctrl+C untuk berhenti.`
+      : `Demo adapter lokal: ${appOrigin}/demo | papan: ${appOrigin}/layar | Ctrl+C untuk berhenti. Auth/email/WebSocket live tidak dipakai.`,
   );
   if (process.argv.includes("--smoke")) {
     let ready = false;
     for (let i = 0; i < 40; i++) {
       try {
-        const response = await fetch("http://127.0.0.1:3100/demo");
+        const response = await fetch(`${appOrigin}/demo`);
         if (
           response.ok &&
           (await response.text()).includes("Masuk demo lokal")

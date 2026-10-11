@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, type Page } from "@playwright/test";
+import { providerOrigin } from "../harness/ports.mjs";
 
 export async function injectFixture(page: Page) {
   await page.addScriptTag({
@@ -65,7 +66,7 @@ export async function loginTeacher(
   ).toContainText("Tautan masuk sudah dikirim");
   // Test mailbox only: no real email. The test double checks the PKCE challenge.
   const response = await page.request.get(
-    `http://127.0.0.1:54325/__test/link?email=${encodeURIComponent(email)}`,
+    `${providerOrigin}/__test/link?email=${encodeURIComponent(email)}`,
   );
   const link: { url: string } = await response.json();
   await page.goto(link.url);

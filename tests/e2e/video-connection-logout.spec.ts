@@ -4,8 +4,9 @@ import {
   snapshotSchema,
 } from "../../src/contracts/presentation";
 import { classListSchema } from "../../src/contracts/classes";
+import { appOrigin, providerOrigin } from "../harness/ports.mjs";
 
-const origin = "http://127.0.0.1:3100";
+const origin = appOrigin;
 const headers = { Origin: origin };
 const post = (client: APIRequestContext, path: string, data: object) =>
   client.post(path, { headers, data });
@@ -16,7 +17,7 @@ async function login(client: APIRequestContext, email: string) {
   expect((await post(client, "/auth/login", { email })).ok()).toBe(true);
   // Local test mailbox only, matching the existing browser helper.
   const link = await client.get(
-    `http://127.0.0.1:54325/__test/link?email=${encodeURIComponent(email)}`,
+    `${providerOrigin}/__test/link?email=${encodeURIComponent(email)}`,
   );
   const { url } = (await link.json()) as { url: string };
   expect((await client.get(url)).ok()).toBe(true);

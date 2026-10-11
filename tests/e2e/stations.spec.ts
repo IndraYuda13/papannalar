@@ -3,6 +3,7 @@ import { openBoard } from "../browser/helpers";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 test("TURN01 real IndexedDB records actual start once, isolates semester/owner and rejects rewritten history", async ({
   page,
 }) => {
@@ -54,7 +55,7 @@ test("ROT01 teacher timer/three rounds and board projection preserve privacy", a
     await expect(page.getByLabel("Review kartu")).toHaveCount(0);
   }
   const boardContext = await browser.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
     viewport: { width: 1920, height: 1080 },
   });
   const board = await boardContext.newPage();

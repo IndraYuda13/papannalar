@@ -1,8 +1,9 @@
 import { expect, test, type Page, type Locator } from "@playwright/test";
 import { libraryStateSchema } from "../../src/contracts/library";
 import { openBoard } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 
-const origin = "http://127.0.0.1:3100";
+const origin = appOrigin;
 async function sample(page: Page) {
   await page.goto("/masuk");
   await page.getByRole("button", { name: "Coba dengan data contoh" }).click();

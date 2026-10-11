@@ -5,7 +5,8 @@ import {
   snapshotSchema,
   connectionPulseSchema,
 } from "../../src/contracts/presentation";
-const headers = { Origin: "http://127.0.0.1:3100" };
+import { appOrigin } from "../harness/ports.mjs";
+const headers = { Origin: appOrigin };
 const call = (page: Page, surface: "teacher" | "board", body: object) =>
   page.request.post(
     surface === "teacher" ? "/api/v1/pairing" : "/api/v1/board/pairing",
@@ -30,7 +31,7 @@ test("V2 re-scan keeps question 3 and presentation identity; displaced controlle
     ).ok(),
   ).toBe(true);
   const context = await browser.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
   });
   const board = await context.newPage();
   try {

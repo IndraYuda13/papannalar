@@ -7,7 +7,8 @@ import {
   runDetailSchema,
 } from "../../src/contracts/library";
 import type { PublicTool } from "../../src/contracts/tools";
-const origin = "http://127.0.0.1:3100";
+import { appOrigin } from "../harness/ports.mjs";
+const origin = appOrigin;
 async function call(page: Page, data: object) {
   const response = await page.request.post("/api/v1/library", {
     headers: { Origin: origin },

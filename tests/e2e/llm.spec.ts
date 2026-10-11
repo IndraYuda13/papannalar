@@ -5,6 +5,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
 import { buildPackage } from "../../src/core/package/build";
 import { toPackageRecipe } from "../../src/contracts/sync-package";
+import { appOrigin } from "../harness/ports.mjs";
 test.use({ trace: "off" });
 test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback, stores feedback and preserves board privacy", async ({
   page,
@@ -66,7 +67,7 @@ test("LLM01 real teacher UI keeps name/raw question local, shows honest fallback
     await expect(page.getByLabel("Review kartu")).toHaveCount(0);
   }
   const boardContext = await browser.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
     viewport: { width: 1920, height: 1080 },
   });
   const board = await boardContext.newPage();
@@ -215,7 +216,7 @@ test("LLM API rejects unowned/extra fields and remains disabled without credenti
   const context = await browser.newContext(),
     page = await context.newPage();
   await loginTeacher(page);
-  const origin = { Origin: "http://127.0.0.1:3100" },
+  const origin = { Origin: appOrigin },
     classId = crypto.randomUUID();
   const created = await page.request.post("/api/v1/classes", {
     headers: origin,
@@ -285,7 +286,7 @@ test("LLM API rejects unowned/extra fields and remains disabled without credenti
   const anon = await browser.newContext();
   expect(
     (
-      await anon.request.post("http://127.0.0.1:3100/api/v1/llm/bisik", {
+      await anon.request.post(`${appOrigin}/api/v1/llm/bisik`, {
         headers: origin,
         data: input,
       })

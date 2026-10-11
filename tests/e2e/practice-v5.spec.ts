@@ -3,7 +3,9 @@ import { execFileSync } from "node:child_process";
 import { loginTeacher, openBoard } from "../browser/helpers";
 import { fromPackageRecipe } from "../../src/contracts/sync-package";
 import type { TeacherPackage } from "../../src/core/package/build";
-const origin = "http://127.0.0.1:3100";
+import { appOrigin } from "../harness/ports.mjs";
+import { databaseUrl } from "../harness/postgres.mjs";
+const origin = appOrigin;
 async function savedPackage(page: Page): Promise<TeacherPackage> {
   return page.evaluate(async () => {
     const database = (await indexedDB.databases()).find((d) =>
@@ -284,7 +286,7 @@ test("PRACTICE02 correct code recovers an expired own sample lease; a different 
       execFileSync(
         process.env.PSQL_BIN ?? "psql",
         [
-          "postgresql://postgres@127.0.0.1:55432/pn_m01c_test",
+          databaseUrl,
           "-X",
           "-q",
           "-c",

@@ -6,6 +6,7 @@ import {
   injectFixture,
   waitForShellCache,
 } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 test("teacher pairs board, public groups render and number line/lift respond locally", async ({
   page,
   browser,
@@ -24,7 +25,7 @@ test("teacher pairs board, public groups render and number line/lift respond loc
     .click();
   await expect(page.getByTestId("scan-count")).toContainText("29/32");
   const boardContext = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
       viewport: { width: 1920, height: 1080 },
     }),
     board = await boardContext.newPage();

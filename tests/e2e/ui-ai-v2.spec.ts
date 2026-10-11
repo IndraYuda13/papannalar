@@ -1,12 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
 import { mkdir, readFile } from "node:fs/promises";
 import { openBoard, loginTeacher } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 declare global {
   interface Window {
     __pnDraws?: number;
   }
 }
-const origin = "http://127.0.0.1:3100",
+const origin = appOrigin,
   evidence = "artifacts/qa/ui-ai-v2";
 async function sample(page: Page) {
   await page.goto("/masuk");

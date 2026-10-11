@@ -7,6 +7,7 @@ import {
   injectFixture,
   waitForShellCache,
 } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 test("TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo", async ({
   page,
   browser,
@@ -23,7 +24,7 @@ test("TOOL03/04 ratio model, algebra distribution, zero pairs and offline undo",
     .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
       viewport: { width: 1920, height: 1080 },
     }),
     board = await context.newPage();
@@ -156,7 +157,7 @@ test("TOOL02 fractions keep whole size, check the model, undo, and run offline o
     .getByRole("button", { name: "Jalankan contoh sesi", exact: true })
     .click();
   const context = await browser.newContext({
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
     viewport: { width: 1920, height: 1080 },
   });
   const board = await context.newPage();

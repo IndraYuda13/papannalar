@@ -6,6 +6,7 @@ import {
   injectFixture,
   waitForShellCache,
 } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 async function fixtures(page: import("@playwright/test").Page) {
   await page.addScriptTag({
     content: await readFile(".browser-tests/sync-fixture.js", "utf8"),
@@ -183,7 +184,7 @@ test("PRIV03 paired roster exists only in board RAM and disappears on offline re
   browser,
 }) => {
   await loginTeacher(page);
-  const headers = { Origin: "http://127.0.0.1:3100" },
+  const headers = { Origin: appOrigin },
     classId = crypto.randomUUID();
   expect(
     (
@@ -194,7 +195,7 @@ test("PRIV03 paired roster exists only in board RAM and disappears on offline re
     ).status(),
   ).toBe(201);
   const context = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
     }),
     board = await context.newPage();
   await openBoard(board);

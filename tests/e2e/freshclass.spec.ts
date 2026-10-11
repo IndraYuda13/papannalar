@@ -3,6 +3,7 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
 import type { CardAnswer, CardKind } from "../../src/cards/layouts/layout-v1";
+import { appOrigin } from "../harness/ports.mjs";
 const commands: {
   action: string;
   base?: number;
@@ -95,7 +96,7 @@ test("E2E02 fresh 32-student class uses UI/photo inputs through check, rotations
     cycle.getByLabel("Tidak hadir absen 32", { exact: true }),
   ).toBeEnabled();
   const boardContext = await browser.newContext({
-      baseURL: "http://127.0.0.1:3100",
+      baseURL: appOrigin,
       viewport: { width: 1920, height: 1080 },
     }),
     board = await boardContext.newPage();

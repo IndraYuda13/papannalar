@@ -8,7 +8,8 @@ import {
   waitForShellCache,
 } from "../browser/helpers";
 import { readLocalPackage } from "../browser/package-state";
-const origin = "http://127.0.0.1:3100";
+import { appOrigin } from "../harness/ports.mjs";
+const origin = appOrigin;
 async function call(page: Page, path: string, data: object) {
   return page.request.post(path, { headers: { Origin: origin }, data });
 }

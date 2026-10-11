@@ -4,8 +4,9 @@ import {
   runDetailSchema,
   runSchema,
 } from "../../src/contracts/library";
+import { appOrigin } from "../harness/ports.mjs";
 
-const origin = "http://127.0.0.1:3100";
+const origin = appOrigin;
 async function sample(page: Page) {
   await page.goto("/masuk");
   await page.getByRole("button", { name: "Coba dengan data contoh" }).click();

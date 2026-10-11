@@ -3,6 +3,7 @@
 import { createServer } from "node:http";
 import { createHash, randomUUID, randomBytes } from "node:crypto";
 import { sql, literal, asUser } from "./postgres.mjs";
+import { providerOrigin, providerPort } from "./ports.mjs";
 import { SAMPLE_ID } from "../../scripts/sample-data.mjs";
 
 const users = new Map(),
@@ -189,7 +190,7 @@ function dataRequest(request, url, body, user) {
 }
 
 createServer(async (request, response) => {
-  const url = new URL(request.url, "http://127.0.0.1:54325");
+  const url = new URL(request.url, providerOrigin);
   let result = { status: 200, body: {} };
   try {
     let raw = "";
@@ -284,8 +285,8 @@ createServer(async (request, response) => {
     "Cache-Control": "no-store",
   });
   response.end(result.status === 204 ? undefined : JSON.stringify(result.body));
-}).listen(54325, "127.0.0.1", () =>
+}).listen(providerPort, "127.0.0.1", () =>
   console.log(
-    "TEST provider on loopback 54325: Auth double, real PostgreSQL RLS.",
+    `TEST provider on loopback ${providerPort}: Auth double, real PostgreSQL RLS.`,
   ),
 );

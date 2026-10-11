@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
 import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
 
 for (const status of [401, 409])
   test(`SYNC04 automatic ${status} raises an actionable notice while device settings stay collapsed and answers remain durable`, async ({
@@ -241,7 +242,7 @@ test("SYNC03 two teacher devices enforce read-only import, explicit takeover and
   await chooseTeacherMode(page, "demo");
   const otherContext = await browser.newContext({
     storageState: await context.storageState(),
-    baseURL: "http://127.0.0.1:3100",
+    baseURL: appOrigin,
   });
   const other = await otherContext.newPage(),
     errors: string[] = [];
