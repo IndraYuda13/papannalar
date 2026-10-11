@@ -107,11 +107,9 @@ try {
       windowsHide: true,
     });
     children.push(child);
-    child.on("exit", (code) => {
-      if (code) {
-        cleanup();
-        process.exit(code);
-      }
+    child.on("exit", (code, signal) => {
+      cleanup();
+      process.exit(code ?? (signal ? 1 : 0));
     });
   }
   console.log(

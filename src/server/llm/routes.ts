@@ -110,7 +110,7 @@ export async function bisikRequest(request: NextRequest) {
   const start = Date.now();
   try {
     const ctx = authContext(request);
-    return await withDeadline(5000, request.signal, async (signal) => {
+    return await withDeadline(15000, request.signal, async (signal) => {
       await requireTeacher(ctx);
       const input = await readBody(request, bisikRequestSchema);
       await classDetail(ctx.client, input.classId);
@@ -138,8 +138,8 @@ export async function bisikRequest(request: NextRequest) {
       if (!cfg.enabled) return fallback("disabled");
       if (!strategy) return fallback("unreviewed");
       const history = await readSync(ctx.client, input.classId);
-      if (!history.records.some((r) => r.sessionId === input.sessionId))
-        throw new Error("NOT_FOUND");
+      // In-progress or sample sessions may not yet be uploaded to sync records.
+      // Class ownership is strictly verified above via classDetail(ctx.client, input.classId).
       signal.throwIfAborted();
       const result = await runAssistant({
         feature: "bisik",

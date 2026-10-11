@@ -89,7 +89,7 @@ export function BisikControls({
     const controller = new AbortController();
     active.current = controller;
     setBusy(true);
-    const timer = setTimeout(() => controller.abort(), 5000);
+    const timer = setTimeout(() => controller.abort(), 15000);
     setMessage("AI sedang menyusun saran mengajar…");
     try {
       if (question) {

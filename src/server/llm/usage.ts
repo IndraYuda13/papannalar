@@ -42,7 +42,7 @@ export async function runAssistant<T>(input: {
     reason: FallbackReason = "none",
     errorCategory: Usage["errorCategory"] = null;
   const deadline =
-    (input.feature === "bisik" ? 5000 : 30000) - (Date.now() - input.start);
+    (input.feature === "bisik" ? 15000 : 30000) - (Date.now() - input.start);
   const usage = (): Usage => ({
     ...usageMetadata(input.provider),
     feature: input.feature,

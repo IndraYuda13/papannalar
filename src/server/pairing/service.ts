@@ -86,13 +86,23 @@ export async function pairingRequest(
             "unknown",
         ),
       });
+      const proto =
+        request.headers.get("x-forwarded-proto") ??
+        request.nextUrl.protocol.replace(":", "");
+      const host =
+        request.headers.get("x-forwarded-host") ??
+        request.headers.get("host") ??
+        request.nextUrl.host;
+      const effectiveOrigin = proto.startsWith("https")
+        ? `${proto}://${host}`
+        : applicationOrigin(request);
       return ctx.finish(
         NextResponse.json(
           challengeSchema.parse({
             id: data.id,
             code,
             expiresAt: data.expiresAt,
-            pairingUrl: pairingUrl(applicationOrigin(request), code),
+            pairingUrl: pairingUrl(effectiveOrigin, code),
           }),
         ),
       );
