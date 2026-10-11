@@ -76,7 +76,11 @@ export function publicDiagram(
       "KPK dari $1 dan $2",
     )
     .replace(/(\d+) pensil berharga Rp([\d.]+)/, "$1 pensil harganya Rp$2");
-  const integer = (value: string) => Number(value.replaceAll(".", ""));
+  // Strip only thousands separators (a "." between a digit and exactly three
+  // digits), so an English-style decimal like "1.5" is parsed as 1.5, not 15
+  // (T2-10b). Indonesian prompts use "." for thousands and "," for decimals.
+  const integer = (value: string) =>
+    Number(value.replace(/(?<=\d)\.(?=\d{3}\b)/g, ""));
   let match = text.match(/Mana lebih banyak: (\d+) atau (\d+) jeruk\?/);
   if (match && Math.max(+match[1], +match[2]) <= 20)
     return {

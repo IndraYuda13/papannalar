@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 vi.mock("server-only", () => ({}));
-import { acceptedOrigins, applicationOrigin } from "../../src/server/auth/origin";
+import {
+  acceptedOrigins,
+  applicationOrigin,
+} from "../../src/server/auth/origin";
 import { clientAddress } from "../../src/server/http";
 
 const request = (url: string, headers: Record<string, string> = {}) =>

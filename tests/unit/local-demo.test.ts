@@ -13,6 +13,15 @@ const loopbackEnv = {
   localAdapter: "1",
   provider: "http://127.0.0.1:55425",
   origin: "http://127.0.0.1:3200",
+  publicAppOrigin: undefined,
+  allowPublicDemo: undefined,
+} as {
+  demoMode: string | undefined;
+  localAdapter: string | undefined;
+  provider: string | undefined;
+  origin: string | undefined;
+  publicAppOrigin: string | undefined;
+  allowPublicDemo: string | undefined;
 };
 
 it("local demo access requires explicit flag and exact isolated loopback origins", () => {
@@ -111,7 +120,10 @@ it("demoSurfaceAllowed requires an explicit opt-in flag and fails closed without
   ).toBe(false);
   for (const demoMode of ["", "true", "0", "yes"])
     expect(
-      demoSurfaceAllowed({ headers: loopbackHost }, { ...loopbackEnv, demoMode }),
+      demoSurfaceAllowed(
+        { headers: loopbackHost },
+        { ...loopbackEnv, demoMode },
+      ),
     ).toBe(false);
   expect(demoModeEnabled(undefined)).toBe(false);
   expect(demoModeEnabled("1")).toBe(true);
@@ -121,12 +133,93 @@ it("demoSurfaceAllowed refuses a proxied request (nginx X-Real-IP) even on a loo
   // set to the true peer, so nginx's Host rewrite cannot smuggle it in.
   expect(
     demoSurfaceAllowed(
-      { headers: headers({ host: "127.0.0.1:3100", "x-real-ip": "203.0.113.9" }) },
+      {
+        headers: headers({
+          host: "127.0.0.1:3100",
+          "x-real-ip": "203.0.113.9",
+        }),
+      },
       loopbackEnv,
     ),
   ).toBe(false);
   expect(isProxiedRequest(headers({ "x-real-ip": "203.0.113.9" }))).toBe(true);
   expect(isProxiedRequest(headers({}))).toBe(false);
+});
+it("an external PUBLIC_APP_ORIGIN refuses demo surfaces unless the operator acknowledges a public demo (GATE 2)", () => {
+  const loopbackHost = headers({ host: "127.0.0.1:3200" });
+  // A real public deployment sets PUBLIC_APP_ORIGIN (the F-02 fix); the floor
+  // then depends on no proxy property and cannot flip if X-Real-IP changes.
+  expect(
+    demoSurfaceAllowed(
+      { headers: loopbackHost },
+      { ...loopbackEnv, publicAppOrigin: "https://papannalar.indrayuda.my.id" },
+    ),
+  ).toBe(false);
+  // Explicit acknowledgement re-enables it for an intentional public demo.
+  expect(
+    demoSurfaceAllowed(
+      { headers: loopbackHost },
+      {
+        ...loopbackEnv,
+        publicAppOrigin: "https://papannalar.indrayuda.my.id",
+        allowPublicDemo: "1",
+      },
+    ),
+  ).toBe(true);
+  expect(
+    demoSurfaceAllowed(
+      { headers: loopbackHost },
+      {
+        ...loopbackEnv,
+        publicAppOrigin: "https://papannalar.indrayuda.my.id",
+        allowPublicDemo: "0",
+      },
+    ),
+  ).toBe(false);
+  // A loopback PUBLIC_APP_ORIGIN is still a local deployment -> allowed.
+  expect(
+    demoSurfaceAllowed(
+      { headers: loopbackHost },
+      { ...loopbackEnv, publicAppOrigin: "http://127.0.0.1:3200" },
+    ),
+  ).toBe(true);
+});
+it("a foreign X-Forwarded-Host / Proto cannot be smuggled past a loopback Host (GATE 3)", () => {
+  expect(
+    demoSurfaceAllowed(
+      {
+        headers: headers({
+          host: "127.0.0.1:3200",
+          "x-forwarded-host": "evil.example",
+        }),
+      },
+      loopbackEnv,
+    ),
+  ).toBe(false);
+  expect(
+    demoSurfaceAllowed(
+      {
+        headers: headers({
+          host: "127.0.0.1:3200",
+          "x-forwarded-proto": "https",
+        }),
+      },
+      loopbackEnv,
+    ),
+  ).toBe(false);
+  // Loopback X-Forwarded-* (what Next itself injects for a direct call) passes.
+  expect(
+    demoSurfaceAllowed(
+      {
+        headers: headers({
+          host: "127.0.0.1:3200",
+          "x-forwarded-host": "127.0.0.1:3200",
+          "x-forwarded-proto": "http",
+        }),
+      },
+      loopbackEnv,
+    ),
+  ).toBe(true);
 });
 it("demoSurfaceAllowed refuses a non-loopback Host or non-loopback config pair", () => {
   expect(

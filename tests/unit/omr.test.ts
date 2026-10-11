@@ -104,7 +104,7 @@ describe("Client OMR geometry and classification", () => {
       }
     },
   );
-  it("blank -> ?, multiple/faint -> review, absent ROI/card is not a wrong answer", () => {
+  it("blank -> missing review row, multiple/faint -> review, absent ROI/card is not a wrong answer", () => {
     const blank = scanCard(
       syntheticCard({
         kind: "weekly",
@@ -114,8 +114,13 @@ describe("Client OMR geometry and classification", () => {
       "weekly",
       roster,
     );
-    expect(blank.status).toBe("accepted");
-    expect(blank.answers[0]).toEqual({ status: "blank", result: "?" });
+    // A blank (unmarked) row is a review item, not a deliberate "?" (T2-03):
+    // docs/13 requires blank rows to be inspected, and BKT must receive a
+    // pending observation, not incorrect "?" evidence. Only the "?" bubble
+    // (row 3 here, accepted) yields a deliberate "?".
+    expect(blank.status).toBe("review");
+    expect(blank.answers[0]).toEqual({ status: "blank", result: "missing" });
+    expect(blank.answers[2].result).toBe("?");
     const multiple = scanCard(
       syntheticCard({
         kind: "weekly",

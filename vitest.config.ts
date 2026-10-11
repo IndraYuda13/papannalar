@@ -1,6 +1,14 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  resolve: {
+    // Match the Next/tsconfig "@/*" -> src/* alias so unit tests can import the
+    // same route/server modules the app does.
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   test: {
     environment: "node",
     // Bound CPU/memory contention for coverage, OMR and ESLint integration tests.

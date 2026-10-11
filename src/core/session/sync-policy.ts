@@ -1,5 +1,13 @@
 export type SyncFailure =
-  "login" | "forbidden" | "review" | "invalid" | "retry";
+  | "login"
+  | "forbidden"
+  | "review"
+  | "invalid"
+  | "retry"
+  // The server acknowledged a session-delete for this entry (T2-09). It is a
+  // real, teacher-visible outcome, not an invisible "invalid": the local edit
+  // was not saved because the session no longer exists server-side.
+  | "deleted";
 export function syncFailure(status: number): SyncFailure {
   if (status === 401) return "login";
   if (status === 403 || status === 404) return "forbidden";

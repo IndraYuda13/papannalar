@@ -47,6 +47,12 @@ export type Grouping = Readonly<{
     composition: readonly Composition[];
   }>[];
   smallClass: boolean;
+  // Explicit "no active pupils" signal (T2-05): an empty/absent active roster
+  // used to be reported as an ordinary class with zero groups, so downstream
+  // consumers (stationSchedule(0) -> RangeError, createExitPlan "Exit needs
+  // groups") failed far from the cause. Callers must treat emptyClass as a
+  // product-level state to surface, not a valid grouping.
+  emptyClass: boolean;
   homogeneous: boolean;
 }>;
 type Bin = {
@@ -222,7 +228,10 @@ export function groupStudents(
       ),
     ),
     merges: Object.freeze(merges),
-    smallClass: active.length > 0 && active.length < 3,
+    // Fewer than 3 active pupils is a small class; zero active pupils is the
+    // explicit empty state (T2-05), never a normal class.
+    smallClass: active.length < 3,
+    emptyClass: active.length === 0,
     homogeneous,
   });
 }

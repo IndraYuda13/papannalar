@@ -116,7 +116,10 @@ describe("Grouping from displayed placement", () => {
       const sizes = result.groups.map((g) => g.members.length);
       if (sizes.length)
         expect(Math.max(...sizes) - Math.min(...sizes)).toBeLessThanOrEqual(1);
-      expect(result.smallClass).toBe(n > 0 && n < 3);
+      // smallClass now covers an empty roster too (T2-05); emptyClass is the
+      // explicit "no active pupils" signal for a product-level state.
+      expect(result.smallClass).toBe(n < 3);
+      expect(result.emptyClass).toBe(n === 0);
       expect(groupStudents(students.toReversed(), config)).toEqual(result);
     },
   );

@@ -660,6 +660,12 @@ export function CycleWorkspace({
                     </p>
                   ))}
               </details>
+              {!groups.length && derived.grouping.emptyClass && (
+                <p className="text-sm text-muted-foreground" role="status">
+                  Belum ada siswa hadir untuk dikelompokkan. Tandai kehadiran
+                  minimal satu siswa, lalu muat ulang kelompok.
+                </p>
+              )}
               {!groups.length && derived.grouping.groups.length > 0 && (
                 <div className="learning-groups" aria-label="Saran kelompok">
                   {derived.grouping.groups.map((g) => (

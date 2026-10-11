@@ -329,7 +329,16 @@ export function createSyncRepository(scope: LocalScope) {
           if (ack.status !== "accepted") {
             await queue.put({
               ...entry,
-              state: ack.status === "conflict" ? "review" : "invalid",
+              // "deleted" is a distinct, surfaced outcome (T2-09): the session
+              // was removed server-side, so this local edit cannot be saved and
+              // must be shown to the teacher rather than silently marked
+              // invalid and left to block the class queue invisibly.
+              state:
+                ack.status === "conflict"
+                  ? "review"
+                  : ack.status === "deleted"
+                    ? "deleted"
+                    : "invalid",
             });
             return;
           }

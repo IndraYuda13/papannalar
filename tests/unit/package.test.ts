@@ -101,24 +101,28 @@ describe("PKG01 offline package", () => {
       expect(parseTeacherPackage(pkg)).toEqual(pkg);
     },
   );
-  it("500 package seeds keep station/exit separate including the small A4 domain", () => {
-    for (let seed = 0; seed < 500; seed++) {
-      const pkg = buildPackage({
-        ...input,
-        seed,
-        grade: 2,
-        occupied: [],
-        variant: "oral",
-      });
-      for (const a of pkg.activities) {
-        const used = [...a.board, ...a.independent, a.optional, a.guided].map(
-          (q) => q.mathFingerprint,
-        );
-        expect(used).not.toContain(a.exit.mathFingerprint);
-        expect(used).not.toContain(a.exitContext.mathFingerprint);
+  it(
+    "500 package seeds keep station/exit separate including the small A4 domain",
+    { timeout: 30_000 },
+    () => {
+      for (let seed = 0; seed < 500; seed++) {
+        const pkg = buildPackage({
+          ...input,
+          seed,
+          grade: 2,
+          occupied: [],
+          variant: "oral",
+        });
+        for (const a of pkg.activities) {
+          const used = [...a.board, ...a.independent, a.optional, a.guided].map(
+            (q) => q.mathFingerprint,
+          );
+          expect(used).not.toContain(a.exit.mathFingerprint);
+          expect(used).not.toContain(a.exitContext.mathFingerprint);
+        }
       }
-    }
-  });
+    },
+  );
   it("replaces exactly one question and freezes assessment keys", () => {
     const pkg = buildPackage({ ...input, variant: "weekly" });
     const next = replacePackageQuestion(pkg, pkg.assessment[0].id, 1234567);

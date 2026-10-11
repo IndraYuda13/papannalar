@@ -108,14 +108,15 @@ describe("V4 custom OMR from actual pixels", () => {
         scale: 4,
       });
       const result = scanCard(frame, "weekly", roster, binding);
+      // A blank row 2 is a review item now (T2-03), not a silent "?".
       expect(result).toMatchObject({
-        status: "accepted",
+        status: "review",
         attendanceNumber: 7,
         form: binding,
       });
       expect(result.answers).toEqual([
         { status: "accepted", result: "A" },
-        { status: "blank", result: "?" },
+        { status: "blank", result: "missing" },
         { status: "accepted", result: "?" },
       ]);
       expect(scanResultSchema.parse(result)).toEqual(result);
@@ -253,11 +254,12 @@ describe("V4 custom OMR from actual pixels", () => {
       roster,
       binding,
     );
+    // An absent/invalid attendance AND blank rows (T2-03) both raise issues.
     expect(absent).toMatchObject({
       status: "review",
       form: binding,
       attendanceNumber: null,
-      issues: ["attendance"],
+      issues: ["attendance", "answers"],
     });
   });
   it.each(CARD_KINDS)("preserves old %s cards and QR payloads", (kind) => {

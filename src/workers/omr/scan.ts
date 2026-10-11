@@ -405,13 +405,16 @@ export function scanCard(
     .slice(0, form?.rows ?? layout.rows)
     .map((points) => {
       const read = row(points);
+      // An unmarked (blank) row is NOT a deliberate "Belum tahu" (T2-03):
+      // docs/13_GUIDE_LATIHAN_AI.md requires it to be inspected. Map blank to
+      // "missing" so the answers review issue fires and BKT records a pending
+      // observation, not incorrect evidence. The "?" bubble remains the only
+      // source of a deliberate "?" (CARD_OPTIONS), preserved when accepted.
       return {
         result:
           read.status === "accepted"
             ? CARD_OPTIONS[read.index!]
-            : read.status === "blank"
-              ? ("?" as const)
-              : ("missing" as const),
+            : ("missing" as const),
         status: read.status,
       };
     });

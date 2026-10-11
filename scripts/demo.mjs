@@ -8,12 +8,17 @@ import { SAMPLE_ID } from "./sample-data.mjs";
 import { appOrigin, appPort, providerOrigin } from "../tests/harness/ports.mjs";
 const require = createRequire(import.meta.url),
   root = process.cwd();
-// Demo surfaces are enabled by an EXPLICIT operator/dev opt-in only. This
-// launcher runs locally, so it enables the local adapter, but the demo/sample
-// surfaces stay disabled unless PAPANNALAR_DEMO_MODE is passed by the operator
-// (or `--demo`/`--video` is requested below). Absent -> /demo and /auth/demo
-// 404 (ORION-arbitrated Layer 1; SENTINEL F-01/F-03).
-const demoMode = process.env["PAPANNALAR_DEMO_MODE"];
+// Demo surfaces are enabled by an EXPLICIT operator/dev opt-in only: the
+// PAPANNALAR_DEMO_MODE=1 env var or the dedicated `--demo` flag. `--video`
+// (recording) deliberately does NOT imply demo mode: production's unit runs
+// `pnpm video`, and ORION's binding Layer 1 requires that an unchanged unit
+// leaves demo surfaces 404. To record against sample data, run
+// `PAPANNALAR_DEMO_MODE=1 pnpm video`. Absent -> /demo and /auth/demo 404
+// (ORION-arbitrated Layer 1; SENTINEL F-01/F-03).
+const demoOn =
+  process.env["PAPANNALAR_DEMO_MODE"] === "1" ||
+  process.argv.includes("--demo");
+const recording = process.argv.includes("--video");
 const psql =
   process.env.PSQL_BIN ??
   (process.platform === "win32"
@@ -34,12 +39,9 @@ const env = {
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-test-publishable-key",
   PAIRING_SECRET: randomBytes(32).toString("hex"),
   PAPANNALAR_LOCAL_ADAPTER: "1",
-  // Demo mode is opt-in. `--video`/`--demo` (or an explicit
-  // PAPANNALAR_DEMO_MODE=1 in the environment) enables it; absent stays off so
+  // Demo mode is opt-in (env var or `--demo`); `--video` alone leaves it off so
   // a public deployment that still runs this launcher serves 404 on demo paths.
-  ...(demoMode === "1" ||
-  process.argv.includes("--video") ||
-  process.argv.includes("--demo")
+  ...(demoOn
     ? {
         PAPANNALAR_DEMO_MODE: "1",
         SAMPLE_ENABLED: "true",
@@ -100,8 +102,7 @@ try {
     ownCluster = true;
   }
   run(process.execPath, ["scripts/test-db.mjs", "prepare"]);
-  if (process.argv.includes("--video"))
-    run(process.execPath, ["scripts/seed-local-recording.mjs"]);
+  if (recording) run(process.execPath, ["scripts/seed-local-recording.mjs"]);
   const developing = process.argv.includes("--dev");
   if (developing) run(process.execPath, ["scripts/prepare-assets.mjs"]);
   if (!developing && !existsSync(".next/BUILD_ID")) {
@@ -132,11 +133,11 @@ try {
     });
   }
   console.log(
-    process.argv.includes("--video")
+    recording
       ? `Rekaman lokal: ${appOrigin}/masuk → Coba dengan data contoh → /guru | papan /layar. PostgreSQL nyata; Auth/Realtimenya provider uji loopback. Ctrl+C untuk berhenti.`
-      : demoMode === "1" || process.argv.includes("--demo")
+      : demoOn
         ? `Demo adapter lokal: ${appOrigin}/demo | papan: ${appOrigin}/layar | Ctrl+C untuk berhenti. Auth/email/WebSocket live tidak dipakai.`
-        : `Adapter lokal aktif (demo OFF): ${appOrigin}/masuk | papan: ${appOrigin}/layar | /demo dan /auth/demo 404. Jalankan dengan --demo untuk mengaktifkan permukaan demo.`,
+        : `Adapter lokal aktif (demo OFF): ${appOrigin}/masuk | papan: ${appOrigin}/layar | /demo dan /auth/demo 404. Jalankan dengan --demo atau PAPANNALAR_DEMO_MODE=1 untuk mengaktifkan permukaan demo.`,
   );
   if (process.argv.includes("--smoke")) {
     let ready = false;

@@ -5,10 +5,10 @@ import { syncRecordSchema } from "@/contracts/sync";
 import { takeoverSchema } from "@/contracts/sync-conflict";
 import { syncRpc } from "@/server/sync";
 export async function POST(request: NextRequest) {
+  // Auth context built outside the try so a rotated cookie is still emitted on
+  // an error response (T2-04), matching the sibling /sync route.
+  const auth = authContext(request);
   try {
-    // Authenticate before parsing (SENTINEL F-09): an unauthenticated caller
-    // must get 401, never a 422-vs-401 oracle about the body schema.
-    const auth = authContext(request);
     await requireTeacher(auth);
     const input = await readBody(request, takeoverSchema);
     return auth.finish(
@@ -17,6 +17,6 @@ export async function POST(request: NextRequest) {
       ),
     );
   } catch (error) {
-    return handleError(error);
+    return auth.finish(handleError(error));
   }
 }

@@ -3,6 +3,7 @@ import { Brand } from "@/ui/components/brand";
 import { LoginForm } from "@/features/guru/login-form";
 import { SampleLogin } from "@/features/guru/sample-login";
 import { DecorativeScene } from "@/ui/components/decorative-scene";
+import { demoConfiguredForEnvironment } from "@/server/demo-surface";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Masuk" };
@@ -33,7 +34,7 @@ export default function LoginPage() {
         </p>
         <LoginForm />
         {process.env["SAMPLE_ENABLED"] === "true" &&
-          process.env["PAPANNALAR_DEMO_MODE"] === "1" && (
+          demoConfiguredForEnvironment() && (
             <SampleLogin
               requiresCode={Boolean(process.env["SAMPLE_ACCESS_CODE"])}
             />
