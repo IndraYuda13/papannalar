@@ -35,10 +35,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   let context: ReturnType<typeof authContext> | undefined;
   try {
-    const input = await readBody(request, createClassSchema);
+    // Authenticate before parsing (SENTINEL F-09).
     context = authContext(request);
     await requireTeacher(context);
     await requireSampleController(request, context);
+    const input = await readBody(request, createClassSchema);
     await createClass(context.client, input);
     return context.finish(
       NextResponse.json(await classDetail(context.client, input.id), {

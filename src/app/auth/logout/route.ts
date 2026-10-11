@@ -3,7 +3,10 @@ import { z } from "zod";
 import { isSameOrigin, isTeacherIdentity } from "../../../contracts/auth";
 import { randomIdSchema } from "../../../contracts/domain";
 import { authContext } from "../../../server/auth/client";
-import { applicationOrigin } from "../../../server/auth/origin";
+import {
+  acceptedOrigins,
+  applicationOrigin,
+} from "../../../server/auth/origin";
 import { apiError, handleError, readBody } from "../../../server/http";
 import { sampleControllerToken } from "../../../server/sample-controller";
 import { isSurfaceAuthCookie } from "../../../server/auth/cookies";
@@ -15,7 +18,17 @@ const receiptSchema = z.strictObject({
 });
 
 export async function POST(request: NextRequest) {
-  if (!isSameOrigin(request, applicationOrigin(request)))
+  // Same-origin required, with an explicit content-type gate so a cross-site
+  // <form>/<img> POST without preflight cannot reach sign-out (F-05). The
+  // empty-Origin case is refused when a session cookie is present, which is the
+  // dangerous one (a third-party page forcing an active session to terminate);
+  // a cookie-less first sign-out with no Origin only clears empty cookies.
+  const hasSessionCookie = request.cookies
+    .getAll()
+    .some((cookie) => isSurfaceAuthCookie(cookie.name, "pn-teacher-auth"));
+  if (hasSessionCookie && request.headers.get("origin") === null)
+    return apiError("FORBIDDEN", 403);
+  if (!isSameOrigin(request, acceptedOrigins(request)))
     return apiError("FORBIDDEN", 403);
   let input: z.infer<typeof inputSchema>;
   try {

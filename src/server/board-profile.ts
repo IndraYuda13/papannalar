@@ -18,14 +18,19 @@ export async function boardProfileRequest(
       const { data, error } = await ctx.client.auth.getUser();
       if (error || !data.user?.is_anonymous) throw new Error("UNAUTHENTICATED");
     }
+    // Authenticate first, then parse: a malformed presentationId must read as
+    // INVALID_INPUT (422), never as a transient 503 that would distinguish
+    // "malformed" from "not yours" by status code (SENTINEL F-11).
     const input =
       surface === "board"
         ? publicBoardProfile(await readBody(request, boardProfileSchema))
-        : {
-            presentationId: randomIdSchema.parse(
+        : (() => {
+            const id = randomIdSchema.safeParse(
               request.nextUrl.searchParams.get("presentationId"),
-            ),
-          };
+            );
+            if (!id.success) throw new Error("INVALID_INPUT");
+            return { presentationId: id.data };
+          })();
     const { data, error } = await ctx.client.rpc("board_profile_action", {
       p_action: surface === "board" ? "save" : "read",
       p_input: input,

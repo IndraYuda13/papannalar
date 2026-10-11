@@ -34,11 +34,15 @@ export default defineConfig({
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "test-only-publishable-key",
         PAIRING_SECRET: "test-only-pairing-pepper-never-production-2026",
         PAPANNALAR_LOCAL_ADAPTER: "1",
+        // Explicit demo opt-in for the browser suite (ORION-arbitrated Layer 1);
+        // absent in production so /demo and /auth/demo 404 there.
+        PAPANNALAR_DEMO_MODE: "1",
         SAMPLE_ENABLED: "true",
         SAMPLE_TEACHER_ID: "7b000001-0000-4000-8000-000000000001",
         SAMPLE_TEACHER_EMAIL: "recording@qa.invalid",
         SAMPLE_TEACHER_PASSWORD: "local-recording-test-password-only-2026",
-        SAMPLE_ACCESS_CODE: "",
+        // A real (>=12 char) code; the sample route now refuses an empty one.
+        SAMPLE_ACCESS_CODE: "local-e2e-sample-access-code",
       },
       reuseExistingServer: process.env["PAPANNALAR_REUSE_LOCAL_DEMO"] === "1",
       timeout: 60000,

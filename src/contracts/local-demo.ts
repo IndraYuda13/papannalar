@@ -35,6 +35,14 @@ export function isLocalDemoEnvironment(
   );
 }
 
+// Explicit operator opt-in for every demo/sample surface. The local-adapter
+// flag alone is NOT an authorization boundary (SENTINEL F-01/F-03): a launcher
+// that hardcodes the loopback pair can still be deployed to a public host, so a
+// second, deliberate switch must be present. Absent or non-"1" fails closed.
+export function demoModeEnabled(value: string | undefined): boolean {
+  return value === "1";
+}
+
 // Same loopback rule applied to a raw `Host` header value: accept a loopback
 // host name with any port, reject everything else (credentials, path, query,
 // foreign hosts, malformed values).
@@ -53,4 +61,43 @@ export function isLoopbackHostHeader(host: string | null | undefined): boolean {
   } catch {
     return false;
   }
+}
+
+// The single gate every demo/sample surface must clear (ORION-arbitrated
+// layering, SENTINEL F-01/F-03):
+//   1. PAPANNALAR_DEMO_MODE=1 — an explicit, operator-controlled opt-in that is
+//      separate from the local-adapter flag (which the demo launcher sets for
+//      every deployment, and is therefore not an authorization boundary).
+//   2. the loopback config pair (provider + app origin);
+//   3. a loopback Host header;
+//   4. a direct (unproxied) request — nginx always sets X-Real-IP, so a request
+//      that travelled through the public reverse proxy can never pass, even
+//      though nginx rewrites Host/Origin/X-Forwarded-*.
+// Any future demo entry point must call this instead of re-deriving the
+// condition, so the boundary cannot drift.
+export function demoSurfaceAllowed(
+  request: { headers: Headers },
+  env: {
+    demoMode: string | undefined;
+    localAdapter: string | undefined;
+    provider: string | undefined;
+    origin: string | undefined;
+  },
+): boolean {
+  return (
+    demoModeEnabled(env.demoMode) &&
+    isLocalDemoEnvironment(env.localAdapter, env.provider, env.origin) &&
+    isLoopbackHostHeader(request.headers.get("host")) &&
+    !isProxiedRequest(request.headers)
+  );
+}
+
+// A request that reached the app through the reverse proxy. nginx sets
+// X-Real-IP unconditionally to the true peer address and Next never injects it,
+// so its presence proves a proxied hop even though Host/Origin/X-Forwarded-*
+// are rewritten. Demo surfaces refuse proxied requests so a public deployment
+// cannot expose them even when the demo flag leaks into the environment.
+// Direct loopback dev/demo requests carry no X-Real-IP.
+export function isProxiedRequest(headers: Headers): boolean {
+  return Boolean(headers.get("x-real-ip"));
 }

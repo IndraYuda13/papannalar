@@ -27,7 +27,11 @@ export function isSameOrigin(
     url: string;
     headers: Headers;
   },
-  expectedOrigin = new URL(request.url).origin,
+  expectedOrigin: string | readonly string[] = new URL(request.url).origin,
 ): boolean {
-  return request.headers.get("origin") === expectedOrigin;
+  const origin = request.headers.get("origin");
+  if (origin === null) return false;
+  return (
+    Array.isArray(expectedOrigin) ? expectedOrigin : [expectedOrigin]
+  ).includes(origin);
 }

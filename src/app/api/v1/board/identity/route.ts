@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { isSameOrigin } from "@/contracts/auth";
 import { authContext } from "@/server/auth/client";
-import { applicationOrigin } from "@/server/auth/origin";
+import { acceptedOrigins } from "@/server/auth/origin";
 import { apiError, handleError } from "@/server/http";
 
 export async function POST(request: NextRequest) {
   let context: ReturnType<typeof authContext> | undefined;
-  if (!isSameOrigin(request, applicationOrigin(request)))
+  if (!isSameOrigin(request, acceptedOrigins(request)))
     return apiError("FORBIDDEN", 403);
   try {
     context = authContext(request, "board");

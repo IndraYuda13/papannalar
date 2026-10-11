@@ -1,17 +1,10 @@
 import { notFound } from "next/navigation";
-import { isLocalDemoEnvironment } from "@/contracts/local-demo";
+import { demoAllowedForServerComponent } from "@/server/demo-surface";
 import { PageHeader } from "@/ui/components/studio";
 import { Brand } from "@/ui/components/brand";
 export const dynamic = "force-dynamic";
-export default function DemoPage() {
-  if (
-    !isLocalDemoEnvironment(
-      process.env["PAPANNALAR_LOCAL_ADAPTER"],
-      process.env["NEXT_PUBLIC_SUPABASE_URL"],
-      process.env["APP_ORIGIN"],
-    )
-  )
-    notFound();
+export default async function DemoPage() {
+  if (!(await demoAllowedForServerComponent())) notFound();
   return (
     <main className="studio-panel mx-auto my-8 max-w-2xl space-y-6 bg-card p-6 sm:p-10">
       <Brand />

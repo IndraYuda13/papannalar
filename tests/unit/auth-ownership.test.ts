@@ -51,6 +51,50 @@ describe("Auth/ownership boundaries", () => {
       ),
     ).toBe(true);
   });
+  it("origin allowlist menerima origin publik dan internal, menolak origin asing", () => {
+    const accept = ["http://127.0.0.1:3100", "https://papannalar.example"];
+    expect(
+      isSameOrigin(
+        {
+          url: "http://127.0.0.1:3100/api",
+          headers: new Headers({ origin: "https://papannalar.example" }),
+        },
+        accept,
+      ),
+    ).toBe(true);
+    expect(
+      isSameOrigin(
+        {
+          url: "http://127.0.0.1:3100/api",
+          headers: new Headers({ origin: "http://127.0.0.1:3100" }),
+        },
+        accept,
+      ),
+    ).toBe(true);
+    expect(
+      isSameOrigin(
+        {
+          url: "http://127.0.0.1:3100/api",
+          headers: new Headers({ origin: "https://evil.example" }),
+        },
+        accept,
+      ),
+    ).toBe(false);
+  });
+  it("permintaan tanpa header Origin selalu ditolak", () => {
+    expect(
+      isSameOrigin(
+        { url: "http://127.0.0.1:3100/api", headers: new Headers() },
+        "http://127.0.0.1:3100",
+      ),
+    ).toBe(false);
+    expect(
+      isSameOrigin(
+        { url: "http://127.0.0.1:3100/api", headers: new Headers() },
+        ["http://127.0.0.1:3100"],
+      ),
+    ).toBe(false);
+  });
   it("login menolak extra role/redirect/metadata", () => {
     expect(
       loginSchema.safeParse({ email: "teacher@qa.invalid", role: "admin" })

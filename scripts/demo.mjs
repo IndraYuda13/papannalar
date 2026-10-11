@@ -8,6 +8,12 @@ import { SAMPLE_ID } from "./sample-data.mjs";
 import { appOrigin, appPort, providerOrigin } from "../tests/harness/ports.mjs";
 const require = createRequire(import.meta.url),
   root = process.cwd();
+// Demo surfaces are enabled by an EXPLICIT operator/dev opt-in only. This
+// launcher runs locally, so it enables the local adapter, but the demo/sample
+// surfaces stay disabled unless PAPANNALAR_DEMO_MODE is passed by the operator
+// (or `--demo`/`--video` is requested below). Absent -> /demo and /auth/demo
+// 404 (ORION-arbitrated Layer 1; SENTINEL F-01/F-03).
+const demoMode = process.env["PAPANNALAR_DEMO_MODE"];
 const psql =
   process.env.PSQL_BIN ??
   (process.platform === "win32"
@@ -28,13 +34,19 @@ const env = {
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "local-test-publishable-key",
   PAIRING_SECRET: randomBytes(32).toString("hex"),
   PAPANNALAR_LOCAL_ADAPTER: "1",
-  ...(process.argv.includes("--video")
+  // Demo mode is opt-in. `--video`/`--demo` (or an explicit
+  // PAPANNALAR_DEMO_MODE=1 in the environment) enables it; absent stays off so
+  // a public deployment that still runs this launcher serves 404 on demo paths.
+  ...(demoMode === "1" ||
+  process.argv.includes("--video") ||
+  process.argv.includes("--demo")
     ? {
+        PAPANNALAR_DEMO_MODE: "1",
         SAMPLE_ENABLED: "true",
         SAMPLE_TEACHER_ID: SAMPLE_ID,
         SAMPLE_TEACHER_EMAIL: "recording@qa.invalid",
         SAMPLE_TEACHER_PASSWORD: "local-recording-test-password-only-2026",
-        SAMPLE_ACCESS_CODE: "",
+        SAMPLE_ACCESS_CODE: process.env["SAMPLE_ACCESS_CODE"] ?? "",
       }
     : {}),
 };
@@ -122,7 +134,9 @@ try {
   console.log(
     process.argv.includes("--video")
       ? `Rekaman lokal: ${appOrigin}/masuk → Coba dengan data contoh → /guru | papan /layar. PostgreSQL nyata; Auth/Realtimenya provider uji loopback. Ctrl+C untuk berhenti.`
-      : `Demo adapter lokal: ${appOrigin}/demo | papan: ${appOrigin}/layar | Ctrl+C untuk berhenti. Auth/email/WebSocket live tidak dipakai.`,
+      : demoMode === "1" || process.argv.includes("--demo")
+        ? `Demo adapter lokal: ${appOrigin}/demo | papan: ${appOrigin}/layar | Ctrl+C untuk berhenti. Auth/email/WebSocket live tidak dipakai.`
+        : `Adapter lokal aktif (demo OFF): ${appOrigin}/masuk | papan: ${appOrigin}/layar | /demo dan /auth/demo 404. Jalankan dengan --demo untuk mengaktifkan permukaan demo.`,
   );
   if (process.argv.includes("--smoke")) {
     let ready = false;
@@ -139,7 +153,10 @@ try {
       } catch {}
       await new Promise((resolve) => setTimeout(resolve, 250));
     }
-    if (!ready) throw new Error("Demo route did not become ready");
+    if (!ready)
+      throw new Error(
+        "Demo route did not become ready (set PAPANNALAR_DEMO_MODE=1 / pass --demo to enable demo surfaces)",
+      );
     console.log(
       "PASS demo launcher /demo HTTP 200 with explicit local provider label",
     );

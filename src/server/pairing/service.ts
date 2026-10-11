@@ -1,8 +1,4 @@
 import "server-only";
-import {
-  isLocalDemoEnvironment,
-  isLoopbackHostHeader,
-} from "../../contracts/local-demo";
 import { createHmac, randomInt } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { authContext, requireTeacher } from "../auth/client";
@@ -12,7 +8,8 @@ import {
   sampleControllerToken,
 } from "../sample-controller";
 import { pairingUrl } from "../../features/classroom/pairing-url";
-import { readBody, handleError } from "../http";
+import { readBody, handleError, clientAddress } from "../http";
+import { demoAllowedForRequest } from "../demo-surface";
 import {
   boardPairingSchema,
   teacherPairingSchema,
@@ -70,10 +67,7 @@ export async function pairingRequest(
     if (input.action === "reset") {
       const data = await rpc("reset", {
         resetId: input.resetId,
-        ipHash: hash(
-          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-            "unknown",
-        ),
+        ipHash: hash(clientAddress(request)),
       });
       return ctx.finish(NextResponse.json(boardResetReceiptSchema.parse(data)));
     }
@@ -84,10 +78,7 @@ export async function pairingRequest(
         ...(input.presentationId
           ? { presentationId: input.presentationId }
           : {}),
-        ipHash: hash(
-          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-            "unknown",
-        ),
+        ipHash: hash(clientAddress(request)),
       });
       const proto =
         request.headers.get("x-forwarded-proto") ??
@@ -117,24 +108,14 @@ export async function pairingRequest(
         sessionId: input.sessionId,
         payload: input.payload,
         ...(input.controllerId ? { controllerId: input.controllerId } : {}),
-        ipHash: hash(
-          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-            "unknown",
-        ),
+        ipHash: hash(clientAddress(request)),
       });
       return ctx.finish(NextResponse.json(snapshotSchema.parse(data)));
     }
     if (input.action === "channel") {
       await rpc("snapshot", input);
       const url = process.env["NEXT_PUBLIC_SUPABASE_URL"]!;
-      if (
-        isLocalDemoEnvironment(
-          process.env["PAPANNALAR_LOCAL_ADAPTER"],
-          url,
-          process.env["APP_ORIGIN"],
-        ) &&
-        isLoopbackHostHeader(request.headers.get("host"))
-      )
+      if (demoAllowedForRequest(request))
         return ctx.finish(NextResponse.json({ kind: "snapshot" }));
       const { data } = await ctx.client.auth.getSession();
       if (!data.session) throw new Error("UNAUTHENTICATED");

@@ -1,8 +1,20 @@
 import { expect, it } from "vitest";
 import {
+  demoModeEnabled,
+  demoSurfaceAllowed,
   isLocalDemoEnvironment,
   isLoopbackHostHeader,
+  isProxiedRequest,
 } from "../../src/contracts/local-demo";
+
+const headers = (entries: Record<string, string>) => new Headers(entries);
+const loopbackEnv = {
+  demoMode: "1",
+  localAdapter: "1",
+  provider: "http://127.0.0.1:55425",
+  origin: "http://127.0.0.1:3200",
+};
+
 it("local demo access requires explicit flag and exact isolated loopback origins", () => {
   expect(
     isLocalDemoEnvironment(
@@ -84,4 +96,62 @@ it("loopback host header rejects foreign, malformed and smuggled values", () => 
     "127.0.0.1:3100/../x",
   ])
     expect(isLoopbackHostHeader(host)).toBe(false);
+});
+
+// F-01/F-03: the single fail-closed gate every demo/sample surface must clear.
+it("demoSurfaceAllowed requires an explicit opt-in flag and fails closed without it", () => {
+  const loopbackHost = headers({ host: "127.0.0.1:3200" });
+  expect(demoSurfaceAllowed({ headers: loopbackHost }, loopbackEnv)).toBe(true);
+  // No flag -> 404, even on a perfect loopback config + request.
+  expect(
+    demoSurfaceAllowed(
+      { headers: loopbackHost },
+      { ...loopbackEnv, demoMode: undefined },
+    ),
+  ).toBe(false);
+  for (const demoMode of ["", "true", "0", "yes"])
+    expect(
+      demoSurfaceAllowed({ headers: loopbackHost }, { ...loopbackEnv, demoMode }),
+    ).toBe(false);
+  expect(demoModeEnabled(undefined)).toBe(false);
+  expect(demoModeEnabled("1")).toBe(true);
+});
+it("demoSurfaceAllowed refuses a proxied request (nginx X-Real-IP) even on a loopback host", () => {
+  // A request that travelled through the public reverse proxy carries X-Real-IP
+  // set to the true peer, so nginx's Host rewrite cannot smuggle it in.
+  expect(
+    demoSurfaceAllowed(
+      { headers: headers({ host: "127.0.0.1:3100", "x-real-ip": "203.0.113.9" }) },
+      loopbackEnv,
+    ),
+  ).toBe(false);
+  expect(isProxiedRequest(headers({ "x-real-ip": "203.0.113.9" }))).toBe(true);
+  expect(isProxiedRequest(headers({}))).toBe(false);
+});
+it("demoSurfaceAllowed refuses a non-loopback Host or non-loopback config pair", () => {
+  expect(
+    demoSurfaceAllowed(
+      { headers: headers({ host: "evil.example" }) },
+      loopbackEnv,
+    ),
+  ).toBe(false);
+  expect(
+    demoSurfaceAllowed(
+      { headers: headers({ host: "127.0.0.1:3200" }) },
+      { ...loopbackEnv, origin: "https://papannalar.example" },
+    ),
+  ).toBe(false);
+  expect(
+    demoSurfaceAllowed(
+      { headers: headers({ host: "127.0.0.1:3200" }) },
+      { ...loopbackEnv, provider: "https://app.supabase.co" },
+    ),
+  ).toBe(false);
+  // The local-adapter flag alone must not enable the surface.
+  expect(
+    demoSurfaceAllowed(
+      { headers: headers({ host: "127.0.0.1:3200" }) },
+      { ...loopbackEnv, localAdapter: undefined },
+    ),
+  ).toBe(false);
 });

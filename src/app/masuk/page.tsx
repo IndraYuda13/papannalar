@@ -32,11 +32,12 @@ export default function LoginPage() {
           sekali.
         </p>
         <LoginForm />
-        {process.env["SAMPLE_ENABLED"] === "true" && (
-          <SampleLogin
-            requiresCode={Boolean(process.env["SAMPLE_ACCESS_CODE"])}
-          />
-        )}
+        {process.env["SAMPLE_ENABLED"] === "true" &&
+          process.env["PAPANNALAR_DEMO_MODE"] === "1" && (
+            <SampleLogin
+              requiresCode={Boolean(process.env["SAMPLE_ACCESS_CODE"])}
+            />
+          )}
         <a
           className="mt-8 inline-flex min-h-12 items-center font-semibold text-primary underline"
           href="/layar"

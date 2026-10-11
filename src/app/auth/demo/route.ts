@@ -1,23 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
-import {
-  isLocalDemoEnvironment,
-  isLoopbackHostHeader,
-} from "@/contracts/local-demo";
 import { isSameOrigin } from "@/contracts/auth";
 import { authContext } from "@/server/auth/client";
+import { demoAllowedForRequest } from "@/server/demo-surface";
 import { apiError, handleError } from "@/server/http";
 export async function POST(request: NextRequest) {
   const origin = process.env["APP_ORIGIN"],
     provider = process.env["NEXT_PUBLIC_SUPABASE_URL"];
-  if (
-    !isLocalDemoEnvironment(
-      process.env["PAPANNALAR_LOCAL_ADAPTER"],
-      provider,
-      origin,
-    ) ||
-    !isLoopbackHostHeader(request.headers.get("host"))
-  )
-    return apiError("NOT_FOUND", 404);
+  // Fail closed: the demo surface exists only under the explicit operator
+  // opt-in + loopback config + direct (unproxied) loopback request.
+  if (!demoAllowedForRequest(request)) return apiError("NOT_FOUND", 404);
   if (!isSameOrigin(request, origin!)) return apiError("FORBIDDEN", 403);
   const ctx = authContext(request);
   try {

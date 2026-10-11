@@ -29,10 +29,11 @@ export async function GET(request: NextRequest, params: Params) {
 export async function PATCH(request: NextRequest, params: Params) {
   let context: ReturnType<typeof authContext> | undefined;
   try {
-    const input = await readBody(request, updateClassSchema);
+    // Authenticate before parsing (SENTINEL F-09).
     context = authContext(request);
     await requireTeacher(context);
     await requireSampleController(request, context);
+    const input = await readBody(request, updateClassSchema);
     const { data, error } = await context.client
       .from("classes")
       .update({
@@ -55,13 +56,14 @@ export async function PATCH(request: NextRequest, params: Params) {
 export async function DELETE(request: NextRequest, params: Params) {
   let context: ReturnType<typeof authContext> | undefined;
   try {
+    // Authenticate before parsing (SENTINEL F-09).
+    context = authContext(request);
+    await requireTeacher(context);
+    await requireSampleController(request, context);
     const input = await readBody(
       request,
       z.strictObject({ revision: z.number().int().positive() }),
     );
-    context = authContext(request);
-    await requireTeacher(context);
-    await requireSampleController(request, context);
     const { data, error } = await context.client
       .from("classes")
       .delete()

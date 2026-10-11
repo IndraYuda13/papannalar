@@ -2,7 +2,35 @@ import "server-only";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { isSameOrigin } from "../contracts/auth";
-import { applicationOrigin } from "./auth/origin";
+import { acceptedOrigins } from "./auth/origin";
+
+// Best-effort client identity for IP-keyed rate limits (SENTINEL F-04).
+//
+// Next.js 16 exposes no transport socket address to a route handler, so we
+// cannot read the true peer. Instead of trusting the left-most
+// `X-Forwarded-For` entry (client-supplied, spoofable), we prefer the
+// proxy-set `X-Real-IP` (nginx always sets it to `$remote_addr`) and otherwise
+// take the RIGHT-most `X-Forwarded-For` entry, which is the one our own proxy
+// appended last. When neither is present the caller is a direct connection and
+// we report `unknown` — a shared bucket, never an attacker-chosen value.
+//
+// Trust boundary: this assumes the app is reached only through the local
+// reverse proxy, which sets both headers and strips client-supplied ones.
+// Deployments with no proxy (or a proxy that forwards client XFF verbatim) MUST
+// set a real `PUBLIC_APP_ORIGIN`/`X-Real-IP` policy; see REMEDIATION_REPORT.
+export function clientAddress(request: NextRequest): string {
+  const real = request.headers.get("x-real-ip")?.trim();
+  if (real) return real;
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const parts = forwarded
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
+  return "unknown";
+}
 
 export function apiError(code: string, status: number) {
   return NextResponse.json(
@@ -15,7 +43,7 @@ export async function readBody<T>(
   schema: z.ZodType<T>,
   maximumBytes = 8192,
 ): Promise<T> {
-  if (!isSameOrigin(request, applicationOrigin(request)))
+  if (!isSameOrigin(request, acceptedOrigins(request)))
     throw new Error("FORBIDDEN");
   if (request.headers.get("content-type")?.split(";")[0] !== "application/json")
     throw new Error("INVALID_INPUT");
