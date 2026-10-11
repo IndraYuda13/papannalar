@@ -7,9 +7,14 @@ untuk lingkungan uji terpisah, tanpa data siswa nyata atau layanan hosted.
 
 - `pnpm video`: menyiapkan data contoh dan membuka alur aplikasi utama melalui
   `/masuk` → **Coba dengan data contoh**. Gunakan panduan guru untuk mencoba
-  kelas, soal, asesmen, cetak kartu dan hasil.
-- `pnpm demo`: menyediakan akses fixture terpisah melalui `/demo`.
-- `pnpm demo --smoke`: memeriksa startup launcher lalu menghentikannya.
+  kelas, soal, asesmen, cetak kartu dan hasil. `--video` **tidak** mengaktifkan
+  permukaan demo; gunakan `PAPANNALAR_DEMO_MODE=1 pnpm video` bila ingin data
+  contoh sekaligus `/demo`.
+- `pnpm demo --demo`: menyediakan akses fixture terpisah melalui `/demo`.
+  Tanpa `--demo` (dan tanpa `PAPANNALAR_DEMO_MODE=1`), `/demo`, `/auth/demo` dan
+  `/auth/sample` menjawab 404 — ini keadaan aman default di host publik.
+- `pnpm demo --smoke`: memeriksa startup launcher lalu menghentikannya (implisit
+  mengaktifkan permukaan demo untuk pemeriksaan).
 
 Aplikasi berjalan pada `http://127.0.0.1:3100`, provider Auth/HTTP khusus tes pada
 port 54325, dan PostgreSQL uji pada port 55432 dengan database `pn_m01c_test`.

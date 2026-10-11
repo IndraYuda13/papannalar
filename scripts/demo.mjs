@@ -9,15 +9,17 @@ import { appOrigin, appPort, providerOrigin } from "../tests/harness/ports.mjs";
 const require = createRequire(import.meta.url),
   root = process.cwd();
 // Demo surfaces are enabled by an EXPLICIT operator/dev opt-in only: the
-// PAPANNALAR_DEMO_MODE=1 env var or the dedicated `--demo` flag. `--video`
-// (recording) deliberately does NOT imply demo mode: production's unit runs
-// `pnpm video`, and ORION's binding Layer 1 requires that an unchanged unit
-// leaves demo surfaces 404. To record against sample data, run
+// PAPANNALAR_DEMO_MODE=1 env var or a dedicated `--demo`/`--smoke` flag.
+// `--video` (recording) deliberately does NOT imply demo mode: production's
+// unit runs `pnpm video`, and ORION's binding Layer 1 requires that an unchanged
+// unit leaves demo surfaces 404. To record against sample data, run
 // `PAPANNALAR_DEMO_MODE=1 pnpm video`. Absent -> /demo and /auth/demo 404
 // (ORION-arbitrated Layer 1; SENTINEL F-01/F-03).
 const demoOn =
   process.env["PAPANNALAR_DEMO_MODE"] === "1" ||
-  process.argv.includes("--demo");
+  process.argv.includes("--demo") ||
+  // `pnpm demo --smoke` inspects the demo route; that is an explicit dev check.
+  process.argv.includes("--smoke");
 const recording = process.argv.includes("--video");
 const psql =
   process.env.PSQL_BIN ??

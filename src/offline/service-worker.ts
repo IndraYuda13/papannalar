@@ -2,6 +2,19 @@
 
 import { cacheTarget, type ShellManifest } from "./cache-policy";
 
+// Offline shell staleness model (T2-08).
+//
+// The cached public shell is populated once per service-worker revision, in the
+// `install` handler, from the build manifest (cache: "reload"). Navigations are
+// network-first: a live classroom always fetches fresh HTML/RSC and only falls
+// back to the cached shell when the network fails (see the fetch handler below).
+// So the staleness window is: a classroom that stays open across a deploy keeps
+// serving the OLD shell only for offline fallbacks, until the new worker's
+// `install` runs on a fresh worker and the client consents via
+// QUERY_UPDATE_SAFETY. This is a deliberate trade-off (never cache runtime
+// HTML/RSC/API responses). It is bounded by the next full worker install; there
+// is no background revalidation of the shell between installs.
+
 declare const __SHELL_MANIFEST__: ShellManifest;
 const worker = globalThis as unknown as ServiceWorkerGlobalScope;
 const manifest = __SHELL_MANIFEST__;

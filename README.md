@@ -68,14 +68,25 @@ pnpm build
 pnpm video
 ```
 
-Buka `http://127.0.0.1:3100/masuk` dan pilih **Coba dengan data contoh**.
-Launcher menyiapkan data sintetis untuk mencoba alur aplikasi utama.
-Biarkan proses berjalan; Ctrl+C menghentikannya. Jangan menjalankan dua launcher
-atau tes browser pada port yang sama secara bersamaan.
+Buka `http://127.0.0.1:3100/masuk`. Launcher menyiapkan data sintetis untuk
+mencoba alur aplikasi utama. Biarkan proses berjalan; Ctrl+C menghentikannya.
+Jangan menjalankan dua launcher atau tes browser pada port yang sama secara
+bersamaan.
 
-`pnpm demo` menyediakan jalur fixture terpisah di `/demo`. Keduanya hanya untuk
-loopback dan pengujian, bukan adapter production atau bukti layanan hosted.
-[Petunjuk demo dan pemulihan lokal](docs/09_LOCAL_HANDOFF.md) memuat detailnya.
+`pnpm demo --demo` menyediakan jalur fixture terpisah di `/demo`. Keduanya hanya
+untuk loopback dan pengujian, bukan adapter production atau bukti layanan
+hosted. [Petunjuk demo dan pemulihan lokal](docs/09_LOCAL_HANDOFF.md) memuat
+detailnya.
+
+**Permukaan demo/sample bersifat opt-in dan gagal-tertutup.** `/demo`,
+`POST /auth/demo` dan `POST /auth/sample` hanya aktif bila `PAPANNALAR_DEMO_MODE=1`
+secara eksplisit disetel (atau launcher dijalankan dengan `--demo`), DAN origin
+loopback, DAN permintaan langsung tanpa proksi. `pnpm video` tidak
+mengaktifkannya, sehingga unit produksi yang tidak diubah menyajikan 404 di jalur
+demo. Untuk melatih data contoh saat merekam: `PAPANNALAR_DEMO_MODE=1 pnpm video`.
+`/auth/sample` juga menolak `SAMPLE_ACCESS_CODE` kosong atau kurang dari 12
+karakter. Pada deployment publik, setel `PUBLIC_APP_ORIGIN` ke origin luar; demo
+tetap 404 kecuali `PAPANNALAR_ALLOW_PUBLIC_DEMO=1` secara sadar mengizinkannya.
 
 ## Konfigurasi AI opsional
 
