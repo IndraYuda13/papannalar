@@ -11,9 +11,14 @@
 @layer base {
   html {
     color-scheme: light;
+    /* V1: a focus ring must never be painted under the fixed bottom bar. The scroll
+       container reserves the bar's height so focus scrolls clear of it. */
+    scroll-padding-bottom: var(--pn-nav-safe);
   }
   body {
-    @apply bg-background font-sans text-base leading-6 text-foreground antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
+    font-size: 16px;
+    line-height: 24px;
   }
   button,
   a {
@@ -22,6 +27,18 @@
   button:not(:disabled),
   a {
     touch-action: manipulation;
+  }
+  /* Every focusable control keeps its own clearance as well (V1, part b). The browser scrolls
+     the *focused element's* scroll-margin box into view, so the margin must sit on the control
+     itself — a margin on an ancestor row does not clear the fixed bottom bar. */
+  :is(.studio-workspace, .studio-row, .studio-row-list > li, [data-nav-item])
+    :is(a[href], button, input, select, textarea, summary),
+  :is(
+    a.studio-row,
+    a.studio-section-action,
+    .studio-workspace > :is(a, button, input, select, textarea, summary)
+  ) {
+    scroll-margin-bottom: var(--pn-nav-safe);
   }
   ::selection {
     background: var(--pn-teal-100);
@@ -170,7 +187,14 @@
 /* Board-only tokens. Teacher typography and touch targets retain their own scale.
    Unlayered rules override legacy fixed-size utility classes on the board. */
 .board-surface {
-  --board-title: clamp(30px, 2.6vw, 48px);
+  /* v4 (DESIGN_BRIEF §5.3): the question floor is an invariant — --board-question never
+     resolves below 56px at a 1920x1080 canvas. Presets and interaction zones may reduce
+     spacing, model size and chrome, never question legibility (R1/R2). */
+  --board-question: clamp(56px, 3.4vw, 96px);
+  --board-title: var(--board-question);
+  --board-option: clamp(48px, 2.5vw, 64px);
+  --board-numeral: clamp(72px, 6vw, 112px);
+  --board-task: clamp(40px, 2.1vw, 52px);
   --board-body: clamp(20px, 1.65vw, 30px);
   --board-label: clamp(18px, 1.4vw, 26px);
   --board-answer: clamp(28px, 2.3vw, 44px);
@@ -193,7 +217,6 @@
   line-height: 1.2;
 }
 .board-surface[data-board-preset="compact"] {
-  --board-title: clamp(28px, 2.3vw, 42px);
   --board-body: clamp(20px, 1.45vw, 26px);
   --board-label: clamp(18px, 1.25vw, 24px);
   --board-answer: clamp(26px, 2vw, 38px);
@@ -205,7 +228,6 @@
   --board-base-hit: 48px;
 }
 .board-surface[data-board-preset="large"] {
-  --board-title: clamp(34px, 3vw, 56px);
   --board-body: clamp(22px, 1.9vw, 36px);
   --board-label: clamp(20px, 1.6vw, 30px);
   --board-answer: clamp(32px, 2.7vw, 52px);
@@ -879,7 +901,11 @@
 /* The production library renderer and the teacher's bounded preview share tool
    layout. These rules are scoped; teacher forms outside the preview are intact. */
 [data-library-preview] {
-  --board-title: clamp(24px, 3cqw, 38px);
+  /* The preview is legitimately smaller than the board. It defines the question token at
+     its own scale and no longer republishes --board-title, so a preview can never be the
+     source of a board question size (R2). D1 labels it `Tampilan papan`. */
+  --board-question: clamp(24px, 3cqw, 38px);
+  --board-title: var(--board-question);
   --board-body: clamp(18px, 2cqw, 24px);
   --board-label: 18px;
   --board-answer: clamp(24px, 3cqw, 36px);
@@ -1167,7 +1193,6 @@
   inset: 50dvh 16px 8px;
   --board-control: 48px;
   --board-model: clamp(112px, 18dvh, 200px);
-  --board-title: 30px;
   --board-answer: 28px;
   --board-body: 22px;
   --board-label: 20px;

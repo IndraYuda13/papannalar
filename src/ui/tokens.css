@@ -1,4 +1,10 @@
+/* PapanNalar design tokens.
+   v4 (AMBANG): the private/public threshold is the layout system. Colour roles, the
+   hairline/edge split and the radii/elevation/hit-area scales are the whole DNA, so this
+   file is the single source both teacher and board surfaces read. Brand values never
+   change; v4 changes what they are allowed to do. See DESIGN_BRIEF_V4.md §4. */
 :root {
+  /* Brand values (unchanged — docs/04_BRAND_DESAIN.md). */
   --pn-teal-700: #0b6b6b;
   --pn-teal-800: #085252;
   --pn-teal-100: #d8efee;
@@ -22,6 +28,37 @@
   --pn-jarak-1: #237d79;
   --pn-jarak-0: #085252;
 
+  /* v4 additions (§4.2). --pn-ink-500 and --pn-amber-100 were referenced by utilities
+     that compiled to nothing; every one of the three now resolves. */
+  --pn-ink-500: #6e7f8c;
+  --pn-amber-100: #fce4c2;
+  --pn-sukses-100: #e7f3ea;
+
+  /* v4 semantic split (§4.3): a hairline is decoration inside an established group;
+     an edge is a structural boundary and must clear 3:1 on paper and on white. */
+  --pn-hairline: var(--pn-line);
+  --pn-edge: var(--pn-ink-500);
+
+  /* Board ground. `bg-pn-board` was used by the editor's board preview while no such
+     token existed, so the preview rendered without the board's paper ground. */
+  --pn-board: var(--pn-kertas);
+
+  /* v4 geometry and elevation (§4.8, §6.4). Radius shrinks as viewing distance grows. */
+  --pn-r-1: 6px;
+  --pn-r-2: 10px;
+  --pn-r-3: 14px;
+  --pn-r-4: 22px;
+  --pn-e1: 0 1px 2px #14212b0f;
+  --pn-e2: 0 8px 24px #14212b1f;
+
+  /* v4 hit areas (§4.8, §6.1). */
+  --pn-tap: 48px;
+  --pn-tap-lg: 56px;
+  /* The bottom bar's own block size, including its 1px top rule. The bar and the space the
+     content reserves for it read the same number, so they cannot drift apart (V1). */
+  --pn-nav-h: 68px;
+  --pn-nav-safe: calc(var(--pn-nav-h) + env(safe-area-inset-bottom));
+
   --background: var(--pn-kertas);
   --foreground: var(--pn-ink-900);
   --card: var(--pn-putih);
@@ -36,9 +73,9 @@
   --accent-foreground: var(--pn-ink-900);
   --destructive: var(--pn-bahaya);
   --pn-line: #d3ded8;
-  --pn-shadow: 0 2px 8px #14212b06;
-  --border: var(--pn-line);
-  --input: var(--pn-ink-400);
+  --pn-shadow: var(--pn-e1);
+  --border: var(--pn-hairline);
+  --input: var(--pn-edge);
   --ring: var(--pn-teal-700);
   --radius: 0.75rem;
 }
@@ -60,17 +97,23 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-pn-hairline: var(--pn-hairline);
+  --color-pn-edge: var(--pn-edge);
+  --color-pn-board: var(--pn-board);
   --color-pn-teal-700: var(--pn-teal-700);
   --color-pn-teal-800: var(--pn-teal-800);
   --color-pn-teal-100: var(--pn-teal-100);
   --color-pn-amber-500: var(--pn-amber-500);
   --color-pn-amber-700: var(--pn-amber-700);
+  --color-pn-amber-100: var(--pn-amber-100);
   --color-pn-ink-900: var(--pn-ink-900);
   --color-pn-ink-600: var(--pn-ink-600);
+  --color-pn-ink-500: var(--pn-ink-500);
   --color-pn-ink-400: var(--pn-ink-400);
   --color-pn-kertas: var(--pn-kertas);
   --color-pn-putih: var(--pn-putih);
   --color-pn-sukses: var(--pn-sukses);
+  --color-pn-sukses-100: var(--pn-sukses-100);
   --color-pn-peringatan: var(--pn-peringatan);
   --color-pn-bahaya: var(--pn-bahaya);
   --color-pn-grup-biru: var(--pn-grup-biru);
@@ -84,6 +127,11 @@
   --color-pn-jarak-0: var(--pn-jarak-0);
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
   --font-kelas: "Atkinson Hyperlegible", system-ui, sans-serif;
-  --radius-kartu: 12px;
-  --radius-tombol: 10px;
+  /* Named radii. `rounded-input` was used by 28 call sites while no such theme value
+     existed, so every field and quiet control silently had square corners. */
+  --radius-input: var(--pn-r-2);
+  --radius-kartu: var(--pn-r-3);
+  --radius-sheet: var(--pn-r-3);
+  --radius-dialog: var(--pn-r-4);
+  --radius-tombol: var(--pn-r-2);
 }

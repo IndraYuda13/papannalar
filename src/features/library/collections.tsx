@@ -20,7 +20,12 @@ import { LibraryItemView } from "./item-view";
 import { defaultTool, ToolFields, TOOL_LABELS } from "./tool-fields";
 import { InteractiveHelp } from "./interactive-help";
 import { templateItem } from "./templates";
-import { PageHeader, StateNotice } from "@/ui/components/studio";
+import {
+  PageHeader,
+  Section,
+  StateNotice,
+  BoardLegality,
+} from "@/ui/components/studio";
 import { ToolPoster } from "@/ui/components/decorative-scene";
 import { FileQuestion, Plus } from "lucide-react";
 export function CollectionsPage({
@@ -39,15 +44,14 @@ export function CollectionsPage({
     (c) => c.source === tab && c.status !== "archived",
   );
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <PageHeader
-        eyebrow="Rak ide mengajar"
-        title="Soal & Presentasi"
+        title="Soal"
         description="Simpan sekali, gunakan di berbagai kelas."
         actions={
           <Button asChild>
             <Link href="/guru/soal/baru">
-              <Plus size={20} aria-hidden />
+              <Plus size={20} strokeWidth={1.8} aria-hidden />
               Buat kumpulan soal
             </Link>
           </Button>
@@ -60,80 +64,80 @@ export function CollectionsPage({
           kumpulan untuk mengedit atau menggunakannya.
         </p>
       )}
-      <div
-        role="group"
-        aria-label="Sumber soal"
-        className="studio-tabs flex gap-2"
-      >
+      <div role="group" aria-label="Sumber soal" className="studio-segmented">
         {(["system", "teacher"] as const).map((t) => (
           <Button
             key={t}
+            variant="quiet"
             aria-pressed={tab === t}
-            variant={tab === t ? "default" : "outline"}
             onClick={() => setTab(t)}
           >
             {t === "system" ? "Dari Sistem" : "Soal Saya"}
           </Button>
         ))}
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {sets.map((c) => (
-          <Link
-            key={c.id}
-            href={`/guru/soal/${c.id}`}
-            className={`${panel} friendly-card studio-catalog-card`}
-          >
-            {c.document.kind === "cards" ? (
-              <FileQuestion size={28} className="text-primary" aria-hidden />
-            ) : (
-              <ToolPoster
-                asset={
-                  c.document.items.some(
-                    (i) =>
-                      i.kind === "interactive" && i.tool.kind === "balance",
-                  )
-                    ? "balance-scale"
-                    : c.document.items.some(
+      <Section label={tab === "system" ? "Kumpulan dari sistem" : "Soal saya"}>
+        <ul className="studio-row-list">
+          {sets.map((c) => (
+            <li key={c.id}>
+              <Link
+                className="studio-row"
+                href={`/guru/soal/${c.id}`}
+                title={c.document.title || "Kumpulan tanpa judul"}
+              >
+                <span className="studio-row-icon" aria-hidden>
+                  {c.document.kind === "cards" ? (
+                    <FileQuestion size={22} strokeWidth={1.8} />
+                  ) : (
+                    <ToolPoster
+                      asset={
+                        c.document.items.some(
                           (i) =>
                             i.kind === "interactive" &&
-                            i.tool.kind === "algebra",
+                            i.tool.kind === "balance",
                         )
-                      ? "algebra-kit"
-                      : "learning-board"
-                }
-              />
-            )}
-            <h2 className="text-xl font-bold">
-              {c.document.title || "Kumpulan tanpa judul"}
-            </h2>
-            <p>
-              {c.document.kind === "cards"
-                ? "Kartu Nalar"
-                : "Interaktif di layar"}{" "}
-              · {c.document.items.length} soal
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {c.status === "ready" ? "Siap digunakan" : "Draft"}
-              {c.source === "system" ? " · Materi sistem" : ""}
-            </p>
-            <span className="inline-flex min-h-12 items-center font-semibold text-primary">
-              Buka kumpulan →
-            </span>
-          </Link>
-        ))}
-      </div>
-      {!sets.length && (
-        <StateNotice
-          title="Belum ada kumpulan"
-          action={
-            <Button asChild>
-              <Link href="/guru/soal/baru">Buat soal pertama</Link>
-            </Button>
-          }
-        >
-          Mulai dari satu pertanyaan, lalu tambahkan contoh atau alat belajar.
-        </StateNotice>
-      )}
+                          ? "balance-scale"
+                          : c.document.items.some(
+                                (i) =>
+                                  i.kind === "interactive" &&
+                                  i.tool.kind === "algebra",
+                              )
+                            ? "algebra-kit"
+                            : "learning-board"
+                      }
+                    />
+                  )}
+                </span>
+                <span className="studio-row-content">
+                  <h2>{c.document.title || "Kumpulan tanpa judul"}</h2>
+                  <p>
+                    {c.document.kind === "cards"
+                      ? "Kartu Nalar"
+                      : "Interaktif di layar"}{" "}
+                    · {c.document.items.length} soal ·{" "}
+                    {c.status === "ready" ? "Siap digunakan" : "Draft"}
+                  </p>
+                </span>
+                <span className="studio-row-action" data-row-action>
+                  Buka kumpulan
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {!sets.length && (
+          <StateNotice
+            title="Belum ada yang cocok"
+            action={
+              <Button asChild>
+                <Link href="/guru/soal/baru">Buat kumpulan soal</Link>
+              </Button>
+            }
+          >
+            Mulai dari satu pertanyaan, lalu tambahkan contoh atau alat belajar.
+          </StateNotice>
+        )}
+      </Section>
     </div>
   );
 }
@@ -412,15 +416,14 @@ function CollectionEditor({
   );
   const previewItem = previewResult.success ? previewResult.data : undefined;
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <Link
         href="/guru/soal"
-        className="inline-flex min-h-12 items-center text-primary"
+        className="inline-flex min-h-12 items-center text-pn-teal-700"
       >
-        ← Soal & Presentasi
+        ← Soal
       </Link>
       <PageHeader
-        eyebrow={readonly ? "Materi sistem" : "Studio soal"}
         title={
           readonly
             ? document.title
@@ -428,7 +431,11 @@ function CollectionEditor({
               ? "Edit kumpulan soal"
               : "Buat kumpulan soal"
         }
-        description="Susun pertanyaan, isi alat, lalu periksa tampilan yang akan dilihat kelas."
+        description={
+          readonly
+            ? "Materi sistem. Salin ke Soal Saya untuk mengubahnya."
+            : "Susun pertanyaan, isi alat, lalu periksa tampilan yang akan dilihat kelas."
+        }
       />
       {assessmentSource && (
         <p className="practice-feedback">
@@ -660,6 +667,11 @@ function CollectionEditor({
                 />
                 {errorAt(`items.${index}.prompt`)}
               </label>
+              {item.kind === "card" && (
+                <div className="mt-2">
+                  <BoardLegality prompt={item.prompt} />
+                </div>
+              )}
               {item.kind === "card" ? (
                 <>
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -850,13 +862,18 @@ function CollectionEditor({
             </Button>
           )}
           {previewItem && preview !== null && (
-            <section className={panel} aria-label="Pratinjau soal">
-              <Button variant="outline" onClick={() => setPreview(null)}>
-                Tutup preview
-              </Button>
+            <Section
+              aria-label="Pratinjau soal"
+              label="Tampilan papan"
+              action={
+                <Button variant="outline" onClick={() => setPreview(null)}>
+                  Tutup preview
+                </Button>
+              }
+            >
               <div
                 data-library-preview
-                className="min-h-0 rounded-input bg-pn-board p-4"
+                className="studio-board-preview min-h-0"
               >
                 <LibraryItemView
                   key={
@@ -868,17 +885,28 @@ function CollectionEditor({
                   row={preview + 1}
                 />
               </div>
-            </section>
+              {/* The preview's type is legitimately smaller than the board's, and a reviewer
+                  tuning the board against this scale would set the wrong number (T6 §4.4). */}
+              <p className="studio-board-preview-note">
+                Ukuran teks di pratinjau ini lebih kecil daripada di Layar
+                Kelas. Papan memakai soal minimal 56 px pada layar 1920×1080.
+              </p>
+            </Section>
           )}
           {preview !== null && !previewItem && (
-            <section className={panel} aria-label="Pratinjau soal">
-              <Button variant="outline" onClick={() => setPreview(null)}>
-                Tutup preview
-              </Button>
+            <Section
+              aria-label="Pratinjau soal"
+              label="Tampilan papan"
+              action={
+                <Button variant="outline" onClick={() => setPreview(null)}>
+                  Tutup preview
+                </Button>
+              }
+            >
               <p role="status">
                 Periksa isian yang diubah untuk melanjutkan preview.
               </p>
-            </section>
+            </Section>
           )}
         </div>
       </div>

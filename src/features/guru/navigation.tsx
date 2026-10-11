@@ -2,19 +2,46 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { Home, UsersRound, Layers, ClipboardCheck, LogOut } from "lucide-react";
+import {
+  Home,
+  UsersRound,
+  Layers,
+  ClipboardCheck,
+  LogOut,
+  Presentation,
+} from "lucide-react";
 import { Brand } from "@/ui/components/brand";
 import { TeacherProvider } from "./app-context";
 import { logoutTeacher } from "@/features/classroom/logout-transport";
 import { MotionSwap } from "@/ui/components/interactive-motion";
-import { Presentation } from "lucide-react";
+
+/**
+ * v4 navigation (§6.1, §10.1 V3/V4/V6/V10).
+ *
+ * Four destinations, not five: `Latihan kelompok` is a workflow reachable from home and from
+ * a class, not a top-level destination. That removes the duplicate `UsersRound` silhouette
+ * (V3) structurally rather than by swapping a glyph, and it gives the remaining four 12px
+ * labels room to breathe at 360px (V4).
+ *
+ * The sidebar appears at 1024, not 768 (V6); the account block and the board action are
+ * grouped at the sidebar foot above a rule (V10).
+ */
 const entries = [
-  ["/guru", "Beranda", "Beranda", Home],
-  ["/guru/kelas", "Kelas", "Kelas", UsersRound],
-  ["/guru/soal", "Soal & Presentasi", "Soal", Layers],
-  ["/guru/latihan", "Belajar berkelompok", "Kelompok", UsersRound],
-  ["/guru/asesmen", "Asesmen & Hasil", "Hasil", ClipboardCheck],
+  ["/guru", "Beranda", Home],
+  ["/guru/kelas", "Kelas", UsersRound],
+  ["/guru/soal", "Soal", Layers],
+  ["/guru/asesmen", "Hasil", ClipboardCheck],
 ] as const;
+
+function isCurrent(pathname: string, href: string) {
+  if (href === "/guru") return pathname === href;
+  if (href === "/guru/asesmen")
+    return (
+      pathname.startsWith("/guru/asesmen") || pathname.startsWith("/guru/hasil")
+    );
+  return pathname.startsWith(href);
+}
+
 export function TeacherNavigation({ children }: { children: ReactNode }) {
   const pathname = usePathname(),
     router = useRouter();
@@ -32,86 +59,87 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
   const adaptive =
     pathname === "/guru/latihan" || pathname === "/guru/simulasi";
   return (
-    <div
-      data-surface="guru"
-      className="studio-shell min-h-dvh md:grid md:grid-cols-[248px_1fr]"
-    >
+    <div data-surface="guru" data-register="private" className="studio-shell">
       <a className="skip-link" href="#konten">
         Langsung ke isi
       </a>
-      <aside className="studio-sidebar md:sticky md:top-0 md:h-dvh md:border-r">
-        <div className="flex items-center justify-between p-4 md:p-6">
-          <Link href="/guru" prefetch={false} aria-label="Beranda PapanNalar">
-            <Brand />
-          </Link>
-          <button
-            className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-input text-primary md:hidden"
-            aria-label="Keluar akun"
-            onClick={() => void logout()}
+      <div className="lg:grid lg:grid-cols-[232px_minmax(0,1fr)]">
+        <aside className="studio-sidebar lg:sticky lg:top-0 lg:h-dvh lg:border-r">
+          <div className="flex items-center justify-between p-4 lg:px-6 lg:pt-6">
+            <Link href="/guru" prefetch={false} aria-label="Beranda PapanNalar">
+              <Brand />
+            </Link>
+            <button
+              className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-input text-primary lg:hidden"
+              aria-label="Keluar akun"
+              onClick={() => void logout()}
+            >
+              <LogOut size={20} strokeWidth={1.8} />
+            </button>
+          </div>
+          <nav
+            aria-label="Menu utama"
+            className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-pn-hairline bg-card pb-[env(safe-area-inset-bottom)] lg:static lg:mx-3 lg:flex lg:flex-col lg:gap-1 lg:border-0 lg:pb-0"
           >
-            <LogOut size={20} />
-          </button>
-        </div>
-        <nav
-          aria-label="Menu utama"
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-pn-ink-400/30 bg-card pb-[env(safe-area-inset-bottom)] md:static md:mx-3 md:flex md:flex-col md:gap-2 md:border-0"
-        >
-          {entries.map(([href, label, mobileLabel, Icon]) => {
-            const active =
-              href === "/guru"
-                ? pathname === href
-                : pathname.startsWith(href) ||
-                  (href === "/guru/latihan" && pathname === "/guru/simulasi") ||
-                  (href === "/guru/asesmen" &&
-                    pathname.startsWith("/guru/hasil"));
-            return (
-              <Link
-                key={href}
-                href={href}
-                prefetch={false}
-                aria-label={label}
-                aria-current={active ? "page" : undefined}
-                className={`flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-input px-1 py-2 text-center text-[11px] font-semibold md:flex-row md:justify-start md:text-left md:gap-3 md:px-3 md:text-sm ${active ? "bg-pn-teal-100 text-primary" : "text-muted-foreground"}`}
-              >
-                <span className="nav-icon shrink-0" aria-hidden>
-                  <Icon size={22} strokeWidth={1.8} />
-                </span>
-                <span className="md:hidden">{mobileLabel}</span>
-                <span className="hidden md:inline">{label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="studio-sidebar-foot">
-          <button
-            className="mt-4 hidden min-h-12 items-center gap-2 text-sm text-muted-foreground md:flex"
-            onClick={() => void logout()}
-          >
-            <LogOut size={18} />
-            Keluar akun
-          </button>
-        </div>
-      </aside>
-      <main
-        id="konten"
-        className="studio-workspace min-w-0 px-4 pt-5 pb-28 sm:px-8 md:py-8"
-      >
-        <div className="mx-auto max-w-5xl">
-          <div className="studio-context">
-            <Link href="/layar" prefetch={false} target="_blank">
-              <Presentation size={18} aria-hidden />
+            {entries.map(([href, label, Icon]) => {
+              const active = isCurrent(pathname, href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  prefetch={false}
+                  data-nav-item
+                  aria-label={label}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-input px-1 py-2 text-center text-xs leading-4 font-semibold lg:min-h-12 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-sm lg:leading-6 ${
+                    active
+                      ? "bg-pn-teal-100 text-pn-teal-800"
+                      : "text-pn-ink-600 hover:bg-pn-teal-100"
+                  }`}
+                >
+                  <span className="nav-icon shrink-0" aria-hidden>
+                    <Icon size={22} strokeWidth={1.8} />
+                  </span>
+                  <span className="nav-label">{label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+          <div className="studio-sidebar-foot hidden lg:block">
+            <Link
+              className="mb-3 flex min-h-12 items-center gap-3 rounded-input border border-pn-edge px-3 text-sm font-semibold text-pn-teal-700 hover:bg-pn-teal-100"
+              href="/layar"
+              prefetch={false}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Presentation size={20} strokeWidth={1.8} aria-hidden />
               Layar Kelas
             </Link>
+            <button
+              className="flex min-h-12 w-full items-center gap-3 rounded-input px-3 text-sm text-pn-ink-600 hover:bg-pn-teal-100"
+              onClick={() => void logout()}
+            >
+              <LogOut size={18} strokeWidth={1.8} aria-hidden />
+              Keluar akun
+            </button>
           </div>
-          <MotionSwap change={pathname}>
-            {adaptive ? (
-              children
-            ) : (
-              <TeacherProvider>{children}</TeacherProvider>
-            )}
-          </MotionSwap>
-        </div>
-      </main>
+        </aside>
+        <main
+          id="konten"
+          className="studio-workspace min-w-0 px-4 pt-5 sm:px-8 lg:py-8"
+        >
+          <div className="mx-auto w-full max-w-[960px]">
+            <MotionSwap change={pathname}>
+              {adaptive ? (
+                children
+              ) : (
+                <TeacherProvider>{children}</TeacherProvider>
+              )}
+            </MotionSwap>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

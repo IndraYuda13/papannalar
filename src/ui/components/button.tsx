@@ -5,14 +5,21 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/ui/lib/cn";
 
+/**
+ * v4 (§8.3). `primary` appears exactly once per screen; every other action is `secondary`
+ * or `quiet`. Two primaries may never be adjacent. Board sizing lives on the board surface,
+ * not here, so these variants stay teacher-scale.
+ */
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-3 rounded-tombol font-semibold transition-[background-color,box-shadow,transform] duration-150 active:translate-y-px motion-reduce:transform-none motion-reduce:transition-none disabled:transform-none disabled:cursor-not-allowed disabled:opacity-60 [&_svg]:shrink-0",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-tombol font-semibold transition-[background-color,border-color,color,transform] duration-150 active:translate-y-px motion-reduce:transform-none motion-reduce:transition-none disabled:transform-none disabled:cursor-not-allowed disabled:opacity-60 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-pn-teal-800",
         outline:
-          "border border-primary bg-card text-primary hover:bg-secondary",
+          "border border-pn-edge bg-card text-primary hover:bg-secondary",
+        quiet: "text-primary hover:bg-secondary",
+        destructive: "bg-pn-bahaya text-white hover:bg-pn-bahaya/90",
       },
       size: {
         default: "min-h-12 min-w-12 px-5 py-3 text-base leading-6",

@@ -8,12 +8,14 @@ import {
   type LibraryResponse,
   type LibraryRun,
 } from "@/contracts/library";
+// `panel` is still used by ResultPage (/guru/hasil/[id]), which is D2 scope.
 import { field, panel } from "@/features/library/client";
 import { createNameRepository } from "@/local/names";
 import { Button } from "@/ui/components/button";
 import { mathText } from "@/features/library/item-view";
-import { PageHeader, StateNotice } from "@/ui/components/studio";
+import { PageHeader, Section, StateNotice } from "@/ui/components/studio";
 import { FileCheck2 } from "lucide-react";
+
 export function AssessmentsPage() {
   const { state, classes } = useTeacher(),
     [tab, setTab] = useState<"sessions" | "results">("sessions"),
@@ -31,11 +33,10 @@ export function AssessmentsPage() {
       (tab === "results" || r.status === "active"),
   );
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <PageHeader
-        eyebrow="Dari jawaban ke langkah berikutnya"
-        title="Asesmen & Hasil"
-        description="Periksa jawaban siswa dan lihat hasilnya."
+        title="Hasil"
+        description="Periksa jawaban siswa dan lihat hasilnya. Nama tidak ada di sini — hanya nomor absen."
         actions={
           <Button asChild>
             <Link href="/guru/mulai?mode=assessment">Buat asesmen</Link>
@@ -45,139 +46,172 @@ export function AssessmentsPage() {
       <div
         role="group"
         aria-label="Asesmen dan hasil"
-        className="studio-tabs flex gap-2"
+        className="studio-segmented"
       >
         <Button
+          variant="quiet"
           aria-pressed={tab === "sessions"}
-          variant={tab === "sessions" ? "default" : "outline"}
           onClick={() => setTab("sessions")}
         >
           Sesi Asesmen
         </Button>
         <Button
+          variant="quiet"
           aria-pressed={tab === "results"}
-          variant={tab === "results" ? "default" : "outline"}
           onClick={() => setTab("results")}
         >
           Hasil
         </Button>
       </div>
-      <details className="studio-filter-panel">
-        <summary className="min-h-12 cursor-pointer content-center font-semibold text-primary">
-          Cari berdasarkan kelas atau tanggal
-          {cls || collection || from || to ? " · Filter aktif" : ""}
-        </summary>
-        <div className="studio-filter grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <label>
-            Kelas
-            <select
-              className={field}
-              value={cls}
-              onChange={(e) => setClass(e.target.value)}
-            >
-              <option value="">Semua kelas</option>
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Kumpulan
-            <select
-              className={field}
-              value={collection}
-              onChange={(e) => setCollection(e.target.value)}
-            >
-              <option value="">Semua kumpulan</option>
-              {state.collections
-                .filter((c) => c.document.kind === "cards")
-                .map((c) => (
+      <Section label="Cari asesmen">
+        <details className="studio-filter-panel">
+          <summary className="min-h-12 cursor-pointer content-center font-semibold text-primary">
+            Cari berdasarkan kelas atau tanggal
+            {cls || collection || from || to ? " · Filter aktif" : ""}
+          </summary>
+          <div className="studio-filter grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <label>
+              Kelas
+              <select
+                className={field}
+                value={cls}
+                onChange={(e) => setClass(e.target.value)}
+              >
+                <option value="">Semua kelas</option>
+                {classes.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.document.title}
+                    {c.label}
                   </option>
                 ))}
-            </select>
-          </label>
-          <label>
-            Dari tanggal
-            <input
-              type="date"
-              className={field}
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-            />
-          </label>
-          <label>
-            Sampai tanggal
-            <input
-              type="date"
-              className={field}
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-            />
-          </label>
-        </div>
-        <Button
-          variant="outline"
-          onClick={() => {
-            setClass("");
-            setCollection("");
-            setFrom("");
-            setTo("");
-          }}
-        >
-          Tampilkan semua
-        </Button>
-      </details>
-      <ul className="studio-row-list">
-        {runs.map((r) => (
-          <li key={r.id}>
-            <Link
-              href={
-                tab === "sessions"
-                  ? `/guru/sesi/${r.id}`
-                  : `/guru/hasil/${r.id}`
-              }
-              className="studio-row justify-between"
-            >
-              <span>
-                <b>
-                  {r.classLabel} · {r.document.title}
-                </b>
-                <small className="mt-1 block">
-                  {r.date.split("-").reverse().join("/")} ·{" "}
-                  {r.status === "active" ? "Sedang berlangsung" : "Selesai"}
-                  {r.synthetic ? " · Data contoh" : ""}
-                </small>
-              </span>
-              <span className="font-semibold text-primary">
-                {tab === "sessions" ? "Lanjutkan" : "Buka hasil"} →
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-      {!runs.length && (
-        <StateNotice
-          title={
-            tab === "results"
-              ? "Hasil akan muncul setelah asesmen"
-              : "Belum ada asesmen berjalan"
-          }
-          action={
-            <Button asChild variant="outline">
-              <Link href="/guru/mulai?mode=assessment">
-                Mulai cek pemahaman
-              </Link>
-            </Button>
-          }
-        >
-          Pilih kelas dan Kartu Nalar untuk memeriksa pemahaman siswa. Jika
-          memakai filter, coba pilihan kelas atau tanggal lain.
-        </StateNotice>
-      )}
+              </select>
+            </label>
+            <label>
+              Kumpulan
+              <select
+                className={field}
+                value={collection}
+                onChange={(e) => setCollection(e.target.value)}
+              >
+                <option value="">Semua kumpulan</option>
+                {state.collections
+                  .filter((c) => c.document.kind === "cards")
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.document.title}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <label>
+              Dari tanggal
+              <input
+                type="date"
+                className={field}
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+              />
+            </label>
+            <label>
+              Sampai tanggal
+              <input
+                type="date"
+                className={field}
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+              />
+            </label>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setClass("");
+              setCollection("");
+              setFrom("");
+              setTo("");
+            }}
+          >
+            Tampilkan semua
+          </Button>
+        </details>
+      </Section>
+      <Section
+        /* The sample flag is a per-list fact, so it is stated once here rather than repeated in
+           every row (§8.7, F6). */
+        label={
+          (tab === "sessions" ? "Sesi asesmen" : "Hasil asesmen") +
+          (runs.some((r) => r.synthetic) ? " · data contoh" : "")
+        }
+        ground="sheet"
+      >
+        {runs.length > 0 && (
+          <ul className="studio-row-list">
+            {runs.map((r) => (
+              <li key={r.id}>
+                <Link
+                  href={
+                    tab === "sessions"
+                      ? `/guru/sesi/${r.id}`
+                      : `/guru/hasil/${r.id}`
+                  }
+                  className="studio-row"
+                  title={`${r.classLabel} · ${r.document.title}`}
+                >
+                  <span className="studio-row-icon" aria-hidden>
+                    <FileCheck2 size={22} strokeWidth={1.8} />
+                  </span>
+                  <span className="studio-row-content">
+                    <h2>
+                      {r.classLabel} · {r.document.title}
+                    </h2>
+                    <p>
+                      {r.date.split("-").reverse().join("/")} ·{" "}
+                      {r.status === "active" ? "Sedang berlangsung" : "Selesai"}
+                    </p>
+                  </span>
+                  {/* The sample flag is a per-list fact, not per-row: repeating it in every row
+                      stole the width the title needed and said the same thing N times. It is
+                      stated once, in the section label (F6/§8.7). */}
+                  <span className="studio-row-action" data-row-action>
+                    {tab === "sessions" ? "Lanjutkan" : "Buka hasil"}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+        {!runs.length && (
+          <StateNotice
+            title={
+              tab === "results"
+                ? "Belum ada yang cocok"
+                : "Belum ada sesi hari ini"
+            }
+            action={
+              cls || collection || from || to ? (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setClass("");
+                    setCollection("");
+                    setFrom("");
+                    setTo("");
+                  }}
+                >
+                  Tampilkan semua
+                </Button>
+              ) : (
+                <Button asChild>
+                  <Link href="/guru/mulai?mode=assessment">Buat asesmen</Link>
+                </Button>
+              )
+            }
+          >
+            {cls || collection || from || to
+              ? "Coba kosongkan pencarian atau ubah tanggal."
+              : "Pilih kelas dan Kartu Nalar untuk memeriksa pemahaman siswa."}
+          </StateNotice>
+        )}
+      </Section>
     </div>
   );
 }

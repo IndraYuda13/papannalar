@@ -20,7 +20,7 @@ import { logoutTeacher } from "@/features/classroom/logout-transport";
 import { libraryCache, syncLibraryResponses } from "@/local/library";
 import { libraryCall } from "@/features/library/client";
 import type { LocalScope } from "@/local/scope";
-import { StateNotice } from "@/ui/components/studio";
+import { StateNotice, StatusChip } from "@/ui/components/studio";
 import { Button } from "@/ui/components/button";
 type Data = {
   scope: LocalScope;
@@ -181,9 +181,11 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
       value={{ ...data, refresh, canMutate: !conflict && !locked }}
     >
       {data.state.sample && (
-        <span className="mb-4 inline-block rounded-full bg-pn-teal-100 px-3 py-1 text-xs font-bold text-primary">
-          Data contoh
-        </span>
+        /* §8.7 / F6: this is a static state, so it is a label with an outline dot — no mint
+           filter fill, and never a button that could be mistaken for a filter control. */
+        <div className="mb-4">
+          <StatusChip>Data contoh · bukan siswa nyata</StatusChip>
+        </div>
       )}
       {data.offline && (
         <p role="status" className="mb-4 text-sm">

@@ -3,36 +3,67 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTeacher } from "./app-context";
 import { Button } from "@/ui/components/button";
-import { panel } from "@/features/library/client";
 import { capturePairingLink } from "@/features/classroom/pairing-url";
 import { OfflineChooser } from "@/features/library/offline-chooser";
-import { PageHeader, WorkflowSteps } from "@/ui/components/studio";
+import {
+  PageHeader,
+  ProgressLabel,
+  Section,
+  StateNotice,
+} from "@/ui/components/studio";
 import { ToolExplorer } from "@/ui/components/tool-explorer";
-import { MotionBoundary } from "@/ui/components/motion-boundary";
+import { useClassSpreads, RungRail, type Spread } from "./class-spread";
+import { ArrowRight, Presentation, Shapes } from "lucide-react";
 import type { LibraryRun } from "@/contracts/library";
-import { BookOpen, Presentation, Sparkles, ArrowRight } from "lucide-react";
-function ResumeLesson({ run: r }: { run: LibraryRun }) {
+import { MotionBoundary } from "@/ui/components/motion-boundary";
+
+/**
+ * One row contract (V5): icon · content · rail · action, and the action track never wraps.
+ * The rail is §9.1's signature device: the row shows *this* run's class distribution, so the
+ * home screen teaches the product's core idea every time it is opened.
+ */
+function ResumeRow({
+  run,
+  spread,
+  primary,
+}: {
+  run: LibraryRun;
+  spread?: Spread;
+  primary?: boolean;
+}) {
   return (
     <li>
       <Link
-        className="flex min-h-16 flex-wrap items-center justify-between gap-2 rounded-input border p-3"
-        href={`/guru/sesi/${r.id}`}
+        className="studio-row"
+        data-primary-row={primary ? "" : undefined}
+        href={`/guru/sesi/${run.id}`}
+        title={`${run.classLabel} · ${run.document.title}`}
       >
-        <span>
-          <b>{r.classLabel}</b> · {r.document.title}
-          <small className="block text-muted-foreground">
-            {r.mode === "assessment" ? "Cek pemahaman" : "Mengajar"} · Soal{" "}
-            {r.position + 1}/{r.document.items.length} ·{" "}
-            {r.date.split("-").reverse().join("/")}
-          </small>
+        <span className="studio-row-icon" aria-hidden>
+          {run.position + 1}
         </span>
-        <span className="font-semibold text-primary">Lanjutkan →</span>
+        <span className="studio-row-content">
+          <h2>
+            {run.classLabel} · {run.document.title}
+          </h2>
+          <p>
+            {run.mode === "assessment" ? "Cek pemahaman" : "Mengajar"} · Soal{" "}
+            {run.position + 1}/{run.document.items.length} ·{" "}
+            {run.date.split("-").reverse().join("/")}
+          </p>
+        </span>
+        <RungRail spread={spread} />
+        <span className="studio-row-action" data-row-action>
+          Lanjutkan
+          <ArrowRight size={18} strokeWidth={1.8} aria-hidden />
+        </span>
       </Link>
     </li>
   );
 }
+
 export function TeacherHome() {
-  const { classes, state, offline } = useTeacher(),
+  const { classes, state, offline, scope } = useTeacher(),
     [pair, setPair] = useState("");
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -43,134 +74,163 @@ export function TeacherHome() {
   }, []);
   const active = state.runs.filter((r) => r.status === "active"),
     last = classes.find((c) => c.id === active[0]?.classId) ?? classes[0];
+  // The rail is a per-class metric, so each row reads the spread of its own class.
+  const spreads = useClassSpreads(scope, classes);
   if (offline) return <OfflineChooser />;
+  const hasActive = active.length > 0;
+  const practiceHref = `/guru/latihan?mode=${state.sample ? "demo" : "pilot"}${last ? `&class=${last.id}` : ""}`;
   return (
     <div className="space-y-6">
+      {/* v4 (§9.1): `Ruang mengajar`, no eyebrow, no hero, exactly one primary action.
+          The board action is a persistent secondary in the header (F3), never a floating link. */}
       <PageHeader
-        eyebrow="Satu papan, setiap siswa belajar"
-        title="Siap belajar hari ini?"
+        title="Ruang mengajar"
         description={
           state.sample
-            ? "Kelas dan soal contoh sudah tersedia. Mulai dari satu sesi untuk mencoba cara mengajar."
+            ? "Kelas dan soal contoh sudah tersedia."
             : "Pilih kelas, pilih soal, lalu mulai sesi mengajar."
         }
         actions={
-          <Button asChild>
-            <Link href={last ? `/guru/mulai?class=${last.id}` : "/guru/kelas"}>
-              Mulai mengajar
-            </Link>
-          </Button>
+          <>
+            <Button asChild variant="outline">
+              <a href="/layar" target="_blank" rel="noreferrer">
+                <Presentation size={20} strokeWidth={1.8} aria-hidden />
+                Layar Kelas
+              </a>
+            </Button>
+            {!hasActive && (
+              <Button asChild>
+                <Link
+                  href={last ? `/guru/mulai?class=${last.id}` : "/guru/kelas"}
+                >
+                  Mulai mengajar
+                </Link>
+              </Button>
+            )}
+          </>
         }
-      />
-      <WorkflowSteps
-        steps={["Pilih kelas", "Pilih soal", "Mengajar", "Lihat hasil"]}
       />
       {pair && (
         <p role="status" className="rounded-input bg-pn-teal-100 p-3">
           Layar ditemukan. Pilih atau lanjutkan sesi untuk menyambungkannya.
         </p>
       )}
-      {active.length > 0 && (
-        <section
+      {hasActive ? (
+        <Section
           id="teacher-home-resume"
           aria-label="Sesi aktif"
-          className={`${panel} studio-resume`}
+          label="Lanjutkan sesi"
+          ground="sheet"
         >
-          <h2 className="text-xl font-bold">Lanjutkan sesi</h2>
-          <ul className="space-y-3">
-            {active.slice(0, 3).map((r) => (
-              <ResumeLesson key={r.id} run={r} />
+          <ul>
+            {active.slice(0, 3).map((run) => (
+              <ResumeRow
+                key={run.id}
+                run={run}
+                spread={run.classId ? spreads[run.classId] : undefined}
+                primary={run.id === active[0].id}
+              />
             ))}
           </ul>
           {active.length > 3 && (
             <details>
-              <summary className="flex min-h-12 cursor-pointer items-center font-semibold text-primary">
+              <summary className="flex min-h-14 cursor-pointer items-center border-t border-pn-hairline px-4 font-semibold text-pn-teal-700">
                 Sesi lainnya ({active.length - 3})
               </summary>
-              <ul className="max-h-96 space-y-3 overflow-y-auto overscroll-contain">
-                {active.slice(3).map((r) => (
-                  <ResumeLesson key={r.id} run={r} />
+              <ul className="max-h-96 overflow-y-auto overscroll-contain">
+                {active.slice(3).map((run) => (
+                  <ResumeRow
+                    key={run.id}
+                    run={run}
+                    spread={run.classId ? spreads[run.classId] : undefined}
+                  />
                 ))}
               </ul>
             </details>
           )}
-        </section>
-      )}
-      <div className="grid gap-4 sm:grid-cols-2" aria-label="Pilih kegiatan">
-        <section className={`${panel} flex flex-col gap-4`}>
-          <div className="space-y-3 min-w-0">
-            <h2 className="flex items-center gap-3 text-xl font-bold">
-              <span className="activity-icon" aria-hidden>
-                <BookOpen size={24} strokeWidth={1.8} />
-              </span>
-              Mengajar dengan soal pilihan
-            </h2>
-            <p className="text-muted-foreground">
-              Gunakan soal siap pakai atau buat soal sendiri, lalu tampilkan di
-              Layar Kelas.
-            </p>
-            {last && (
-              <Link
-                className="inline-flex min-h-12 items-center text-primary underline"
-                href={`/guru/kelas/${last.id}`}
-              >
-                Buka kelas {last.label}
-              </Link>
-            )}
-          </div>
-          <Button asChild variant="outline" className="mt-auto">
-            <Link href="/guru/soal">
-              Pilih soal
-              <ArrowRight size={18} aria-hidden />
-            </Link>
-          </Button>
-        </section>
-        <section className={`${panel} flex flex-col gap-4`}>
-          <h2 className="flex items-center gap-3 text-xl font-bold">
-            <span className="activity-icon" aria-hidden>
-              <Sparkles size={24} />
-            </span>
-            Belajar berkelompok
-          </h2>
-          <p>
-            Cari tahu siswa yang perlu bantuan, lalu siapkan kegiatan sesuai
-            kebutuhannya. Anda akan dipandu dari pemeriksaan jawaban sampai
-            pembagian kelompok.
-          </p>
-          {!state.sample && (
-            <p className="text-sm text-muted-foreground">
-              Alur berkelompok saat ini dapat dicoba dengan data contoh.
-            </p>
-          )}
-          <Button asChild variant="outline" className="mt-auto">
-            <Link
-              href={`/guru/latihan?mode=${state.sample ? "demo" : "pilot"}${last ? `&class=${last.id}` : ""}`}
+        </Section>
+      ) : (
+        <Section label="Sesi hari ini" ground="sheet">
+          <div className="p-4">
+            <StateNotice
+              title="Belum ada sesi hari ini"
+              action={
+                <Button asChild>
+                  <Link
+                    href={last ? `/guru/mulai?class=${last.id}` : "/guru/kelas"}
+                  >
+                    Mulai mengajar
+                  </Link>
+                </Button>
+              }
             >
-              Siapkan belajar berkelompok
-              <ArrowRight size={18} aria-hidden />
-            </Link>
-          </Button>
-        </section>
-      </div>
-      <MotionBoundary>
-        <section className="flex flex-wrap items-center justify-between gap-3 rounded-kartu bg-pn-teal-100 p-5">
-          <div>
-            <h2 className="flex items-center gap-2 font-bold">
-              <Presentation size={24} className="text-primary" aria-hidden />
-              Layar Kelas
-            </h2>
-            <p className="text-sm">
-              Buka pada papan atau proyektor. Sambungkan dari sesi mengajar.
-            </p>
+              Pilih kelas dan soal, lalu mulai mengajar.
+            </StateNotice>
           </div>
-          <Button asChild variant="outline">
-            <a href="/layar" target="_blank" rel="noreferrer">
-              Buka Layar Kelas
+        </Section>
+      )}
+      {/* §9.1(c): the two workflow entries sit in one shared list, not one Section each —
+          a Section whose whole body is a single row is just a bigger row (V7/V8's lesson). */}
+      <Section label="Langkah berikutnya">
+        <ul className="studio-row-list">
+          <li>
+            <Link className="studio-row" href={practiceHref}>
+              <span className="studio-row-icon" aria-hidden>
+                <Shapes size={22} strokeWidth={1.8} />
+              </span>
+              <span className="studio-row-content">
+                <h2>Latihan kelompok</h2>
+                <p>Siapkan kelompok dari hasil cek terakhir.</p>
+              </span>
+              <span className="studio-row-action" data-row-action>
+                Siapkan
+                <ArrowRight size={18} strokeWidth={1.8} aria-hidden />
+              </span>
+            </Link>
+          </li>
+          <li>
+            <a
+              className="studio-row"
+              href="/layar"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span className="studio-row-icon" aria-hidden>
+                <Presentation size={22} strokeWidth={1.8} />
+              </span>
+              <span className="studio-row-content">
+                <h2>Layar Kelas</h2>
+                <p>Untuk papan atau proyektor di kelas.</p>
+              </span>
+              <span className="studio-row-action" data-row-action>
+                Buka
+                <ArrowRight size={18} strokeWidth={1.8} aria-hidden />
+              </span>
             </a>
-          </Button>
-        </section>
+          </li>
+        </ul>
+        {!state.sample && (
+          <p className="studio-help mt-3">
+            Alur berkelompok saat ini dapat dicoba dengan data contoh.
+          </p>
+        )}
+      </Section>
+      {/* §9.1(e): the tool explorer is present but collapsed, so it never competes with the
+          one primary action for the first screenful. It is the screen's own tool shelf, so the
+          section label is its heading — no second "Jelajahi alat belajar" heading inside. */}
+      <MotionBoundary>
+        <Section label="Soal & alat">
+          <ProgressLabel index={2} total={4} label="Pilih soal" />
+          <details className="mt-3">
+            <summary className="min-h-12 cursor-pointer content-center font-semibold text-pn-teal-700">
+              Buka alat belajar
+            </summary>
+            <div className="mt-3">
+              <ToolExplorer />
+            </div>
+          </details>
+        </Section>
       </MotionBoundary>
-      <ToolExplorer />
     </div>
   );
 }
