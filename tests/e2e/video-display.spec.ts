@@ -260,6 +260,19 @@ for (const viewport of [
       // is why the canvas-width fix (A42b) had to land before this walk could be reliable — a
       // re-measure under a walking reader was what mis-filed a page's text under its neighbour's
       // label.
+      await page.evaluate(() => document.fonts.ready.then(() => undefined));
+      await expect
+        .poll(async () => {
+          const before = await page
+            .locator(".library-page-controls p")
+            .textContent();
+          await page.waitForTimeout(150);
+          return (
+            before ===
+            (await page.locator(".library-page-controls p").textContent())
+          );
+        })
+        .toBe(true);
       while (await back.isEnabled()) await back.click();
       await expect(back).toBeDisabled();
       await expect(next).toBeEnabled();

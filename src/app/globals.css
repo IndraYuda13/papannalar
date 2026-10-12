@@ -1578,6 +1578,23 @@
 .board-surface [data-library-tool] .board-graph-workspace > div:last-child > * {
   margin-block: 0;
 }
+.board-surface [data-library-tool] [aria-label="Koefisien grafik"] fieldset {
+  padding: 2px;
+  gap: 2px;
+}
+.board-surface [data-library-tool] .board-graph-control {
+  gap: 0;
+}
+.board-surface [data-library-tool] .board-graph-control > span {
+  line-height: 1;
+}
+.board-surface [data-library-tool] .board-graph-actions {
+  gap: 2px;
+}
+.board-surface [data-library-tool] .board-graph-actions button {
+  font-size: 16px;
+  padding-inline: 4px;
+}
 .board-surface [data-library-tool] [data-tool="graphs"] > p {
   font-size: 18px;
   line-height: 1.25;

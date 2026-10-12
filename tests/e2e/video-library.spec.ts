@@ -3,6 +3,7 @@ import { mkdir } from "node:fs/promises";
 import {
   libraryStateSchema,
   runDetailSchema,
+  runDetailV2Schema,
 } from "../../src/contracts/library";
 import {
   openBoard,
@@ -399,10 +400,14 @@ test("U15 two cached classes open offline; revised pending response syncs once a
     const grant = await window.__privacyFixture.readLocalAccess();
     return { ownerId: grant!.id, mode: "demo" as const };
   });
-  const detail = runDetailSchema.parse(
+  const detail = runDetailV2Schema.parse(
     await page.evaluate(
       async ({ scope, id }) =>
-        window.__privacyFixture.libraryCache(scope, "detail", id),
+        window.__privacyFixture
+          .readLearningResult(scope, { source: "library", id })
+          .then((result) =>
+            result.source === "library" ? result.detail : null,
+          ),
       { scope, id: one.id },
     ),
   );
@@ -421,14 +426,32 @@ test("U15 two cached classes open offline; revised pending response syncs once a
   };
   await page.evaluate(
     async ({ scope, action }) => {
-      await window.__privacyFixture.queueLibraryResponse(scope, action);
-      await window.__privacyFixture.queueLibraryResponse(scope, {
+      await window.__privacyFixture.queueGroupCardResponse(scope, {
         ...action,
+        contractVersion: 2,
+        source: "manual",
+        answerStates: action.answers.map(() => "answered"),
+      });
+      await window.__privacyFixture.queueGroupCardResponse(scope, {
+        ...action,
+        contractVersion: 2,
+        source: "manual",
+        answerStates: action.answers.map(() => "answered"),
         revision: action.revision + 1,
       });
     },
     { scope, action },
   );
+  await page.reload();
+  await injectFixture(page);
+  expect(
+    (
+      await page.evaluate(
+        (scope) => window.__privacyFixture.pendingGroupCardResponses(scope),
+        scope,
+      )
+    ).length,
+  ).toBe(1);
   await context.setOffline(false);
   await expect
     .poll(async () => {
@@ -446,7 +469,8 @@ test("U15 two cached classes open offline; revised pending response syncs once a
     .poll(() =>
       page.evaluate(
         async (scope) =>
-          (await window.__privacyFixture.pendingLibraryResponses(scope)).length,
+          (await window.__privacyFixture.pendingGroupCardResponses(scope))
+            .length,
         scope,
       ),
     )
@@ -460,7 +484,10 @@ test("U15 two cached classes open offline; revised pending response syncs once a
   expect(
     await page.evaluate(async (scope) => {
       try {
-        await window.__privacyFixture.libraryCache(scope, "state", "index");
+        await window.__privacyFixture.readLearningResult(scope, {
+          source: "library",
+          id: "7b000001-0000-4000-8000-000000000099",
+        });
         return false;
       } catch {
         return true;
@@ -533,9 +560,17 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
   await page.getByRole("button", { name: "Simpan & mulai asesmen" }).click();
   await expect(page).toHaveURL(/\/guru\/sesi\//);
   const runId = new URL(page.url()).pathname.split("/").at(-1)!;
+  await page.getByText("Siapkan cetakan", { exact: true }).click();
   const pdf = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Cetak kartu asesmen" }).click();
-  expect((await pdf).suggestedFilename()).toContain("kartu-nalar");
+  await page
+    .getByRole("button", { name: "Unduh kartu jawaban", exact: true })
+    .click();
+  const printedRun = runDetailSchema.parse(
+    await call(page, { action: "detail", id: runId }),
+  );
+  expect((await pdf).suggestedFilename()).toBe(
+    `kartu-jawaban-${printedRun.run.formId}-v1.pdf`,
+  );
   for (let n = 1; n <= 3; n++) {
     await page
       .getByRole("button", {
@@ -588,11 +623,11 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
   }
   await page.getByRole("link", { name: "Buka hasil tersimpan" }).click();
   await expect(
-    page.getByRole("heading", { name: "3/32 lembar masuk" }),
+    page.getByText("3/32 kartu diperiksa · 0 perlu dicek", { exact: true }),
   ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "3/32 lembar masuk" }),
+    page.getByText("3/32 kartu diperiksa · 0 perlu dicek", { exact: true }),
   ).toBeVisible();
   await page.goto(`/guru/soal/${setId}`);
   await page

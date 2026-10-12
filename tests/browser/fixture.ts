@@ -19,7 +19,17 @@ import { classPresence } from "../../src/local/class-presence";
 import { boardToolProgress } from "../../src/local/library-board-progress";
 import { lockLocalAccess, readLocalAccess } from "../../src/local/access";
 
+import {
+  readLearningResult,
+  queueGroupCardResponse,
+  pendingGroupCardResponses,
+  syncGroupCardResponses,
+} from "../../src/client/learning-client";
 const fixture = {
+  readLearningResult,
+  queueGroupCardResponse,
+  pendingGroupCardResponses,
+  syncGroupCardResponses,
   createCycleRepository,
   libraryResponseConflicts,
   resolveLibraryResponse,
