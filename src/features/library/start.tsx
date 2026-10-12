@@ -180,8 +180,8 @@ export function StartLesson({
               </summary>
               <ul className="space-y-3">
                 <li>
-                  Kumpulan yang belum siap, atau yang dipakai untuk kegiatan interaktif,
-                  tidak muncul di daftar ini.
+                  Kumpulan yang belum siap, atau yang dipakai untuk kegiatan
+                  interaktif, tidak muncul di daftar ini.
                 </li>
                 {unavailable.map((c) => (
                   <li key={c.id} className="rounded-input border p-3">

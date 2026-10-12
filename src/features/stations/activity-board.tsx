@@ -7,6 +7,7 @@ import {
   QuestionVisual,
   needsQuestionVisual,
 } from "@/features/layar/question-visual";
+import { turnInstruction } from "@/features/layar/turn-copy";
 export function ActivityBoard({ state }: { state: PresentationState }) {
   const activity = state.activity!,
     group = state.groups.find((g) => g.id === activity.groupId);
@@ -28,9 +29,9 @@ export function ActivityBoard({ state }: { state: PresentationState }) {
         <MathPrompt value={activity.prompt} />
       </h2>
       {state.roles && (
+        /* §I.2 / A46: instruction copy, not role-play labels. */
         <p data-testid="board-roles" className="text-[32px]">
-          Pilot: {state.roles.pilots.join(" · ")} · Navigator:{" "}
-          {state.roles.navigators.join(" · ")}. Navigator menjelaskan kenapa.
+          {turnInstruction(state.roles)}
         </p>
       )}
       <div className="grid w-full gap-6 min-[1600px]:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">

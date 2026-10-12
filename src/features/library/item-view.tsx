@@ -5,6 +5,7 @@ import { ToolView } from "@/features/tools/tool-view";
 import { Button } from "@/ui/components/button";
 import type { ToolModel } from "@/core/tools/patterns";
 import { paginateDisplayText } from "@/features/layar/appearance-pagination";
+import { boardMeasure } from "@/ui/components/studio";
 import { ActivityIcon } from "@/ui/components/activity-icon";
 type ItemProps = {
   item: LibraryBoardState["item"];
@@ -30,12 +31,19 @@ function ItemPages({
 }: ItemProps) {
   const root = useRef<HTMLElement>(null),
     body = useRef<HTMLDivElement>(null);
+  // §J.1/A41: the board's legibility rule is a *content* rule (BOARD_MAX_LINES / BOARD_MAX_WORDS,
+  // checked live in the item editor). A prompt that satisfies it is never split, whichever way a
+  // measurement falls — so pagination may only be entered for content the product itself calls
+  // illegal. The old trigger was a raw `length > 140`, which promoted a stress fixture to a
+  // contract and could paginate legal content on a narrow canvas.
+  const legal = boardMeasure(item.prompt).legal;
   const [paginated, setPaginated] = useState(
     () =>
-      (!hidePrompt && item.prompt.length > 140) ||
-      (item.kind === "card" &&
-        (item.options.some((o) => o.length > 80) ||
-          item.options.join("").length > 240)),
+      !legal &&
+      ((!hidePrompt && item.prompt.length > 140) ||
+        (item.kind === "card" &&
+          (item.options.some((o) => o.length > 80) ||
+            item.options.join("").length > 240))),
   );
   const [pages, setPages] = useState<ReadingPage[]>([]),
     [position, setPosition] = useState(0);
@@ -47,6 +55,14 @@ function ItemPages({
   const fontsReady = useRef(typeof document === "undefined" || !document.fonts);
   const optionsKey = JSON.stringify(item.kind === "card" ? item.options : null);
   const index = Math.min(position, Math.max(0, pages.length - 1));
+  // §J.1/A42: the reader's position is authoritative and the page list is frozen for a geometry.
+  // `measure` used to recompute on every scheduling tick; a count that moved mid-walk made two
+  // `position` values resolve to the same page and skipped one, and a spec accumulating by label
+  // read that skip as a fragment missing from the middle of a sentence. Here a measurement is
+  // reused whenever the geometry and the content are unchanged, so the list cannot move under a
+  // reader who is walking it. A preset switch, a resize or a new item does legitimately change
+  // the fit, and that is the only thing that re-measures.
+  const measuredFor = useRef<string>("");
   const current = pages[index] ?? {
     kind: hidePrompt && item.kind !== "card" ? "workspace" : "prompt",
     label: "Pertanyaan",
@@ -72,15 +88,27 @@ function ItemPages({
       // A teacher preview with its prompt already above the model has no text
       // pages to split; the page itself scrolls around the full-size controls.
       if (hidePrompt && item.kind !== "card") return;
+      const signature = `${region.clientWidth}x${region.clientHeight}:${
+        element
+          .closest(".board-surface,[data-library-preview]")
+          ?.getAttribute("data-board-preset") ?? ""
+      }:${item.kind}:${item.prompt.length}:${optionsKey.length}`;
       if (!paginated) {
         if (
           element.scrollHeight > element.clientHeight + 1 ||
           region.scrollHeight > region.clientHeight + 1 ||
           region.scrollWidth > region.clientWidth + 1
-        )
+        ) {
+          // A41: legal content is never paginated, even when a canvas cannot show it whole.
+          if (legal) return;
+          measuredFor.current = "";
           setPaginated(true);
+        }
         return;
       }
+      // Reuse the settled measurement for this geometry and content. Re-measuring an unchanged
+      // geometry is what let the count move under a reader.
+      if (measuredFor.current === signature) return;
       // The probe shares the actual fraction markup, font and available width.
       const probe = document.createElement("div");
       probe.className = "library-reading-text";
@@ -129,6 +157,7 @@ function ItemPages({
       } finally {
         probe.remove();
       }
+      measuredFor.current = signature;
       setPages((previous) =>
         JSON.stringify(previous) === JSON.stringify(next) ? previous : next,
       );
@@ -169,13 +198,22 @@ function ItemPages({
       observer.disconnect();
       changes.disconnect();
     };
-  }, [item.prompt, item.kind, optionsKey, paginated, hidePrompt]);
+  }, [item.prompt, item.kind, optionsKey, paginated, hidePrompt, legal]);
   return (
     <section ref={root} className="library-item" data-testid="library-item">
-      <h1 className="library-prompt" hidden={paginated || hidePrompt}>
+      {/* §J.2.2/§J.2.3: `data-board-question` and `data-board-band` bind a verification row to
+          the *element the board actually renders*, on both paths. The package path renders
+          `h1.board-question`; on this path the same role is played by `h1.library-prompt` when
+          the prompt is on one screen, and by the visible prompt page when it is not — exactly one
+          at a time, because the other is `hidden`. */}
+      <h1
+        className="library-prompt"
+        data-board-question
+        hidden={paginated || hidePrompt}
+      >
         {mathText(item.prompt)}
       </h1>
-      <p className="library-instruction">
+      <p className="library-instruction" data-board-band>
         {item.kind !== "card" && (
           <ActivityIcon
             className="activity-icon-inline"
@@ -184,10 +222,14 @@ function ItemPages({
         )}
         {hint}
       </p>
-      {paginated && <p className="library-page-label">{current.label}</p>}
-      <div ref={body} className="library-item-body">
+      {paginated && (
+        <p className="library-page-label" data-board-band>
+          {current.label}
+        </p>
+      )}
+      <div ref={body} className="library-item-body" data-board-band>
         {item.kind === "card" && (
-          <ol className="library-options" hidden={paginated}>
+          <ol className="library-options" data-board-options hidden={paginated}>
             {item.options.map((option, choice) => (
               <li key={choice}>
                 <b className="library-choice-label">{"ABCD"[choice]}</b>
@@ -200,7 +242,11 @@ function ItemPages({
         {paginated && (
           <div className="library-reading-copy" hidden={!reading}>
             {current.kind === "prompt" ? (
-              <h1 className="library-reading-text" data-reading-kind="prompt">
+              <h1
+                className="library-reading-text"
+                data-reading-kind="prompt"
+                data-board-question={!reading ? undefined : true}
+              >
                 {mathText(current.text)}
               </h1>
             ) : (

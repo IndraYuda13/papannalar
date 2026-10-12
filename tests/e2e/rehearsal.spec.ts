@@ -185,7 +185,11 @@ for (const run of [1, 2, 3]) {
         .getByRole("button", { name: "Mulai tugas papan", exact: true })
         .click();
       await expect(turns).toContainText("1/3 tugas dimulai");
-      await expect(board.getByTestId("board-roles")).toContainText("Pilot:");
+      // §I.2 (A46): instruction copy naming the attendance numbers, no role-play label.
+      await expect(board.getByTestId("board-roles")).toContainText("absen");
+      await expect(board.getByTestId("board-roles")).not.toContainText(
+        /Pilot|Navigator/,
+      );
       if (round === 2) {
         await open("number-line", "Garis Bilangan", "predict");
         await board.getByLabel("Nilai tebakan", { exact: true }).fill("-8");

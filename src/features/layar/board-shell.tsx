@@ -3,6 +3,7 @@ import { Brand } from "@/ui/components/brand";
 import { Button } from "@/ui/components/button";
 import { FullscreenButton } from "@/features/layar/fullscreen-button";
 import { BoardWorkspace } from "./board-workspace";
+import { BoardProgressProvider } from "./board-progress-context";
 import {
   BoardAppearanceProvider,
   useBoardAppearance,
@@ -49,7 +50,9 @@ function BoardSurface() {
         {appearance.editing && <AppearanceEditor />}
         {appearance.ready && !appearance.firstUse && (
           <div className="board-workspace-region" hidden={appearance.editing}>
-            <BoardWorkspace />
+            <BoardProgressProvider>
+              <BoardWorkspace />
+            </BoardProgressProvider>
           </div>
         )}
         {appearance.notice && (

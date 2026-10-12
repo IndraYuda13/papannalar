@@ -2,6 +2,7 @@ import type { PresentationState } from "@/contracts/presentation";
 import type { PublicStation } from "@/contracts/stations";
 import { RotationTimer } from "./timer";
 import type { PublicRoles } from "@/contracts/turns";
+import { turnInstruction } from "@/features/layar/turn-copy";
 export function StationBoard({
   station,
   groups,
@@ -55,15 +56,9 @@ export function StationBoard({
         Saat waktu habis, tunggu arahan guru sebelum berpindah.
       </p>
       {roles && (
+        /* §I.2 / A46: instruction copy, not role-play labels. */
         <p className="text-[40px]" data-testid="board-roles">
-          Pilot:{" "}
-          {roles.pilots.map((n) => n.toString().padStart(2, "0")).join(" · ")} ·
-          Navigator:{" "}
-          {roles.navigators
-            .map((n) => n.toString().padStart(2, "0"))
-            .join(" · ")}
-          <br />
-          Navigator menjelaskan kenapa; teman lain menulis tebakan di buku.
+          {turnInstruction(roles)}
         </p>
       )}
     </section>

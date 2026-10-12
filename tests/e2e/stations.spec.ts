@@ -120,7 +120,13 @@ test("ROT01 teacher timer/three rounds and board projection preserve privacy", a
     .getByRole("button", { name: "Mulai tugas papan", exact: true })
     .click();
   await expect(turns).toContainText("1/3 tugas dimulai");
-  await expect(board.getByTestId("board-roles")).toContainText("Pilot:");
+  // §I.2 (A46): the turn reaches the board as a plain instruction naming the attendance
+  // numbers, never as a role-play label. This assertion is the vocabulary rule's own
+  // falsifier on the station moment.
+  await expect(board.getByTestId("board-roles")).toContainText("absen");
+  await expect(board.getByTestId("board-roles")).not.toContainText(
+    /Pilot|Navigator/,
+  );
   await expect(control.getByLabel("Waktu putaran")).toHaveText(/1[45]:\d{2}/);
   await expect(control.getByLabel("Bisik kelompok Guru")).toContainText("D1.2");
   await control

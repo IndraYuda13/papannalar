@@ -64,6 +64,13 @@ export function NumberLine({
     const measure = () => {
       // Visual marker and hit area have independent CSS-pixel sizes. One
       // handle snaps along the rail; floor labels are never overlapping targets.
+      // A truly hidden model has no scale at all, and every value below is a division by the
+      // scale. Measuring then produced a radius of several thousand user units; because the SVG
+      // paints `overflow: visible`, that invisible hit circle covered the whole surrounding panel
+      // and swallowed the clicks meant for the controls beside it (measured: r=1015 over the
+      // appearance preview's `Simpan tampilan`). Only the degenerate box is skipped: a small but
+      // real box still measures correctly, because the rendered hit target is scale-invariant.
+      if (!svg.clientWidth || !svg.clientHeight) return;
       const scale = Math.min(
         svg.clientWidth / (vertical ? 300 : 1320),
         svg.clientHeight / (vertical ? 600 : 300),
@@ -73,9 +80,16 @@ export function NumberLine({
         const marker =
           parseFloat(style.getPropertyValue("--board-marker")) || 40;
         const hit = parseFloat(style.getPropertyValue("--board-hit")) || 56;
-        setRadius(Math.max(48, hit) / 2 / scale);
+        // A bound, not a clamp. A correctly measured model needs ~158 user units here, so a
+        // ceiling of 2000 (the first attempt) never engages and the pathological radius survives;
+        // a ceiling of 150 engages on the *good* measurement too and distorts the rendered target
+        // (measured 45.6px against the declared 47.9px floor). 300 sits between the two: the real
+        // measurement is untouched, a stale or unstyled one is shrunk to something that cannot
+        // reach across the panel.
+        const ceiling = 300;
+        setRadius(Math.min(Math.max(48, hit) / 2 / scale, ceiling));
         // Include the two-pixel non-scaling border in the visible diameter.
-        setVisibleRadius((marker - 2) / 2 / scale);
+        setVisibleRadius(Math.min((marker - 2) / 2 / scale, ceiling));
         const padding = Math.max(60, (Math.max(24, marker / 2) + 12) / scale);
         setRailPadding(padding);
         setAxisPixels(

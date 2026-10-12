@@ -60,15 +60,25 @@ export function BoardContent({ state, content, plan }: ContentProps) {
     base.lesson,
   ]);
   return (
-    <div className="board-column" data-board-safe data-crossing={crossing}>
+    <div
+      className="board-column"
+      data-board-safe
+      data-crossing={crossing}
+      data-board-band
+    >
       <p
         className={`board-role-line${crossing ? " board-rule-draw" : ""}`}
         data-role-line
+        data-board-band
         data-motion-class={crossing ? "C4" : undefined}
       >
         {copy.role}
       </p>
-      <div hidden={Boolean(state.spotlight)} className="board-column-body">
+      <div
+        hidden={Boolean(state.spotlight)}
+        className="board-column-body"
+        data-board-band
+      >
         <HintReports enabled={!state.spotlight}>
           <BoardBody
             key={identity}
@@ -96,12 +106,13 @@ export function BoardContent({ state, content, plan }: ContentProps) {
         data-testid="lesson-objective"
         hidden={state.mode === "reflection"}
         className="board-objective"
+        data-board-band
       >
         Tujuan:{" "}
         {state.lesson?.objective ?? "menjelaskan arah dan perubahan bilangan."}
       </p>
       {copy.next && (
-        <p className="board-next-line" data-next-line>
+        <p className="board-next-line" data-next-line data-board-band>
           {copy.next}
         </p>
       )}
@@ -251,8 +262,8 @@ function BoardBody({ state, content, plan }: ContentProps) {
           Temukan kelompokmu
         </h1>
         <p className="board-instruction">
-          Nomor absenmu ada di salah satu kartu di bawah. Cari nomormu, lalu duduk
-          bersama kelompokmu.
+          Nomor absenmu ada di salah satu kartu di bawah. Cari nomormu, lalu
+          duduk bersama kelompokmu.
         </p>
         <PublicGroups groups={state.groups} station={state.station} />
       </>
@@ -330,7 +341,9 @@ export function BoardCloseCard({
     >
       <div className="board-close-card">
         <h1>Sesi selesai.</h1>
-        <p className="board-model-box">Kegunaan hari ini: {total} soal dikerjakan bersama.</p>
+        <p className="board-model-box">
+          Kegunaan hari ini: {total} soal dikerjakan bersama.
+        </p>
         <p className="board-close-meta">
           PapanNalar · {stamp || "hari ini"} · {total} soal
         </p>

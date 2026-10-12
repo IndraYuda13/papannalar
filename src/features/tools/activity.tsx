@@ -21,6 +21,7 @@ import { ToolView } from "./tool-view";
 import { useBoardCapabilities } from "@/features/layar/capability-context";
 import type { PublicGuidance } from "@/contracts/guidance";
 import { useHintReport } from "@/features/layar/hint-reporting";
+import { turnHandOverLabel } from "@/features/layar/turn-copy";
 
 // All predictions, walls and model histories are RAM-only, owned by taskEpoch.
 export function ToolActivity({
@@ -194,8 +195,8 @@ export function ToolActivity({
         {pattern === "predict" && (
           <div className="rounded-kartu border-4 border-primary p-4 text-[40px]">
             <p>
-              Semua menulis tebakan di buku. Pilot menggeser penanda; Navigator
-              menjelaskan alasannya.
+              Semua menulis tebakan di buku. Satu siswa menggeser penanda; siswa
+              berikutnya menjelaskan alasannya.
             </p>
             <label className="flex flex-wrap items-center gap-4">
               Penanda tebakan{" "}
@@ -279,7 +280,7 @@ export function ToolActivity({
             <p>
               {simultaneous
                 ? "Dua model, dua cara. Bandingkan hasil tanpa lomba waktu."
-                : "Dua sentuhan belum teruji. Pilot A dan B bergantian; kedua model tetap terpisah."}
+                : "Dua sentuhan belum teruji. Siswa A dan B bergantian; kedua model tetap terpisah."}
             </p>
             {!simultaneous && (
               <Button
@@ -287,7 +288,7 @@ export function ToolActivity({
                 variant="outline"
                 onClick={() => setTurn((t) => (t === 0 ? 1 : 0))}
               >
-                Giliran Pilot {turn === 0 ? "B" : "A"}
+                {turnHandOverLabel(turn === 0 ? "B" : "A")}
               </Button>
             )}
           </div>

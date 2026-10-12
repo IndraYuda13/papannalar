@@ -64,7 +64,9 @@ export function defaultAppearance(displayKey: string): AppearanceProfile {
  * translated by name), so a board that was configured before this release keeps its choice
  * instead of silently resetting to the default.
  */
-export function parseStoredAppearance(value: unknown): AppearanceProfile | undefined {
+export function parseStoredAppearance(
+  value: unknown,
+): AppearanceProfile | undefined {
   const current = appearanceProfileSchema.safeParse(value);
   if (current.success) return current.data;
   const legacy = z

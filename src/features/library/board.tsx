@@ -7,6 +7,7 @@ import {
 import { LibraryItemView } from "./item-view";
 import { boardToolProgress } from "@/local/library-board-progress";
 import { checkModel, type ToolModel } from "@/core/tools/patterns";
+import { useBoardProgressPublisher } from "@/features/layar/board-progress-context";
 export function LibraryBoard({
   presentationId,
   revision = 0,
@@ -17,6 +18,12 @@ export function LibraryBoard({
   fallback: ReactNode;
 }) {
   const [value, setValue] = useState<LibraryBoardState | null>(null);
+  // L1: the footer rail resolves its position and total from the same object this renderer
+  // prints its own `Soal {position+1}/{total}` from, so the two can never disagree.
+  const publish = useBoardProgressPublisher();
+  useEffect(() => {
+    publish(value);
+  }, [publish, value]);
   useEffect(() => {
     let stopped = false,
       busy = false;

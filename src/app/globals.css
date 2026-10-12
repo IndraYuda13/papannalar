@@ -573,6 +573,18 @@
   min-width: 0;
   gap: var(--board-gap);
 }
+/* The canvas width must not depend on what the canvas currently contains.
+   `.board-main` centres its children (`align-items: center`, §B0.1's top-anchored column), which
+   makes `.board-workspace-region` shrink-to-fit: its width was therefore derived from the widest
+   thing inside it. On the paginated reading path that is a feedback loop — a 400-character page
+   narrows the canvas to its own measure, the paginator re-fits against the narrower canvas, and
+   the page count oscillates (measured: 1101px ↔ 399px, `Bagian 8 dari 18` ↔ `Bagian 8 dari 8`),
+   which in turn moves the `Lanjut` control so a tap can never land on it. A projected canvas is
+   the one surface whose width must be a fact about the screen, not about the text. */
+.board-surface .board-workspace-region {
+  align-self: stretch;
+  width: 100%;
+}
 .board-workspace-region > div > [data-board-height] {
   flex: 1;
 }
@@ -767,6 +779,21 @@
 
 :is(.board-surface, [data-library-preview]) .board-tool {
   position: relative;
+}
+/* §8 `:545`: a lazily-imported tool reserves its box and keeps its landmark while the chunk is in
+   flight. The reserved height is the preset's model box, so the element the reader is looking at
+   does not change height when content arrives (§A.1) and the region's accessible name exists from
+   the first frame. `min-height` on the loading state only — a loaded tool is sized by its own
+   content, exactly as before. */
+:is(.board-surface, [data-library-preview]) .board-tool-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--board-model, 240px);
+}
+.board-tool-loading-note {
+  font-size: var(--board-label, 18px);
+  color: var(--pn-ink-600);
 }
 :is(.board-surface, [data-library-preview]) .board-tool > p:first-child {
   font-size: var(--board-label);

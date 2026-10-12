@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { providerOrigin } from "../harness/ports.mjs";
 
 export async function injectFixture(page: Page) {
@@ -172,4 +172,28 @@ export async function confirmSheet(page: Page, label: string | RegExp) {
   await expect(dialog).toBeVisible();
   await dialog.getByRole("button", { name: label }).click();
   await expect(dialog).toHaveCount(0);
+}
+
+/**
+ * Wait until the board is actually connected, by state rather than by wording.
+ *
+ * The phone's status text is confirmation-gated: the teacher polls at 750 ms, the board ACKs on a
+ * 2 s interval, and the label only appears after both have happened — 1–4 s idle, longer under
+ * load. Asserting `toContainText("Layar tersambung")` therefore fails on timing, not on behaviour,
+ * and reads as a product defect. `[data-connected]` is the same fact without the round-trip lag.
+ * The visible wording is still asserted, because the two vocabularies must agree (§A20).
+ */
+export async function waitForBoardConnection(
+  page: Page | Locator,
+  timeout = 20000,
+) {
+  await expect(page.getByTestId("board-connection")).toHaveAttribute(
+    "data-connected",
+    "true",
+    { timeout },
+  );
+  await expect(page.getByTestId("pairing-status")).toContainText(
+    "Layar tersambung",
+    { timeout },
+  );
 }

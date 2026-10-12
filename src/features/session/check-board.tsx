@@ -35,10 +35,10 @@ export function CheckBoard({ state }: { state: PresentationState }) {
       className="board-check"
       data-beat="question"
     >
-      <h1 className="board-heading board-question">
+      <h1 className="board-heading board-question" data-board-question>
         <MathPrompt value={value.question.prompt} />
       </h1>
-      <div className="board-options board-options-grid">
+      <div className="board-options board-options-grid" data-board-options>
         {value.question.options.map((o) => (
           <p key={o.label} className="board-option-row">
             <span className="board-option-mark">{o.label}</span>

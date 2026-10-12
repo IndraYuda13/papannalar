@@ -69,7 +69,11 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
     })
     .click();
   await expect(opening).toContainText("1/1 tugas dimulai");
-  await expect(board.getByTestId("opening-roles")).toContainText("Pilot:");
+  // §I.2 (A46): instruction copy naming the attendance numbers, no role-play label.
+  await expect(board.getByTestId("opening-roles")).toContainText("absen");
+  await expect(board.getByTestId("opening-roles")).not.toContainText(
+    /Pilot|Navigator/,
+  );
   await expect(page.getByTestId("scan-count")).toHaveText(
     "29/32 kartu tersimpan lokal",
   );

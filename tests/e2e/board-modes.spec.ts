@@ -586,10 +586,13 @@ test("UI01 SD5 lower touch zone, 1.5x objects, SMA10 tariffs and explicit Berdua
   );
   await expect(board.getByText(/Dua sentuhan belum teruji/)).toBeVisible();
   await board
-    .getByRole("button", { name: "Giliran Pilot B", exact: true })
+    .getByRole("button", { name: "Serahkan giliran ke sisi B", exact: true })
     .click();
   await expect(
-    board.getByRole("button", { name: "Giliran Pilot A", exact: true }),
+    board.getByRole("button", {
+      name: "Serahkan giliran ke sisi A",
+      exact: true,
+    }),
   ).toBeVisible();
   expect(errors).toEqual([]);
   await writeFile(

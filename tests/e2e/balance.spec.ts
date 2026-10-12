@@ -1,5 +1,9 @@
 import { openTeacherExample } from "../browser/helpers";
-import { openBoard, chooseTeacherMode } from "../browser/helpers";
+import {
+  openBoard,
+  chooseTeacherMode,
+  waitForBoardConnection,
+} from "../browser/helpers";
 import {
   test,
   expect,
@@ -46,9 +50,7 @@ async function paired(page: Page, browser: Browser) {
   await page
     .getByRole("button", { name: "Hubungkan papan", exact: true })
     .click();
-  await expect(page.getByTestId("pairing-status")).toContainText(
-    "Layar tersambung",
-  );
+  await waitForBoardConnection(page);
   await page.getByText("Pratinjau Alat Nalar", { exact: true }).click();
   await page
     .getByLabel("Pilih Alat Nalar", { exact: true })
@@ -235,7 +237,7 @@ test("TOOL05 seven patterns: predictions, distinct twin, Nala repair, open paths
   await expect(tool).toHaveCount(1);
   await solve(tool);
   await board
-    .getByRole("button", { name: "Giliran Pilot B", exact: true })
+    .getByRole("button", { name: "Serahkan giliran ke sisi B", exact: true })
     .click();
   await expect(tool.getByTestId("balance-left")).toHaveText("3x − 7");
   await solve(tool);

@@ -1,5 +1,6 @@
 "use client";
 import { useState, type FormEvent } from "react";
+import { LoaderCircle } from "lucide-react";
 import { Button } from "@/ui/components/button";
 import { hasPendingLogout } from "@/local/access";
 import { logoutTeacher } from "@/features/classroom/logout-transport";
@@ -45,8 +46,24 @@ export function LoginForm() {
         />
       </label>
       <Button type="submit" disabled={busy} className="w-full">
+        {busy && (
+          /* §F A15 / §D.1: the in-flight state carries a spinner *and* the label. The label
+             alone leaves a screen-reader or low-vision user with only a text change. The
+             rotation stops under every motion-off input (the `.pending-spinner` rule), so
+             `Mengirim…` plus a still glyph is the reduced-motion rendering — the spinner is
+             `aria-hidden` because `aria-busy` states the condition for assistive tech. */
+          <LoaderCircle
+            className="pending-spinner"
+            size={18}
+            aria-hidden
+            data-testid="login-spinner"
+          />
+        )}
         {busy ? "Mengirim…" : "Kirim tautan masuk"}
       </Button>
+      <p role="status" aria-live="polite" className="sr-only">
+        {busy ? "Mengirim tautan masuk." : ""}
+      </p>
       <p role="status" className="text-sm text-muted-foreground">
         {message}
       </p>

@@ -5,6 +5,7 @@ import type { PublicRoles } from "@/contracts/turns";
 import { ToolActivity } from "@/features/tools/activity";
 import { Button } from "@/ui/components/button";
 import { QuestionVisual } from "@/features/layar/question-visual";
+import { turnInstruction } from "@/features/layar/turn-copy";
 export function OpeningBoard({
   lesson,
   roles,
@@ -39,13 +40,11 @@ export function OpeningBoard({
       ) : (
         <>
           {roles && (
+            /* §I.2 / A46: the turn is stated as an instruction in plain Indonesian, next to the
+               interaction it describes. The role-play label and the two-bare-numbers row are gone;
+               the attendance numbers stay because that is the part a student acts on. */
             <p data-testid="opening-roles" className="text-[40px]">
-              Pilot:{" "}
-              {roles.pilots.map((n) => String(n).padStart(2, "0")).join(" · ")}{" "}
-              · Navigator:{" "}
-              {roles.navigators
-                .map((n) => String(n).padStart(2, "0"))
-                .join(" · ")}
+              {turnInstruction(roles)}
             </p>
           )}
           {lesson.intuitiveOnly ? (

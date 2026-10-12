@@ -35,6 +35,8 @@ import type { BoardProfile } from "@/contracts/board-profile";
 import { RemoteBoard } from "./remote-board";
 import { useBoardPackage } from "./use-board-package";
 import { BoardNavigation } from "./board-navigation";
+import { boardProgress } from "./board-progress";
+import { useBoardProgressSource } from "./board-progress-context";
 import { HintReporting } from "./hint-reporting";
 import {
   readPendingBoardReset,
@@ -87,7 +89,9 @@ function PairingCountdown({ expiresAt }: { expiresAt: string }) {
   );
   useEffect(() => {
     const tick = () =>
-      setLeft(Math.max(0, Math.floor((Date.parse(expiresAt) - Date.now()) / 1000)));
+      setLeft(
+        Math.max(0, Math.floor((Date.parse(expiresAt) - Date.now()) / 1000)),
+      );
     tick();
     const timer = setInterval(tick, 500);
     return () => clearInterval(timer);
@@ -115,6 +119,7 @@ function BoardSessionWorkspace({
   const [presentationId, setPresentationId] = useState<string>();
   const [envelope, setEnvelope] = useState<PresentationEnvelope>();
   const packageView = useBoardPackage(envelope);
+  const progressSource = useBoardProgressSource();
   const [heldLocal, setHeldLocal] = useState<{
     payload: PresentationState;
     revision: number;
@@ -443,7 +448,16 @@ function BoardSessionWorkspace({
           : connection?.realtime === false
             ? "Mengikuti lewat pemeriksaan berkala"
             : "Terputus";
-  const railPages = packageView.pages.length;
+  // L1: the rail's position and total come from whichever source owns them on the path being
+  // rendered — the run plan on the package path, the bound library item on the library path, the
+  // check item's own total on a session check. `pages.length` alone is only the first of those, so
+  // a library run painted `Soal 1/0` beside a header reading `Soal 5/5`.
+  const progress = boardProgress({
+    library: progressSource.library,
+    packagePages: packageView.pages.length,
+    packageIndex: packageView.index,
+    state: displayed,
+  });
   // B8: the session is closed. The board does not go back to pairing on its own — it shows the
   // closing card, because a lesson that just ended needs one sentence, not a login screen.
   const closed = connection?.session === "closed";
@@ -582,7 +596,9 @@ function BoardSessionWorkspace({
           className="my-4 space-y-3 rounded-kartu border p-4"
           aria-label="Sambungkan kembali ke sesi yang sama"
         >
-          {challenge?.pairingUrl && <PairingQrCode url={challenge.pairingUrl} />}
+          {challenge?.pairingUrl && (
+            <PairingQrCode url={challenge.pairingUrl} />
+          )}
           {challenge && (
             <p
               data-testid="pairing-code"
@@ -689,7 +705,11 @@ function BoardSessionWorkspace({
               <p role="status" className="board-note">
                 {message}
               </p>
-              <Button size="board" variant="outline" onClick={() => void start()}>
+              <Button
+                size="board"
+                variant="outline"
+                onClick={() => void start()}
+              >
                 Buat kode baru
               </Button>
             </div>
@@ -706,7 +726,9 @@ function BoardSessionWorkspace({
                   {challenge.code.slice(0, 3)} {challenge.code.slice(3)}
                 </p>
               )}
-              {challenge && <PairingCountdown expiresAt={challenge.expiresAt} />}
+              {challenge && (
+                <PairingCountdown expiresAt={challenge.expiresAt} />
+              )}
               {expiredCode && (
                 <div data-pairing-expired-note className="board-expired-note">
                   <p className="board-pairing-code board-pairing-code-old">
@@ -724,23 +746,30 @@ function BoardSessionWorkspace({
           </div>
         </section>
       )}
-      <footer className="board-foot" data-board-safe>
-        {displayed && (
+      <footer className="board-foot" data-board-safe data-board-band>
+        {/* L1 + §J.2.1: the rail paints only when a source actually resolved a position and a
+            total. A zero-segment rail is not a truthful statement about a live session, and the
+            old code painted one whenever the publish payload carried no `package` key — which is
+            every library run. The four motion elements A2 names are marked here too, so the row
+            resolves on this path as well as on the library path. */}
+        {displayed && progress && (
           <div
             className="board-rail"
             data-progress-rail
+            data-board-band
+            data-progress-source={progress.source}
             role="group"
-            aria-label={`Soal ${packageView.index + 1} dari ${railPages}`}
+            aria-label={`Soal ${progress.position} dari ${progress.total}`}
           >
             <span className="board-rail-track">
-              {Array.from({ length: railPages }, (_, i) => (
+              {Array.from({ length: progress.total }, (_, i) => (
                 <span
                   key={i}
                   className="board-rail-segment"
                   data-state={
-                    i === packageView.index
+                    i === progress.position - 1
                       ? "current"
-                      : i < packageView.index
+                      : i < progress.position - 1
                         ? "done"
                         : "pending"
                   }
@@ -748,7 +777,7 @@ function BoardSessionWorkspace({
               ))}
             </span>
             <span className="board-rail-position">
-              Soal {packageView.index + 1}/{railPages}
+              Soal {progress.position}/{progress.total}
             </span>
           </div>
         )}
@@ -758,6 +787,8 @@ function BoardSessionWorkspace({
           data-connected={connected ? "true" : "false"}
           data-arrived={arrived ? "true" : "false"}
           data-motion-class="C3"
+          data-board-band
+          data-board-state-line
           className="board-state-line"
         >
           {connected && <CircleCheck size={18} aria-hidden />}

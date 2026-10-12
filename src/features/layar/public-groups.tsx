@@ -67,9 +67,7 @@ export function PublicGroups({
   return (
     <div className="board-groups">
       {groups.map((g) => {
-        const assignment = station?.assignments.find(
-          (a) => a.groupId === g.id,
-        );
+        const assignment = station?.assignments.find((a) => a.groupId === g.id);
         return (
           <section
             key={g.id}
@@ -85,10 +83,7 @@ export function PublicGroups({
                 ? `Stasiun pertama: ${assignment.station}`
                 : "Tunggu arahan guru untuk stasiun pertama."}
             </p>
-            <p
-              aria-label={`Absen ${g.label}`}
-              className="board-group-numbers"
-            >
+            <p aria-label={`Absen ${g.label}`} className="board-group-numbers">
               {g.attendanceNumbers
                 .map((n) => String(n).padStart(2, "0"))
                 .join(" · ")}

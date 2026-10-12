@@ -34,7 +34,8 @@ export function boardCopy(state: PresentationState): BoardCopy {
   // The role line states what the screen is and what to do with it. The position and the card
   // row are stated once, by the question screen's own band inside the region a reader enters,
   // where the timer that belongs to them also lives (§I.3, §B2).
-  const questionRole = "Soal cek. Isi satu pilihan saja; jika belum tahu, pilih ?.";
+  const questionRole =
+    "Soal cek. Isi satu pilihan saja; jika belum tahu, pilih ?.";
   if (state.practice)
     return {
       role: "Latihan mandiri. Setiap orang mengerjakan bagiannya sendiri.",

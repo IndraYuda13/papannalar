@@ -193,7 +193,7 @@ test("Seven patterns use actual paired board, distinct examples, repairs, unique
   await a.getByRole("button", { name: "Lompat", exact: true }).click();
   await a.getByRole("button", { name: "Jalankan", exact: true }).click();
   await board
-    .getByRole("button", { name: "Giliran Pilot B", exact: true })
+    .getByRole("button", { name: "Serahkan giliran ke sisi B", exact: true })
     .click();
   await expect(b.getByTestId("number-position")).toContainText("Posisi −3");
   for (const amount of ["-2", "-3"]) {

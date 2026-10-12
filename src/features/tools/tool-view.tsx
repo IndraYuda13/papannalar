@@ -9,9 +9,36 @@ const AlgebraTiles = dynamic(() =>
 );
 const Balance = dynamic(() => import("./balance").then((m) => m.Balance));
 const Graphs = dynamic(() => import("./graphs").then((m) => m.Graphs));
+/**
+ * The lazily-imported tools keep their landmark mounted while the chunk is in flight (§8 `:545`).
+ *
+ * `{ loading: () => <p>Menyiapkan alat…</p> }` replaced the tool's own region with a paragraph, so
+ * for the first load of `Batang Pecahan` the region `getByRole("region", { name: "Batang Pecahan" })`
+ * did not exist in the DOM at t=0 **or** at t=160 ms, and INTERACTION_DELTA_V4 §A.1 forbids a board
+ * element whose height changes when content arrives. The fallback now renders a container carrying
+ * the tool's own landmark (role + accessible name) with the region's reserved box, so the anatomy
+ * and the height hold during the load and the assertion is about the product, not about timing.
+ */
+function toolFallback(label: string) {
+  return function ToolLoading() {
+    return (
+      <section
+        role="region"
+        aria-label={label}
+        aria-busy="true"
+        className="board-tool board-tool-loading"
+        data-tool="loading"
+      >
+        <p className="board-tool-loading-note">Menyiapkan alat…</p>
+      </section>
+    );
+  };
+}
 const Fractions = dynamic(
   () => import("./fractions").then((m) => m.Fractions),
-  { loading: () => <p>Menyiapkan alat…</p> },
+  {
+    loading: toolFallback("Batang Pecahan"),
+  },
 );
 export function ToolView({
   task,

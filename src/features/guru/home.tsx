@@ -23,6 +23,12 @@ import { MotionBoundary } from "@/ui/components/motion-boundary";
  * One row contract (V5): icon · content · rail · action, and the action track never wraps.
  * The rail is §9.1's signature device: the row shows *this* run's class distribution, so the
  * home screen teaches the product's core idea every time it is opened.
+ *
+ * The top-most active run owns the screen's single primary action (§F A16). It was already
+ * *painted* filled (`.studio-row[data-primary-row]`), but nothing carried the measurable
+ * attribute, so on a screen with ≥2 runs `[data-emphasis="primary"]` counted 0 — a rule the row
+ * asserts but the DOM never exposed. The attribute belongs on the filled action itself, and it
+ * must not be a second one: the header's `Mulai mengajar` is only rendered when no run is active.
  */
 function ResumeRow({
   run,
@@ -55,7 +61,11 @@ function ResumeRow({
           </p>
         </span>
         <RungRail spread={spread} />
-        <span className="studio-row-action" data-row-action>
+        <span
+          className="studio-row-action"
+          data-row-action
+          data-emphasis={primary ? "primary" : undefined}
+        >
           Lanjutkan
           <ArrowRight size={18} strokeWidth={1.8} aria-hidden />
         </span>
@@ -218,7 +228,10 @@ export function TeacherHome() {
         <Section label="Baru selesai" ground="sheet" data-recently-closed>
           <ul className="studio-row-list">
             <li>
-              <Link className="studio-row" href={`/guru/hasil/${closedToday.id}`}>
+              <Link
+                className="studio-row"
+                href={`/guru/hasil/${closedToday.id}`}
+              >
                 <span className="studio-row-icon" aria-hidden>
                   {closedToday.document.items.length}
                 </span>

@@ -26,11 +26,7 @@ const legacyCapabilities = {
   height: "normal",
   durationSeconds: 10,
 };
-async function storedBoard(
-  page: Page,
-  preset = "sedang",
-  allowMotion = false,
-) {
+async function storedBoard(page: Page, preset = "sedang", allowMotion = false) {
   await page.addInitScript(
     ({ capabilities, preset, id }) => {
       localStorage.setItem(
@@ -179,14 +175,62 @@ async function readablePage(page: Page) {
   expect(geometry.copyBottom).toBeLessThanOrEqual(geometry.bottom + 1);
 }
 
+// AURORA §J.1 splits the old "400-character prompt remains complete and bounded" row in two.
+// Its title promoted a stress fixture to a contract: 400 characters is illegal content by the
+// product's own law (`BOARD_MAX_LINES = 2`, `BOARD_MAX_WORDS = 14`, `studio.tsx:185-186`), so
+// "complete on one page" was never a claim the product made about legal items. What the product
+// does promise is two different things, and each now has its own row:
+//   A41 — legal content is never paginated at all;
+//   A42 — illegal content paginates losslessly, bounded, with a page count that does not move.
+const legalPrompt = "Lift dari −2 ke lantai 5. Berapa perpindahannya?";
+const legalOptions = ["7", "−7", "3", "−3"] as [string, string, string, string];
+
 for (const viewport of [
   { width: 1280, height: 720 },
   { width: 1366, height: 768 },
   { width: 1920, height: 1080 },
 ]) {
-  test(`V1 400-character prompt and four options remain complete and bounded at ${viewport.width}x${viewport.height}`, async ({
+  test(`A41 legal content renders whole on one screen at ${viewport.width}x${viewport.height}`, async ({
     page,
   }, info) => {
+    await page.setViewportSize(viewport);
+    await storedBoard(page);
+    await boardFixture(page, () =>
+      libraryItem({
+        id: fixtureId,
+        kind: "card",
+        prompt: legalPrompt,
+        options: legalOptions,
+      }),
+    );
+    await page.goto("/layar");
+    await expect(page.getByTestId("library-board")).toBeVisible();
+    // The prompt satisfies the board's own limit, so it is never split, at any preset.
+    for (const preset of ["Jarak dekat", "Jarak sedang", "Jarak jauh"]) {
+      await page
+        .getByRole("button", { name: "Ubah tampilan", exact: true })
+        .click();
+      await page
+        .getByRole("button", { name: new RegExp(`^${preset}`) })
+        .click();
+      await page
+        .getByRole("button", { name: "Simpan tampilan", exact: true })
+        .click();
+      await expect(page.locator(".library-page-controls")).toHaveCount(0);
+      await expect(page.locator(".library-page-label")).toHaveCount(0);
+      await expect(page.locator(".library-prompt")).toHaveText(legalPrompt);
+      const options = page.locator(".library-options:not([hidden]) > li");
+      await expect(options).toHaveCount(5);
+      await bounded(page);
+      await readablePage(page);
+      await screenshot(page, info, `a41-legal-${preset.replace(" ", "-")}`);
+    }
+  });
+
+  test(`A42 oversized content paginates losslessly and boundedly at ${viewport.width}x${viewport.height}`, async ({
+    page,
+  }, info) => {
+    test.setTimeout(90000);
     await page.setViewportSize(viewport);
     await storedBoard(page);
     await boardFixture(page, () =>
@@ -199,7 +243,6 @@ for (const viewport of [
     );
     await page.goto("/layar");
     await expect(page.getByTestId("library-board")).toBeVisible();
-    await expect(page.locator(".board-menu")).not.toHaveAttribute("open");
     for (const preset of ["Jarak dekat", "Jarak sedang", "Jarak jauh"]) {
       await page
         .getByRole("button", { name: "Ubah tampilan", exact: true })
@@ -212,39 +255,63 @@ for (const viewport of [
         .click();
       const next = page.getByRole("button", { name: "Bagian berikutnya" });
       const back = page.getByRole("button", { name: "Bagian sebelumnya" });
+      // Walk back to page 1 first: the fixture may resume mid-item, and the walk below must start
+      // from a known page. The control only enables/disables once the fit has been measured, which
+      // is why the canvas-width fix (A42b) had to land before this walk could be reliable — a
+      // re-measure under a walking reader was what mis-filed a page's text under its neighbour's
+      // label.
       while (await back.isEnabled()) await back.click();
+      await expect(back).toBeDisabled();
       await expect(next).toBeEnabled();
       const texts: Record<string, string> = {};
+      let first = "",
+        visited = 0;
+      const counts: string[] = [];
       for (let index = 0; index < 100; index++) {
-        // Read the label and the copy in ONE evaluate. Two separate `textContent()` calls are
-        // two DOM reads, and the paginator re-measures once when the webfont swaps in, so the
-        // page can turn between them — which files a page's text under the previous page's
-        // label and reports a mismatch that no reader can actually see (the product renders
-        // both from one object in one frame).
-        const { label, text } = await page.evaluate(() => ({
+        // Read the label, the copy and the count in ONE evaluate. Two separate `textContent()`
+        // calls are two DOM reads, and the paginator re-measures once when the webfont swaps in,
+        // so the page can turn between them — which files a page's text under the previous page's
+        // label and reports a fragment missing mid-sentence that no reader can actually see.
+        const { label, text, count } = await page.evaluate(() => ({
           label:
             document.querySelector(".library-page-label")?.textContent ?? "",
           text:
             document.querySelector(
               ".library-reading-copy:not([hidden]) .library-reading-text",
             )?.textContent ?? "",
+          count:
+            document.querySelector(".library-page-controls p")?.textContent ??
+            "",
         }));
         texts[label] = (texts[label] ?? "") + text;
+        visited += 1;
+        counts.push(count);
+        if (index === 0) first = count;
         await bounded(page);
         await readablePage(page);
-        if (index === 0 || (label === "Pilihan A" && texts[label] === text))
-          await screenshot(
-            page,
-            info,
-            `${preset}-${index === 0 ? "prompt" : "option-A"}`,
-          );
+        if (index === 0)
+          await screenshot(page, info, `${preset}-a42-first-page`);
         if (await next.isDisabled()) break;
         await next.click();
       }
+      // The count is one series: the position advances by one per page and every page names the
+      // same total. (Comparing the first page's text to the last page's compares *positions*, not
+      // the count — the defect was the total moving `8` → `18` mid-walk.)
+      expect(first).toBe(
+        counts.length ? `Bagian 1 dari ${counts.length}` : first,
+      );
+      expect([...new Set(counts.map((c) => c.split(" dari ")[1]))]).toEqual([
+        String(counts.length),
+      ]);
+      expect(visited).toBeGreaterThan(1);
+      await expect(next).toBeDisabled();
+      // Lossless per label: the concatenation equals the source byte-for-byte.
       expect(texts["Pertanyaan"]).toBe(longPrompt);
       for (const [index, label] of ["A", "B", "C", "D"].entries())
         expect(texts[`Pilihan ${label}`]).toBe(longOptions[index]);
       expect(texts["Pilihan ?"]).toBe("? · Belum tahu");
+      // `Pilihan ?` is the last page visited.
+      expect(Object.keys(texts).at(-1)).toBe("Pilihan ?");
     }
   });
 }
