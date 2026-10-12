@@ -6,13 +6,17 @@ kelas berjalan dalam satu aplikasi Next.js dengan TypeScript dan Supabase.
 
 ## Alur penggunaan
 
-1. Buka **Beranda → Mulai mengajar**, lalu pilih kelas.
-2. Pilih soal siap pakai atau kumpulan soal buatan sendiri.
-3. Mulai sesi. Jika memakai TV/proyektor, buka `/layar` di perangkat tersebut,
-   lalu sambungkan dari HP guru dengan QR atau kode yang tampil.
-4. Untuk asesmen, cetak Kartu Nalar, bagikan kepada siswa, lalu pindai atau
+1. Buka `/masuk`, daftar dengan email dan sandi jika belum memiliki akun,
+   lalu masuk dengan email dan sandi tersebut.
+2. Buka **Beranda → Mulai mengajar**, pilih kelas dan soal siap pakai atau
+   kumpulan soal buatan sendiri.
+3. Siapkan kegiatan kelas atau kelompok. Untuk kegiatan kelompok, atur kelompok
+   dan penugasan sebelum memulai sesi.
+4. Jika memakai TV/proyektor, buka `/layar` di perangkat tersebut, lalu sambungkan
+   dari HP guru dengan QR atau kode yang tampil.
+5. Untuk asesmen, cetak Kartu Nalar, bagikan kepada siswa, lalu pindai atau
    masukkan jawaban secara manual. Periksa isian sebelum menyimpan.
-5. Akhiri sesi dan buka hasil untuk membahas soal bersama kelas.
+6. Akhiri sesi dan buka hasil untuk membahas soal bersama kelas.
 
 [Panduan guru](docs/13_GUIDE_LATIHAN_AI.md) menjelaskan pembuatan soal, pencetakan
 kartu, koreksi jawaban dan bantuan AI opsional. AI tidak diperlukan untuk alur
@@ -33,16 +37,17 @@ konfigurasi dan migration repo. Isi `.env.local` dengan URL dan publishable key
 lingkungan dev, `APP_ORIGIN=http://127.0.0.1:3000`, serta `PAIRING_SECRET` acak
 minimal 32 karakter khusus server. Jangan gunakan service-role key di browser.
 
-Aktifkan email magic link dan anonymous sign-in untuk identitas papan, izinkan
-callback `http://127.0.0.1:3000/auth/callback`, serta matikan **Allow public access**
-pada pengaturan Realtime agar topic menggunakan policy private.
+Gunakan provider yang mendukung pendaftaran dan masuk dengan email/sandi serta
+anonymous sign-in untuk identitas papan. Konfigurasi provider hosted memerlukan
+verifikasi tersendiri. Matikan **Allow public access** pada pengaturan Realtime
+agar topic menggunakan policy private.
 
 ```sh
 pnpm dev
 ```
 
-Buka `http://127.0.0.1:3000/masuk`. Magic link harus dibuka di browser/perangkat
-yang meminta tautan. `/guru` adalah aplikasi guru dan `/layar` adalah layar kelas.
+Buka `http://127.0.0.1:3000/masuk` untuk daftar atau masuk dengan email dan sandi.
+`/guru` adalah aplikasi guru dan `/layar` adalah layar kelas.
 
 Untuk build produksi lokal:
 
@@ -116,10 +121,10 @@ build dan E2E secara berurutan. Tes browser memakai port 3100 dan provider uji
 54325; hentikan launcher demo terlebih dahulu. Workflow CI menyiapkan PostgreSQL
 uji otomatis. Tes terarah tersedia dalam [package.json](package.json).
 
-Bukti pengujian tersimpan di [artifacts/qa](artifacts/qa/), termasuk
-[hasil audit alur guru](artifacts/qa/ui-ai-v2/workflow-v7.json). Setiap laporan
-berlaku untuk kandidat dan lingkungan yang tercatat; hasil historis bukan
-jaminan kelulusan commit yang lebih baru.
+Runner menyimpan bukti pengujian lokal di `artifacts/qa/`; direktori ini tidak
+ikut dilacak Git dan tidak tersedia dalam clone baru sebelum tes dijalankan.
+Setiap laporan berlaku untuk kandidat dan lingkungan yang tercatat; hasil
+historis bukan jaminan kelulusan commit yang lebih baru.
 
 ## Struktur kode
 
