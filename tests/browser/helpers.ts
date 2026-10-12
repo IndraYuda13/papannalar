@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
 import { expect, type Locator, type Page } from "@playwright/test";
-import { providerOrigin } from "../harness/ports.mjs";
 
 export async function injectFixture(page: Page) {
   await page.addScriptTag({
@@ -70,27 +69,29 @@ export async function sampleLogin(page: Page) {
   await sampleLoginOn(page);
 }
 
+/** Real registration fixture. Credentials are synthetic and never written to artifacts. */
+export async function registerTeacher(page: Page) {
+  const email = `teacher-${crypto.randomUUID()}@qa.invalid`;
+  const password = `fixture-${crypto.randomUUID()}`;
+  await page.goto("/daftar");
+  await page.getByLabel("Email guru", { exact: true }).fill(email);
+  await page.getByLabel("Kata sandi", { exact: true }).fill(password);
+  await page
+    .getByLabel("Konfirmasi kata sandi", { exact: true })
+    .fill(password);
+  await page.getByRole("button", { name: "Daftar", exact: true }).click();
+  await expect(page).toHaveURL(/\/guru$/);
+  return { email, password };
+}
+
 export async function loginTeacher(
   page: Page,
   options: { guided?: boolean } = {},
 ) {
-  const email = `teacher-${crypto.randomUUID()}@qa.invalid`;
-  await page.goto("/masuk");
-  await page.getByLabel("Email guru").fill(email);
-  await page.getByRole("button", { name: "Kirim tautan masuk" }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "Tautan masuk sudah dikirim" }),
-  ).toContainText("Tautan masuk sudah dikirim");
-  // Test mailbox only: no real email. The test double checks the PKCE challenge.
-  const response = await page.request.get(
-    `${providerOrigin}/__test/link?email=${encodeURIComponent(email)}`,
-  );
-  const link: { url: string } = await response.json();
-  await page.goto(link.url);
-  await expect(page).toHaveURL(/\/guru$/);
+  await registerTeacher(page);
   // v4 (V3): adaptive practice is a workflow reached from home, not a nav destination — the
   // duplicate nav silhouette is gone, so the helper follows the real user path instead.
-  await page.getByRole("link", { name: /^Latihan kelompok/ }).click();
+  await page.goto("/guru/latihan?mode=demo");
   await expect(page).toHaveURL(/\/guru\/latihan/);
   await expect(
     page.getByRole("button", { name: "Buat kelas", exact: true }),

@@ -1364,17 +1364,20 @@ test("A15 the in-flight submit carries a spinner and no layout shift", async ({
   await page.route("**/auth/login", async (route) => {
     // Hold the response so the in-flight state is observable rather than a 1-frame flicker.
     await new Promise((resolve) => setTimeout(resolve, 600));
-    await route.fulfill({ status: 500, body: "unavailable" });
+    await route.fulfill({ status: 503, body: "unavailable" });
   });
   await page.goto("/masuk");
-  const button = page.getByRole("button", { name: "Kirim tautan masuk" });
+  const button = page.getByRole("button", { name: "Masuk", exact: true });
   await expect(button).toBeVisible();
   const width = (await button.boundingBox())!.width;
   // At rest: no spinner.
   await expect(page.getByTestId("login-spinner")).toHaveCount(0);
   await page.getByLabel("Email guru").fill("teacher@qa.invalid");
+  await page
+    .getByLabel("Kata sandi", { exact: true })
+    .fill("synthetic-only-fixture");
   await button.click();
-  const inFlight = page.getByRole("button", { name: "Mengirim…" });
+  const inFlight = page.getByRole("button", { name: "Memproses…" });
   await expect(inFlight).toBeVisible();
   // §F A15 / §D.1: the spinner is present while in flight.
   await expect(page.getByTestId("login-spinner")).toHaveCount(1);

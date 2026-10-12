@@ -4,7 +4,7 @@ import {
   snapshotSchema,
 } from "../../src/contracts/presentation";
 import { classListSchema } from "../../src/contracts/classes";
-import { appOrigin, providerOrigin } from "../harness/ports.mjs";
+import { appOrigin } from "../harness/ports.mjs";
 
 const origin = appOrigin;
 const headers = { Origin: origin };
@@ -13,14 +13,20 @@ const post = (client: APIRequestContext, path: string, data: object) =>
 const pairing = (client: APIRequestContext, board: boolean, data: object) =>
   post(client, board ? "/api/v1/board/pairing" : "/api/v1/pairing", data);
 
-async function login(client: APIRequestContext, email: string) {
-  expect((await post(client, "/auth/login", { email })).ok()).toBe(true);
-  // Local test mailbox only, matching the existing browser helper.
-  const link = await client.get(
-    `${providerOrigin}/__test/link?email=${encodeURIComponent(email)}`,
-  );
-  const { url } = (await link.json()) as { url: string };
-  expect((await client.get(url)).ok()).toBe(true);
+async function login(
+  client: APIRequestContext,
+  email: string,
+  password: string,
+  register = false,
+) {
+  expect(
+    (
+      await post(client, register ? "/auth/register" : "/auth/login", {
+        email,
+        password,
+      })
+    ).ok(),
+  ).toBe(true);
 }
 async function claim(
   client: APIRequestContext,
@@ -66,8 +72,9 @@ test("logout revokes only this controller across independent logins of the same 
   const [teacherA, teacherB, boardA, boardB] = clients;
   try {
     const email = `logout-${crypto.randomUUID()}@qa.invalid`;
-    await login(teacherA, email);
-    await login(teacherB, email);
+    const password = `fixture-${crypto.randomUUID()}`;
+    await login(teacherA, email, password, true);
+    await login(teacherB, email, password);
     expect(await (await teacherA.get("/api/v1/teacher")).json()).toEqual(
       await (await teacherB.get("/api/v1/teacher")).json(),
     );

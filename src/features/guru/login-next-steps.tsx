@@ -25,7 +25,7 @@ export function LoginNextSteps() {
         </p>
       )}
       <ol>
-        <li>Masuk dengan email</li>
+        <li>Masuk dengan email dan kata sandi</li>
         <li>Pilih kelas dan soal</li>
         <li>Tampilkan di Layar Kelas</li>
       </ol>

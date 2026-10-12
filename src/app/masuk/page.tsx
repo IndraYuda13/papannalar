@@ -27,14 +27,19 @@ export default function LoginPage() {
       <div className="studio-login-form">
         <Brand />
         <h1 className="mt-12 mb-3 text-[28px] font-extrabold">
-          Masuk tanpa kata sandi
+          Masuk ke akun guru
         </h1>
         <p className="mb-8 text-muted-foreground">
-          Gunakan email guru untuk membuka kelas Anda. Tautan hanya berlaku
-          sekali.
+          Gunakan email dan kata sandi untuk membuka kelas Anda.
         </p>
         <LoginNextSteps />
         <LoginForm />
+        <a
+          href="/daftar"
+          className="mt-4 inline-flex min-h-12 items-center font-semibold text-primary underline"
+        >
+          Belum punya akun? Daftar
+        </a>
         {process.env["SAMPLE_ENABLED"] === "true" &&
           demoConfiguredForEnvironment() && (
             <SampleLogin

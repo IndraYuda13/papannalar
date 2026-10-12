@@ -1,25 +1,15 @@
 import { test, expect } from "@playwright/test";
-import { providerOrigin } from "../harness/ports.mjs";
+import { registerTeacher } from "../browser/helpers";
+const root =
+  process.env["PNL_BROWSER_ARTIFACT_ROOT"] ?? "artifacts/qa/grouped-learning";
 import { mkdir } from "node:fs/promises";
 test("authenticated empty and unavailable teacher surfaces keep real actions and do not overflow", async ({
   page,
 }) => {
-  await mkdir("/mnt/papannalar-20261013/evidence/frame-browser", {
+  await mkdir(root, {
     recursive: true,
   });
-  const email = `empty-${crypto.randomUUID()}@qa.invalid`;
-  await page.goto("/masuk");
-  await page.getByLabel("Email guru").fill(email);
-  await page.getByRole("button", { name: "Kirim tautan masuk" }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "Tautan masuk sudah dikirim" }),
-  ).toBeVisible();
-  const link = await (
-    await page.request.get(
-      `${providerOrigin}/__test/link?email=${encodeURIComponent(email)}`,
-    )
-  ).json();
-  await page.goto(link.url);
+  await registerTeacher(page);
   for (const width of [360, 390, 768, 1024, 1366, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/guru/latihan");
@@ -34,7 +24,7 @@ test("authenticated empty and unavailable teacher surfaces keep real actions and
       ),
     ).toBe(true);
     await page.screenshot({
-      path: `/mnt/papannalar-20261013/evidence/frame-browser/empty-${width}.png`,
+      path: `${root}/empty-${width}.png`,
       fullPage: true,
     });
   }

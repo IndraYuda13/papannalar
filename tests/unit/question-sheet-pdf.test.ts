@@ -35,7 +35,8 @@ const print: PrintAssignment = {
     rows: 5,
   },
 };
-const root = "/mnt/papannalar-20261013/evidence/frame-pdf";
+const root =
+  process.env["PNL_PDF_ARTIFACT_ROOT"] ?? "artifacts/qa/question-sheet-pdf";
 it("renders every frozen question and option in order across pages without private fields", async () => {
   await mkdir(root, { recursive: true });
   const font = await readFile("public/fonts/atkinson-card.woff");

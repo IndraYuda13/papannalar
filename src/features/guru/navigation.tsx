@@ -119,6 +119,14 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
           className="studio-workspace min-w-0 px-4 pt-5 sm:px-8 lg:py-8"
         >
           <div className="mx-auto w-full max-w-[960px]">
+            {pathname === "/guru" && (
+              <Link
+                href="/guru/akun"
+                className="mb-4 inline-flex min-h-12 items-center text-sm font-semibold text-primary underline"
+              >
+                Atur kata sandi akun lama
+              </Link>
+            )}
             <MotionSwap change={pathname}>
               {adaptive ? (
                 children

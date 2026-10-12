@@ -116,15 +116,13 @@ export async function createQuestionSheetPdf(
     draw("? · Belum tahu", 20, 11);
     y -= 20;
   });
-  doc
-    .getPages()
-    .forEach((p, i) =>
-      p.drawText(`${print.code} · Halaman ${i + 1}/${doc.getPageCount()}`, {
-        x: margin,
-        y: 25,
-        size: 9,
-        font,
-      }),
-    );
+  doc.getPages().forEach((p, i) =>
+    p.drawText(`${print.code} · Halaman ${i + 1}/${doc.getPageCount()}`, {
+      x: margin,
+      y: 25,
+      size: 9,
+      font,
+    }),
+  );
   return doc.save();
 }

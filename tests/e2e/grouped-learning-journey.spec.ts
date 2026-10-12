@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
-import { appOrigin, providerOrigin } from "../harness/ports.mjs";
-import { openBoard } from "../browser/helpers";
+import { appOrigin } from "../harness/ports.mjs";
+import { openBoard, registerTeacher } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 async function call(page: Page, path: string, data: object) {
   const response = await page.request.post(path, {
@@ -11,22 +11,10 @@ async function call(page: Page, path: string, data: object) {
   return response.json();
 }
 async function login(page: Page) {
-  const email = `groups-${crypto.randomUUID()}@qa.invalid`;
-  await page.goto("/masuk");
-  await page.getByLabel("Email guru").fill(email);
-  await page.getByRole("button", { name: "Kirim tautan masuk" }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "Tautan masuk sudah dikirim" }),
-  ).toBeVisible();
-  const link = await (
-    await page.request.get(
-      `${providerOrigin}/__test/link?email=${encodeURIComponent(email)}`,
-    )
-  ).json();
-  await page.goto(link.url);
-  await expect(page).toHaveURL(/\/guru$/);
+  await registerTeacher(page);
 }
-const root = "/mnt/papannalar-20261013/evidence/frame-browser";
+const root =
+  process.env["PNL_BROWSER_ARTIFACT_ROOT"] ?? "artifacts/qa/grouped-learning";
 test("real-class explicit methods, persisted groups, autonomous board and late blank corrections", async ({
   page,
   browser,
