@@ -1,7 +1,13 @@
 import { readFile, readdir, mkdir, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 import { sql, literal } from "../tests/harness/postgres.mjs";
 import { createServer } from "vite";
 import { createHash } from "node:crypto";
+
+async function writeArtifact(path, content) {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, content);
+}
 
 const mode = process.argv[2] ?? "rls";
 if (mode === "password-auth") {
@@ -14,15 +20,13 @@ if (mode === "password-auth") {
 if (mode === "learning") {
   for (const file of ["library", "group-lessons", "group-board"]) {
     const output = sql(await readFile(`supabase/tests/${file}.sql`, "utf8"));
-    await mkdir("artifacts/qa/learning", { recursive: true });
-    await writeFile(`artifacts/qa/learning/${file}-sql.log`, output + "\n");
+    await writeArtifact(`artifacts/qa/learning/${file}-sql.log`, output + "\n");
     console.log(output.split("\n").at(-1));
   }
   await import("./check-learning-tools.mjs");
   process.exit(0);
 }
 if (mode === "prepare") {
-  await mkdir("artifacts/qa/M01/m01c", { recursive: true });
   sql(await readFile("tests/harness/bootstrap.sql", "utf8"));
   sql(
     "create schema if not exists pn_test; revoke all on schema pn_test from public,anon,authenticated; create table if not exists pn_test.migrations(name text primary key, digest text not null)",
@@ -52,26 +56,30 @@ if (mode === "prepare") {
   );
 } else {
   const output = sql(await readFile("supabase/tests/ownership.sql", "utf8"));
-  await writeFile("artifacts/qa/M01/m01c/rls-results.log", output + "\n");
+  await writeArtifact("artifacts/qa/M01/m01c/rls-results.log", output + "\n");
   console.log(output);
   if (mode !== "ownership") {
     const library = sql(await readFile("supabase/tests/library.sql", "utf8"));
-    await mkdir("artifacts/qa/video-ready", { recursive: true });
-    await writeFile("artifacts/qa/video-ready/library-sql.log", library + "\n");
+    await writeArtifact(
+      "artifacts/qa/video-ready/library-sql.log",
+      library + "\n",
+    );
     console.log(library);
     console.log(
       sql(await readFile("supabase/tests/password-auth.sql", "utf8")),
     );
     for (const file of ["group-lessons", "group-board"]) {
       const output = sql(await readFile(`supabase/tests/${file}.sql`, "utf8"));
-      await mkdir("artifacts/qa/learning", { recursive: true });
-      await writeFile(`artifacts/qa/learning/${file}-sql.log`, output + "\n");
+      await writeArtifact(
+        `artifacts/qa/learning/${file}-sql.log`,
+        output + "\n",
+      );
       console.log(output.split("\n").at(-1));
     }
     const videoConnection = sql(
       await readFile("supabase/tests/video-connection.sql", "utf8"),
     );
-    await writeFile(
+    await writeArtifact(
       "artifacts/qa/video-ready/connection-sql.log",
       videoConnection + "\n",
     );
@@ -79,43 +87,37 @@ if (mode === "prepare") {
     const boardReset = sql(
       await readFile("supabase/tests/board-reset.sql", "utf8"),
     );
-    await writeFile(
+    await writeArtifact(
       "artifacts/qa/ui-ai-v2/board-reset-sql.log",
       boardReset + "\n",
     );
     console.log(boardReset);
     const pairing = await readFile("supabase/tests/presentations.sql", "utf8");
     const result = sql(pairing);
-    await mkdir("artifacts/qa/M04/m04a", { recursive: true });
-    await writeFile("artifacts/qa/M04/m04a/rls-results.log", result + "\n");
+    await writeArtifact("artifacts/qa/M04/m04a/rls-results.log", result + "\n");
     console.log(result);
     const stations = sql(await readFile("supabase/tests/stations.sql", "utf8"));
-    await mkdir("artifacts/qa/M08", { recursive: true });
-    await writeFile("artifacts/qa/M08/station-sql.log", stations + "\n");
+    await writeArtifact("artifacts/qa/M08/station-sql.log", stations + "\n");
     console.log(stations);
     const tools = sql(await readFile("supabase/tests/tools.sql", "utf8"));
-    await mkdir("artifacts/qa/M09", { recursive: true });
-    await writeFile("artifacts/qa/M09/tool-sql.log", tools + "\n");
+    await writeArtifact("artifacts/qa/M09/tool-sql.log", tools + "\n");
     console.log(tools);
     const graphs = sql(await readFile("supabase/tests/graphs.sql", "utf8"));
-    await mkdir("artifacts/qa/M14", { recursive: true });
-    await writeFile("artifacts/qa/M14/graphs-sql.log", graphs + "\n");
+    await writeArtifact("artifacts/qa/M14/graphs-sql.log", graphs + "\n");
     console.log(graphs);
     const modes = sql(await readFile("supabase/tests/board-modes.sql", "utf8"));
-    await writeFile("artifacts/qa/M14/board-modes-sql.log", modes + "\n");
+    await writeArtifact("artifacts/qa/M14/board-modes-sql.log", modes + "\n");
     console.log(modes);
     const guidance = sql(await readFile("supabase/tests/guidance.sql", "utf8"));
-    await mkdir("artifacts/qa/M15", { recursive: true });
-    await writeFile("artifacts/qa/M15/guidance-sql.log", guidance + "\n");
+    await writeArtifact("artifacts/qa/M15/guidance-sql.log", guidance + "\n");
     console.log(guidance);
     const exit = sql(await readFile("supabase/tests/exit.sql", "utf8"));
-    await mkdir("artifacts/qa/M10", { recursive: true });
-    await writeFile("artifacts/qa/M10/exit-sql.log", exit + "\n");
+    await writeArtifact("artifacts/qa/M10/exit-sql.log", exit + "\n");
     console.log(exit);
     const packageProjection = sql(
       await readFile("supabase/tests/package-presentation.sql", "utf8"),
     );
-    await writeFile(
+    await writeArtifact(
       "artifacts/qa/M10/package-sql.log",
       packageProjection + "\n",
     );
@@ -123,21 +125,21 @@ if (mode === "prepare") {
     const capabilities = sql(
       await readFile("supabase/tests/board-capabilities.sql", "utf8"),
     );
-    await mkdir("artifacts/qa/M12", { recursive: true });
-    await writeFile(
+    await writeArtifact(
       "artifacts/qa/M12/capabilities-sql.log",
       capabilities + "\n",
     );
     console.log(capabilities);
     const llm = sql(await readFile("supabase/tests/llm.sql", "utf8"));
-    await mkdir("artifacts/qa/M13", { recursive: true });
-    await writeFile("artifacts/qa/M13/llm-sql.log", llm + "\n");
+    await writeArtifact("artifacts/qa/M13/llm-sql.log", llm + "\n");
     console.log(llm);
     const llmProfiles = sql(
       await readFile("supabase/tests/llm-profiles.sql", "utf8"),
     );
-    await mkdir("artifacts/qa/ui-ai-v2", { recursive: true });
-    await writeFile("artifacts/qa/ui-ai-v2/ledger-sql.log", llmProfiles + "\n");
+    await writeArtifact(
+      "artifacts/qa/ui-ai-v2/ledger-sql.log",
+      llmProfiles + "\n",
+    );
     console.log(llmProfiles);
     const vite = await createServer({
       configFile: false,
@@ -162,8 +164,10 @@ if (mode === "prepare") {
         .replace("__BOARD_PACKET__", literal(JSON.stringify(packet)))
         .replace("__BOARD_PAGES__", literal(JSON.stringify(pages)));
       const boardContent = sql(boardContentTest);
-      await mkdir("artifacts/qa/M15", { recursive: true });
-      await writeFile("artifacts/qa/M15/content-sql.log", boardContent + "\n");
+      await writeArtifact(
+        "artifacts/qa/M15/content-sql.log",
+        boardContent + "\n",
+      );
       console.log(boardContent);
       const { syncFixture, syncHistoryFixture } = await vite.ssrLoadModule(
         "/tests/fixtures/sync.ts",
@@ -175,8 +179,7 @@ if (mode === "prepare") {
         literal(JSON.stringify(syncFixture().mutation)),
       );
       const sync = sql(syncTest);
-      await mkdir("artifacts/qa/M11", { recursive: true });
-      await writeFile("artifacts/qa/M11/sync-sql.log", sync + "\n");
+      await writeArtifact("artifacts/qa/M11/sync-sql.log", sync + "\n");
       console.log(sync);
       const writerTest = (
         await readFile("supabase/tests/sync-writer.sql", "utf8")
@@ -185,7 +188,7 @@ if (mode === "prepare") {
         literal(JSON.stringify(syncFixture().mutation)),
       );
       const writer = sql(writerTest);
-      await writeFile("artifacts/qa/M11/writer-sql.log", writer + "\n");
+      await writeArtifact("artifacts/qa/M11/writer-sql.log", writer + "\n");
       console.log(writer);
       const historyTest = (
         await readFile("supabase/tests/sync-history.sql", "utf8")
@@ -194,7 +197,7 @@ if (mode === "prepare") {
         literal(JSON.stringify(syncHistoryFixture().mutation)),
       );
       const history = sql(historyTest);
-      await writeFile("artifacts/qa/M11/history-sql.log", history + "\n");
+      await writeArtifact("artifacts/qa/M11/history-sql.log", history + "\n");
       console.log(history);
     } finally {
       await vite.close();
