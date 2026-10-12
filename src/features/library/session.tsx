@@ -19,11 +19,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTeacher } from "@/features/guru/app-context";
 import {
   publicLibraryItem,
-  runSchema,
-  runDetailSchema,
-  type LibraryRun,
-  type LibraryResponse,
-  type LibraryAction,
+  runV2Schema,
+  runDetailV2Schema,
+  type LibraryRunV2,
+  type LibraryResponseV2,
+  type LibraryV2Action,
 } from "@/contracts/library";
 import {
   publicPresentation,
@@ -37,21 +37,31 @@ import { pairingCall } from "@/features/classroom/transport";
 import { RemoteControls } from "@/features/session/remote-controls";
 import { Button } from "@/ui/components/button";
 import { confirmAction } from "@/ui/components/confirm";
-import {
-  libraryCache,
-  pendingLibraryResponses,
-  queueLibraryResponse,
-  removeLibraryCache,
-} from "@/local/library";
+import { pendingCardResponses } from "./pending-card-responses";
 import { ScanCapture } from "@/features/scanner/capture";
 import type { CardAnswer } from "@/cards/layouts/layout-v1";
 import type { CustomFormBinding } from "@/contracts/custom-form";
-import { field, panel, libraryCall } from "./client";
+import { field, panel } from "./client";
+import { libraryV2Call, queueGroupCardResponse } from "@/local/learning-client";
+import { featureCache, removeFeatureCache } from "./v2-cache";
+import { z } from "zod";
+import { AssignmentPrint } from "./print-assignment";
 import { StateNotice, WorkflowSteps } from "@/ui/components/studio";
 import { LibraryItemView } from "./item-view";
 import { useDraftGuard } from "@/ui/use-draft-guard";
 import { ConflictReview } from "./conflict-review";
-type Detail = { run: LibraryRun; responses: LibraryResponse[] };
+const answerDraftSchema = z.strictObject({
+  formId: z.uuid(),
+  version: z.number().int().positive(),
+  studentId: z.uuid(),
+  answers: z
+    .array(z.enum(["", "unreadable", "A", "B", "C", "D", "?"]))
+    .min(1)
+    .max(5),
+  revision: z.number().int().nonnegative(),
+  review: z.boolean(),
+});
+type Detail = { run: LibraryRunV2; responses: LibraryResponseV2[] };
 export function SessionPage({ id }: { id: string }) {
   const { scope } = useTeacher(),
     [detail, setDetail] = useState<Detail>(),
@@ -98,7 +108,7 @@ export function SessionPage({ id }: { id: string }) {
     </div>
   );
 }
-function projection(run: LibraryRun): PresentationState {
+function projection(run: LibraryRunV2): PresentationState {
   const item = run.document.items[run.position];
   return publicPresentation({
     schemaVersion: 1,
@@ -109,7 +119,7 @@ function projection(run: LibraryRun): PresentationState {
     ...(item.kind === "interactive" ? { tool: item.tool } : {}),
   });
 }
-async function publishRun(env: PresentationEnvelope, next: LibraryRun) {
+async function publishRun(env: PresentationEnvelope, next: LibraryRunV2) {
   return snapshotSchema.parse(
     await pairingCall("teacher", {
       action: "publish",
@@ -134,7 +144,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     [attendance, setAttendance] = useState(
       initial.run.roster[0]?.attendanceNumber ?? 1,
     ),
-    [answers, setAnswers] = useState<(CardAnswer | "")[]>(
+    [answers, setAnswers] = useState<(CardAnswer | "" | "unreadable")[]>(
       initial.run.document.items.map(() => ""),
     ),
     [needsReview, setReview] = useState(false),
@@ -146,7 +156,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
   useDraftGuard(manual && answerDirty);
   useEffect(() => {
     let active = true;
-    void libraryCache(scope, "answerDraft", initial.run.id)
+    void featureCache(scope, `answerDraft:${initial.run.id}`, answerDraftSchema)
       .then((draft) => {
         const student = initial.run.roster.find(
           (s) => s.id === draft?.studentId,
@@ -182,7 +192,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     if (!student) return;
     draftWrites.current = draftWrites.current
       .then(async () => {
-        await libraryCache(scope, "answerDraft", run.id, {
+        await featureCache(scope, `answerDraft:${run.id}`, answerDraftSchema, {
           formId: run.formId,
           version: run.version,
           studentId: student.id,
@@ -208,14 +218,32 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
   ]);
   async function discardDraft() {
     await draftWrites.current;
-    await removeLibraryCache(scope, "answerDraft", run.id);
+    await removeFeatureCache(scope, `answerDraft:${run.id}`);
   }
+  const responseSource = useRef<"scan" | "manual">("manual");
   const mutating = useRef(false);
   const transport = usePresentationTransport({
     sessionId: run.id,
     classId: run.classId,
     initialState: () => projection(run),
   });
+  useEffect(() => {
+    const reload = () => {
+      void readLibraryDetail(scope, run.id)
+        .then((result) => {
+          setRun(result.detail.run);
+          setResponses(result.detail.responses);
+          setPending(false);
+        })
+        .catch(() =>
+          setMessage(
+            "Jawaban telah dikirim, tetapi hasil terbaru belum dapat dimuat.",
+          ),
+        );
+    };
+    window.addEventListener("pn-cards-synced", reload);
+    return () => window.removeEventListener("pn-cards-synced", reload);
+  }, [scope, run.id]);
   const form: CustomFormBinding = {
     intent: "custom_assessment",
     formId: run.formId,
@@ -230,13 +258,13 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     connected = transport.online;
   useEffect(() => {
     const synced = (event: Event) => {
-      const result = runDetailSchema.safeParse(
+      const result = runDetailV2Schema.safeParse(
         (event as CustomEvent<unknown>).detail,
       );
       if (result.success && result.data.run.id === run.id) {
         setRun(result.data.run);
         setResponses(result.data.responses);
-        void pendingLibraryResponses(scope)
+        void pendingCardResponses(scope, run.id)
           .then((rows) => setPending(rows.some((r) => r.id === run.id)))
           .catch(() => undefined);
         setMessage(
@@ -249,7 +277,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
   }, [run.id, scope]);
   useEffect(() => {
     let stopped = false;
-    void pendingLibraryResponses(scope)
+    void pendingCardResponses(scope, run.id)
       .then((rows) => {
         if (stopped) return;
         const own = rows.filter((r) => r.id === run.id);
@@ -281,8 +309,8 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     setBusy(true);
     setMessage("");
     try {
-      const next = runSchema.parse(
-        await libraryCall({
+      const next = runV2Schema.parse(
+        await libraryV2Call({
           action: "position",
           id: run.id,
           revision: run.revision,
@@ -290,14 +318,6 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         }),
       );
       setRun(next);
-      await libraryCache(scope, "detail", run.id, {
-        run: next,
-        responses,
-      }).catch(() => {
-        setMessage(
-          "Soal sudah berganti. Salinan untuk penggunaan tanpa internet belum tersimpan di perangkat ini.",
-        );
-      });
       await refresh().catch(() => undefined);
     } catch {
       setMessage(
@@ -328,60 +348,45 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     setAttendance(n);
     const student = run.roster.find((s) => s.attendanceNumber === n),
       existing = responses.find((r) => r.studentId === student?.id);
-    setAnswers(existing?.answers ?? run.document.items.map(() => ""));
+    setAnswers(
+      existing?.answers.map(
+        (a, i) =>
+          a ?? (existing.answerStates[i] === "unreadable" ? "unreadable" : ""),
+      ) ?? run.document.items.map(() => ""),
+    );
     setReview(existing?.status === "review");
     setBaseRevision(existing?.revision ?? 0);
     setAnswerDirty(false);
   }
-  async function print() {
-    if (mutating.current) return;
-    mutating.current = true;
-    setBusy(true);
-    try {
-      const [{ createCardPdf }, font] = await Promise.all([
-        import("@/cards/pdf/create"),
-        fetch("/fonts/atkinson-card.woff"),
-      ]);
-      if (!font.ok) throw new Error();
-      const bytes = await createCardPdf(
-        "weekly",
-        new Uint8Array(await font.arrayBuffer()),
-        form,
-      );
-      const url = URL.createObjectURL(
-        new Blob([new Uint8Array(bytes)], { type: "application/pdf" }),
-      );
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `kartu-nalar-${run.classLabel}-${run.date}.pdf`;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setMessage("Kartu siap diunduh.");
-    } catch {
-      setMessage(
-        "Kartu belum dapat diunduh. Sambungkan internet, lalu tekan Cetak kartu asesmen lagi.",
-      );
-    } finally {
-      mutating.current = false;
-      setBusy(false);
-    }
-  }
   async function saveResponse() {
     if (mutating.current || !canMutate) return;
-    const completed = answers.filter((a): a is CardAnswer => a !== "");
-    if (completed.length !== answers.length) {
+    const completed = answers.map((a) =>
+      a === "" || a === "unreadable" ? null : a,
+    );
+    const answerStates = answers.map((a) =>
+      a === ""
+        ? ("blank" as const)
+        : a === "unreadable"
+          ? ("unreadable" as const)
+          : ("answered" as const),
+    );
+    const student = run.roster.find((s) => s.attendanceNumber === attendance);
+    if (!student) return;
+    const queued = await pendingCardResponses(scope, run.id);
+    if (queued.some((r) => r.studentId === student.id)) {
       setMessage(
-        "Periksa setiap baris yang belum diisi atau belum terbaca. Pilih ? hanya jika siswa memilih Belum tahu.",
+        "Jawaban siswa ini menunggu pengiriman. Sambungkan internet dan muat ulang sebelum mengoreksi.",
       );
       return;
     }
-    const student = run.roster.find((s) => s.attendanceNumber === attendance);
-    if (!student) return;
     mutating.current = true;
     setBusy(true);
     setMessage("");
-    const action: Extract<LibraryAction, { action: "response" }> = {
+    const action: Extract<LibraryV2Action, { action: "response" }> = {
+      contractVersion: 2,
       action: "response",
+      source: responseSource.current,
+      answerStates,
       id: run.id,
       formId: run.formId,
       pageIndex: 0,
@@ -389,37 +394,23 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
       studentId: student.id,
       answers: completed,
       revision: baseRevision,
-      status: needsReview ? "review" : "received",
+      status:
+        needsReview || completed.some((a) => a === null)
+          ? "review"
+          : "received",
     };
     try {
       if (!navigator.onLine) {
-        await queueLibraryResponse(scope, action);
-        const local: LibraryResponse = {
-          studentId: student.id,
-          answers: completed,
-          revision: baseRevision + 1,
-          correct: run.document.items.filter(
-            (q, i) => q.kind === "card" && q.key === answers[i],
-          ).length,
-          status: action.status,
-        };
-        const next = [
-          ...responses.filter((r) => r.studentId !== student.id),
-          local,
-        ];
-        setResponses(next);
-        await libraryCache(scope, "detail", run.id, { run, responses: next });
+        await queueGroupCardResponse(scope, action);
         setPending(true);
         setMessage(
           "Tersimpan di perangkat. Jawaban dikirim saat tersambung kembali.",
         );
       } else {
-        const data = runDetailSchema.parse(await libraryCall(action));
+        const data = runDetailV2Schema.parse(await libraryV2Call(action));
         setResponses(data.responses);
         setRun(data.run);
-        await libraryCache(scope, "detail", run.id, data).catch(
-          () => undefined,
-        );
+
         setPending(false);
         setMessage(`Jawaban absen ${attendance} sudah tersimpan.`);
       }
@@ -457,8 +448,8 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     setClosing(true);
     setMessage("");
     try {
-      const next = runSchema.parse(
-        await libraryCall({
+      const next = runV2Schema.parse(
+        await libraryV2Call({
           action: "close",
           id: run.id,
           revision: run.revision,
@@ -466,18 +457,12 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
       );
       setRun(next);
       // A successful close is final even if refreshing the index fails offline.
-      await libraryCache(scope, "detail", run.id, {
-        run: next,
-        responses,
-      }).catch(() => {});
       await refresh().catch(() => {});
       if (answerDirty) {
         await discardDraft().catch(() => undefined);
         setAnswerDirty(false);
       }
-      router.replace(
-        run.mode === "assessment" ? `/guru/hasil/${run.id}` : "/guru",
-      );
+      router.replace(`/guru/hasil/${run.id}`);
     } catch {
       setMessage(
         "Sesi belum dapat diakhiri. Periksa sambungan lalu coba lagi.",
@@ -502,7 +487,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
       >
         <p className="text-sm text-primary">
           Kelas {run.classLabel} ·{" "}
-          {run.mode === "assessment" ? "Cek pemahaman" : "Mengajar"}
+          {run.responseMethod === "cards" ? "Cek pemahaman" : "Mengajar"}
         </p>
         <h1 className="text-[26px] leading-tight font-extrabold">
           {run.document.title}
@@ -515,7 +500,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
       <WorkflowSteps
         current={run.status === "closed" ? 2 : 1}
         steps={
-          run.mode === "assessment"
+          run.responseMethod === "cards"
             ? /* Friction 11: lesson vocabulary, subset-consistent with the conductor strip.
                  The full-lesson ladder stays on /guru/latihan; this rail is navigation for
                  the lesson, not a second app taxonomy. */
@@ -554,7 +539,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         </span>
       </div>
       <div className="studio-session-grid">
-        {run.status === "active" ? (
+        {run.status === "active" && !run.parentLessonId ? (
           <section
             className={`${panel} studio-session-pairing`}
             aria-label="Sambungan layar"
@@ -687,8 +672,10 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
           )}
         </section>
       </div>
-      <ConflictReview scope={scope} run={run} canMutate={canMutate} />
-      {run.mode === "assessment" && (
+      {!run.parentLessonId && run.mode === "assessment" && (
+        <ConflictReview scope={scope} run={run} canMutate={canMutate} />
+      )}
+      {run.responseMethod === "cards" && (
         <section className={panel} aria-label="Lembar jawaban">
           <h2 className="text-xl font-bold">
             Lembar jawaban · {responses.length}/{run.roster.length} masuk
@@ -707,13 +694,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
               manual.
             </li>
           </ol>
-          <Button
-            variant="outline"
-            disabled={busy}
-            onClick={() => void print()}
-          >
-            Cetak kartu asesmen
-          </Button>
+          <AssignmentPrint run={run} />
           {/* Friction 14: the `ukuran asli 100%` instruction must be readable *before* the
               download control, not after it. A teacher who prints "sesuaikan halaman" gets
               cards the OMR worker cannot read, and the instruction arrived too late to stop
@@ -728,6 +709,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
               roster={run.roster.map((s) => s.attendanceNumber)}
               onManual={() => {
                 if (!mutating.current && canMutate) {
+                  responseSource.current = "manual";
                   openedManual.current = true;
                   selectStudent(attendance);
                   setManual(true);
@@ -741,12 +723,19 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
                   result.attendanceNumber === null
                 )
                   return;
+                responseSource.current = "scan";
                 setAttendance(result.attendanceNumber);
                 openedManual.current = true;
                 setAnswers(
                   result.answers
                     .slice(0, run.document.items.length)
-                    .map((r) => (r.result === "missing" ? "" : r.result)),
+                    .map((r) =>
+                      r.result === "missing"
+                        ? r.status === "blank"
+                          ? ""
+                          : "unreadable"
+                        : r.result,
+                    ),
                 );
                 const student = run.roster.find(
                   (s) => s.attendanceNumber === result.attendanceNumber,
@@ -793,18 +782,23 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
                         aria-label={`Baris ${index + 1}`}
                         className={field}
                         value={answer}
-                        required
                         disabled={busy || !canMutate}
                         onChange={(e) => {
                           setAnswerDirty(true);
                           setAnswers(
                             answers.map((a, i) =>
-                              i === index ? (e.target.value as CardAnswer) : a,
+                              i === index
+                                ? (e.target.value as
+                                    CardAnswer | "" | "unreadable")
+                                : a,
                             ),
                           );
                         }}
                       >
-                        <option value="">Belum diisi / belum terbaca</option>
+                        <option value="">Kosong</option>
+                        <option value="unreadable">
+                          Tidak terbaca / tanda ganda
+                        </option>
                         {(["A", "B", "C", "D", "?"] as const).map((c) => (
                           <option key={c} value={c}>
                             {c === "?" ? "? / Belum tahu" : c}
@@ -862,7 +856,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         </section>
       )}
       <div className="flex flex-wrap gap-3">
-        {(run.status === "active" || closing) && (
+        {!run.parentLessonId && (run.status === "active" || closing) && (
           <Button
             variant="outline"
             disabled={!canMutate || busy || closing}
@@ -887,7 +881,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         run.position === run.document.items.length - 1 && (
           <p className="text-sm text-muted-foreground">
             Ini soal terakhir.{" "}
-            {run.mode === "assessment"
+            {run.responseMethod === "cards"
               ? "Catat jawaban siswa, lalu pilih Akhiri sesi untuk melihat hasil."
               : "Pilih Akhiri sesi saat kegiatan belajar selesai."}
           </p>

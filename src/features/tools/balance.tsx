@@ -1,4 +1,5 @@
 "use client";
+import { useRemoteToolCheck } from "./remote-check-context";
 import { useReducer, useRef, useState, type PointerEvent } from "react";
 import {
   initialBalance,
@@ -75,6 +76,7 @@ export function Balance({
   initial?: BalanceState;
   onRun?: (model: ToolModel) => boolean;
 }) {
+  const remoteCheck = useRemoteToolCheck();
   const [state, dispatch] = useReducer(
     (s: BalanceState, action: BalanceAction) => reduceBalance(s, action, task),
     initial ?? initialBalance(task),
@@ -302,6 +304,10 @@ export function Balance({
         <Button
           size="board"
           onClick={() => {
+            if (remoteCheck) {
+              remoteCheck({ kind: "balance", state });
+              return;
+            }
             const checked = checkBalance(state, task),
               matches =
                 onRun?.({ kind: "balance", state }) ?? checked.modelMatches;
@@ -315,7 +321,7 @@ export function Balance({
             );
           }}
         >
-          Jalankan
+          {remoteCheck ? "Periksa jawaban" : "Jalankan"}
         </Button>
       </div>
       <p role="status" className="min-h-14 text-[40px] text-primary">

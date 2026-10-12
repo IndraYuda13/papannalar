@@ -1,4 +1,5 @@
 "use client";
+import { useRemoteToolCheck } from "./remote-check-context";
 import { useReducer, useRef, useState, type PointerEvent } from "react";
 import {
   initialAlgebra,
@@ -30,6 +31,7 @@ export function AlgebraTiles({
   initial?: AlgebraState;
   onRun?: (model: ToolModel) => boolean;
 }) {
+  const remoteCheck = useRemoteToolCheck();
   const [state, dispatch] = useReducer(
     reduceAlgebra,
     initial ?? initialAlgebra(),
@@ -241,6 +243,10 @@ export function AlgebraTiles({
         <Button
           size="board"
           onClick={() => {
+            if (remoteCheck) {
+              remoteCheck({ kind: "algebra", state });
+              return;
+            }
             const checked = checkAlgebra(state, task);
             const matches =
               onRun?.({ kind: "algebra", state }) ?? checked.modelMatches;
@@ -252,7 +258,7 @@ export function AlgebraTiles({
             );
           }}
         >
-          Jalankan
+          {remoteCheck ? "Periksa jawaban" : "Jalankan"}
         </Button>
       </div>
       <p role="status" className="min-h-14 text-[40px] text-primary">

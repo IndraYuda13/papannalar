@@ -1,4 +1,5 @@
 "use client";
+import { useRemoteToolCheck } from "./remote-check-context";
 import {
   useEffect,
   useReducer,
@@ -36,6 +37,7 @@ export function NumberLine({
     orientation: defaultVertical ? "vertical" : "horizontal",
   };
   const vertical = task.orientation === "vertical";
+  const remoteCheck = useRemoteToolCheck();
   const [state, dispatch] = useReducer(
     (
       s: ReturnType<typeof initialNumberLine>,
@@ -404,16 +406,20 @@ export function NumberLine({
         </Button>
         <Button
           size="board"
-          onClick={() =>
+          onClick={() => {
+            if (remoteCheck) {
+              remoteCheck({ kind: "number-line", state });
+              return;
+            }
             setNotice(
               (onRun?.({ kind: "number-line", state }) ??
                 checkNumberLine(state, task).modelMatches)
                 ? "Model sudah sesuai. Ceritakan arah lompatanmu."
                 : "Coba periksa titik awal dan arah setiap lompatan.",
-            )
-          }
+            );
+          }}
         >
-          Jalankan
+          {remoteCheck ? "Periksa jawaban" : "Jalankan"}
         </Button>
         <Button
           size="board"

@@ -10,13 +10,18 @@ import { confirmAction } from "@/ui/components/confirm";
 import {
   CHOICES,
   collectionDocumentSchema,
-  collectionSchema,
+  collectionV2Schema,
   libraryItemSchema,
   publicLibraryItem,
   type DraftDocument,
   type Collection,
 } from "@/contracts/library";
 import { field, panel, libraryCall } from "./client";
+import { libraryV2Call } from "@/local/learning-client";
+import { MappingFields } from "./mapping-fields";
+import { featureCache, removeFeatureCache } from "./v2-cache";
+import { collectionMappingSchema } from "@/contracts/learning-evidence";
+import type { CollectionMapping } from "@/contracts/learning-evidence";
 import { LibraryItemView } from "./item-view";
 import { defaultTool, ToolFields, TOOL_LABELS } from "./tool-fields";
 import { InteractiveHelp } from "./interactive-help";
@@ -179,8 +184,8 @@ function CollectionEditor({
   initial,
   assessmentSource,
 }: {
-  initial?: Collection;
-  assessmentSource?: Collection;
+  initial?: Collection & { mapping: CollectionMapping };
+  assessmentSource?: Collection & { mapping: CollectionMapping };
 }) {
   const { refresh, scope, canMutate } = useTeacher(),
     router = useRouter();
@@ -218,6 +223,9 @@ function CollectionEditor({
       index: number;
       item: DraftDocument["items"][number];
     }>();
+  const [mapping, setMapping] = useState<CollectionMapping>(
+    initial?.mapping ?? { default: null, overrides: [] },
+  );
   const readonly = source === "system";
   const [dirty, setDirty] = useState(false);
   const [draftState, setDraftState] = useState("");
@@ -233,6 +241,15 @@ function CollectionEditor({
   useEffect(() => {
     if (initial?.source === "system") return;
     let active = true;
+    void featureCache(
+      scope,
+      `mappingDraft:${draftKey}`,
+      collectionMappingSchema,
+    )
+      .then((value) => {
+        if (value && active && !edited.current) setMapping(value);
+      })
+      .catch(() => undefined);
     void libraryCache(scope, "editorDraft", draftKey)
       .then((draft) => {
         if (!draft || !active || edited.current) return;
@@ -361,14 +378,29 @@ function CollectionEditor({
     }
   }
   async function persist(ready: boolean) {
-    const response = collectionSchema.parse(
-      await libraryCall({ action: "save", id, revision, ready, document }),
+    const response = collectionV2Schema.parse(
+      await libraryV2Call({
+        action: "save",
+        id,
+        revision,
+        ready,
+        document,
+        mapping: {
+          ...mapping,
+          overrides: mapping.overrides.filter((o) =>
+            document.items.some((i) => i.id === o.itemId),
+          ),
+        },
+      }),
     );
     setRevision(response.revision);
     setVersion(response.version);
     setSaved(ready);
     await writes.current;
     await removeLibraryCache(scope, "editorDraft", draftKey).catch(
+      () => undefined,
+    );
+    await removeFeatureCache(scope, `mappingDraft:${draftKey}`).catch(
       () => undefined,
     );
     setDirty(false);
@@ -491,6 +523,30 @@ function CollectionEditor({
         />
         {errorAt("title")}
       </label>
+      <MappingFields
+        value={mapping}
+        items={document.items}
+        disabled={readonly || busy || !canMutate}
+        onChange={(next) => {
+          edited.current = true;
+          setMapping(next);
+          setDirty(true);
+          setSaved(false);
+          setDraftState(
+            "Pemetaan belum disimpan. Pilih Simpan sebelum keluar.",
+          );
+          void featureCache(
+            scope,
+            `mappingDraft:${draftKey}`,
+            collectionMappingSchema,
+            next,
+          ).catch(() =>
+            setMessage(
+              "Pemetaan belum tersimpan di perangkat. Simpan sebelum keluar.",
+            ),
+          );
+        }}
+      />
       {readonly ? (
         <p className="font-semibold">
           Jenis kumpulan

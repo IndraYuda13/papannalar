@@ -1,4 +1,5 @@
 "use client";
+import { useRemoteToolCheck } from "./remote-check-context";
 import { useReducer, useState, useRef } from "react";
 import {
   initialRatio,
@@ -31,6 +32,7 @@ export function RatioTable({
   initial?: RatioState;
   onRun?: (model: ToolModel) => boolean;
 }) {
+  const remoteCheck = useRemoteToolCheck();
   const [state, dispatch] = useReducer(
     (s: ReturnType<typeof initialRatio>, action: RatioAction) =>
       reduceRatio(s, action, task),
@@ -208,6 +210,10 @@ export function RatioTable({
         <Button
           size="board"
           onClick={() => {
+            if (remoteCheck) {
+              remoteCheck({ kind: "ratio", state });
+              return;
+            }
             const checked = checkRatio(state, task);
             const matches =
               onRun?.({ kind: "ratio", state }) ?? checked.modelMatches;
@@ -219,7 +225,7 @@ export function RatioTable({
             );
           }}
         >
-          Jalankan
+          {remoteCheck ? "Periksa jawaban" : "Jalankan"}
         </Button>
       </div>
       <p role="status" className="min-h-14 text-[40px] text-primary">

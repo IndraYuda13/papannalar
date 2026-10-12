@@ -1,11 +1,12 @@
 "use client";
 import { useRef, useState } from "react";
+import { libraryV2Call } from "@/local/learning-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTeacher } from "@/features/guru/app-context";
-import { runSchema, publicLibraryItem } from "@/contracts/library";
+import { runV2Schema, publicLibraryItem } from "@/contracts/library";
 import { Button } from "@/ui/components/button";
-import { field, panel, libraryCall, jakartaDate } from "./client";
+import { field, panel, jakartaDate } from "./client";
 import { PageHeader, StateNotice, WorkflowSteps } from "@/ui/components/studio";
 import { LibraryItemView } from "./item-view";
 export function StartLesson({
@@ -24,6 +25,9 @@ export function StartLesson({
     [date, setDate] = useState(jakartaDate()),
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState(""),
+    [responseMethod, setResponseMethod] = useState<"none" | "cards">(
+      mode === "assessment" ? "cards" : "none",
+    ),
     [preview, setPreview] = useState(false),
     [previewIndex, setPreviewIndex] = useState(0);
   const lock = useRef(false),
@@ -45,7 +49,10 @@ export function StartLesson({
         r.classId === cls &&
         r.collectionId === collection &&
         r.version === selected?.version &&
-        r.mode === mode,
+        r.mode === mode &&
+        r.responseMethod ===
+          (selected?.document.kind === "cards" ? responseMethod : "none") &&
+        !r.parentLessonId,
     );
   async function start() {
     if (lock.current || !selected || !cls || !canMutate) return;
@@ -57,8 +64,8 @@ export function StartLesson({
         router.push(`/guru/sesi/${active.id}`);
         return;
       }
-      const value = runSchema.parse(
-        await libraryCall({
+      const value = runV2Schema.parse(
+        await libraryV2Call({
           action: "start",
           id: runId.current,
           classId: cls,
@@ -66,6 +73,8 @@ export function StartLesson({
           version: selected.version,
           date,
           mode,
+          responseMethod:
+            selected.document.kind === "cards" ? responseMethod : "none",
         }),
       );
       await refresh().catch(() => undefined);
@@ -110,7 +119,10 @@ export function StartLesson({
             <select
               className={field}
               value={cls}
-              onChange={(e) => setClass(e.target.value)}
+              onChange={(e) => {
+                runId.current = crypto.randomUUID();
+                setClass(e.target.value);
+              }}
             >
               {classes.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -143,6 +155,7 @@ export function StartLesson({
               className={field}
               value={collection}
               onChange={(e) => {
+                runId.current = crypto.randomUUID();
                 setCollection(e.target.value);
                 setPreview(false);
                 setPreviewIndex(0);
@@ -165,6 +178,35 @@ export function StartLesson({
               ))}
             </select>
           </label>
+          {mode === "teach" && selected?.document.kind === "cards" && (
+            <fieldset className="space-y-2">
+              <legend className="font-semibold">Bagaimana soal dipakai?</legend>
+              {(["none", "cards"] as const).map((method) => (
+                <label
+                  key={method}
+                  className="flex min-h-12 items-center gap-3"
+                >
+                  <input
+                    type="radio"
+                    name="responseMethod"
+                    checked={responseMethod === method}
+                    onChange={() => {
+                      runId.current = crypto.randomUUID();
+                      setResponseMethod(method);
+                    }}
+                  />
+                  {method === "none"
+                    ? "Bahas soal saja"
+                    : "Kumpulkan jawaban dengan kartu"}
+                </label>
+              ))}
+              <p className="text-sm text-muted-foreground">
+                {responseMethod === "none"
+                  ? "Tanpa pemindaian atau nilai individual. Ringkasan kegiatan masuk Hasil."
+                  : "Jawaban dicatat per siswa. Siapkan lembar soal dan kartu jawaban."}
+              </p>
+            </fieldset>
+          )}
           {mode === "assessment" && (
             <p className="text-sm text-muted-foreground">
               Kartu Nalar adalah lembar jawaban siswa. Anda bisa mengunduh dan

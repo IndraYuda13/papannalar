@@ -10,7 +10,9 @@ import {
 import { z } from "zod";
 import { teacherIdentitySchema } from "@/contracts/auth";
 import { classListSchema, type ClassDto } from "@/contracts/classes";
-import { libraryStateSchema } from "@/contracts/library";
+import { libraryStateV2Schema } from "@/contracts/library";
+import { featureCache } from "@/features/library/v2-cache";
+import { libraryV2Call, syncGroupCardResponses } from "@/local/learning-client";
 import {
   hasPendingLogout,
   readLocalAccess,
@@ -25,7 +27,7 @@ import { StateNotice, StatusChip } from "@/ui/components/studio";
 import { Button } from "@/ui/components/button";
 type Data = {
   scope: LocalScope;
-  state: z.infer<typeof libraryStateSchema>;
+  state: z.infer<typeof libraryStateV2Schema>;
   classes: ClassDto[];
   offline: boolean;
   canMutate: boolean;
@@ -49,7 +51,7 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
         if (!grant) throw new Error();
         for (const mode of ["pilot", "demo"] as const) {
           const scope = { ownerId: grant.id, mode },
-            state = await libraryCache(scope, "state", "index"),
+            state = await featureCache(scope, "state", libraryStateV2Schema),
             classes = await libraryCache(scope, "classes", "index");
           if (state && classes) {
             setData({ scope, state, classes: classes.classes, offline: true });
@@ -67,8 +69,8 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
       if (!res.ok) throw new Error();
       const identity = teacherIdentitySchema.parse(await res.json());
       await rememberLocalAccess(identity.id);
-      const state = libraryStateSchema.parse(
-          await libraryCall({ action: "list" }),
+      const state = libraryStateV2Schema.parse(
+          await libraryV2Call({ action: "list" }),
         ),
         scope: LocalScope = {
           ownerId: identity.id,
@@ -81,7 +83,7 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
       const classes = classListSchema.parse(await classResponse.json());
       setData({ scope, state, classes: classes.classes, offline: false });
       try {
-        await libraryCache(scope, "state", "index", state);
+        await featureCache(scope, "state", libraryStateV2Schema, state);
         await libraryCache(scope, "classes", "index", classes);
       } catch {
         setMessage("Penyimpanan offline belum tersedia di perangkat ini.");
@@ -131,6 +133,14 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
             return;
           }
           if (!stopped) setConflict(false);
+        }
+        const groupCount = await syncGroupCardResponses({
+          ownerId: owner!,
+          mode: mode!,
+        });
+        if (groupCount) {
+          window.dispatchEvent(new Event("pn-cards-synced"));
+          await refresh();
         }
         const count = await syncLibraryResponses(
           { ownerId: owner!, mode: mode! },

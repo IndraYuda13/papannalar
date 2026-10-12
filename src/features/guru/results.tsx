@@ -1,76 +1,92 @@
 "use client";
-import { readLibraryDetail } from "@/features/library/read-detail";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useTeacher } from "./app-context";
-import {
-  runDetailSchema,
-  type LibraryResponse,
-  type LibraryRun,
-} from "@/contracts/library";
-// `panel` is still used by ResultPage (/guru/hasil/[id]), which is D2 scope.
-import { field, panel } from "@/features/library/client";
+import { readLearningResult, readResultsIndex } from "@/local/learning-client";
+import type { ResultDetail, ResultIndexEntry } from "@/contracts/results-index";
+import type { RunDetail } from "@/contracts/library";
 import { createNameRepository } from "@/local/names";
-import { Button } from "@/ui/components/button";
+import { field } from "@/features/library/client";
+import { pendingCardResponses } from "@/features/library/pending-card-responses";
 import { mathText } from "@/features/library/item-view";
+import { Button } from "@/ui/components/button";
 import { PageHeader, Section, StateNotice } from "@/ui/components/studio";
-import { FileCheck2 } from "lucide-react";
 
+const templateLabel = {
+  activity: "Ringkasan kegiatan",
+  cards: "Jawaban kartu",
+  groups: "Kegiatan kelompok",
+  diagnostic: "Hasil diagnostik",
+};
 export function AssessmentsPage() {
-  const { state, classes } = useTeacher(),
-    [tab, setTab] = useState<"sessions" | "results">("sessions"),
+  const { classes, scope } = useTeacher();
+  const [entries, setEntries] = useState<ResultIndexEntry[]>([]),
+    [cursor, setCursor] = useState<string | null>(null),
     [cls, setClass] = useState(""),
-    [collection, setCollection] = useState(""),
     [from, setFrom] = useState(""),
-    [to, setTo] = useState("");
-  const runs = state.runs.filter(
-    (r) =>
-      r.mode === "assessment" &&
-      (!cls || r.classId === cls) &&
-      (!collection || r.collectionId === collection) &&
-      (!from || r.date >= from) &&
-      (!to || r.date <= to) &&
-      (tab === "results" || r.status === "active"),
+    [to, setTo] = useState(""),
+    [busy, setBusy] = useState(true),
+    [message, setMessage] = useState(""),
+    [failed, setFailed] = useState(false);
+  const load = useCallback(
+    async (next?: string) => {
+      setBusy(true);
+      setFailed(false);
+      setMessage("");
+      try {
+        const result = await readResultsIndex(scope, {
+          ...(cls ? { classId: cls } : {}),
+          ...(from ? { from } : {}),
+          ...(to ? { to } : {}),
+          ...(next ? { cursor: next } : {}),
+        });
+        setEntries((old) =>
+          next
+            ? [
+                ...old,
+                ...result.entries.filter(
+                  (e) => !old.some((o) => o.key === e.key),
+                ),
+              ]
+            : result.entries,
+        );
+        setCursor(result.nextCursor);
+        if (result.cached)
+          setMessage(
+            "Sambungan terputus. Menampilkan data terakhir yang tersimpan.",
+          );
+      } catch {
+        setFailed(true);
+        setMessage(
+          "Hasil belum dapat dimuat. Periksa sambungan lalu coba lagi.",
+        );
+      } finally {
+        setBusy(false);
+      }
+    },
+    [scope, cls, from, to],
   );
-  const filtered = Boolean(cls || collection || from || to);
+  useEffect(() => {
+    const timer = setTimeout(() => void load(), 0);
+    return () => clearTimeout(timer);
+  }, [load]);
   return (
     <div className="space-y-6">
       <PageHeader
         title="Hasil"
-        description="Periksa jawaban siswa dan lihat hasilnya. Nama tidak ada di sini — hanya nomor absen."
+        description="Lihat ringkasan kegiatan dan hasil jawaban kartu."
         actions={
-          <Button asChild>
+          <Button asChild variant="outline">
             <Link href="/guru/mulai?mode=assessment">Buat asesmen</Link>
           </Button>
         }
       />
-      <div
-        role="group"
-        aria-label="Asesmen dan hasil"
-        className="studio-segmented"
-      >
-        <Button
-          variant="quiet"
-          aria-pressed={tab === "sessions"}
-          onClick={() => setTab("sessions")}
-        >
-          Sesi Asesmen
-        </Button>
-        <Button
-          variant="quiet"
-          aria-pressed={tab === "results"}
-          onClick={() => setTab("results")}
-        >
-          Hasil
-        </Button>
-      </div>
-      <Section label="Cari asesmen">
-        <details className="studio-filter-panel">
-          <summary className="min-h-12 cursor-pointer content-center font-semibold text-primary">
+      <Section label="Cari kegiatan">
+        <details>
+          <summary className="min-h-12 cursor-pointer content-center font-semibold">
             Cari berdasarkan kelas atau tanggal
-            {cls || collection || from || to ? " · Filter aktif" : ""}
           </summary>
-          <div className="studio-filter grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-3">
             <label>
               Kelas
               <select
@@ -87,27 +103,10 @@ export function AssessmentsPage() {
               </select>
             </label>
             <label>
-              Kumpulan
-              <select
-                className={field}
-                value={collection}
-                onChange={(e) => setCollection(e.target.value)}
-              >
-                <option value="">Semua kumpulan</option>
-                {state.collections
-                  .filter((c) => c.document.kind === "cards")
-                  .map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.document.title}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <label>
               Dari tanggal
               <input
-                type="date"
                 className={field}
+                type="date"
                 value={from}
                 onChange={(e) => setFrom(e.target.value)}
               />
@@ -115,18 +114,18 @@ export function AssessmentsPage() {
             <label>
               Sampai tanggal
               <input
-                type="date"
                 className={field}
+                type="date"
                 value={to}
+                min={from}
                 onChange={(e) => setTo(e.target.value)}
               />
             </label>
           </div>
           <Button
-            variant="outline"
+            variant="quiet"
             onClick={() => {
               setClass("");
-              setCollection("");
               setFrom("");
               setTo("");
             }}
@@ -135,113 +134,87 @@ export function AssessmentsPage() {
           </Button>
         </details>
       </Section>
-      <Section
-        /* The sample flag is a per-list fact, so it is stated once here rather than repeated in
-           every row (§8.7, F6). */
-        label={
-          (tab === "sessions" ? "Sesi asesmen" : "Hasil asesmen") +
-          (runs.some((r) => r.synthetic) ? " · data contoh" : "")
-        }
-        ground="sheet"
-      >
-        {runs.length > 0 && (
+      <Section label="Kegiatan dan hasil" ground="sheet">
+        {busy && !entries.length ? (
+          <StateNotice kind="loading" title="Memuat hasil…" />
+        ) : failed && !entries.length ? (
+          <StateNotice
+            kind="error"
+            title={message}
+            action={<Button onClick={() => void load()}>Coba lagi</Button>}
+          />
+        ) : !entries.length ? (
+          <StateNotice
+            title={
+              cls || from || to ? "Belum ada yang cocok" : "Belum ada hasil"
+            }
+          >
+            Ringkasan muncul setelah kegiatan tersimpan. Ubah pencarian atau
+            mulai mengajar.
+          </StateNotice>
+        ) : (
           <ul className="studio-row-list">
-            {runs.map((r) => (
-              <li key={r.id}>
+            {entries.map((e) => (
+              <li key={e.key}>
                 <Link
-                  href={
-                    tab === "sessions"
-                      ? `/guru/sesi/${r.id}`
-                      : `/guru/hasil/${r.id}`
-                  }
                   className="studio-row"
-                  title={`${r.classLabel} · ${r.document.title}`}
+                  href={`/guru/hasil/${e.id}?source=${e.source}`}
                 >
-                  <span className="studio-row-icon" aria-hidden>
-                    <FileCheck2 size={22} strokeWidth={1.8} />
-                  </span>
                   <span className="studio-row-content">
                     <h2>
-                      {r.classLabel} · {r.document.title}
+                      {e.classLabel} · {e.title}
                     </h2>
                     <p>
-                      {r.date.split("-").reverse().join("/")} ·{" "}
-                      {r.status === "active" ? "Sedang berlangsung" : "Selesai"}
+                      {templateLabel[e.template]} ·{" "}
+                      {e.date.split("-").reverse().join("/")} ·{" "}
+                      {e.status === "active" ? "Berlangsung" : "Selesai"}
+                      {e.synthetic ? " · Data contoh" : ""}
                     </p>
                   </span>
-                  {/* The sample flag is a per-list fact, not per-row: repeating it in every row
-                      stole the width the title needed and said the same thing N times. It is
-                      stated once, in the section label (F6/§8.7). */}
-                  <span className="studio-row-action" data-row-action>
-                    {tab === "sessions" ? "Lanjutkan" : "Buka hasil"}
-                  </span>
+                  <span className="studio-row-action">Buka hasil</span>
                 </Link>
               </li>
             ))}
           </ul>
         )}
-        {!runs.length && (
-          <StateNotice
-            /* Three distinct empty states, because "no data yet" and "your filter matched nothing"
-               are different facts and only one of them is the teacher's to fix (§6.5). */
-            title={
-              filtered
-                ? "Belum ada yang cocok"
-                : tab === "results"
-                  ? "Belum ada hasil"
-                  : "Belum ada sesi hari ini"
-            }
-            action={
-              filtered ? (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setClass("");
-                    setCollection("");
-                    setFrom("");
-                    setTo("");
-                  }}
-                >
-                  Tampilkan semua
-                </Button>
-              ) : (
-                <Button asChild>
-                  <Link href="/guru/mulai?mode=assessment">Buat asesmen</Link>
-                </Button>
-              )
-            }
+        {cursor && (
+          <Button
+            variant="outline"
+            disabled={busy}
+            onClick={() => void load(cursor)}
           >
-            {filtered
-              ? "Coba kosongkan pencarian atau ubah tanggal."
-              : tab === "results"
-                ? "Hasil akan muncul setelah asesmen selesai diperiksa."
-                : "Pilih kelas dan soal, lalu mulai cek pemahaman."}
-          </StateNotice>
+            Muat kegiatan berikutnya
+          </Button>
         )}
       </Section>
+      <p role="status">{message}</p>
+      {failed && entries.length > 0 && (
+        <Button variant="outline" onClick={() => void load()}>
+          Coba lagi
+        </Button>
+      )}
     </div>
   );
 }
-export function ResultPage({ id }: { id: string }) {
+export function ResultPage({
+  id,
+  source = "library",
+}: {
+  id: string;
+  source?: ResultDetail["source"];
+}) {
   const { scope } = useTeacher(),
-    [detail, setDetail] = useState<{
-      run: LibraryRun;
-      responses: LibraryResponse[];
-    }>(),
+    [result, setResult] = useState<ResultDetail>(),
     [names, setNames] = useState<Record<string, string>>({}),
-    [cached, setCached] = useState(false),
-    [selected, setSelected] = useState(""),
     [message, setMessage] = useState("");
   const load = useCallback(async () => {
+    setMessage("");
     try {
-      const loaded = await readLibraryDetail(scope, id);
-      setDetail(loaded.detail);
-      setCached(loaded.cached);
-      setMessage(
-        loaded.cached
-          ? "Sambungan terganggu. Menampilkan jawaban yang tersimpan di perangkat ini."
-          : "",
-      );
+      setResult(await readLearningResult(scope, { source, id }));
+      if (!navigator.onLine)
+        setMessage(
+          "Sambungan terputus. Menampilkan data terakhir yang tersimpan.",
+        );
       const repo = createNameRepository(scope);
       try {
         setNames(
@@ -254,25 +227,15 @@ export function ResultPage({ id }: { id: string }) {
       }
     } catch {
       setMessage(
-        "Hasil belum dapat dibuka. Sambungkan internet untuk memuatnya.",
+        "Hasil belum dapat dibuka. Sambungkan internet lalu coba lagi.",
       );
     }
-  }, [id, scope]);
+  }, [scope, id, source]);
   useEffect(() => {
-    const t = setTimeout(() => void load(), 0);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => void load(), 0);
+    return () => clearTimeout(timer);
   }, [load]);
-  useEffect(() => {
-    const synced = (event: Event) => {
-      const value = runDetailSchema.safeParse(
-        (event as CustomEvent<unknown>).detail,
-      );
-      if (value.success && value.data.run.id === id) setDetail(value.data);
-    };
-    window.addEventListener("pn-library-synced", synced);
-    return () => window.removeEventListener("pn-library-synced", synced);
-  }, [id]);
-  if (!detail)
+  if (!result)
     return (
       <StateNotice
         kind={message ? "error" : "loading"}
@@ -284,205 +247,288 @@ export function ResultPage({ id }: { id: string }) {
         }
       />
     );
-  const { run, responses } = detail,
-    student = run.roster.find((s) => s.id === selected),
-    answer = responses.find((r) => r.studentId === selected);
-  // F5/V8: one hero metric, then supporting detail. The old block was three equal-weight
-  // tiles, so the decisive comprehension signal competed with two intake counters.
-  const graded = responses.filter((r) => r.status === "received");
-  const misses = run.document.items
-    .map((q, index) => ({
-      question: q,
-      index,
-      missed:
-        q.kind === "card"
-          ? graded.filter((r) => r.answers[index] !== q.key).length
-          : 0,
-    }))
-    .filter((entry) => entry.question.kind === "card")
-    .sort((a, b) => b.missed - a.missed);
-  const hardest = graded.length ? misses[0] : undefined;
   return (
     <div className="space-y-5">
       <Link
-        href="/guru/asesmen"
         className="inline-flex min-h-12 items-center text-primary"
+        href="/guru/asesmen"
       >
-        ← Asesmen & Hasil
+        Kembali ke Hasil
       </Link>
-      {/* Friction 9 / A14: the results sheet is the teacher's own paper summary, so it gets a
-          primary action of its own. `Bahas bersama` is that action; the print path is its
-          secondary. Names never reach paper — attendance numbers only. */}
-      <div className="studio-print-actions" data-print-skip>
-        <Button variant="outline" onClick={() => window.print()}>
-          Cetak ringkasan
-        </Button>
-        <span className="studio-print-note">
-          Cetak ukuran asli 100%. Hanya nomor absen yang tercetak.
-        </span>
-      </div>
-      <PageHeader
-        title={`Hasil · Kelas ${run.classLabel}`}
-        description={`${run.document.title} · ${run.date.split("-").reverse().join("/")}`}
-      />
-      <p className="studio-print-head">
-        PapanNalar · {run.classLabel} ·{" "}
-        {run.date.split("-").reverse().join("/")}
-      </p>
-      {hardest && (
-        <Section label="Soal yang paling sering salah">
-          <p className="studio-comprehension-question">
-            {mathText(hardest.question.prompt)}
-          </p>
-          <p className="studio-comprehension-miss">
-            {hardest.missed} dari {graded.length} lembar diperiksa menjawab
-            belum tepat
-          </p>
-        </Section>
-      )}
-      <p className="studio-intake-line">
-        {responses.length}/{run.roster.length} lembar masuk ·{" "}
-        {responses.filter((r) => r.status === "review").length} perlu dicek ·{" "}
-        {run.document.items.length} soal · Versi {run.version}
-      </p>
-      {responses.some((r) => r.status === "received") && (
-        <details className={panel}>
-          <summary className="min-h-12 cursor-pointer content-center font-bold">
-            Soal untuk dibahas bersama
-          </summary>
-          <p className="text-sm">
-            Hitungan dari lembar yang sudah diperiksa. Pilih soal yang perlu
-            dijelaskan kembali kepada kelas.
-          </p>
-          <ol className="space-y-3">
-            {run.document.items.map((q, index) =>
-              q.kind === "card" ? (
-                <li key={q.id}>
-                  <b>
-                    Soal {index + 1}: {mathText(q.prompt)}
-                  </b>
-                  <p>
-                    {
-                      responses.filter(
-                        (r) =>
-                          r.status === "received" && r.answers[index] !== q.key,
-                      ).length
-                    }{" "}
-                    jawaban belum tepat dari{" "}
-                    {responses.filter((r) => r.status === "received").length}{" "}
-                    lembar diperiksa.
-                  </p>
-                  {q.explanation && (
-                    <p className="text-muted-foreground">{q.explanation}</p>
-                  )}
-                </li>
-              ) : null,
-            )}
-          </ol>
-        </details>
-      )}
-      {run.synthetic && (
-        <p className="text-sm">Hasil contoh, bukan data siswa nyata.</p>
-      )}
-      <div className="practice-next-action">
-        <p>
-          {responses.length < run.roster.length
-            ? "Masih ada siswa yang belum mengumpulkan jawaban. Anda bisa melengkapinya sekarang atau nanti."
-            : "Semua lembar sudah masuk. Pilih nomor absen untuk melihat jawaban siswa."}
-        </p>
-        <Button asChild variant="outline">
-          <Link href={`/guru/sesi/${id}`}>Pindai atau koreksi lembar</Link>
-        </Button>
-      </div>
-      <section className={panel}>
-        <h2 className="flex items-center gap-2 text-xl font-bold">
-          <FileCheck2 size={24} className="text-primary" aria-hidden />
-          {responses.length}/{run.roster.length} lembar masuk
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {cached ? "Salinan tersimpan di perangkat" : "Hasil tersimpan"} ·
-          Nomor absen saat asesmen
-        </p>
-        <ul className="divide-y">
-          {run.roster.map((s) => {
-            const r = responses.find((a) => a.studentId === s.id);
-            return (
-              <li key={s.id}>
-                <button
-                  className="flex min-h-16 w-full items-center justify-between gap-2 text-left"
-                  aria-expanded={selected === s.id}
-                  onClick={() => setSelected(selected === s.id ? "" : s.id)}
-                >
-                  <span>
-                    <b className="mr-2">
-                      {String(s.attendanceNumber).padStart(2, "0")}
-                    </b>
-                    {names[s.id] ?? `Absen ${s.attendanceNumber}`}
-                  </span>
-                  <span className="text-right text-sm">
-                    {r
-                      ? `${r.status === "review" ? "Perlu dicek" : "Sudah masuk"} · ${r.correct}/${run.document.items.length}`
-                      : "Belum masuk"}
-                  </span>
-                </button>
-                {selected === s.id && student && (
-                  <section className={panel} aria-label="Rincian jawaban">
-                    <h2 className="text-xl font-bold">
-                      Absen {student.attendanceNumber} · Rincian jawaban
+      {result.source === "library" ? (
+        <LibraryResult detail={result.detail} names={names} />
+      ) : result.source === "group_lesson" ? (
+        <>
+          <PageHeader
+            title={`Hasil · ${result.lesson.classLabel}`}
+            description={`Kegiatan kelompok · ${result.lesson.date} · ${result.lesson.status === "closed" ? "Selesai" : "Berlangsung"}`}
+          />
+          <Section label="Ringkasan kegiatan">
+            <p>
+              Jawaban bersama di layar bukan nilai tiap siswa. Kelompok
+              tersimpan sesuai saat kegiatan dimulai.
+            </p>
+            <ul className="studio-row-list">
+              {result.lesson.groups.map((g) => {
+                const a = result.lesson.assignments.find(
+                    (a) => a.groupId === g.id,
+                  ),
+                  run = result.runs.find((r) => r.run.id === a?.runId);
+                return (
+                  <li key={g.id} className="py-4">
+                    <h2 className="font-bold">
+                      {g.label} · {g.studentIds.length} siswa
                     </h2>
-                    {answer ? (
-                      <>
-                        <p>
-                          Revisi {answer.revision} · {answer.correct}/
-                          {run.document.items.length} benar
-                        </p>
-                        <ol className="space-y-4">
-                          {run.document.items.map((q, i) =>
-                            q.kind === "card" ? (
-                              <li
-                                key={q.id}
-                                /* T2-03: three distinct visual states, and a blank row is never
-                                   presented as `Belum tahu`. The stored schema only carries a
-                                   consumed answer or `?`, so `kosong` is reserved for the row
-                                   the scanner rejected; a response flagged for review is the
-                                   unreadable/double-marked case and says so. */
-                                data-scan-state={
-                                  answer.status === "review"
-                                    ? "perlu-dicek"
-                                    : "terbaca"
-                                }
-                              >
-                                <b>
-                                  {i + 1}. {mathText(q.prompt)}
-                                </b>
-                                <p>
-                                  Jawaban:{" "}
-                                  {answer.answers[i] === "?"
-                                    ? "? / Belum tahu"
-                                    : answer.answers[i]}{" "}
-                                  · Kunci: {q.key}
-                                </p>
-                                {q.explanation && (
-                                  <p className="text-muted-foreground">
-                                    {q.explanation}
-                                  </p>
-                                )}
-                              </li>
-                            ) : null,
-                          )}
-                        </ol>
-                      </>
-                    ) : (
-                      <p>Belum ada lembar untuk siswa ini.</p>
-                    )}
-                  </section>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+                    <p>
+                      {a
+                        ? {
+                            teacher: "Dibimbing guru",
+                            board: "Menjawab di layar",
+                            cards: "Mengerjakan soal dengan kartu",
+                          }[a.method]
+                        : "Belum ditetapkan"}{" "}
+                      · {run?.run.document.title} ·{" "}
+                      {a?.status === "completed"
+                        ? "Tugas selesai"
+                        : a?.status === "stopped"
+                          ? "Dihentikan"
+                          : a?.status === "active"
+                            ? "Berlangsung"
+                            : "Disiapkan"}
+                    </p>
+                    <details>
+                      <summary className="min-h-12 cursor-pointer content-center">
+                        Lihat anggota
+                      </summary>
+                      <ul>
+                        {g.studentIds.map((id) => {
+                          const s = result.lesson.presence.find(
+                            (s) => s.id === id,
+                          );
+                          return (
+                            <li key={id}>
+                              {s?.attendanceNumber}.{" "}
+                              <span data-print-skip>
+                                {names[id] ?? `Siswa ${s?.attendanceNumber}`}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </details>
+                  </li>
+                );
+              })}
+            </ul>
+            <Button asChild variant="outline">
+              <Link
+                href={`/guru/latihan?lesson=${result.lesson.id}&class=${result.lesson.classId}`}
+              >
+                {result.lesson.status === "closed"
+                  ? "Buka kegiatan tersimpan"
+                  : "Lanjutkan kegiatan"}
+              </Link>
+            </Button>
+          </Section>
+          {result.runs
+            .filter((r) => r.run.responseMethod === "cards")
+            .map((r) => (
+              <LibraryResult key={r.run.id} detail={r} names={names} embedded />
+            ))}
+          <p>
+            Jawaban kartu yang belum masuk dapat dilengkapi nanti. Kartu
+            terlambat tidak mengaktifkan layar lagi.
+          </p>
+        </>
+      ) : (
+        <>
+          <PageHeader
+            title="Hasil diagnostik"
+            description="Riwayat asesmen tersimpan"
+          />
+          <Section label="Jawaban individual">
+            <p>
+              {result.detail.roster.length} siswa · {result.detail.cards.length}{" "}
+              kartu tersimpan
+            </p>
+            <ul className="studio-row-list">
+              {result.detail.cards.map((c) => (
+                <li className="py-3" key={`${c.sessionId}:${c.studentId}`}>
+                  <p>
+                    Absen{" "}
+                    {
+                      result.detail.roster.find((s) => s.id === c.studentId)
+                        ?.attendanceNumber
+                    }{" "}
+                    · Revisi {c.revision}
+                  </p>
+                  <p>{c.choices.join(" · ")}</p>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        </>
+      )}
       <p role="status">{message}</p>
     </div>
+  );
+}
+function LibraryResult({
+  detail,
+  names,
+  embedded = false,
+}: {
+  detail: RunDetail;
+  names: Record<string, string>;
+  embedded?: boolean;
+}) {
+  const { run, responses } = detail;
+  const { scope } = useTeacher();
+  const [pendingCount, setPendingCount] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    void pendingCardResponses(scope, run.id)
+      .then((rows) => {
+        if (!cancelled) setPendingCount(rows.length);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [scope, run.id]);
+  const [selected, setSelected] = useState("");
+  const missing =
+    run.roster.length - responses.filter((r) => r.status === "received").length;
+  return (
+    <>
+      {!embedded && (
+        <PageHeader
+          title={`Hasil · ${run.classLabel}`}
+          description={`${run.document.title} · ${run.date} · Versi ${run.version}`}
+        />
+      )}
+      <Section
+        label={
+          run.responseMethod === "none"
+            ? "Ringkasan kegiatan"
+            : `Jawaban kartu · ${run.document.title}`
+        }
+      >
+        <p>
+          {run.document.items.length} soal · Versi {run.version} ·{" "}
+          {run.status === "closed"
+            ? "Kegiatan selesai"
+            : "Kegiatan berlangsung"}
+        </p>
+        {run.responseMethod === "none" ? (
+          <>
+            <p>
+              Bahas soal tanpa pengumpulan kartu. Tidak ada nilai individual
+              dari kegiatan ini.
+            </p>
+            <ol className="space-y-3 py-3">
+              {run.document.items.map((q, i) => (
+                <li key={q.id}>
+                  {i + 1}. {mathText(q.prompt)}
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : (
+          <>
+            {pendingCount > 0 && (
+              <p role="status">
+                {pendingCount} jawaban menunggu pengiriman dari perangkat ini,
+                belum menjadi hasil tersimpan.
+              </p>
+            )}
+            <p>
+              {responses.filter((r) => r.status === "received").length}/
+              {run.roster.length} kartu diperiksa ·{" "}
+              {responses.filter((r) => r.status === "review").length} perlu
+              dicek
+            </p>
+            {missing > 0 && (
+              <p>
+                {missing} kartu belum diperiksa. Jawaban masih bisa dilengkapi.
+              </p>
+            )}
+            <p className="text-sm text-muted-foreground">
+              Hasil {run.document.items.length} soal pada kumpulan ini, bukan
+              tingkat kemampuan. Hanya jawaban diterima yang menjadi hasil
+              individual.
+            </p>
+            <ul className="studio-row-list">
+              {run.roster.map((s) => {
+                const r = responses.find((r) => r.studentId === s.id);
+                return (
+                  <li key={s.id}>
+                    <button
+                      className="flex min-h-16 w-full items-center justify-between gap-3 text-left"
+                      aria-expanded={selected === s.id}
+                      onClick={() => setSelected(selected === s.id ? "" : s.id)}
+                    >
+                      <span className="min-w-0 break-words">
+                        <b>{s.attendanceNumber}.</b>{" "}
+                        <span data-print-skip>
+                          {names[s.id] ?? `Siswa ${s.attendanceNumber}`}
+                        </span>
+                      </span>
+                      <span>
+                        {!r
+                          ? "Belum masuk"
+                          : r.status === "review"
+                            ? "Perlu dicek"
+                            : `${r.correct}/${run.document.items.length} benar`}
+                      </span>
+                    </button>
+                    {selected === s.id && (
+                      <div className="space-y-3 pb-4">
+                        {r ? (
+                          <>
+                            <p>
+                              Revisi {r.revision} ·{" "}
+                              {r.status === "review"
+                                ? "Belum menjadi hasil valid"
+                                : "Jawaban diterima"}
+                            </p>
+                            <ol className="space-y-3">
+                              {run.document.items.map((q, i) => (
+                                <li key={q.id}>
+                                  <p>
+                                    {i + 1}. {mathText(q.prompt)}
+                                  </p>
+                                  <p>
+                                    Jawaban:{" "}
+                                    {r.answerStates[i] === "blank"
+                                      ? "Kosong"
+                                      : r.answerStates[i] === "unreadable"
+                                        ? "Tidak terbaca"
+                                        : r.answers[i] === "?"
+                                          ? "? / Belum tahu"
+                                          : r.answers[i]}
+                                  </p>
+                                </li>
+                              ))}
+                            </ol>
+                          </>
+                        ) : (
+                          <p>Belum ada kartu untuk siswa ini.</p>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+            <Button asChild variant="outline">
+              <Link href={`/guru/sesi/${run.id}`}>
+                Pindai atau koreksi lembar
+              </Link>
+            </Button>
+          </>
+        )}
+      </Section>
+    </>
   );
 }

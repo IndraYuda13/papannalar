@@ -19,6 +19,7 @@ import { pairingCall, watchPresentation } from "@/features/classroom/transport";
 import type { PresentationConnection } from "@/features/classroom/connection-transport";
 import { PairingQrCode } from "@/features/classroom/pairing-scanner";
 import { LibraryBoard } from "@/features/library/board";
+import { GroupBoard } from "@/features/library/group-board";
 import { BoardContent, BoardCloseCard } from "./board-content";
 import { Button } from "@/ui/components/button";
 import { Sheet } from "@/ui/components/sheet";
@@ -660,14 +661,20 @@ function BoardSessionWorkspace({
             <HintReporting env={envelope} enabled={!locallyControlled}>
               {envelope ? (
                 <RemoteBoard env={envelope} enabled={!locallyControlled}>
-                  <LibraryBoard
+                  <GroupBoard
                     presentationId={envelope.presentationId}
-                    revision={envelope.revision}
+                    channelEpoch={envelope.channelEpoch}
                     fallback={
-                      <BoardContent
-                        state={displayed}
-                        content={packageView.content}
-                        plan={packageView.plan}
+                      <LibraryBoard
+                        presentationId={envelope.presentationId}
+                        revision={envelope.revision}
+                        fallback={
+                          <BoardContent
+                            state={displayed}
+                            content={packageView.content}
+                            plan={packageView.plan}
+                          />
+                        }
                       />
                     }
                   />

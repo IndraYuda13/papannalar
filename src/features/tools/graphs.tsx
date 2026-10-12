@@ -1,4 +1,5 @@
 "use client";
+import { useRemoteToolCheck } from "./remote-check-context";
 import {
   useEffect,
   useId,
@@ -136,6 +137,7 @@ export function Graphs({
   initial?: GraphState;
   onRun?: (model: ToolModel) => boolean;
 }) {
+  const remoteCheck = useRemoteToolCheck();
   const [state, dispatch] = useReducer(
     (s: GraphState, a: GraphAction) => reduceGraphs(s, a, task),
     initial ?? initialGraphs(task),
@@ -830,6 +832,10 @@ export function Graphs({
         <Button
           size="board"
           onClick={() => {
+            if (remoteCheck) {
+              remoteCheck({ kind: "graphs", state });
+              return;
+            }
             const check = checkGraphs(state, task),
               matches =
                 onRun?.({ kind: "graphs", state }) ?? check.modelMatches;
@@ -843,7 +849,7 @@ export function Graphs({
             );
           }}
         >
-          Jalankan
+          {remoteCheck ? "Periksa jawaban" : "Jalankan"}
         </Button>
       </div>
       <p role="status" className="min-h-14 text-[40px] text-primary">

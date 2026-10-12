@@ -1,14 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useTeacher } from "@/features/guru/app-context";
-import { libraryCache } from "@/local/library";
-import type { LibraryRun, LibraryResponse } from "@/contracts/library";
+
+import type { RunDetail } from "@/contracts/library";
+import { readLibraryDetail } from "./read-detail";
 import { SessionWorkspace } from "./session";
 import { field, panel } from "./client";
 import { StateNotice } from "@/ui/components/studio";
 import { Button } from "@/ui/components/button";
 import Link from "next/link";
-type Detail = { run: LibraryRun; responses: LibraryResponse[] };
+type Detail = RunDetail;
 export function OfflineChooser() {
   const { scope, state } = useTeacher(),
     [cached, setCached] = useState<Detail[]>([]),
@@ -16,7 +17,15 @@ export function OfflineChooser() {
     [opened, setOpened] = useState<Detail>();
   useEffect(() => {
     let stopped = false;
-    void Promise.all(state.runs.map((r) => libraryCache(scope, "detail", r.id)))
+    void Promise.all(
+      state.runs
+        .filter((r) => !r.parentLessonId)
+        .map((r) =>
+          readLibraryDetail(scope, r.id)
+            .then((r) => r.detail)
+            .catch(() => undefined),
+        ),
+    )
       .then((rows) => {
         if (!stopped) setCached(rows.filter((r): r is Detail => Boolean(r)));
       })

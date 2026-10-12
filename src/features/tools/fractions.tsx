@@ -1,4 +1,5 @@
 "use client";
+import { useRemoteToolCheck } from "./remote-check-context";
 import {
   useReducer,
   useRef,
@@ -28,6 +29,7 @@ export function Fractions({
   initial?: FractionState;
   onRun?: (model: ToolModel) => boolean;
 }) {
+  const remoteCheck = useRemoteToolCheck();
   const [state, dispatch] = useReducer(
     (s: ReturnType<typeof initialFractions>, action: FractionAction) =>
       reduceFractions(s, action, task),
@@ -230,16 +232,20 @@ export function Fractions({
         </Button>
         <Button
           size="board"
-          onClick={() =>
+          onClick={() => {
+            if (remoteCheck) {
+              remoteCheck({ kind: "fractions", state });
+              return;
+            }
             setNotice(
               (onRun?.({ kind: "fractions", state }) ??
                 checkFractions(state, task).modelMatches)
                 ? "Model sudah sesuai. Mengapa panjangnya tetap sama?"
                 : "Bandingkan bagian berwarna, tanda, dan pembagian satu utuh.",
-            )
-          }
+            );
+          }}
         >
-          Jalankan
+          {remoteCheck ? "Periksa jawaban" : "Jalankan"}
         </Button>
       </div>
       <p role="status" className="min-h-14 text-[40px] text-primary">

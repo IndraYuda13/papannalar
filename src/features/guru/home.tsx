@@ -89,14 +89,18 @@ export function TeacherHome() {
     const timer = setTimeout(() => setNow(Date.now()), 0);
     return () => clearTimeout(timer);
   }, []);
-  const active = state.runs.filter((r) => r.status === "active"),
+  const active = state.runs.filter(
+      (r) => r.status === "active" && !r.parentLessonId,
+    ),
     last = classes.find((c) => c.id === active[0]?.classId) ?? classes[0];
   // Friction 8: a closing teach run used to land on Beranda with no summary at all. The most
   // recently closed run of the day is stated once, with numbers only, and links to its notes
   // when any response exists.
   const today = now > 0 ? jakartaDate(new Date(now)) : "";
   const closedToday = today
-    ? state.runs.find((r) => r.status === "closed" && r.date === today)
+    ? state.runs.find(
+        (r) => r.status === "closed" && r.date === today && !r.parentLessonId,
+      )
     : undefined;
   // The intake line is read from the run's own detail (the run list deliberately carries no
   // counts), so the numbers on this row are real, never inferred.
