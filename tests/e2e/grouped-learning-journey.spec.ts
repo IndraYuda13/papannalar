@@ -98,15 +98,34 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
   await expect(
     page.getByText("Bahas soal tanpa pengumpulan kartu.", { exact: false }),
   ).toBeVisible();
+  await page.goto(`/guru/mulai?class=${classId}&collection=${collectionId}`);
+  await page
+    .getByLabel("Kumpulkan jawaban dengan kartu", { exact: true })
+    .check();
+  await page.getByRole("button", { name: "Mulai sesi", exact: true }).click();
+  await expect(
+    page.getByRole("region", { name: "Lembar jawaban" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Akhiri sesi", exact: true }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Akhiri sesi", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: /Jawaban kartu/ }),
+  ).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/guru/latihan?class=${classId}`);
+  await page.getByText("Periksa kehadiran", { exact: true }).click();
+  await page.getByRole("checkbox").last().uncheck();
   await page.getByLabel("Jumlah kelompok").fill("2");
   await page
     .getByRole("button", { name: "Buat kelompok", exact: true })
     .click();
   await expect(
-    page.getByText("6 siswa dalam 2 kelompok", { exact: true }),
+    page.getByText("5 siswa dalam 2 kelompok", { exact: true }),
   ).toBeVisible();
+  await expect(page).toHaveURL(/lesson=/);
   const lessonId = new URL(page.url()).searchParams.get("lesson")!;
   let lesson = await call(page, "/api/v1/group-lessons", {
     action: "detail",
@@ -116,10 +135,21 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
     new Set(
       lesson.groups.flatMap((g: { studentIds: string[] }) => g.studentIds),
     ).size,
-  ).toBe(6);
+  ).toBe(5);
+  const originalMembers = lesson.groups.map(
+    (g: { studentIds: string[] }) => g.studentIds,
+  );
   await page.reload();
+  const reloaded = await call(page, "/api/v1/group-lessons", {
+    action: "detail",
+    id: lessonId,
+  });
+  expect(reloaded.seed).toBe(lesson.seed);
+  expect(
+    reloaded.groups.map((g: { studentIds: string[] }) => g.studentIds),
+  ).toEqual(originalMembers);
   await expect(
-    page.getByText("6 siswa dalam 2 kelompok", { exact: true }),
+    page.getByText("5 siswa dalam 2 kelompok", { exact: true }),
   ).toBeVisible();
 
   const groups = page.locator("section").filter({
@@ -136,7 +166,33 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
       .check();
     await group.getByLabel("Soal yang dipakai").selectOption(collectionId);
   }
+  await groups
+    .nth(0)
+    .getByRole("button", { name: "Pindahkan", exact: true })
+    .first()
+    .click();
+  await groups
+    .nth(0)
+    .getByLabel("Pindahkan ke kelompok")
+    .selectOption(lesson.groups[1].id);
+  await groups
+    .nth(0)
+    .getByRole("button", { name: "Simpan perubahan", exact: true })
+    .click();
   await page.screenshot({ path: `${root}/groups-mobile.png`, fullPage: true });
+  for (const width of [360, 768, 1024, 1366, 1440]) {
+    await page.setViewportSize({ width, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: `${root}/groups-${width}.png`,
+      fullPage: true,
+    });
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -170,7 +226,7 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
   await page.getByLabel("Kode pasangan").fill(code.replace(/\s/g, ""));
   await page.getByRole("button", { name: /Hubungkan|Sambungkan/ }).click();
   await expect(board.getByTestId("group-board")).toBeVisible();
-  await board.getByRole("button", { name: "A. 1/2", exact: true }).click();
+  await board.getByRole("button", { name: /^A\./ }).click();
   await board
     .getByRole("button", { name: "Periksa jawaban", exact: true })
     .click();
@@ -228,5 +284,109 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
   expect(detail.responses[0].status).toBe("review");
   expect(detail.responses[0].answers).toEqual(["?", null]);
   expect(detail.run.status).toBe("closed");
+  await page.getByRole("button", { name: "Input manual", exact: true }).click();
+  await page.getByLabel("Baris 1", { exact: true }).selectOption("B");
+  await page.getByLabel("Baris 2", { exact: true }).selectOption("B");
+  await page.getByLabel("Masih perlu dicek").uncheck();
+  await page
+    .getByRole("button", { name: "Simpan jawaban", exact: true })
+    .click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "sudah tersimpan" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Periksa jawaban", exact: true }),
+  ).toHaveCount(0);
+  const corrected = await call(page, "/api/v1/library", {
+    contractVersion: 2,
+    action: "detail",
+    id: cards.runId,
+  });
+  expect(corrected.responses[0].status).toBe("received");
+  expect(corrected.responses[0].correct).toBe(2);
+  expect(corrected.responses[0].revision).toBeGreaterThan(
+    detail.responses[0].revision,
+  );
+  await page.goto(`/guru/hasil/${lessonId}?source=group_lesson`);
+  await expect(page.getByText("2/2 benar", { exact: true })).toBeVisible();
+  const toolId = crypto.randomUUID();
+  await call(page, "/api/v1/library", {
+    contractVersion: 2,
+    action: "save",
+    id: toolId,
+    revision: 0,
+    ready: true,
+    mapping: { default: null, overrides: [] },
+    document: {
+      title: "Lompatan interaktif uji",
+      kind: "interactive",
+      items: [
+        {
+          id: crypto.randomUUID(),
+          kind: "interactive",
+          prompt: "Mulai dari -3 dan lompat 5 ke kanan.",
+          tool: {
+            kind: "number-line",
+            origin: { numerator: -3, denominator: 1 },
+            delta: { numerator: 5, denominator: 1 },
+            orientation: "horizontal",
+          },
+        },
+        {
+          id: crypto.randomUUID(),
+          kind: "writing",
+          prompt: "Ceritakan cara menemukan jawabannya.",
+        },
+      ],
+    },
+  });
+  await page.goto(`/guru/latihan?class=${classId}`);
+  await page.getByLabel("Jumlah kelompok").fill("1");
+  await page
+    .getByRole("button", { name: "Buat kelompok", exact: true })
+    .click();
+  const toolGroup = page.locator("section").filter({
+    has: page.locator("summary", { hasText: "Lihat anggota dan kegiatan" }),
+  });
+  await toolGroup.locator("summary").first().click();
+  await toolGroup.getByLabel("Menjawab di layar", { exact: true }).check();
+  await toolGroup.getByLabel("Soal yang dipakai").selectOption(toolId);
+  await page
+    .getByRole("button", { name: "Periksa kesiapan", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Mulai kegiatan", exact: true })
+    .click();
+
+  const toolContext = await browser.newContext({
+      viewport: { width: 1366, height: 768 },
+    }),
+    toolBoard = await toolContext.newPage();
+  await openBoard(toolBoard);
+  const toolCode = await toolBoard.getByTestId("pairing-code").innerText();
+  await page.getByLabel("Kode pasangan").fill(toolCode.replace(/\s/g, ""));
+  await page
+    .getByRole("button", { name: "Hubungkan papan", exact: true })
+    .click();
+  await expect(toolBoard.getByTestId("group-board")).toBeVisible();
+  await toolBoard.getByLabel("Besar lompatan").fill("5");
+  await toolBoard.getByRole("button", { name: "Lompat", exact: true }).click();
+  await toolBoard
+    .getByRole("button", { name: "Periksa jawaban", exact: true })
+    .click();
+  await expect(
+    toolBoard.getByText("Jawaban tepat.", { exact: true }),
+  ).toBeVisible();
+  await toolBoard.screenshot({ path: `${root}/interactive-board.png` });
+  await toolBoard
+    .getByRole("button", { name: "Soal berikutnya", exact: true })
+    .click();
+  await toolBoard
+    .getByRole("button", { name: "Selesai mencoba", exact: true })
+    .click();
+  await expect(
+    toolBoard.getByRole("heading", { name: "Semua soal selesai", exact: true }),
+  ).toBeVisible();
+  await toolContext.close();
   await context.close();
 });
