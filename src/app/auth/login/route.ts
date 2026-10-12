@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { loginSchema } from "@/contracts/auth";
 import { authContext } from "@/server/auth/client";
+import { deliveredLoginLink } from "@/server/auth/delivered-link";
 import { applicationOrigin } from "@/server/auth/origin";
 import { handleError, readBody } from "@/server/http";
 
@@ -19,7 +20,13 @@ export async function POST(request: NextRequest) {
       },
     });
     if (error) throw new Error("AUTH_UNAVAILABLE");
-    return context.finish(NextResponse.json({ sent: true }));
+    // In-band delivery for the loopback test provider (which cannot send
+    // email): when the operator opts in, hand the just-minted link back so the
+    // same browser can complete sign-in immediately.
+    const link = await deliveredLoginLink(input.email);
+    return context.finish(
+      NextResponse.json(link ? { sent: true, link } : { sent: true }),
+    );
   } catch (error) {
     const response = handleError(error);
     return context ? context.finish(response) : response;

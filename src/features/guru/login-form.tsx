@@ -7,6 +7,7 @@ import { logoutTeacher } from "@/features/classroom/logout-transport";
 
 export function LoginForm() {
   const [message, setMessage] = useState("");
+  const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -21,9 +22,23 @@ export function LoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      // In-band delivery (`PAPANNALAR_LOGIN_LINK_REVEAL`): the loopback test
+      // provider cannot send email, so it returns the link itself. Unknown
+      // response shapes fail quiet and keep the standard message.
+      const payload: { link?: unknown } | null = response.ok
+        ? await response.json().catch(() => null)
+        : null;
+      const candidate = payload?.link;
+      const delivered =
+        typeof candidate === "string" && candidate.startsWith("/auth/callback?")
+          ? candidate
+          : "";
+      setLink(delivered);
       setMessage(
         response.ok
-          ? "Tautan masuk sudah dikirim. Buka email di perangkat ini."
+          ? delivered
+            ? "Tautan masuk siap. Buka sekarang di perangkat ini."
+            : "Tautan masuk sudah dikirim. Buka email di perangkat ini."
           : "Tautan belum dapat dikirim. Coba lagi sebentar.",
       );
     } catch {
@@ -45,7 +60,7 @@ export function LoginForm() {
           className="studio-field mt-2 min-h-12 w-full rounded-input border border-pn-ink-400 bg-white px-3 font-normal"
         />
       </label>
-      <Button type="submit" disabled={busy} className="w-full">
+      <Button type="submit" disabled={busy} aria-busy={busy} className="w-full">
         {busy && (
           /* §F A15 / §D.1: the in-flight state carries a spinner *and* the label. The label
              alone leaves a screen-reader or low-vision user with only a text change. The
@@ -67,6 +82,13 @@ export function LoginForm() {
       <p role="status" className="text-sm text-muted-foreground">
         {message}
       </p>
+      {link && (
+        <Button asChild variant="outline" className="w-full">
+          <a href={link} data-testid="delivered-link">
+            Buka tautan masuk
+          </a>
+        </Button>
+      )}
     </form>
   );
 }
