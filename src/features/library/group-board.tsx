@@ -337,7 +337,7 @@ function GroupBoardTask({
                   <Button
                     key={value}
                     variant="outline"
-                    className="h-auto min-h-14 justify-start whitespace-normal text-left text-lg"
+                    className={`h-auto min-h-14 justify-start whitespace-normal text-left text-lg ${activeChoice === value ? "border-primary bg-pn-teal-100 ring-2 ring-primary" : ""}`}
                     aria-pressed={activeChoice === value}
                     onClick={() => {
                       setChoice(value);
@@ -346,6 +346,9 @@ function GroupBoardTask({
                     }}
                   >
                     {value}. {mathText(option)}
+                    {activeChoice === value && (
+                      <span className="ml-auto pl-3 text-sm">Dipilih</span>
+                    )}
                   </Button>
                 );
               })}
