@@ -1,13 +1,21 @@
 import { createHash, randomUUID } from "node:crypto";
 import { createServerClient } from "@supabase/ssr";
-import { writeFile } from "node:fs/promises";
-const app = "http://127.0.0.1:3213",
-  provider = "http://127.0.0.1:54333";
+import {
+  verifyDiagnosticDatabase,
+  writeDiagnostic,
+} from "./learning-diagnostics.mjs";
+import {
+  appOrigin as app,
+  providerOrigin as provider,
+} from "../tests/harness/ports.mjs";
+verifyDiagnosticDatabase();
 if (
-  process.cwd() !== "/mnt/papannalar-20261013/candidate" ||
-  !process.env.TEST_DATABASE_URL?.includes(":55433/pn_m01c_mission_20261013")
+  !process.env.PNL_APP_PORT ||
+  !process.env.PNL_PROVIDER_PORT ||
+  process.env.PNL_APP_PORT === "3100" ||
+  process.env.PNL_PROVIDER_PORT === "54325"
 )
-  throw new Error("isolated runtime required");
+  throw new Error("Explicit nonlive app/provider ports required");
 const verifier = randomUUID();
 const email = `backend-${randomUUID()}@qa.invalid`;
 const headers = { "Content-Type": "application/json" };
@@ -201,8 +209,5 @@ const report = {
   limits:
     "synthetic Auth/PostgREST adapter backed by isolated real PostgreSQL, not hosted Supabase/physical device certification",
 };
-await writeFile(
-  "/mnt/papannalar-20261013/evidence/backend-http.json",
-  JSON.stringify(report, null, 2),
-);
+await writeDiagnostic("backend-http.json", report);
 console.log(JSON.stringify(report));

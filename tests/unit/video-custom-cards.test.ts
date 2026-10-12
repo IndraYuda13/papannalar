@@ -71,7 +71,11 @@ describe("V4 immutable custom form contract", () => {
   it("marks every unused row and prevents synthetic inputs from hiding extra answers", () => {
     const commands = cardDrawing("weekly", binding);
     expect(
-      commands.some((c) => c.kind === "text" && c.text === "Cek pemahaman"),
+      commands.some(
+        (c) =>
+          c.kind === "text" &&
+          c.text === `${binding.formId.slice(0, 8)} · V${binding.version}`,
+      ),
     ).toBe(true);
     expect(
       commands.filter(

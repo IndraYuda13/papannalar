@@ -1,8 +1,11 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { sql, literal, databaseUrl } from "../tests/harness/postgres.mjs";
-if (new URL(databaseUrl).port !== "55433")
-  throw new Error("isolated DB required");
+import {
+  verifyDiagnosticDatabase,
+  writeDiagnostic,
+} from "./learning-diagnostics.mjs";
+verifyDiagnosticDatabase();
 const text = await readFile("supabase/tests/group-board.sql", "utf8");
 const setup = text.slice(
   0,
@@ -65,8 +68,5 @@ const report = {
   final,
   results: responses.map((r) => r.error ?? "accepted"),
 };
-await writeFile(
-  "/mnt/papannalar-20261013/evidence/learning-concurrency.json",
-  JSON.stringify(report, null, 2),
-);
+await writeDiagnostic("learning-concurrency.json", report);
 console.log(JSON.stringify(report));

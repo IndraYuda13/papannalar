@@ -1,14 +1,12 @@
-import { readFile, readdir, writeFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
-const url = new URL(process.env.TEST_DATABASE_URL ?? "");
-if (
-  url.hostname !== "127.0.0.1" ||
-  url.port !== "55433" ||
-  url.pathname !== "/pn_m01c_mission_20261013"
-)
-  throw new Error("Requires mission isolated cluster");
+import {
+  verifyDiagnosticDatabase,
+  writeDiagnostic,
+} from "./learning-diagnostics.mjs";
+const url = verifyDiagnosticDatabase();
 const name =
-  process.env.PNL_UPGRADE_DATABASE ?? "pn_m01c_learning_upgrade_final_20261013";
+  process.env.PNL_UPGRADE_DATABASE ?? `pn_m01c_learning_upgrade_${Date.now()}`;
 if (!/^pn_m01c_learning_upgrade_[a-z0-9_]+$/.test(name))
   throw new Error("Invalid isolated upgrade name");
 const admin = url.toString();
@@ -61,13 +59,10 @@ if (history !== "1")
 const result = {
   status: "VERIFIED",
   database: name,
-  port: 55433,
+  port: Number(url.port),
   before: before.trim(),
   after: after.trim(),
   legacyHistory: Number(history),
 };
-await writeFile(
-  "/mnt/papannalar-20261013/evidence/learning-upgrade.json",
-  JSON.stringify(result, null, 2),
-);
+await writeDiagnostic("learning-upgrade.json", result);
 console.log(JSON.stringify(result));

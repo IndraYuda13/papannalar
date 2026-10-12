@@ -1,6 +1,6 @@
 import { createServer } from "vite";
 import { z } from "zod";
-import { writeFile } from "node:fs/promises";
+import { writeDiagnostic } from "./learning-diagnostics.mjs";
 const v = await createServer({
   configFile: false,
   server: { middlewareMode: true },
@@ -32,10 +32,7 @@ try {
     const m = await v.ssrLoadModule(`/src/contracts/${file}.ts`);
     output[id] = normalize(z.toJSONSchema(m[key], { unrepresentable: "any" }));
   }
-  await writeFile(
-    "/mnt/papannalar-20261013/evidence/learning-schemas.json",
-    JSON.stringify(output),
-  );
+  await writeDiagnostic("learning-schemas.json", output);
 } finally {
   await v.close();
 }
