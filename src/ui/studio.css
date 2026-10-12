@@ -1306,15 +1306,21 @@
   margin: 0;
   padding: 0;
   list-style: none;
+  /* The rows are flex boxes, so the implicit `list-item` counter is never
+     incremented and `content: counter(list-item)` painted "0." for every step
+     (live report 2026-10-12: "urutannya 0 dan 0 harusnya 1 dan 2"). An
+     explicit counter restores 1., 2., … on any `display`. */
+  counter-reset: board-step;
   font-size: var(--board-answer);
 }
 .board-idle-steps li {
   display: flex;
   align-items: baseline;
   gap: 16px;
+  counter-increment: board-step;
 }
 .board-idle-steps li::before {
-  content: counter(list-item) ".";
+  content: counter(board-step) ".";
   font-variant-numeric: tabular-nums;
   color: var(--pn-ink-600);
 }
