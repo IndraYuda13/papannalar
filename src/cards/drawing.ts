@@ -67,7 +67,12 @@ export function cardDrawing(
           gray: 0,
         });
   text(12, 16, 4, "PapanNalar");
-  text(12, 23, 3.5, form ? "Cek pemahaman" : l.title);
+  text(
+    12,
+    23,
+    3.5,
+    form ? `${form.formId.slice(0, 8)} · V${form.version}` : l.title,
+  );
   text(12, 31, 2.4, "Nama: ................................................");
   text(12, 37, 2.2, "Nomor absen - puluhan");
   text(12, 49, 2.2, "Satuan");

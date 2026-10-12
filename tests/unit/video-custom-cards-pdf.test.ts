@@ -1,4 +1,8 @@
-import { readFile } from "node:fs/promises";
+import { readFile, mkdir, writeFile, mkdtemp, rm } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { cardDrawing } from "../../src/cards/drawing";
 import {
   PDFDocument,
   PDFArray,
@@ -6,6 +10,7 @@ import {
   decodePDFRawStream,
 } from "pdf-lib";
 import jsQR from "jsqr";
+import fontkit from "@pdf-lib/fontkit";
 import { expect, it } from "vitest";
 import { createCardPdf } from "../../src/cards/pdf/create";
 import {
@@ -110,6 +115,46 @@ it("custom PDF has four decodable, identical bound QRs in actual saved output", 
   expect(doc.getPage(0).getWidth()).toBeCloseTo(210 * mm, 6);
   expect(doc.getPage(0).getHeight()).toBeCloseTo(297 * mm, 6);
   expect(payloads).toEqual(Array(4).fill(customFormPayload(binding)));
+  const metrics = await PDFDocument.create();
+  metrics.registerFontkit(fontkit);
+  const font = await metrics.embedFont(
+    await readFile("public/fonts/atkinson-card.woff"),
+  );
+  const commands = cardDrawing("weekly", binding);
+  const header = commands.find((c) => c.kind === "text" && c.y === 23);
+  if (!header || header.kind !== "text")
+    throw new Error("Missing bound header");
+  expect(
+    header.x + font.widthOfTextAtSize(header.text, header.size),
+  ).toBeLessThan(cardLayout("weekly").qr.x);
+  const directory = await mkdtemp(join(tmpdir(), "pn-card-binding-"));
+  try {
+    const file = join(directory, "cards.pdf");
+    await writeFile(file, bytes);
+    const savedText = execFileSync("pdftotext", [file, "-"], {
+      encoding: "utf8",
+    });
+    const code = `${binding.formId.slice(0, 8)} · V${binding.version}`;
+    expect(savedText.split(code).length - 1).toBe(4);
+    const header = cardDrawing("weekly", binding).find(
+      (c) => c.kind === "text" && c.y === 23,
+    );
+    expect(header).toMatchObject({ x: 12, y: 23, size: 3.5, text: code });
+
+    if (process.env.PNL_PRINT_BINDING_EVIDENCE) {
+      await mkdir(process.env.PNL_PRINT_BINDING_EVIDENCE, { recursive: true });
+      await writeFile(
+        join(process.env.PNL_PRINT_BINDING_EVIDENCE, "cards.pdf"),
+        bytes,
+      );
+      await writeFile(
+        join(process.env.PNL_PRINT_BINDING_EVIDENCE, "cards.txt"),
+        savedText,
+      );
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 it.each(["initial", "weekly", "exit"] as const)(
