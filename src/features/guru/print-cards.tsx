@@ -39,7 +39,7 @@ export function PrintCards({
       link.download = `papannalar-${selectedKind}-A4.pdf`;
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setMessage("PDF siap. Cetak 100% / ukuran asli, hitam putih.");
+      setMessage("PDF siap diunduh.");
     } catch {
       setMessage(
         "Kartu belum bisa diunduh. Sambungkan internet, lalu coba lagi.",
@@ -94,11 +94,15 @@ export function PrintCards({
             ? `Unduh Kartu Nalar · ${cardLayout(selectedKind).rows} baris`
             : "Unduh PDF A4"}
       </Button>
+      {/* Friction 14: the scale instruction is load-bearing and must be read before the
+          download, not after it. `PrintScaling.None` in the PDF is untouched. */}
+      <p className="studio-print-note">
+        Cetak ukuran asli 100%. Jangan pilih &quot;sesuaikan halaman&quot;.
+      </p>
       <p className="mt-2 text-sm text-muted-foreground">
         {count
           ? `${count} siswa: cetak ${Math.ceil(count / perSheet)} lembar A4 (${perSheet} kartu per lembar), lalu potong. Satu kartu per siswa.`
-          : `Cek pertama: 2 kartu per lembar. Cek lanjutan dan cek akhir: 4 kartu per lembar.`}{" "}
-        Cetak 100% / ukuran asli, hitam putih.
+          : `Cek pertama: 2 kartu per lembar. Cek lanjutan dan cek akhir: 4 kartu per lembar.`}
       </p>
       <p role="status" className="mt-2 text-sm">
         {message}

@@ -6,6 +6,7 @@ import { useDraftGuard } from "@/ui/use-draft-guard";
 import { useRouter } from "next/navigation";
 import { useTeacher } from "@/features/guru/app-context";
 import { Button } from "@/ui/components/button";
+import { confirmAction } from "@/ui/components/confirm";
 import {
   CHOICES,
   collectionDocumentSchema,
@@ -942,9 +943,12 @@ function CollectionEditor({
             disabled={busy || !canMutate}
             onClick={async () => {
               if (
-                !window.confirm(
-                  "Arsipkan kumpulan? Riwayat hasil tetap tersimpan.",
-                )
+                !(await confirmAction({
+                  title: "Arsipkan kumpulan ini?",
+                  consequence:
+                    "Kumpulan tidak lagi muncul saat memulai sesi. Riwayat hasil dan jawaban siswa tetap tersimpan.",
+                  confirmLabel: "Arsipkan",
+                }))
               )
                 return;
               if (saving.current || !canMutate) return;

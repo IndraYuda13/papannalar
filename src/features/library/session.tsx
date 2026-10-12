@@ -36,6 +36,7 @@ import { PairingCodeInput } from "@/features/classroom/pairing-scanner";
 import { pairingCall } from "@/features/classroom/transport";
 import { RemoteControls } from "@/features/session/remote-controls";
 import { Button } from "@/ui/components/button";
+import { confirmAction } from "@/ui/components/confirm";
 import {
   libraryCache,
   pendingLibraryResponses,
@@ -308,11 +309,22 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     }
   }
   function selectStudent(n: number) {
-    if (
-      answerDirty &&
-      !window.confirm("Buang perubahan jawaban yang belum disimpan?")
-    )
+    if (answerDirty) {
+      void confirmAction({
+        title: "Buang perubahan yang belum disimpan?",
+        consequence:
+          "Jawaban yang sudah diketik pada siswa ini hilang. Data yang sudah tersimpan tidak terpengaruh.",
+        confirmLabel: "Buang perubahan",
+        cancelLabel: "Tetap di sini",
+        tone: "danger",
+      }).then((confirmed) => {
+        if (confirmed) applyStudent(n);
+      });
       return;
+    }
+    applyStudent(n);
+  }
+  function applyStudent(n: number) {
     setAttendance(n);
     const student = run.roster.find((s) => s.attendanceNumber === n),
       existing = responses.find((r) => r.studentId === student?.id);
@@ -344,9 +356,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
       link.download = `kartu-nalar-${run.classLabel}-${run.date}.pdf`;
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setMessage(
-        "Kartu siap. Cetak ukuran asli 100%; gunakan untuk asesmen ini.",
-      );
+      setMessage("Kartu siap diunduh.");
     } catch {
       setMessage(
         "Kartu belum dapat diunduh. Sambungkan internet, lalu tekan Cetak kartu asesmen lagi.",
@@ -428,19 +438,20 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
     }
   }
   async function finish() {
-    if (
-      !canMutate ||
-      (answerDirty &&
-        !window.confirm(
-          "Ada jawaban yang belum disimpan. Buang perubahan dan lanjut mengakhiri sesi?",
-        ))
-    )
-      return;
-    if (
-      mutating.current ||
-      !window.confirm("Akhiri sesi? Materi dan jawaban tetap tersimpan.")
-    )
-      return;
+    if (!canMutate || mutating.current) return;
+    // One acknowledgement for the whole action (friction 7). The unsaved-draft warning used to
+    // be a second browser dialog in front of this one; it is now a sentence in the consequence,
+    // because two stacked modals is a worse question than one honest one.
+    const confirmed = await confirmAction({
+      title: "Akhiri sesi?",
+      consequence: answerDirty
+        ? "Jawaban yang belum disimpan di lembar ini akan dibuang. Materi dan jawaban yang sudah tersimpan tetap aman."
+        : "Papan berhenti menampilkan sesi ini. Materi dan jawaban yang sudah tersimpan tetap aman, dan hasilnya bisa dibuka dari Beranda.",
+      confirmLabel: "Akhiri sesi",
+      cancelLabel: "Lanjut mengajar",
+      tone: answerDirty ? "danger" : "default",
+    });
+    if (!confirmed) return;
     mutating.current = true;
     setBusy(true);
     setClosing(true);
@@ -505,8 +516,11 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         current={run.status === "closed" ? 2 : 1}
         steps={
           run.mode === "assessment"
-            ? ["Cetak kartu", "Soal & jawaban", "Lihat hasil"]
-            : ["Soal siap", "Mengajar", "Akhiri sesi"]
+            ? /* Friction 11: lesson vocabulary, subset-consistent with the conductor strip.
+                 The full-lesson ladder stays on /guru/latihan; this rail is navigation for
+                 the lesson, not a second app taxonomy. */
+              ["Bagikan soal", "Kerjakan", "Kumpulkan"]
+            : ["Siapkan soal", "Tampilkan", "Tutup sesi"]
         }
       />
       {message && (
@@ -514,13 +528,30 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
           {message}
         </p>
       )}
+      {/* Friction 12: three states, not a boolean. "Done" and "current" used to be the same
+          colour, so the strip could not answer "where am I". The difference is geometry plus
+          ground, and the live region carries the words. */}
       <div
         className="studio-session-progress"
+        role="group"
         aria-label={`Soal ${run.position + 1} dari ${run.document.items.length}`}
+        data-session-progress
       >
         {run.document.items.map((q, i) => (
-          <span key={q.id} data-current={i <= run.position} />
+          <span
+            key={q.id}
+            data-state={
+              i === run.position
+                ? "current"
+                : i < run.position
+                  ? "done"
+                  : "pending"
+            }
+          />
         ))}
+        <span className="sr-only" role="status">
+          Soal {run.position + 1} dari {run.document.items.length}
+        </span>
       </div>
       <div className="studio-session-grid">
         {run.status === "active" ? (
@@ -528,6 +559,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
             className={`${panel} studio-session-pairing`}
             aria-label="Sambungan layar"
             data-connected={transport.connected}
+            data-motion-class="C4"
           >
             <h2 className="flex items-center gap-2 font-bold">
               {transport.connected ? (
@@ -535,11 +567,34 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
               ) : (
                 <Monitor size={20} aria-hidden />
               )}
-              {transport.connected ? "Layar tersambung" : "Sambungkan Layar"}
+              {transport.connected
+                ? "Layar tersambung"
+                : transport.snapshot
+                  ? "Menunggu layar menerapkan tampilan."
+                  : "Sambungkan Layar"}
             </h2>
+            {/* D6 Siar: the room, seen from the phone. This is the signature screen of the
+                product — the teacher can see what the class sees without turning around. */}
+            {transport.snapshot && (
+              <div className="studio-siar" data-siar>
+                <p className="studio-siar-label">Sedang tampil di papan</p>
+                <div className="studio-siar-preview" data-library-preview>
+                  <LibraryItemView
+                    key={`siar:${item.id}`}
+                    item={publicLibraryItem(item)}
+                    row={run.position + 1}
+                    hidePrompt
+                  />
+                </div>
+                <p className="studio-siar-position">
+                  Soal {run.position + 1}/{run.document.items.length} · Kelas{" "}
+                  {run.classLabel}
+                </p>
+              </div>
+            )}
             <p role="status" className="text-sm" hidden={transport.connected}>
               {transport.connection?.transport === "offline"
-                ? "Koneksi terputus. Menyambungkan kembali…"
+                ? "Layar terputus. Papan tetap menampilkan tampilan terakhir."
                 : transport.connected
                   ? "Tampilan siap dikendalikan dari HP."
                   : transport.message ||
@@ -659,6 +714,13 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
           >
             Cetak kartu asesmen
           </Button>
+          {/* Friction 14: the `ukuran asli 100%` instruction must be readable *before* the
+              download control, not after it. A teacher who prints "sesuaikan halaman" gets
+              cards the OMR worker cannot read, and the instruction arrived too late to stop
+              them. `PrintScaling.None` in the PDF is untouched. */}
+          <p className="studio-print-note">
+            Cetak ukuran asli 100%. Jangan pilih &quot;sesuaikan halaman&quot;.
+          </p>
           <fieldset disabled={!canMutate} className="min-w-0 space-y-3">
             <ScanCapture
               kind="weekly"

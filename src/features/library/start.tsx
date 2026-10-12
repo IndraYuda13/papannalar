@@ -80,7 +80,6 @@ export function StartLesson({
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Siapkan sesi"
         title={mode === "teach" ? "Mulai mengajar" : "Buat asesmen"}
         description={
           mode === "assessment"
@@ -107,9 +106,6 @@ export function StartLesson({
       ) : (
         <section className={`${panel} studio-start-form`}>
           <label className="block">
-            <span className="studio-step" aria-hidden>
-              1
-            </span>{" "}
             Kelas
             <select
               className={field}
@@ -142,9 +138,6 @@ export function StartLesson({
             </label>
           </details>
           <label className="block">
-            <span className="studio-step" aria-hidden>
-              2
-            </span>{" "}
             Kumpulan soal
             <select
               className={field}
@@ -181,9 +174,15 @@ export function StartLesson({
           {unavailable.length > 0 && (
             <details className="text-sm">
               <summary className="min-h-12 cursor-pointer font-semibold text-primary">
-                Soal saya belum muncul? ({unavailable.length})
+                {/* F9: the unexplained count is gone. The disclosure names the situation; the
+                    explanation is inline, in the panel it opens. */}
+                Soal saya belum muncul?
               </summary>
               <ul className="space-y-3">
+                <li>
+                  Kumpulan yang belum siap, atau yang dipakai untuk kegiatan interaktif,
+                  tidak muncul di daftar ini.
+                </li>
                 {unavailable.map((c) => (
                   <li key={c.id} className="rounded-input border p-3">
                     <b>{c.document.title || "Kumpulan tanpa judul"}</b>
@@ -220,9 +219,6 @@ export function StartLesson({
           {selected && (
             <>
               <p className="studio-start-summary">
-                <span className="studio-step" aria-hidden>
-                  3
-                </span>{" "}
                 {classes.find((c) => c.id === cls)?.label} ·{" "}
                 {selected.document.items.length} soal ·{" "}
                 {selected.document.kind === "cards"

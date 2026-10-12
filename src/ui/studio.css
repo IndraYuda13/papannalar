@@ -916,8 +916,16 @@
   border-radius: 4px;
   background: var(--pn-hairline);
 }
-.studio-session-progress [data-current="true"] {
+.studio-session-progress [data-state="done"] {
   background: var(--pn-teal-700);
+}
+/* Friction 12: `current` is taller *and* differently grounded, so the strip answers "where am
+   I" from geometry alone — a teacher standing behind the phone cannot compare two identical
+   teal segments. */
+.studio-session-progress [data-state="current"] {
+  height: 6px;
+  background: var(--pn-teal-700);
+  box-shadow: inset 0 0 0 1px var(--pn-teal-800);
 }
 .studio-result-summary {
   display: flex;
@@ -1087,21 +1095,139 @@
   border-color: var(--pn-edge);
   color: var(--pn-teal-700);
 }
-.studio-step {
-  display: inline-flex;
-  width: 28px;
-  height: 28px;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--pn-r-1);
-  background: var(--pn-teal-100);
-  color: var(--pn-teal-700);
-  font-weight: 700;
-  margin-right: 6px;
-}
+/* `.studio-step` is retired (§E-3). `/guru/mulai` carried two orientation systems on one
+   screen — the top `WorkflowSteps` and a per-field numeral — which is the same defect as
+   pills + tabs. One canonical orientation device survives: `WorkflowSteps`. */
 .studio-start-summary {
   border-top: 1px solid var(--pn-hairline);
   padding-top: 16px;
+}
+/* The scale note (friction 14). A 1px `--pn-edge` boundary, never amber alone: this is an
+   instruction, not a warning (§4.5 Rule A3). */
+.studio-print-note {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--pn-edge);
+  border-radius: var(--pn-r-2);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+}
+.studio-print-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.studio-print-actions .studio-print-note {
+  margin-top: 0;
+  border: 0;
+  padding: 0;
+  font-weight: 500;
+  color: var(--pn-ink-600);
+}
+/* The one hero comprehension metric (F5/V8), then a single supporting intake line — never
+   three equal-weight tiles. */
+.studio-comprehension-question {
+  margin: 0;
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.studio-comprehension-miss {
+  margin: 6px 0 0;
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--pn-teal-700);
+  font-variant-numeric: tabular-nums;
+}
+.studio-intake-line {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--pn-ink-600);
+  font-variant-numeric: tabular-nums;
+}
+/* Siar (D6): the room, seen from the phone. The preview keeps its own container-relative
+   scale, so it can never be read as the board's size. */
+.studio-siar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.studio-siar-label {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+}
+.studio-siar-preview {
+  max-height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--pn-edge);
+  border-radius: var(--pn-r-2);
+  background: var(--pn-putih);
+  padding: 8px;
+}
+.studio-siar-position {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--pn-ink-600);
+  font-variant-numeric: tabular-nums;
+}
+/* The offline line (§9.7): one persistent line at the top of the working area, mint ground,
+   `--pn-edge`, never a modal and never repeated. */
+.studio-offline-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 16px;
+  background: var(--pn-teal-100);
+  border-bottom: 1px solid var(--pn-edge);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--pn-teal-800);
+}
+.studio-offline-line[data-offline-line="recovered"] {
+  font-weight: 500;
+}
+.studio-offline-detail {
+  font-weight: 400;
+}
+/* Login next-steps (friction 1, A13). Three plain lines, numbered, with no ornament. */
+.studio-login-steps {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  border: 1px solid var(--pn-edge);
+  border-radius: var(--pn-r-2);
+}
+.studio-login-steps ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  list-style: decimal;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--pn-ink-600);
+}
+.studio-login-waiting {
+  margin: 0 0 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--pn-hairline);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--pn-teal-800);
+}
+.studio-login-waiting a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 @media (min-width: 1024px) {
   .studio-editor-layout {
@@ -1137,6 +1263,175 @@
 @media (max-width: 760px) {
   .board-idle-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Board idle: two real steps, a code with a stated validity window, and an expiry line that
+   names what happened (friction 4/5). The canvas is the board's own safe frame. */
+.board-idle {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.board-idle-frame {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  gap: 32px;
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.6fr);
+}
+.board-idle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-start;
+  text-align: left;
+}
+.board-idle-copy .board-role-line {
+  max-width: 100%;
+}
+.board-idle-copy .board-heading {
+  max-width: 100%;
+}
+.board-idle-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--board-answer);
+}
+.board-idle-steps li {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.board-idle-steps li::before {
+  content: counter(list-item) ".";
+  font-variant-numeric: tabular-nums;
+  color: var(--pn-ink-600);
+}
+.board-idle-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid var(--pn-edge);
+  border-radius: var(--pn-r-1);
+  background: var(--pn-putih);
+}
+/* The pairing code keeps its monospace treatment and gains a stated validity window. Neither
+   the code nor the countdown may ever animate: a moving glyph cannot be scanned or typed. */
+.board-pairing-code {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--board-numeral);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.board-pairing-code-old {
+  color: var(--pn-ink-400);
+  text-decoration: line-through;
+}
+.board-pairing-countdown {
+  margin: 0;
+  font-size: var(--board-label);
+  color: var(--pn-ink-600);
+  font-variant-numeric: tabular-nums;
+}
+.board-expired-note {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--pn-edge);
+  border-radius: var(--pn-r-1);
+  background: var(--pn-kertas);
+}
+.board-idle-code .board-note {
+  max-width: 100%;
+  text-align: center;
+}
+
+/* Group cards (§6.6, B4). Both the old preview classes are kept here so the board and the
+   teacher's `[data-library-preview]` share one card, and the shape block is a real SVG at
+   >=1.5x the adjacent text height. */
+.board-groups {
+  display: grid;
+  width: 100%;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.board-group-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border: 4px solid var(--pn-edge);
+  border-radius: var(--pn-r-1);
+  background: var(--pn-putih);
+  text-align: left;
+}
+.board-group-card h2 {
+  margin: 0;
+  font-size: var(--board-task);
+  font-weight: 700;
+}
+.board-group-shape {
+  display: block;
+  flex: none;
+  width: calc(var(--board-task) * 1.5);
+  height: calc(var(--board-task) * 1.5);
+}
+.board-group-shape-inline {
+  display: inline-block;
+  width: calc(var(--board-task) * 0.9);
+  height: calc(var(--board-task) * 0.9);
+  vertical-align: -0.1em;
+}
+.board-group-station {
+  margin: 0;
+  font-size: var(--board-body);
+  color: var(--pn-ink-600);
+}
+.board-group-numbers {
+  margin: 0;
+  font-size: var(--board-answer);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+.board-foot {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--pn-hairline);
+}
+@media (max-width: 900px) {
+  .board-idle-frame,
+  .board-foot {
+    grid-template-columns: 1fr;
+  }
+  .board-foot {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 

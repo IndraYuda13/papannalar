@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Button } from "@/ui/components/button";
+import { confirmAction } from "@/ui/components/confirm";
 
 // Keep the existing 90-second lease alive on the adaptive pages too. Never
 // take over another active sample browser without an explicit user action.
@@ -61,9 +62,12 @@ export function SampleControl({ active }: { active: boolean }) {
         disabled={busy}
         onClick={async () => {
           if (
-            !window.confirm(
-              "Ambil alih kendali data contoh? Sambungan layar perangkat sebelumnya akan diputuskan.",
-            )
+            !(await confirmAction({
+              title: "Ambil alih kendali data contoh?",
+              consequence:
+                "Sambungan layar dari perangkat sebelumnya akan diputuskan. Perangkat itu berhenti mengubah data contoh.",
+              confirmLabel: "Ambil alih kendali",
+            }))
           )
             return;
           setBusy(true);

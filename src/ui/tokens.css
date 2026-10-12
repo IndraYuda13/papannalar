@@ -59,6 +59,31 @@
   --pn-nav-h: 68px;
   --pn-nav-safe: calc(var(--pn-nav-h) + env(safe-area-inset-bottom));
 
+  /* LANGKAH motion timing (INTERACTION_DELTA_V4 §A.3). Every value is a ceiling, not a
+     target. C1 state 120 · C2/C2d/C6 arrival 180 · C3/C4/C5 220-300 · C5 hero 500. */
+  --pn-t-1: 120ms;
+  --pn-t-2: 180ms;
+  --pn-t-3: 220ms;
+  --pn-t-4: 300ms;
+  --pn-t-5: 500ms;
+  --pn-stagger-1: 40ms;
+  --pn-stagger-2: 60ms;
+
+  /* LANGKAH easing. All four are MONOTONIC (y1,y2 in [0,1]): no overshoot, no bounce.
+     An overshooting rule or value is a measurement that lies. */
+  --pn-ease-state: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --pn-ease-arrive: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --pn-ease-cross: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --pn-ease-consequence: cubic-bezier(0.16, 1, 0.3, 1);
+  --pn-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* LANGKAH travel. Sub-perceptual on a board by design (§A.1.2): 16px at 8m is 0.35deg. */
+  --pn-m-1: 2px;
+  --pn-m-2: 4px;
+  --pn-m-3: 8px;
+  --pn-m-4: 16px;
+  --pn-m-5: 32px;
+
   --background: var(--pn-kertas);
   --foreground: var(--pn-ink-900);
   --card: var(--pn-putih);

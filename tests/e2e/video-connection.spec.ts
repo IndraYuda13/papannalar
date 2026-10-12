@@ -107,7 +107,7 @@ test("V2 re-scan keeps question 3 and presentation identity; displaced controlle
     expect(pulse2.controllerSeenAt).toBe(pulse1.controllerSeenAt);
     await context.setOffline(true);
     await expect(board.getByTestId("board-connection")).toContainText(
-      "Soal tetap",
+      "Sambungan ke layar terputus. Layar tetap menampilkan mode terakhir.",
     );
     await context.setOffline(false);
     const reconnect = challengeSchema.parse(

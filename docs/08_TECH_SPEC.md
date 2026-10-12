@@ -1966,3 +1966,17 @@ Batas implementasi ini: belum menyelesaikan seluruh rekomendasi audit produk.
 Manual move, pemetaan keterampilan pada soal buatan guru, tren lintas minggu,
 review materi/privasi dan pembukaan siklus untuk kelas nyata tetap pekerjaan
 terpisah. Nama menu dan petunjuk diperbarui bersama panduan dan tes browser.
+
+## Addendum UI v4 (AMBANG) — 12 Oktober 2026
+
+Audit UI/UX v4 mengubah sistem visual dan beberapa aturan papan. Keputusan baru
+dan penyimpangannya dicatat di sini; dokumen sumber 00-07 tidak diubah.
+
+| ID | Masalah/instruksi | Keputusan implementasi | Batas |
+| --- | --- | --- | --- |
+| K41 | `docs/05_UX_LAYAR.md:52` dan `docs/04_BRAND_DESAIN.md:149` mewajibkan soal ≥56 px pada 1920×1080, tetapi preset bawaan meresolusi 48 px, `compact` 42 px, dan override zona interaksi "Lebih rendah" 30 px | [D] Ambang batas 56 px menjadi invarian `--board-question`; override 30 px (dan `--board-title: 30px`) dihapus. Zona dan preset boleh mengecilkan spasi, model, kontrol, dan chrome — tidak pernah mengecilkan keterbacaan soal. Preset `compact/balanced/large` diganti `dekat/sedang/jauh` (Jarak dekat / Jarak sedang / Jarak jauh) dengan migrasi schemaVersion 1→2 yang menerjemahkan preset berdasarkan nama | Angka 56 px berasal dari perhitungan sudut 10 menit busur pada panel 43-55" di 8 m; proyektor 100" lebih longgar. Belum diukur di ruang kelas nyata |
+| K42 | `docs/05_UX_LAYAR.md` menetapkan target sentuh objek ≥88 px dan tombol ≥96 px pada 1920×1080 | [D] Berlaku pada preset `sedang` dan `jauh`. Pada `dekat` (panel kecil yang disentuh siswa dari jarak dekat) batas marker 64 px dan kontrol 72 px, karena guru menyatakan siswa berada dalam jangkauan tangan. Penyimpangan ini berlabel di editor tampilan sehingga tidak bisa diwarisi diam-diam | Penyimpangan pilihan pengguna, bukan kelalaian; butuh review perangkat sebelum pilot |
+| K43 | Papan masih memusatkan kolom soal (`globals.css` menetapkan `text-align: center` pada kolom flex tanpa `justify-content`), sementara §6.1 brief mewajibkan soal di atas kolom agar garis mata dari bangku belakang konsisten | [D] Kolom keputusan berlabuh ke atas dengan pita origin 8-20% tinggi kanvas; baris T10 §F A3b mengukurnya pada 1920×1080 di ketiga preset | Kolom yang sama juga dipakai pratinjau ber-skala container; pratinjau memakai skala `cqw` sendiri dan bukan angka papan |
+| K44 | Papan memakai token tipe berbasis `vw`, sehingga tidak sah dipakai ulang pada kontainer yang lebih kecil | [D] Token papan tetap `vw` hanya pada permukaan yang memiliki viewport. Setiap permukaan ber-skala container mendeklarasikan skala `cqw` sendiri, seperti `[data-library-preview]` | Aturan dicatat di definisi token agar tidak terangkat tanpa sengaja |
+| K45 | Tindakan paling merusak produk memakai `window.confirm`, termasuk mereset papan yang sedang diproyeksikan | [D] Seluruh `window.confirm`/`alert`/`prompt` dihapus dan diganti `Sheet` produk dengan judul + satu kalimat konsekuensi, fokus kembali ke pemicu, dan Esc menutup. Tidak ada chrome browser di atas proyeksi kelas | Diverifikasi oleh baris A21 pada empat alur berbeda |
+| K46 | `window.confirm` pada `useDraftGuard` memblokir navigasi secara sinkron; dialog produk mengembalikan promise | [D] Guard mencegah klik pertama, menanyakan lewat `Sheet`, lalu menerbitkan ulang navigasi setelah guru menyetujui | Tidak ada perubahan pada penyimpanan draft |

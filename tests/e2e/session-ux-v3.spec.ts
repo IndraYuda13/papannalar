@@ -1,6 +1,6 @@
 import { expect, test, type Page, type Locator } from "@playwright/test";
 import QRCode from "qrcode";
-import { openBoard } from "../browser/helpers";
+import { confirmSheet, openBoard } from "../browser/helpers";
 import {
   collectionSchema,
   runSchema,
@@ -400,15 +400,16 @@ test("QR pixels connect once automatically; ACK collapses controls, disconnect r
       await new Promise((resolve) => setTimeout(resolve, 250));
       await route.continue();
     });
-    page.on("dialog", (dialog) => void dialog.accept());
     const end = page.getByRole("button", { name: "Akhiri sesi", exact: true });
     await end.click();
+    await confirmSheet(page, "Akhiri sesi");
     await expect(
       page.getByRole("status").filter({ hasText: "Sesi belum dapat diakhiri" }),
     ).toBeVisible();
     await expect(page).toHaveURL(`/guru/sesi/${run.id}`);
     await expect(end).toBeEnabled();
     await end.click();
+    await confirmSheet(page, "Akhiri sesi");
     await expect(
       page.getByRole("button", { name: "Mengakhiri sesi…", exact: true }),
     ).toBeDisabled();

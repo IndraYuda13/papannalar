@@ -11,6 +11,7 @@ import {
   type SyncReview,
 } from "../session/sync-review";
 import { Button } from "../../ui/components/button";
+import { confirmAction } from "../../ui/components/confirm";
 export function SyncReviewControls({
   scope,
   classroom,
@@ -76,12 +77,15 @@ export function SyncReviewControls({
           </p>
           <Button
             disabled={busy}
-            onClick={() => {
+            onClick={async () => {
               if (
                 !classroom ||
-                !window.confirm(
-                  "Jadikan perangkat ini pengendali? Perangkat sebelumnya harus berhenti mengedit sesi ini.",
-                )
+                !(await confirmAction({
+                  title: "Jadikan perangkat ini pengendali?",
+                  consequence:
+                    "Perangkat sebelumnya berhenti mengedit sesi ini. Perubahan yang belum dikirim di sana tetap tersimpan lokal.",
+                  confirmLabel: "Ambil alih sesi",
+                }))
               )
                 return;
               void run(async () => {
@@ -150,11 +154,15 @@ export function SyncReviewControls({
           </Button>
           <Button
             disabled={busy || !item.review.compatible}
-            onClick={() => {
+            onClick={async () => {
               if (
-                !window.confirm(
-                  "Ganti jawaban yang berbeda dengan pilihan perangkat ini dan ambil alih pengendali?",
-                )
+                !(await confirmAction({
+                  title: "Gunakan jawaban di perangkat ini?",
+                  consequence:
+                    "Jawaban yang berbeda diganti dengan pilihan perangkat ini, dan perangkat ini menjadi pengendali sesi. Versi server diarsipkan.",
+                  confirmLabel: "Gunakan jawaban lokal",
+                  tone: "danger",
+                }))
               )
                 return;
               void run(async () => {

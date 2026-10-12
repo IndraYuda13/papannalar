@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTeacher } from "./app-context";
+import { readLibraryDetail } from "@/features/library/read-detail";
+import { jakartaDate } from "@/features/library/client";
 import { Button } from "@/ui/components/button";
 import { capturePairingLink } from "@/features/classroom/pairing-url";
 import { OfflineChooser } from "@/features/library/offline-chooser";
@@ -65,6 +67,7 @@ function ResumeRow({
 export function TeacherHome() {
   const { classes, state, offline, scope } = useTeacher(),
     [pair, setPair] = useState("");
+  const [now, setNow] = useState(0);
   useEffect(() => {
     const timer = setTimeout(() => {
       const code = capturePairingLink();
@@ -72,8 +75,43 @@ export function TeacherHome() {
     }, 0);
     return () => clearTimeout(timer);
   }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setNow(Date.now()), 0);
+    return () => clearTimeout(timer);
+  }, []);
   const active = state.runs.filter((r) => r.status === "active"),
     last = classes.find((c) => c.id === active[0]?.classId) ?? classes[0];
+  // Friction 8: a closing teach run used to land on Beranda with no summary at all. The most
+  // recently closed run of the day is stated once, with numbers only, and links to its notes
+  // when any response exists.
+  const today = now > 0 ? jakartaDate(new Date(now)) : "";
+  const closedToday = today
+    ? state.runs.find((r) => r.status === "closed" && r.date === today)
+    : undefined;
+  // The intake line is read from the run's own detail (the run list deliberately carries no
+  // counts), so the numbers on this row are real, never inferred.
+  const [intake, setIntake] = useState<{
+    read: number;
+    total: number;
+    review: number;
+  }>();
+  useEffect(() => {
+    if (!closedToday) return;
+    let stopped = false;
+    void readLibraryDetail(scope, closedToday.id)
+      .then(({ detail }) => {
+        if (stopped) return;
+        setIntake({
+          read: detail.responses.length,
+          total: detail.run.roster.length,
+          review: detail.responses.filter((r) => r.status === "review").length,
+        });
+      })
+      .catch(() => undefined);
+    return () => {
+      stopped = true;
+    };
+  }, [closedToday, scope]);
   // The rail is a per-class metric, so each row reads the spread of its own class.
   const spreads = useClassSpreads(scope, classes);
   if (offline) return <OfflineChooser />;
@@ -99,7 +137,7 @@ export function TeacherHome() {
               </a>
             </Button>
             {!hasActive && (
-              <Button asChild>
+              <Button asChild data-emphasis="primary">
                 <Link
                   href={last ? `/guru/mulai?class=${last.id}` : "/guru/kelas"}
                 >
@@ -155,18 +193,56 @@ export function TeacherHome() {
             <StateNotice
               title="Belum ada sesi hari ini"
               action={
-                <Button asChild>
-                  <Link
-                    href={last ? `/guru/mulai?class=${last.id}` : "/guru/kelas"}
-                  >
-                    Mulai mengajar
-                  </Link>
+                <Button asChild data-emphasis="primary">
+                  {classes.length ? (
+                    <Link href={`/guru/mulai?class=${last.id}`}>
+                      Mulai mengajar
+                    </Link>
+                  ) : (
+                    /* Friction 10: with zero classes the old label promised a session and the
+                       destination was a class form. The label now says what the next screen
+                       actually is. */
+                    <Link href="/guru/kelas">Buat kelas</Link>
+                  )}
                 </Button>
               }
             >
-              Pilih kelas dan soal, lalu mulai mengajar.
+              {classes.length
+                ? "Pilih kelas dan soal, lalu mulai mengajar."
+                : "Buat kelas dulu, lalu pilih soal dan mulai mengajar."}
             </StateNotice>
           </div>
+        </Section>
+      )}
+      {closedToday && (
+        <Section label="Baru selesai" ground="sheet" data-recently-closed>
+          <ul className="studio-row-list">
+            <li>
+              <Link className="studio-row" href={`/guru/hasil/${closedToday.id}`}>
+                <span className="studio-row-icon" aria-hidden>
+                  {closedToday.document.items.length}
+                </span>
+                <span className="studio-row-content">
+                  <h2>
+                    {closedToday.classLabel} · {closedToday.document.title}
+                  </h2>
+                  <p>
+                    {closedToday.date.split("-").reverse().join("/")} ·{" "}
+                    {closedToday.mode === "assessment"
+                      ? "Cek pemahaman"
+                      : "Mengajar"}{" "}
+                    selesai
+                    {intake
+                      ? ` · ${intake.read}/${intake.total} kartu terbaca · ${intake.review} perlu dicek`
+                      : ""}
+                  </p>
+                </span>
+                <span className="studio-row-action" data-row-action>
+                  Buka catatan
+                </span>
+              </Link>
+            </li>
+          </ul>
         </Section>
       )}
       {/* §9.1(c): the workflow entry sits in a shared list, not a Section whose whole body is

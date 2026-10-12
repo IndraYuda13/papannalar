@@ -6,7 +6,7 @@ import {
   runSchema,
   runDetailSchema,
 } from "../../src/contracts/library";
-import { injectFixture, sampleLogin } from "../browser/helpers";
+import { confirmSheet, injectFixture, sampleLogin } from "../browser/helpers";
 import { appOrigin } from "../harness/ports.mjs";
 const origin = appOrigin;
 async function call(page: Page, data: object) {
@@ -84,7 +84,6 @@ test("FLOW08 an unfinished answer remains a draft after reload, never becomes un
       }, run.id),
     )
     .toBe("C");
-  page.once("dialog", (dialog) => dialog.accept());
   await page.reload();
   await expect(page.getByLabel("Baris 1", { exact: true })).toHaveValue("C");
   await expect(page.getByLabel("Baris 2", { exact: true })).toHaveValue("");
@@ -217,8 +216,8 @@ test("FLOW02 manual correction preserves first/middle/last answers; cancel/reope
   expect(
     stored.responses.find((r) => r.studentId === run.roster[31].id)?.answers,
   ).toEqual(["B", ...answers.slice(1)]);
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Akhiri sesi", exact: true }).click();
+  await confirmSheet(page, "Akhiri sesi");
   await expect(page).toHaveURL(`/guru/hasil/${run.id}`);
   await page.getByRole("button", { name: /32.*Perlu dicek/ }).click();
   await expect(

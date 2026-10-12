@@ -39,6 +39,7 @@ import { OralWorkspace } from "./oral-workspace";
 import { ExampleActivities } from "./example-activities";
 import { SampleControl } from "./sample-control";
 import { libraryCache, removeLibraryCache } from "@/local/library";
+import { confirmAction } from "@/ui/components/confirm";
 import type { LocalScope } from "@/local/scope";
 
 const inputClass =
@@ -326,9 +327,13 @@ export function TeacherWorkspace({
     if (
       !detail ||
       !ownerId ||
-      !window.confirm(
-        "Hapus kelas dan roster ini? Nama lokal di perangkat ini juga akan dihapus.",
-      )
+      !(await confirmAction({
+        title: "Hapus kelas ini?",
+        consequence:
+          "Roster dan nama siswa yang tersimpan di perangkat ini ikut terhapus. Riwayat hasil sesi yang sudah selesai tetap tersimpan.",
+        confirmLabel: "Hapus kelas",
+        tone: "danger",
+      }))
     )
       return;
     setBusy(true);

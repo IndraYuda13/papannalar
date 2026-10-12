@@ -6,6 +6,11 @@ import {
   QuestionVisual,
   needsQuestionVisual,
 } from "@/features/layar/question-visual";
+
+/** B9: the timer's urgency is a static 700-weight figure plus a 2px ink underline. No pulse,
+ *  no colour cycling, no sound, and no auto-advance — the room is told the time, not alarmed. */
+const URGENT_AT = 10;
+
 export function CheckBoard({ state }: { state: PresentationState }) {
   const value = state.check!;
   const [remaining, setRemaining] = useState(value.seconds as number);
@@ -23,32 +28,49 @@ export function CheckBoard({ state }: { state: PresentationState }) {
     );
     return () => clearInterval(timer);
   }, [value.seconds]);
+  const expired = remaining <= 0;
   return (
-    <section aria-label="Soal cek paket" className="w-full space-y-8">
-      <p className="text-[32px]">
-        {value.total === 10 ? "Cek pertama" : "Cek lanjutan"} · Soal{" "}
-        {state.question}/{value.total} · Baris {state.question} pada kartu ·{" "}
-        {remaining} detik
-      </p>
-      <h1 className="text-[56px] font-bold">
+    <section
+      aria-label="Soal cek paket"
+      className="board-check"
+      data-beat="question"
+    >
+      <h1 className="board-heading board-question">
         <MathPrompt value={value.question.prompt} />
       </h1>
-      {needsQuestionVisual(state) && (
-        <QuestionVisual prompt={value.question.prompt} />
-      )}
-      <div className="grid grid-cols-2 gap-6 text-[48px]">
+      <div className="board-options board-options-grid">
         {value.question.options.map((o) => (
-          <p
-            key={o.label}
-            className="min-h-24 rounded-kartu border-4 border-primary p-4"
-          >
-            {o.label}. {o.text}
+          <p key={o.label} className="board-option-row">
+            <span className="board-option-mark">{o.label}</span>
+            <span className="board-option-text">{o.text}</span>
           </p>
         ))}
       </div>
-      <p className="text-[40px]">?. Belum tahu</p>
-      <p className="text-[28px]">
-        Isi satu pilihan. Saat waktu habis, tunggu arahan guru.
+      <p className="board-option-row board-option-row-unknown">
+        <span className="board-option-mark board-option-mark-unknown">?</span>
+        <span className="board-option-text">Belum tahu</span>
+      </p>
+      {needsQuestionVisual(state) && (
+        <QuestionVisual prompt={value.question.prompt} />
+      )}
+      {/* The position band states the question's place in the set, the card row it is written on
+          (a student holding a printed card needs that), and the time left — once, inside the
+          region a screen reader enters (§I.3, §B2). It sits *below* the question on purpose:
+          §B0.1 makes the question the first thing at the top of the column, so a band above it
+          would push the single highest-value composition decision out of its 8–20 % band. */}
+      <p className="board-note board-position-band">
+        {value.total === 10 ? "Cek pertama" : "Cek lanjutan"} · Soal{" "}
+        {state.question}/{value.total} · Baris {state.question} pada kartu ·{" "}
+        {expired ? "waktu habis" : `${remaining} detik`}
+      </p>
+      <p
+        className="board-note board-instruction-line"
+        data-urgent={remaining <= URGENT_AT ? "true" : "false"}
+        data-expired={expired ? "true" : "false"}
+      >
+        {expired
+          ? "Tunggu arahan guru sebelum lanjut."
+          : "Kerjakan pada kartu. Tunggu arahan guru saat waktu habis."}
       </p>
     </section>
   );

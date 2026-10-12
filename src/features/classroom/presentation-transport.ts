@@ -155,7 +155,8 @@ export function usePresentationTransport({
       const next = snapshotSchema.parse(result);
       clearPairingLink();
       receive(next);
-      setMessage("Menunggu layar menerapkan tampilan.");
+      // Friction 13: sent, not applied. The applied state is the board's own ACK.
+      setMessage("Terkirim ke papan.");
     } catch (error) {
       throw error;
     } finally {

@@ -18,6 +18,7 @@ import {
 } from "@/local/access";
 import { logoutTeacher } from "@/features/classroom/logout-transport";
 import { libraryCache, syncLibraryResponses } from "@/local/library";
+import { confirmAction } from "@/ui/components/confirm";
 import { libraryCall } from "@/features/library/client";
 import type { LocalScope } from "@/local/scope";
 import { StateNotice, StatusChip } from "@/ui/components/studio";
@@ -202,9 +203,12 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
             variant="outline"
             onClick={async () => {
               if (
-                !window.confirm(
-                  "Ambil alih kendali data contoh? Sambungan layar pengendali sebelumnya akan dicabut.",
-                )
+                !(await confirmAction({
+                  title: "Ambil alih kendali data contoh?",
+                  consequence:
+                    "Sambungan layar dari perangkat pengendali sebelumnya akan dicabut. Perangkat itu berhenti mengubah data contoh.",
+                  confirmLabel: "Ambil alih kendali",
+                }))
               )
                 return;
               try {

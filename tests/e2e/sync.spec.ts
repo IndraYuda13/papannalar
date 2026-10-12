@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
-import { loginTeacher, chooseTeacherMode } from "../browser/helpers";
+import {
+  confirmSheet,
+  loginTeacher,
+  chooseTeacherMode,
+} from "../browser/helpers";
 import { appOrigin } from "../harness/ports.mjs";
 
 for (const status of [401, 409])
@@ -268,10 +272,10 @@ test("SYNC03 two teacher devices enforce read-only import, explicit takeover and
       }
     }, ids.sessionId),
   ).toBe(true);
-  other.once("dialog", (dialog) => dialog.accept());
   await other
     .getByRole("button", { name: "Ambil alih sesi 1", exact: true })
     .click();
+  await confirmSheet(other, "Ambil alih sesi");
   await expect(
     other.getByText("Perangkat ini menjadi pengendali sesi.", { exact: true }),
   ).toBeVisible();
@@ -309,13 +313,13 @@ test("SYNC03 two teacher devices enforce read-only import, explicit takeover and
     .getByRole("button", { name: "Tinjau konflik sinkronisasi", exact: true })
     .click();
   await expect(page.getByText(/Absen 1: server/)).toBeVisible();
-  page.once("dialog", (dialog) => dialog.accept());
   await page
     .getByRole("button", {
       name: "Gunakan jawaban lokal dan ambil alih",
       exact: true,
     })
     .click();
+  await confirmSheet(page, "Gunakan jawaban lokal");
   await expect(
     page.getByText(/Pilihan tersimpan\. Periksa status sinkronisasi/),
   ).toBeVisible();

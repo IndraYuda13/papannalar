@@ -21,7 +21,7 @@ function BoardSurface() {
   return (
     <div
       data-surface="layar"
-      data-board-preset={active?.settings.preset ?? "balanced"}
+      data-board-preset={active?.settings.preset ?? "sedang"}
       data-interaction-zone={active?.settings.interactionZone ?? "auto"}
       className="board-surface font-kelas"
     >

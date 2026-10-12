@@ -19,8 +19,9 @@ import { pairingCall, watchPresentation } from "@/features/classroom/transport";
 import type { PresentationConnection } from "@/features/classroom/connection-transport";
 import { PairingQrCode } from "@/features/classroom/pairing-scanner";
 import { LibraryBoard } from "@/features/library/board";
-import { BoardContent } from "./board-content";
+import { BoardContent, BoardCloseCard } from "./board-content";
 import { Button } from "@/ui/components/button";
+import { Sheet } from "@/ui/components/sheet";
 import { registerUpdateGuard } from "@/offline/update-safety";
 import { CapabilityTest } from "./capability-test";
 import {
@@ -72,9 +73,34 @@ export function BoardWorkspace() {
       onResetComplete={completeReset}
     />
   ) : (
-    <p role="status">Menyiapkan layar…</p>
+    <p className="board-state-line" role="status">
+      Sedang menyiapkan…
+    </p>
   );
 }
+
+/** The board's validity window, in `--board-label` size, with no motion on the digits
+ *  (friction 5): a moving glyph cannot be typed. */
+function PairingCountdown({ expiresAt }: { expiresAt: string }) {
+  const [left, setLeft] = useState(() =>
+    Math.max(0, Math.floor((Date.parse(expiresAt) - Date.now()) / 1000)),
+  );
+  useEffect(() => {
+    const tick = () =>
+      setLeft(Math.max(0, Math.floor((Date.parse(expiresAt) - Date.now()) / 1000)));
+    tick();
+    const timer = setInterval(tick, 500);
+    return () => clearInterval(timer);
+  }, [expiresAt]);
+  const minutes = String(Math.floor(left / 60)).padStart(2, "0");
+  const seconds = String(left % 60).padStart(2, "0");
+  return (
+    <p className="board-pairing-countdown" data-pairing-countdown>
+      Kode berlaku {minutes}:{seconds} lagi
+    </p>
+  );
+}
+
 function BoardSessionWorkspace({
   resetRequest,
   onReset,
@@ -85,6 +111,7 @@ function BoardSessionWorkspace({
   onResetComplete: (requestId: string) => void;
 }) {
   const [challenge, setChallenge] = useState<Challenge>();
+  const [expiredCode, setExpiredCode] = useState<Challenge>();
   const [presentationId, setPresentationId] = useState<string>();
   const [envelope, setEnvelope] = useState<PresentationEnvelope>();
   const packageView = useBoardPackage(envelope);
@@ -101,6 +128,8 @@ function BoardSessionWorkspace({
   }, [locallyControlled, displayed]);
   const [connection, setConnection] = useState<PresentationConnection>();
   const [showPairing, setShowPairing] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [recovered, setRecovered] = useState(false);
   const creating = useRef(false);
   const startController = useRef<AbortController | undefined>(undefined);
   useEffect(() => () => startController.current?.abort(), []);
@@ -212,6 +241,7 @@ function BoardSessionWorkspace({
             ),
           ),
         );
+        setExpiredCode(undefined);
         setShowPairing(true);
         setMessage(
           resetRequest
@@ -242,8 +272,12 @@ function BoardSessionWorkspace({
   }, [start]);
   useEffect(() => {
     const recover = () => {
+      // C6 + friction 15: reconnecting is a state change with a word, never a silent flip.
+      setRecovered(true);
+      const timer = window.setTimeout(() => setRecovered(false), 4000);
       if (!presentationId && !challenge && connection?.session !== "closed")
         void start(true);
+      return () => window.clearTimeout(timer);
     };
     window.addEventListener("online", recover);
     return () => window.removeEventListener("online", recover);
@@ -265,8 +299,13 @@ function BoardSessionWorkspace({
         if (!stopped && typeof response.presentationId === "string") {
           setPresentationId(response.presentationId);
           setChallenge(undefined);
+          setExpiredCode(undefined);
           setShowPairing(false);
         } else if (!stopped && response.expired === true) {
+          // Friction 5: the previous code stays readable and a replacement is issued, with one
+          // sentence naming what happened. Silently swapping the digits left a teacher typing a
+          // dead code with no explanation.
+          setExpiredCode(challenge);
           setChallenge(undefined);
           void start();
         }
@@ -367,8 +406,49 @@ function BoardSessionWorkspace({
     browserOnline &&
     online &&
     connection?.controller === "present";
+  // B3: every real command from the phone produces one visible consequence on the board. The
+  // beat is keyed on the applied revision, so it fires on arrival and not on every render.
+  const [arrived, setArrived] = useState(false);
+  const lastRevision = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    const revision = envelope?.revision;
+    if (revision === undefined) {
+      lastRevision.current = undefined;
+      return;
+    }
+    if (revision === lastRevision.current) return;
+    lastRevision.current = revision;
+    setArrived(true);
+    const timer = window.setTimeout(() => setArrived(false), 900);
+    return () => window.clearTimeout(timer);
+  }, [envelope?.revision]);
+  // The one closed connection vocabulary (friction 6). Same words on the board and on the
+  // phone; a teacher must never read two sentences for one condition. The board's set is stated
+  // verbatim by INTERACTION_DELTA_V4 friction 6: `Tersambung` · `Mengikuti lewat pemeriksaan
+  // berkala` · `Terputus` · `Sambungan ke layar terputus. Layar tetap menampilkan mode
+  // terakhir.` — one sentence, two facts: the condition, and what still works (§9.7's rule that
+  // a teacher mid-lesson must know exactly that, without an apology).
+  // The two local-control states are not connection states — the board is driving itself — so
+  // they are separate, and they say which of the two local situations it is.
+  const stateWord = locallyControlled
+    ? envelope
+      ? "Kendali lokal di papan. Sambungkan HP untuk mengambil kendali."
+      : "Paket offline · daftar kelompok tidak disimpan. Guru membacakan kelompok."
+    : !envelope
+      ? "Menunggu sesi dari HP guru."
+      : !browserOnline
+        ? "Sambungan ke layar terputus. Layar tetap menampilkan mode terakhir."
+        : online && connection?.controller === "present"
+          ? "Tersambung"
+          : connection?.realtime === false
+            ? "Mengikuti lewat pemeriksaan berkala"
+            : "Terputus";
+  const railPages = packageView.pages.length;
+  // B8: the session is closed. The board does not go back to pairing on its own — it shows the
+  // closing card, because a lesson that just ended needs one sentence, not a login screen.
+  const closed = connection?.session === "closed";
   return (
-    <div className="board-workspace w-full">
+    <div className="board-workspace flex w-full min-h-0 flex-1 flex-col">
       {!displayed || testing ? (
         <>
           {testing && (
@@ -402,15 +482,7 @@ function BoardSessionWorkspace({
           <Button
             size="board"
             variant="outline"
-            onClick={() => {
-              if (
-                !displayed ||
-                window.confirm(
-                  "Reset sesi di papan ini? Soal dan goresan di layar akan ditutup. Sesi dan hasil belajar di HP guru tetap tersimpan.",
-                )
-              )
-                onReset();
-            }}
+            onClick={() => (displayed ? setResetOpen(true) : onReset())}
           >
             <RotateCcw size={24} aria-hidden /> Reset sesi di papan
           </Button>
@@ -500,26 +572,6 @@ function BoardSessionWorkspace({
           <p>Animasi dikurangi agar papan lebih nyaman digunakan.</p>
         )}
       </details>
-      <p
-        data-testid="board-connection"
-        role="status"
-        className={
-          connected ? "board-connection-badge" : "text-muted-foreground"
-        }
-      >
-        {connected && <CircleCheck size={18} aria-hidden />}
-        {locallyControlled
-          ? envelope
-            ? "Kendali lokal di papan. Sambungkan HP untuk mengambil kendali."
-            : "Paket offline · daftar kelompok tidak disimpan. Guru membacakan kelompok."
-          : envelope
-            ? !browserOnline
-              ? "Offline di papan. Soal tetap dapat digunakan."
-              : online && connection?.controller === "present"
-                ? "Tersambung"
-                : "Sambungan guru sedang dipulihkan. Soal tetap dapat digunakan."
-            : "Belum tersambung"}
-      </p>
       {displayed && connection?.controller !== "present" && (
         <Button variant="outline" onClick={() => void start()}>
           Sambungkan kembali
@@ -530,9 +582,7 @@ function BoardSessionWorkspace({
           className="my-4 space-y-3 rounded-kartu border p-4"
           aria-label="Sambungkan kembali ke sesi yang sama"
         >
-          {challenge?.pairingUrl && (
-            <PairingQrCode url={challenge.pairingUrl} />
-          )}
+          {challenge?.pairingUrl && <PairingQrCode url={challenge.pairingUrl} />}
           {challenge && (
             <p
               data-testid="pairing-code"
@@ -553,7 +603,18 @@ function BoardSessionWorkspace({
           sambungkan HP.
         </p>
       )}
-      {displayed ? (
+      {closed ? (
+        <BoardCapabilities
+          value={{ touches: 1, high: false, reducedMotion: false }}
+        >
+          <div className="board-stage">
+            <BoardCloseCard
+              total={packageView.pages.length}
+              className="board-close"
+            />
+          </div>
+        </BoardCapabilities>
+      ) : displayed ? (
         <BoardCapabilities
           value={{
             touches: fallback?.verifiedTouches ?? 1,
@@ -612,45 +673,122 @@ function BoardSessionWorkspace({
           </div>
         </BoardCapabilities>
       ) : (
-        <section className="board-idle board-idle-grid">
-          <div>
-            <p className="studio-eyebrow">Belajar bersama dimulai di sini</p>
-            <h1 className="mb-6 text-[64px] leading-tight font-bold">
-              Layar Kelas menunggu.
-            </h1>
-            <ol className="mb-6 list-decimal space-y-2 pl-7 text-[26px]">
-              <li>Buka halaman ini di laptop, proyektor, atau papan kelas.</li>
-              <li>Di HP guru, buka sesi mengajar.</li>
-              <li>
-                Pilih Sambungkan Layar, lalu pindai QR atau isi kode di samping.
-              </li>
-            </ol>
-            <p role="status" className="mb-6">
-              {message}
-            </p>
-            <Button size="board" variant="outline" onClick={() => void start()}>
-              Buat kode baru
-            </Button>
-          </div>
-          <div className="board-idle-code">
-            {challenge?.pairingUrl && (
-              <PairingQrCode url={challenge.pairingUrl} />
-            )}
-            {challenge && (
-              <p
-                data-testid="pairing-code"
-                aria-label="Kode pasangan papan"
-                className="my-8 font-mono text-[96px] tracking-widest"
-              >
-                {challenge.code.slice(0, 3)} {challenge.code.slice(3)}
+        <section className="board-idle" data-beat="idle">
+          <div className="board-idle-frame" data-board-safe>
+            <div className="board-idle-copy">
+              <p className="board-role-line" data-role-line>
+                Layar Kelas menunggu sesi. Semua siswa akan melihat papan ini.
               </p>
-            )}
-            <p className="text-sm text-muted-foreground">
-              Kode papan · masukkan dari sesi mengajar
-            </p>
+              <h1 className="board-heading">Layar Kelas menunggu.</h1>
+              {/* Friction 4: the old step 1 ("buka halaman ini") was circular — anyone reading
+                  the board has already opened it. Two real steps remain. */}
+              <ol className="board-idle-steps">
+                <li>Buka sesi di HP guru.</li>
+                <li>Pindai QR atau masukkan kode.</li>
+              </ol>
+              <p role="status" className="board-note">
+                {message}
+              </p>
+              <Button size="board" variant="outline" onClick={() => void start()}>
+                Buat kode baru
+              </Button>
+            </div>
+            <div className="board-idle-code">
+              {challenge?.pairingUrl && (
+                <PairingQrCode url={challenge.pairingUrl} />
+              )}
+              {challenge && (
+                <p
+                  data-testid="pairing-code"
+                  aria-label="Kode pasangan papan"
+                  className="board-pairing-code"
+                >
+                  {challenge.code.slice(0, 3)} {challenge.code.slice(3)}
+                </p>
+              )}
+              {challenge && <PairingCountdown expiresAt={challenge.expiresAt} />}
+              {expiredCode && (
+                <div data-pairing-expired-note className="board-expired-note">
+                  <p className="board-pairing-code board-pairing-code-old">
+                    {expiredCode.code.slice(0, 3)} {expiredCode.code.slice(3)}
+                  </p>
+                  <p className="board-note">
+                    Kode sebelumnya kedaluwarsa. Kode baru sudah dibuat.
+                  </p>
+                </div>
+              )}
+              <p className="board-note">
+                Kode papan · masukkan dari sesi mengajar
+              </p>
+            </div>
           </div>
         </section>
       )}
+      <footer className="board-foot" data-board-safe>
+        {displayed && (
+          <div
+            className="board-rail"
+            data-progress-rail
+            role="group"
+            aria-label={`Soal ${packageView.index + 1} dari ${railPages}`}
+          >
+            <span className="board-rail-track">
+              {Array.from({ length: railPages }, (_, i) => (
+                <span
+                  key={i}
+                  className="board-rail-segment"
+                  data-state={
+                    i === packageView.index
+                      ? "current"
+                      : i < packageView.index
+                        ? "done"
+                        : "pending"
+                  }
+                />
+              ))}
+            </span>
+            <span className="board-rail-position">
+              Soal {packageView.index + 1}/{railPages}
+            </span>
+          </div>
+        )}
+        <p
+          data-testid="board-connection"
+          role="status"
+          data-connected={connected ? "true" : "false"}
+          data-arrived={arrived ? "true" : "false"}
+          data-motion-class="C3"
+          className="board-state-line"
+        >
+          {connected && <CircleCheck size={18} aria-hidden />}
+          <span className="board-state-rule" aria-hidden />
+          {recovered && !locallyControlled
+            ? "Tersambung lagi. Tampilan terakhir dipulihkan."
+            : stateWord}
+        </p>
+      </footer>
+      <Sheet
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        title="Akhiri sesi di papan ini?"
+        consequence="Soal dan goresan di layar ditutup, dan papan siap menerima kode baru. Hasil belajar di HP guru tetap tersimpan."
+        actions={
+          <>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setResetOpen(false);
+                onReset();
+              }}
+            >
+              Reset papan
+            </Button>
+            <Button variant="outline" onClick={() => setResetOpen(false)}>
+              Batal
+            </Button>
+          </>
+        }
+      />
     </div>
   );
 }

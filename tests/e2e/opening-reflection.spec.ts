@@ -119,7 +119,7 @@ test("OPEN01/PRIV02 catalog opening roles, SD intuition, persistent objective an
     { width: 1920, height: 1080 },
   ]) {
     await board.setViewportSize(size);
-    for (const preset of ["compact", "balanced", "large"]) {
+    for (const preset of ["dekat", "sedang", "jauh"]) {
       await board.locator(".board-surface").evaluate((el, value) => {
         el.setAttribute("data-board-preset", value);
       }, preset);

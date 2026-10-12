@@ -39,6 +39,12 @@ function ItemPages({
   );
   const [pages, setPages] = useState<ReadingPage[]>([]),
     [position, setPosition] = useState(0);
+  // Pagination is *measured*, so it must be measured exactly once, against the font the room will
+  // actually read. Measuring against the fallback face and then re-measuring when the webfont
+  // swaps in yields a different page count mid-lesson ("Bagian 1 dari 9" → 8) and re-renders the
+  // controls under a finger. Wait for the real face; if the API is absent or the font never
+  // arrives, fall back on a timer so an offline board still paginates.
+  const fontsReady = useRef(typeof document === "undefined" || !document.fonts);
   const optionsKey = JSON.stringify(item.kind === "card" ? item.options : null);
   const index = Math.min(position, Math.max(0, pages.length - 1));
   const current = pages[index] ?? {
@@ -62,6 +68,7 @@ function ItemPages({
     function measure() {
       if (!element || !region || !region.clientWidth || !region.clientHeight)
         return;
+      if (!fontsReady.current) return;
       // A teacher preview with its prompt already above the model has no text
       // pages to split; the page itself scrolls around the full-size controls.
       if (hidePrompt && item.kind !== "card") return;
@@ -142,11 +149,23 @@ function ItemPages({
         subtree: true,
         attributeFilter: ["data-board-preset", "data-board-height"],
       });
-    void document.fonts.ready.then(schedule);
+    // The board waits for the real face, then measures once (see `fontsReady` above). The timer
+    // is the offline case: a board that never receives the webfont must still paginate.
+    const settle = () => {
+      fontsReady.current = true;
+      schedule();
+    };
+    const fallbackTimers: number[] = [];
+    if (document.fonts) {
+      void document.fonts.ready.then(settle);
+      const fallback = window.setTimeout(settle, 1200);
+      fallbackTimers.push(fallback);
+    } else settle();
     schedule();
     return () => {
       disposed = true;
       cancelAnimationFrame(frame);
+      for (const timer of fallbackTimers) window.clearTimeout(timer);
       observer.disconnect();
       changes.disconnect();
     };

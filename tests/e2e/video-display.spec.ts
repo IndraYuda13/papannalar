@@ -28,7 +28,7 @@ const legacyCapabilities = {
 };
 async function storedBoard(
   page: Page,
-  preset = "balanced",
+  preset = "sedang",
   allowMotion = false,
 ) {
   await page.addInitScript(
@@ -40,7 +40,7 @@ async function storedBoard(
       localStorage.setItem(
         "pn-board-appearance-v1",
         JSON.stringify({
-          schemaVersion: 1,
+          schemaVersion: 2,
           displayKey: id,
           displayName: "",
           settings: { preset, interactionZone: "auto" },
@@ -200,7 +200,7 @@ for (const viewport of [
     await page.goto("/layar");
     await expect(page.getByTestId("library-board")).toBeVisible();
     await expect(page.locator(".board-menu")).not.toHaveAttribute("open");
-    for (const preset of ["Ringkas", "Seimbang", "Besar"]) {
+    for (const preset of ["Jarak dekat", "Jarak sedang", "Jarak jauh"]) {
       await page
         .getByRole("button", { name: "Ubah tampilan", exact: true })
         .click();
@@ -216,12 +216,19 @@ for (const viewport of [
       await expect(next).toBeEnabled();
       const texts: Record<string, string> = {};
       for (let index = 0; index < 100; index++) {
-        const label = (await page
-          .locator(".library-page-label")
-          .textContent())!;
-        const text = (await page
-          .locator(".library-reading-copy:not([hidden]) .library-reading-text")
-          .textContent())!;
+        // Read the label and the copy in ONE evaluate. Two separate `textContent()` calls are
+        // two DOM reads, and the paginator re-measures once when the webfont swaps in, so the
+        // page can turn between them — which files a page's text under the previous page's
+        // label and reports a mismatch that no reader can actually see (the product renders
+        // both from one object in one frame).
+        const { label, text } = await page.evaluate(() => ({
+          label:
+            document.querySelector(".library-page-label")?.textContent ?? "",
+          text:
+            document.querySelector(
+              ".library-reading-copy:not([hidden]) .library-reading-text",
+            )?.textContent ?? "",
+        }));
         texts[label] = (texts[label] ?? "") + text;
         await bounded(page);
         await readablePage(page);
@@ -357,7 +364,7 @@ test("V1 model and temporary ink survive reading pages and appearance edits", as
   await page
     .getByRole("button", { name: "Ubah tampilan", exact: true })
     .click();
-  await page.getByRole("button", { name: /^Besar/ }).click();
+  await page.getByRole("button", { name: /^Jarak jauh/ }).click();
   await page
     .getByRole("button", { name: "Simpan tampilan", exact: true })
     .click();
@@ -549,10 +556,23 @@ for (const viewport of [
     const setup = page.getByRole("region", { name: "Atur tampilan layar" });
     await expect(setup).toBeVisible();
     const sizes: number[] = [];
-    for (const preset of ["Ringkas", "Seimbang", "Besar"]) {
+    // R3/R4: the distance ladder is not a uniform scale-up. The marker floor is 64px at
+    // `dekat` (a panel the students physically touch) and 88px for both `sedang` and `jauh`,
+    // because those last two are the same physical situation — you cannot touch a panel from
+    // the back bench. What widens with distance is type, spacing and control size. The
+    // question floor is an invariant in all three (R1).
+    const presets: number[] = [];
+    for (const preset of ["Jarak dekat", "Jarak sedang", "Jarak jauh"]) {
       await setup
         .getByRole("button", { name: new RegExp(`^${preset}`) })
         .click();
+      presets.push(
+        await page.evaluate(() => {
+          const surface = document.querySelector(".board-surface")!;
+          const style = getComputedStyle(surface);
+          return parseFloat(style.getPropertyValue("--board-question"));
+        }),
+      );
       for (const example of ["Lift", "Pecahan", "Pilihan ganda"]) {
         await setup.getByRole("button", { name: example, exact: true }).click();
         const preview = setup.getByLabel("Pratinjau ukuran sebenarnya");
@@ -610,7 +630,13 @@ for (const viewport of [
       }
     }
     expect(sizes[0]).toBeLessThan(sizes[1]);
-    expect(sizes[1]).toBeLessThan(sizes[2]);
+    // R3/R4: `sedang` and `jauh` are the same *physical* situation (you cannot touch a panel from
+    // the back bench), so their marker is the same declared size — but the painted dot is a canvas
+    // box derived from (--board-marker − 2px border) / model scale, so the two can land a few
+    // hundredths apart on sub-pixel rasterisation. Compare the declared property, not the paint.
+    expect(sizes[2]).toBeCloseTo(sizes[1], 0);
+    // R1: the question floor is an invariant, so it never moves with the distance preset.
+    expect(presets.every((value) => value >= 56)).toBe(true);
     expect(errors).toEqual([]);
   });
 }
@@ -629,7 +655,7 @@ test("V2 profile survives resize, reload and failed metadata upload; local field
     .getByRole("button", { name: "Ubah tampilan", exact: true })
     .click();
   await page.getByLabel("Nama layar", { exact: true }).fill("Papan 7B");
-  await page.getByRole("button", { name: /^Ringkas/ }).click();
+  await page.getByRole("button", { name: /^Jarak dekat/ }).click();
   await page
     .getByRole("button", { name: "Simpan tampilan", exact: true })
     .click();
@@ -685,7 +711,7 @@ test("V2 profile survives resize, reload and failed metadata upload; local field
   await page.setViewportSize({ width: 1920, height: 1080 });
   await expect(page.locator(".board-surface")).toHaveAttribute(
     "data-board-preset",
-    "compact",
+    "dekat",
   );
   expect(
     await page.evaluate(() => localStorage.getItem("pn-board-appearance-v1")),
@@ -696,10 +722,9 @@ test("V2 profile survives resize, reload and failed metadata upload; local field
   await expect(page.getByLabel("Nama layar", { exact: true })).toHaveValue(
     "Papan 7B",
   );
-  await expect(page.getByRole("button", { name: /^Ringkas/ })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  await expect(
+    page.getByRole("button", { name: /^Jarak dekat/ }),
+  ).toHaveAttribute("aria-pressed", "true");
 });
 
 test("V2 touch result waits for release and fresh one/two/four contacts; mouse never passes", async ({
@@ -815,16 +840,15 @@ test("V2 legacy capabilities migrate to balanced appearance without another wiza
   });
   expect(saved.capability).not.toHaveProperty("displayKey");
   expect(saved.appearance).toMatchObject({
-    schemaVersion: 1,
-    settings: { preset: "balanced", interactionZone: "auto" },
+    schemaVersion: 2,
+    settings: { preset: "sedang", interactionZone: "auto" },
   });
   await page
     .getByRole("button", { name: "Ubah tampilan", exact: true })
     .click();
-  await expect(page.getByRole("button", { name: /^Seimbang/ })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  await expect(
+    page.getByRole("button", { name: /^Jarak sedang/ }),
+  ).toHaveAttribute("aria-pressed", "true");
 });
 
 test("V2 rejected storage retains settings during the tab without a repeated wizard", async ({
@@ -846,7 +870,7 @@ test("V2 rejected storage retains settings during the tab without a repeated wiz
   await page
     .getByRole("button", { name: "Ubah tampilan", exact: true })
     .click();
-  await page.getByRole("button", { name: /^Besar/ }).click();
+  await page.getByRole("button", { name: /^Jarak jauh/ }).click();
   await page
     .getByRole("button", { name: "Simpan tampilan", exact: true })
     .click();
@@ -856,17 +880,16 @@ test("V2 rejected storage retains settings during the tab without a repeated wiz
   await page
     .getByRole("button", { name: "Ubah tampilan", exact: true })
     .click();
-  await expect(page.getByRole("button", { name: /^Besar/ })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  await expect(
+    page.getByRole("button", { name: /^Jarak jauh/ }),
+  ).toHaveAttribute("aria-pressed", "true");
   await expect(
     page.getByRole("button", { name: "Batal", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Batal", exact: true }).click();
   await expect(page.locator(".board-surface")).toHaveAttribute(
     "data-board-preset",
-    "large",
+    "jauh",
   );
   expect(
     await page.evaluate(() => localStorage.getItem("pn-board-appearance-v1")),

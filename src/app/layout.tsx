@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { OfflineBootstrap } from "@/ui/components/offline-bootstrap";
 import "./globals.css";
 import { VisualPreferencesProvider } from "@/ui/components/visual-preferences";
+import { ConfirmProvider } from "@/ui/components/confirm";
+import { OfflineBanner } from "@/ui/components/offline-banner";
 
 export const metadata: Metadata = {
   title: { default: "PapanNalar", template: "%s | PapanNalar" },
@@ -15,7 +17,12 @@ export default function RootLayout({
   return (
     <html lang="id" data-scroll-behavior="smooth">
       <body>
-        <VisualPreferencesProvider>{children}</VisualPreferencesProvider>
+        <VisualPreferencesProvider>
+          <ConfirmProvider>
+            <OfflineBanner />
+            {children}
+          </ConfirmProvider>
+        </VisualPreferencesProvider>
         <OfflineBootstrap />
       </body>
     </html>

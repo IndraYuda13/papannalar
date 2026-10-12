@@ -167,7 +167,9 @@ test("U03-U05 system session plays, recovers question3 automatically and stored 
     await expect(board.getByTestId("library-board")).toBeVisible();
     // A previously used system run is resumed; drive the persisted position to3.
     for (let i = 0; i < 2; i++) {
-      if (await page.getByText(/Soal 3\/3/).isVisible()) break;
+      // Scoped to the board: since D2 the session page states the same position in its own Siar
+      // panel, and a page-wide text match resolves to two elements (strict-mode violation).
+      if (await board.getByText(/Soal 3\/3/).isVisible()) break;
       await page
         .getByRole("button", { name: "Soal berikutnya", exact: true })
         .click();

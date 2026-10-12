@@ -287,6 +287,21 @@ export function ResultPage({ id }: { id: string }) {
   const { run, responses } = detail,
     student = run.roster.find((s) => s.id === selected),
     answer = responses.find((r) => r.studentId === selected);
+  // F5/V8: one hero metric, then supporting detail. The old block was three equal-weight
+  // tiles, so the decisive comprehension signal competed with two intake counters.
+  const graded = responses.filter((r) => r.status === "received");
+  const misses = run.document.items
+    .map((q, index) => ({
+      question: q,
+      index,
+      missed:
+        q.kind === "card"
+          ? graded.filter((r) => r.answers[index] !== q.key).length
+          : 0,
+    }))
+    .filter((entry) => entry.question.kind === "card")
+    .sort((a, b) => b.missed - a.missed);
+  const hardest = graded.length ? misses[0] : undefined;
   return (
     <div className="space-y-5">
       <Link
@@ -295,27 +310,41 @@ export function ResultPage({ id }: { id: string }) {
       >
         ← Asesmen & Hasil
       </Link>
+      {/* Friction 9 / A14: the results sheet is the teacher's own paper summary, so it gets a
+          primary action of its own. `Bahas bersama` is that action; the print path is its
+          secondary. Names never reach paper — attendance numbers only. */}
+      <div className="studio-print-actions" data-print-skip>
+        <Button variant="outline" onClick={() => window.print()}>
+          Cetak ringkasan
+        </Button>
+        <span className="studio-print-note">
+          Cetak ukuran asli 100%. Hanya nomor absen yang tercetak.
+        </span>
+      </div>
       <PageHeader
-        eyebrow="Catatan pemahaman kelas"
         title={`Hasil · Kelas ${run.classLabel}`}
         description={`${run.document.title} · ${run.date.split("-").reverse().join("/")}`}
       />
-      <div className="studio-result-summary" aria-label="Ringkasan hasil">
-        <div>
-          <b>
-            {responses.length}/{run.roster.length}
-          </b>
-          <span>Lembar masuk</span>
-        </div>
-        <div>
-          <b>{responses.filter((r) => r.status === "review").length}</b>
-          <span>Lembar perlu dicek</span>
-        </div>
-        <div>
-          <b>{run.document.items.length}</b>
-          <span>Soal · Versi {run.version}</span>
-        </div>
-      </div>
+      <p className="studio-print-head">
+        PapanNalar · {run.classLabel} ·{" "}
+        {run.date.split("-").reverse().join("/")}
+      </p>
+      {hardest && (
+        <Section label="Soal yang paling sering salah">
+          <p className="studio-comprehension-question">
+            {mathText(hardest.question.prompt)}
+          </p>
+          <p className="studio-comprehension-miss">
+            {hardest.missed} dari {graded.length} lembar diperiksa menjawab
+            belum tepat
+          </p>
+        </Section>
+      )}
+      <p className="studio-intake-line">
+        {responses.length}/{run.roster.length} lembar masuk ·{" "}
+        {responses.filter((r) => r.status === "review").length} perlu dicek ·{" "}
+        {run.document.items.length} soal · Versi {run.version}
+      </p>
       {responses.some((r) => r.status === "received") && (
         <details className={panel}>
           <summary className="min-h-12 cursor-pointer content-center font-bold">
@@ -410,7 +439,19 @@ export function ResultPage({ id }: { id: string }) {
                         <ol className="space-y-4">
                           {run.document.items.map((q, i) =>
                             q.kind === "card" ? (
-                              <li key={q.id}>
+                              <li
+                                key={q.id}
+                                /* T2-03: three distinct visual states, and a blank row is never
+                                   presented as `Belum tahu`. The stored schema only carries a
+                                   consumed answer or `?`, so `kosong` is reserved for the row
+                                   the scanner rejected; a response flagged for review is the
+                                   unreadable/double-marked case and says so. */
+                                data-scan-state={
+                                  answer.status === "review"
+                                    ? "perlu-dicek"
+                                    : "terbaca"
+                                }
+                              >
                                 <b>
                                   {i + 1}. {mathText(q.prompt)}
                                 </b>

@@ -158,3 +158,18 @@ export async function waitForShellCache(page: Page) {
     .poll(() => page.evaluate(() => window.__privacyFixture.auditShellCache()))
     .toBe(true);
 }
+
+/**
+ * Confirm a consequential action through the product's own `Sheet` (INTERACTION_DELTA_V4 §E-7).
+ *
+ * `window.confirm` is gone by design: every destructive action now opens the product dialog with
+ * its title and one consequence sentence, so a test that answers a browser dialog answers
+ * nothing. `label` is the confirm button's own label — read it from the card that owns the
+ * action, not from the trigger button, which may share its wording.
+ */
+export async function confirmSheet(page: Page, label: string | RegExp) {
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: label }).click();
+  await expect(dialog).toHaveCount(0);
+}

@@ -48,6 +48,7 @@ export function AppearanceEditor() {
           <button
             type="button"
             key={preset.id}
+            data-preset={preset.id}
             aria-pressed={draft.settings.preset === preset.id}
             onClick={() =>
               changeAppearance({
@@ -58,6 +59,9 @@ export function AppearanceEditor() {
           >
             <strong>{preset.label}</strong>
             <span>{preset.description}</span>
+            {/* R4: the near-field deviation is labelled here so it can never be silently
+                inherited by a room the teacher did not mean. */}
+            <span className="board-appearance-detail">{preset.detail}</span>
           </button>
         ))}
       </div>

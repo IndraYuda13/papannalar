@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { PDFDocument } from "pdf-lib";
 import {
+  confirmSheet,
   loginTeacher,
   openBoard,
   injectFixture,
@@ -260,7 +261,6 @@ for (const offline of [false, true])
         name: "Reset sesi di papan",
         exact: true,
       });
-      board.on("dialog", (dialog) => void dialog.accept());
       let failedResetId: string | undefined;
       if (offline) {
         await injectFixture(board);
@@ -278,6 +278,8 @@ for (const offline of [false, true])
         });
       }
       await reset.click();
+      // §E-7: the board's reset answers through the product's own Sheet, not browser chrome.
+      await confirmSheet(board, "Reset papan");
       await expect(board.getByTestId("library-board")).toHaveCount(0);
       await expect(board.getByTestId("pairing-code")).toHaveCount(0);
       await expect(

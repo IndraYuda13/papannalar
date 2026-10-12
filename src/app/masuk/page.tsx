@@ -3,6 +3,7 @@ import { Brand } from "@/ui/components/brand";
 import { LoginForm } from "@/features/guru/login-form";
 import { SampleLogin } from "@/features/guru/sample-login";
 import { DecorativeScene } from "@/ui/components/decorative-scene";
+import { LoginNextSteps } from "@/features/guru/login-next-steps";
 import { demoConfiguredForEnvironment } from "@/server/demo-surface";
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export default function LoginPage() {
           Gunakan email guru untuk membuka kelas Anda. Tautan hanya berlaku
           sekali.
         </p>
+        <LoginNextSteps />
         <LoginForm />
         {process.env["SAMPLE_ENABLED"] === "true" &&
           demoConfiguredForEnvironment() && (

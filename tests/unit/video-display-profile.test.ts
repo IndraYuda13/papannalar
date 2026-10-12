@@ -5,6 +5,7 @@ import {
   appearanceProfileSchema,
   createAppearanceStore,
   defaultAppearance,
+  parseStoredAppearance,
 } from "../../src/features/layar/appearance-profile";
 import {
   APPEARANCE_EXAMPLES,
@@ -66,6 +67,52 @@ describe("local appearance profile", () => {
       result.profile,
     );
   });
+  it("migrates a version-1 distance preset by name and writes the upgrade back once", () => {
+    // R3: `compact|balanced|large` are gone; a board configured before the release keeps its
+    // chosen distance instead of silently resetting to the default.
+    const disk = storage();
+    disk.setItem(
+      APPEARANCE_STORAGE_KEY,
+      JSON.stringify({
+        schemaVersion: 1,
+        displayKey: key,
+        displayName: "Papan 7B",
+        settings: { preset: "large", interactionZone: "lower" },
+      }),
+    );
+    const store = createAppearanceStore(
+      () => disk,
+      () => {
+        throw new Error("must reuse displayKey");
+      },
+    );
+    expect(store.read()).toEqual({
+      profile: {
+        schemaVersion: 2,
+        displayKey: key,
+        displayName: "Papan 7B",
+        settings: { preset: "jauh", interactionZone: "lower" },
+      },
+      needsSetup: false,
+      persisted: true,
+    });
+    expect(
+      JSON.parse(disk.getItem(APPEARANCE_STORAGE_KEY)!).schemaVersion,
+    ).toBe(2);
+    for (const [from, to] of [
+      ["compact", "dekat"],
+      ["balanced", "sedang"],
+      ["large", "jauh"],
+    ] as const)
+      expect(
+        parseStoredAppearance({
+          schemaVersion: 1,
+          displayKey: key,
+          displayName: "",
+          settings: { preset: from, interactionZone: "auto" },
+        })?.settings.preset,
+      ).toBe(to);
+  });
   it("first use requires save; subsequent instances keep the chosen preset, name and local identity", () => {
     const disk = storage(),
       store = createAppearanceStore(
@@ -77,7 +124,7 @@ describe("local appearance profile", () => {
     const chosen = {
       ...store.read().profile,
       displayName: "Papan 7B",
-      settings: { preset: "large" as const, interactionZone: "lower" as const },
+      settings: { preset: "jauh" as const, interactionZone: "lower" as const },
     };
     store.save(chosen);
     const next = createAppearanceStore(
@@ -102,7 +149,7 @@ describe("local appearance profile", () => {
     const first = store.read();
     const saved = store.save({
       ...first.profile,
-      settings: { preset: "compact", interactionZone: "auto" },
+      settings: { preset: "dekat", interactionZone: "auto" },
     });
     expect(saved.persisted).toBe(false);
     expect(store.read()).toBe(saved);
@@ -161,6 +208,14 @@ describe("local appearance profile", () => {
         settings: { preset: "giant", interactionZone: "auto" },
       }).success,
     ).toBe(false);
+    // The retired version-1 ids are no longer accepted at the current version.
+    for (const retired of ["compact", "balanced", "large"])
+      expect(
+        appearanceProfileSchema.safeParse({
+          ...defaultAppearance(key),
+          settings: { preset: retired, interactionZone: "auto" },
+        }).success,
+      ).toBe(false);
   });
   it("uses valid production presentation descriptors for all three preview questions", () => {
     for (const sample of APPEARANCE_EXAMPLES) {
@@ -182,9 +237,9 @@ describe("local appearance profile", () => {
     const fetch = vi.fn().mockResolvedValue({ ok: false });
     vi.stubGlobal("fetch", fetch);
     expect(saveBoardProfile(legacy)).toBe(true);
-    await expect(
-      sendBoardProfile({ ...legacy, ...defaultAppearance(key) }),
-    ).rejects.toThrow();
+    // The capability DTO is version 1 and carries no display preference at all; the
+    // appearance profile is a separate browser-only record.
+    await expect(sendBoardProfile(legacy)).rejects.toThrow();
     expect(readBoardProfile()).toEqual(legacy);
     expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual(legacy);
     expect(disk.getItem(APPEARANCE_STORAGE_KEY)).toBeNull();

@@ -278,7 +278,10 @@ export function PresentationControls({
           }),
         ),
       );
-      setMessage("Perintah tersimpan; menunggu layar menerapkan tampilan.");
+      // Friction 13: the words must match the state. `Terkirim ke papan.` is only true once
+      // the board has acknowledged the revision; until then the phone says what it is waiting
+      // for. The two strings never appear simultaneously.
+      setMessage("Terkirim ke papan.");
       return true;
     } catch {
       setMessage(

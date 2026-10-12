@@ -1,6 +1,7 @@
 import { openBoard } from "../browser/helpers";
 import { expect, test, type Page } from "@playwright/test";
 import {
+  confirmSheet,
   injectFixture,
   loginTeacher,
   waitForShellCache,
@@ -252,8 +253,10 @@ test("CRUD kelas A/B melalui API tetap dibatasi RLS PostgreSQL", async ({
       path: "artifacts/qa/M01/m01c/kelas-roster.png",
       fullPage: true,
     });
-    page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Hapus kelas" }).click();
+    // Consequential actions answer through the product's own dialog now (§E-7): there is no
+    // browser chrome to accept.
+    await confirmSheet(page, "Hapus kelas");
     await expect(page.getByRole("button", { name: /^Buka kelas/ })).toHaveCount(
       0,
     );

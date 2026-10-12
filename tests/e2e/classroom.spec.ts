@@ -118,7 +118,11 @@ test("teacher pairs board, public groups render and number line/lift respond loc
   await injectFixture(board);
   await waitForShellCache(board);
   await boardContext.setOffline(true);
-  await expect(board.getByTestId("board-connection")).toContainText("Offline");
+  // §8.8 + INTERACTION_DELTA_V4 friction 6: one closed vocabulary, applied verbatim. The board's
+  // offline sentence is the contract's, not a second wording invented by the surface.
+  await expect(board.getByTestId("board-connection")).toContainText(
+    "Sambungan ke layar terputus. Layar tetap menampilkan mode terakhir.",
+  );
   await board
     .getByRole("button", { name: "Batalkan langkah terakhir", exact: true })
     .click();

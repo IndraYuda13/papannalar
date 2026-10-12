@@ -132,11 +132,15 @@
     gap: 6px;
     color: var(--pn-teal-700);
   }
+  [data-motion="off"] *,
+  [data-motion="off"] *::before,
+  [data-motion="off"] *::after,
   [data-reduced-motion="true"] *,
   [data-reduced-motion="true"] *::before,
   [data-reduced-motion="true"] *::after {
     animation: none !important;
     transition: none !important;
+    animation-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
 }
@@ -206,38 +210,61 @@
   --board-base-marker: 40px;
   --board-base-hit: 56px;
   --board-fraction-whole: clamp(576px, 62cqw, 1056px);
+  /* R5 title-safe frame (5% inline / 2.5% block = 96px / 27px at 1920x1080). Every board
+     chrome element — header rule, pairing code, rail, state line — sits inside it. */
+  --board-safe-inline: 5%;
+  --board-safe-block: 2.5%;
+  /* The decision column's own top padding (§B0.1). It is what puts the question at ~14% of
+     canvas height instead of the middle: the band is an acceptance row now (A3b). */
+  --board-column-top: clamp(4px, 1.4%, 24px);
+  --board-rail-h: 4px;
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100dvh;
   min-height: 0;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: calc(var(--board-safe-block) + env(safe-area-inset-top))
+    calc(var(--board-safe-inline) + env(safe-area-inset-right))
+    calc(var(--board-safe-block) + env(safe-area-inset-bottom))
+    calc(var(--board-safe-inline) + env(safe-area-inset-left));
   font-size: var(--board-body);
   line-height: 1.2;
 }
-.board-surface[data-board-preset="compact"] {
+/* Distance presets (R3). `--board-question` is deliberately absent from all three: the floor
+   is an invariant, and the only thing a preset may change is chrome, model and spacing.
+   `dekat` is the recorded user-chosen deviation of R4 — a panel the students physically touch,
+   so the marker floor is 64px and the control floor 72px instead of 88/96. It is labelled in
+   the appearance editor so it can never be silently inherited. */
+.board-surface[data-board-preset="dekat"] {
   --board-body: clamp(20px, 1.45vw, 26px);
   --board-label: clamp(18px, 1.25vw, 24px);
   --board-answer: clamp(26px, 2vw, 38px);
   --board-gap: clamp(4px, 0.7dvh, 8px);
+  --board-control: 72px;
   --board-model: clamp(148px, 22dvh, 260px);
-  --board-marker: 32px;
-  --board-hit: 48px;
-  --board-base-marker: 32px;
-  --board-base-hit: 48px;
+  --board-marker: 64px;
+  --board-hit: 72px;
+  --board-base-marker: 64px;
+  --board-base-hit: 72px;
 }
-.board-surface[data-board-preset="large"] {
+.board-surface[data-board-preset="jauh"] {
   --board-body: clamp(22px, 1.9vw, 36px);
   --board-label: clamp(20px, 1.6vw, 30px);
   --board-answer: clamp(32px, 2.7vw, 52px);
   --board-gap: clamp(8px, 1.2dvh, 16px);
-  --board-control: clamp(52px, 6.5dvh, 72px);
+  --board-control: 96px;
   --board-model: clamp(164px, 25dvh, 300px);
-  --board-marker: 48px;
-  --board-hit: 64px;
-  --board-base-marker: 48px;
-  --board-base-hit: 64px;
+  --board-marker: 88px;
+  --board-hit: 88px;
+  --board-base-marker: 88px;
+  --board-base-hit: 88px;
+}
+.board-surface[data-board-preset="sedang"] {
+  --board-control: 96px;
+  --board-marker: 88px;
+  --board-hit: 88px;
+  --board-base-marker: 88px;
+  --board-base-hit: 88px;
 }
 .board-header {
   display: flex;
@@ -281,7 +308,249 @@
   min-height: 0;
   width: 100%;
   padding: var(--board-gap) clamp(12px, 2vw, 32px);
+  /* §B0.1: the question origin is near the top of a single decision column, never the middle
+     of the canvas. `justify-content` is deliberately not set here; the column anchors itself. */
+  align-items: center;
+}
+
+/* The decision column (INTERACTION_DELTA_V4 §B0). It owns the board's whole motion
+   vocabulary: rules draw, cards fade in place. It is anchored to the top so the eyeline from
+   the back of the room lands on one consistent place across screens (§B0.1). */
+.board-column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  gap: var(--board-gap);
+  padding-top: var(--board-column-top);
   text-align: center;
+}
+.board-column-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  /* `stretch`, not `center`: a flex item aligned at `center` is free to be as wide as its own
+     min-content, so one long option row pushed the canvas wider than the viewport. Centring is
+     a *text* property here; the bands themselves must be constrained by the column. */
+  align-items: stretch;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+}
+.board-column-body > * {
+  min-width: 0;
+}
+/* The threshold rule. It is the AMBANG device: the private→public crossing drawn once, and
+   the only rule on the board that ever moves (§B1). */
+.board-role-line {
+  position: relative;
+  width: 100%;
+  max-width: 88%;
+  margin: 0;
+  padding-top: 12px;
+  font-size: var(--board-label);
+  line-height: 1.3;
+  color: var(--pn-ink-600);
+}
+.board-role-line::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--pn-ink-900);
+  transform-origin: left;
+}
+.board-next-line {
+  position: relative;
+  width: 100%;
+  max-width: 88%;
+  margin: 0;
+  padding-top: 12px;
+  text-align: left;
+  font-size: var(--board-label);
+  line-height: 1.3;
+  color: var(--pn-ink-600);
+}
+.board-next-line::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--pn-ink-900);
+}
+.board-objective {
+  margin: 0;
+  font-size: var(--board-label);
+  color: var(--pn-teal-700);
+}
+.board-heading {
+  margin: 0;
+  font-size: var(--board-question);
+  line-height: 1.15;
+  max-width: 88%;
+}
+.board-question {
+  font-weight: 700;
+}
+.board-options,
+.board-option-row {
+  margin: 0;
+}
+.board-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: calc(var(--board-gap) * 1.5);
+}
+/* Two columns via grid, not flex-basis: a flex item will not shrink below its min-content
+   width, so a long option pushed the whole board wider than the viewport. `minmax(0, 1fr)`
+   plus an explicit wrap rule is what keeps a long option *inside* the safe frame. */
+.board-options-grid {
+  display: grid;
+  width: 100%;
+  max-width: 88%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@container (max-width: 900px) {
+  .board-options-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.board-option-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  min-width: 0;
+  font-size: var(--board-option);
+  border: 2px solid var(--pn-edge);
+  border-radius: var(--pn-r-1);
+  text-align: left;
+}
+/* A long option wraps inside its own cell instead of widening the board. The mark itself is
+   never broken — a broken number is a wrong number (§5.4) — only the prose may wrap. */
+.board-option-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.board-option-row-unknown {
+  flex: none;
+}
+.board-options-grid .board-option-row-unknown {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+.board-option-mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--board-option) * 1.1);
+  height: calc(var(--board-option) * 1.1);
+  border: 4px solid var(--pn-teal-700);
+  border-radius: 999px;
+  color: var(--pn-teal-700);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.board-option-mark-unknown {
+  border-style: dashed;
+}
+.board-note,
+.board-reading-copy,
+.board-instruction {
+  margin: 0;
+  max-width: 88%;
+  font-size: var(--board-body);
+  line-height: 1.3;
+}
+.board-instruction {
+  font-size: var(--board-answer);
+}
+.board-note[data-urgent="true"] {
+  font-weight: 700;
+  border-bottom: 2px solid var(--pn-ink-900);
+  display: inline-block;
+}
+.board-note[data-expired="true"] {
+  opacity: 0.72;
+}
+.board-model-box {
+  margin: 0;
+  padding: 20px 32px;
+  font-size: var(--board-answer);
+  border: 2px solid var(--pn-edge);
+  border-radius: var(--pn-r-1);
+  font-variant-numeric: tabular-nums;
+}
+.board-station-grid {
+  display: grid;
+  width: 100%;
+  gap: var(--board-gap);
+  align-items: start;
+}
+.board-task-panel {
+  padding: 16px;
+  border: 2px solid var(--pn-edge);
+  border-radius: var(--pn-r-1);
+  background: var(--pn-putih);
+  font-size: var(--board-body);
+  text-align: left;
+}
+.board-task-panel h2 {
+  margin: 0 0 8px;
+  font-size: var(--board-answer);
+  font-weight: 700;
+}
+.board-task-panel p + p {
+  margin-top: 12px;
+}
+@media (min-width: 1100px) {
+  .board-station-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+/* `Sesi selesai` (§B8). The Cetakan material: crop-mark corners, a monospace meta line, one
+   instruction. Nothing celebratory — a lesson ending is not a game ending. */
+.board-close {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+.board-close-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--board-gap);
+  width: min(100%, 88%);
+  padding: clamp(24px, 5%, 72px);
+  text-align: left;
+  border: 1px solid var(--pn-edge);
+  border-radius: var(--pn-r-1);
+  background: var(--pn-putih);
+}
+.board-close-card h1 {
+  margin: 0;
+  font-size: var(--board-question);
+  line-height: 1.15;
+}
+.board-close-meta {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--board-label);
+  color: var(--pn-ink-600);
 }
 :is(.board-surface, [data-library-preview])
   :where(
@@ -856,14 +1125,17 @@
 }
 @media (min-width: 1600px) and (min-height: 950px) {
   .board-surface {
-    --board-hit: 88px;
-    --board-base-hit: 88px;
-    --board-control: 80px;
-  }
-  .board-surface[data-board-preset="large"] {
     --board-hit: 96px;
     --board-base-hit: 96px;
     --board-control: 96px;
+  }
+  /* `dekat` is a declared near-field deviation (R4) and is never widened by a viewport
+     query: a teacher who chose "students are within arm's reach" keeps that choice on a
+     4K panel too. */
+  .board-surface[data-board-preset="dekat"] {
+    --board-hit: 72px;
+    --board-base-hit: 72px;
+    --board-control: 72px;
   }
   .board-header [data-slot="button"],
   .board-appearance-toolbar [data-slot="button"] {
@@ -1591,6 +1863,161 @@
     transform: rotate(360deg);
   }
 }
+/* The only loop in the codebase, with two limits (§A.2): it is legal **only** on a teacher
+   surface for a genuinely in-flight network action, and it may never appear on `/layar`. A
+   rotating glyph on a projected screen is a visible, repeating distraction to 32 children and
+   to a teacher standing behind it; the board states `Sedang menyiapkan…` as a static label. */
+.board-surface .pending-spinner {
+  animation: none;
+}
+
+/* LANGKAH beats (INTERACTION_DELTA_V4 §A.2/§B). One closed set of keyframes; every beat is
+   one-shot, ≤500ms, transform/opacity only, and no keyframe animates a box or a font size
+   (§A.6). `will-change` appears nowhere by design. */
+@keyframes pn-rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes pn-beat-arrive {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pn-beat-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--pn-m-2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pn-beat-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes pn-press {
+  from {
+    transform: translateY(var(--pn-m-1));
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes pn-ring-trace {
+  from {
+    transform: scale(0.25);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* B1 — the crossing. The threshold rule draws itself; the content fades in on top of it.
+     This is the one arrival the idle board gets, and it fires once per session. */
+  .board-rule-draw::before {
+    animation: pn-rule-draw var(--pn-t-3) var(--pn-ease-cross) both;
+  }
+  .board-column[data-crossing="true"] .board-column-body {
+    animation: pn-beat-rise var(--pn-t-2) var(--pn-ease-arrive) 140ms both;
+  }
+  /* B2 — question entrance. The question itself rises 4px (the board's text-bearing maximum)
+     and never scales or slides; the option rows fade in place with the short stagger. */
+  [data-beat="question"] .board-question,
+  [data-beat="question"].board-heading {
+    animation: pn-beat-rise var(--pn-t-2) var(--pn-ease-arrive) both;
+  }
+  .board-options .board-option-row {
+    animation: pn-beat-arrive var(--pn-t-2) var(--pn-ease-arrive) both;
+  }
+  .board-options .board-option-row:nth-child(1) {
+    animation-delay: calc(var(--pn-t-2) + var(--pn-stagger-1) * 0);
+  }
+  .board-options .board-option-row:nth-child(2) {
+    animation-delay: calc(var(--pn-t-2) + var(--pn-stagger-1) * 1);
+  }
+  .board-options .board-option-row:nth-child(3) {
+    animation-delay: calc(var(--pn-t-2) + var(--pn-stagger-1) * 2);
+  }
+  .board-options .board-option-row:nth-child(4) {
+    animation-delay: calc(var(--pn-t-2) + var(--pn-stagger-1) * 3);
+  }
+  /* The dashed `?` row is simply present, never staggered: staggering a fifth row would make
+     the room read five answers where the card has four plus a refusal (§B2, prototype R4). */
+  .board-option-row-unknown {
+    animation: none;
+  }
+  /* B4 — groups arrive one after another, 60ms apart. Students are looking for their own
+     number; the stagger gives the room a reading order it would not otherwise have. */
+  [data-testid="public-group"] {
+    animation: pn-beat-rise var(--pn-t-3) var(--pn-ease-arrive) both;
+  }
+  [data-testid="public-group"]:nth-child(1) {
+    animation-delay: 0ms;
+  }
+  [data-testid="public-group"]:nth-child(2) {
+    animation-delay: var(--pn-stagger-2);
+  }
+  [data-testid="public-group"]:nth-child(3) {
+    animation-delay: calc(var(--pn-stagger-2) * 2);
+  }
+  [data-testid="public-group"]:nth-child(4) {
+    animation-delay: calc(var(--pn-stagger-2) * 3);
+  }
+  [data-testid="public-group"] .board-group-shape {
+    animation: pn-beat-arrive var(--pn-t-4) var(--pn-ease-arrive) both;
+  }
+  /* B5 — the reveal: one hero beat per question, 500ms, never a score announcement. */
+  [data-reveal="true"] {
+    animation: pn-beat-rise var(--pn-t-2) var(--pn-ease-consequence) 260ms both;
+  }
+  [data-reveal="true"] > h2 {
+    animation: pn-beat-rise var(--pn-t-2) var(--pn-ease-consequence) 120ms both;
+  }
+  [data-reveal="true"]::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--pn-amber-700);
+    transform-origin: left;
+    animation: pn-rule-draw var(--pn-t-2) var(--pn-ease-consequence) both;
+  }
+  /* B8 — session close: content fades out, the closing card resolves. Nothing celebratory. */
+  .board-close-card {
+    animation: pn-beat-rise var(--pn-t-3) var(--pn-ease-arrive) both;
+  }
+  /* B7 — the touch trace. One 2px ring, once, per pointer. */
+  .board-touch-ring {
+    animation: pn-ring-trace var(--pn-t-4) var(--pn-ease-consequence) both;
+  }
+  /* C1 — press feedback on the board's own interactive objects. Never while a pointer is
+     down (§A.4): the release is what animates. */
+  .board-surface [data-slot="button"]:active,
+  .board-board-press:active {
+    animation: pn-press var(--pn-t-1) var(--pn-ease-state) both;
+  }
+  /* C2d — a metric or rail appears by fading; it must never grow from zero width, because a
+     distribution that draws itself from zero states "0 students" for the length of the beat
+     (§D.2, A28). */
+  .studio-rail {
+    animation: pn-beat-arrive var(--pn-t-2) var(--pn-ease-arrive) both;
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
@@ -1618,10 +2045,23 @@
     }
   }
 }
+/* The one reduced-motion net (INTERACTION_DELTA_V4 §A.3/A.5). Five inputs — OS preference,
+   the app's `Kurangi animasi`, light display, saveData and a hidden document — now write a
+   single derived attribute, so all of them produce byte-identical outcomes and no consumer
+   can observe two disagreeing switches. The legacy aliases are kept because the board's
+   capability path writes them from the same derived value. */
+[data-motion="off"] *,
+[data-motion="off"] *::before,
+[data-motion="off"] *::after,
 [data-reduced-motion="true"] *,
-[data-light-display="true"] * {
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after,
+[data-light-display="true"] *,
+[data-light-display="true"] *::before,
+[data-light-display="true"] *::after {
   animation: none !important;
   transition: none !important;
+  animation-delay: 0ms !important;
   scroll-behavior: auto !important;
 }
 
@@ -1994,4 +2434,168 @@ html:has([data-light-display="true"]) {
 [data-library-preview] .board-graph-coordinates input {
   width: 100%;
   min-width: 48px;
+}
+
+/* ── Board progress rail (B6, friction 12) ────────────────────────────────────────────────
+   One 4px rail at the bottom of the title-safe frame: a segment per item, plus the position
+   in tabular Atkinson. It is also the timer's home, so the board never has two competing
+   progress devices. The new segment's fill is a transform wipe, not a width animation, and
+   the three states differ by geometry as well as colour, because a strip where "done" and
+   "current" are the same colour cannot answer "where am I". */
+.board-rail {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  /* The rail is a flex child of `.board-foot` next to the state line. `width: 100%` made the
+     footer wider than the viewport and pushed the state line off the right edge (§A20, and the
+     board's own bounded-canvas rule): the rail must take the space that is left, not all of
+     it. */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.board-rail-track {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+}
+.board-rail-segment {
+  position: relative;
+  flex: 1;
+  height: var(--board-rail-h);
+  background: var(--pn-hairline);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.board-rail-segment[data-state="done"] {
+  background: var(--pn-teal-700);
+}
+.board-rail-segment[data-state="current"] {
+  height: calc(var(--board-rail-h) + 2px);
+  background: var(--pn-hairline);
+}
+.board-rail-segment[data-state="current"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--pn-teal-700);
+  transform-origin: left;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .board-rail-segment[data-state="current"]::after {
+    animation: pn-rule-draw var(--pn-t-3) var(--pn-ease-arrive) both;
+  }
+}
+.board-rail-position {
+  flex: none;
+  font-size: var(--board-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The connection/state line at the bottom of the safe frame (§8.8). Three words, one
+   vocabulary shared with the phone (friction 6): a teacher must never see two different
+   sentences for one condition. */
+.board-state-line {
+  display: flex;
+  align-items: center;
+  /* The sentence may wrap; its rule stays attached to the first line rather than pushing the
+     text past the edge. */
+  flex-wrap: wrap;
+  gap: 12px;
+  flex: 0 1 auto;
+  /* The state line is a flex child of `.board-foot`. It may wrap onto its own line (the footer
+     wraps below 900px) but it must never be the thing that makes the canvas wider than the
+     screen: the room reads the whole sentence or the sentence is wrong for that width. */
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  font-size: var(--board-label);
+  color: var(--pn-ink-600);
+}
+.board-state-line[data-connected="true"] {
+  color: var(--pn-teal-700);
+}
+.board-state-line[data-arrived] .board-state-rule {
+  transform-origin: left;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .board-state-line[data-arrived="true"] .board-state-rule {
+    animation: pn-rule-draw var(--pn-t-4) var(--pn-ease-consequence) both;
+  }
+}
+.board-state-rule {
+  flex: none;
+  width: 96px;
+  height: 2px;
+  background: currentColor;
+}
+
+/* ── Print (D.8, §8.9, friction 9/14) ─────────────────────────────────────────────────────
+   The one place the LEMBAR grammar is literally true: paper ground → white, ink → black, no
+   chrome, no nav, no shadow, no sticky. Motion is declared off explicitly — an entrance
+   animation in a print stylesheet is a defect, and A14 asserts zero animated elements in
+   print emulation. No student name may ever appear (invariant): the sheet prints attendance
+   numbers only. */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-family: "Atkinson Hyperlegible", system-ui, sans-serif !important;
+    font-size: 12pt;
+  }
+  .studio-sidebar,
+  .studio-shell nav,
+  [data-nav-item],
+  .skip-link,
+  .studio-offline-line,
+  .board-menu,
+  .board-rail,
+  .board-header,
+  [data-print-skip],
+  [data-slot="button"],
+  button,
+  select {
+    display: none !important;
+  }
+  .studio-shell,
+  .studio-workspace,
+  main {
+    display: block !important;
+    position: static !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    background: #fff !important;
+    border: 0 !important;
+  }
+  .studio-print-head {
+    display: block !important;
+    margin-bottom: 6mm;
+    font-size: 11pt;
+    border-bottom: 1px solid #000;
+    padding-bottom: 2mm;
+  }
+  .studio-print-only {
+    display: block !important;
+  }
+  a[href]::after {
+    content: none !important;
+  }
+}
+.studio-print-head,
+.studio-print-only {
+  display: none;
 }

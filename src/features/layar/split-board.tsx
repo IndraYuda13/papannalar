@@ -5,7 +5,7 @@ import type { PresentationState } from "@/contracts/presentation";
 import { MathPrompt } from "@/ui/components/math-prompt";
 import { Button } from "@/ui/components/button";
 import { ToolActivity } from "@/features/tools/activity";
-import { GroupSymbol } from "./public-groups";
+import { GroupShape } from "./public-groups";
 import { QuestionVisual } from "./question-visual";
 
 export function SplitBoard({
@@ -43,7 +43,8 @@ export function SplitBoard({
               <h2 className="text-[40px] font-bold">
                 {groups.find((g) => g.id === panel.groupId) && (
                   <>
-                    <GroupSymbol
+                    <GroupShape
+                      className="board-group-shape board-group-shape-inline"
                       label={groups.find((g) => g.id === panel.groupId)!.label}
                     />{" "}
                   </>

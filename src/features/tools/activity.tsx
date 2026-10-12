@@ -158,6 +158,7 @@ export function ToolActivity({
       {guidance?.reveal && (
         <section
           aria-label="Jawaban latihan dibuka guru"
+          data-reveal="true"
           className="mb-6 space-y-4 rounded-kartu border-4 border-primary bg-white p-5"
         >
           <h2 className="text-[48px] font-bold">Mari bahas caranya</h2>

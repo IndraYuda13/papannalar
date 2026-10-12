@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { classListSchema } from "../../src/contracts/classes";
 import {
+  confirmSheet,
   loginTeacher,
   injectFixture,
   waitForShellCache,
@@ -289,8 +290,8 @@ test("FLOW02 empty pages offer a next action; personal and example classes remai
   ).toBeVisible();
   const selectedClass = new URL(page.url()).searchParams.get("class");
   expect(selectedClass).toBeTruthy();
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Hapus kelas", exact: true }).click();
+  await confirmSheet(page, "Hapus kelas");
   await expect(
     page.getByRole("button", { name: /Buka kelas 7UX/ }),
   ).toHaveCount(0);
