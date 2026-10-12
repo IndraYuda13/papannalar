@@ -423,7 +423,3 @@ create function pn_private.valid_group_payload(payload jsonb) returns boolean la
 revoke all on function pn_private.valid_group_payload(jsonb) from public,anon,authenticated;
 alter table public.group_lessons add constraint group_payload_schema check(pn_private.valid_group_payload(payload));
 commit;
-
-
-
-
