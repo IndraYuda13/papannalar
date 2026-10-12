@@ -1,0 +1,12 @@
+begin;
+create temp table assertions(label text);
+create function pg_temp.ok(v boolean,label text) returns void language plpgsql as $$begin if v is distinct from true then raise exception 'FAILED: %',label;end if;insert into assertions values(label);end$$;
+select pg_temp.ok(not has_table_privilege('anon','pn_private.password_credentials','SELECT'),'anon cannot read credentials');
+select pg_temp.ok(not has_table_privilege('authenticated','pn_private.password_credentials','SELECT'),'teacher cannot read credentials');
+select pg_temp.ok(not has_table_privilege('authenticated','pn_private.password_sessions','SELECT'),'sessions private');
+select pg_temp.ok(not has_table_privilege('authenticated','pn_private.password_limits','UPDATE'),'rate limits private');
+select pg_temp.ok(not public.password_auth_limit(null,null),'null bucket denied');
+select pg_temp.ok(not public.password_auth_limit('invalid','invalid'),'malformed bucket denied');
+select pg_temp.ok(public.password_auth_limit(repeat('a',64),repeat('b',64)),'valid rate first accepted');
+select count(*)||' password auth SQL assertions PASS' from assertions;
+rollback;

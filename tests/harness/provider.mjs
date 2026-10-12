@@ -5,11 +5,19 @@ import { createHash, randomUUID, randomBytes } from "node:crypto";
 import { sql, literal, asUser } from "./postgres.mjs";
 import { providerOrigin, providerPort } from "./ports.mjs";
 import { SAMPLE_ID } from "../../scripts/sample-data.mjs";
+import {
+  internalTestAuth,
+  passwordRate,
+  credentials,
+  registerPassword,
+  loginPassword,
+  enrollPassword,
+  saveToken,
+  readToken,
+  revokeToken,
+} from "./provider-password.mjs";
 
-const users = new Map(),
-  tokens = new Map(),
-  sessionTokens = new Map(),
-  pending = new Map(),
+const pending = new Map(),
   codes = new Map();
 function newUser(email, anonymous = false) {
   const user = {
@@ -25,7 +33,6 @@ function newUser(email, anonymous = false) {
   sql(
     `insert into auth.users(id,email,is_anonymous) values (${literal(user.id)},${literal(user.email)},${anonymous});`,
   );
-  users.set(email ?? user.id, user);
   return user;
 }
 function session(user) {
@@ -40,11 +47,10 @@ function session(user) {
   };
   const access_token = `${Buffer.from('{"alg":"HS256","typ":"JWT"}').toString("base64url")}.${Buffer.from(JSON.stringify(payload)).toString("base64url")}.${randomBytes(32).toString("base64url")}`;
   const refresh_token = randomUUID();
-  tokens.set(access_token, user);
-  tokens.set(refresh_token, user);
-  const members = new Set([access_token, refresh_token]);
-  sessionTokens.set(access_token, members);
-  sessionTokens.set(refresh_token, members);
+  const sessionId = randomUUID();
+  saveToken(access_token, user, 3600, sessionId, "access");
+  saveToken(refresh_token, user, 86400, sessionId, "refresh");
+
   return {
     access_token,
     refresh_token,
@@ -55,6 +61,13 @@ function session(user) {
   };
 }
 function dataRequest(request, url, body, user) {
+  if (url.pathname === "/rest/v1/rpc/password_auth_limit")
+    return {
+      body:
+        sql(
+          `select to_jsonb(public.password_auth_limit(${literal(body.p_email_hash)},${literal(body.p_ip_hash)}))`,
+        ) === "true",
+    };
   if (!user) return { status: 401, body: { message: "unauthorized" } };
   if (url.pathname === "/rest/v1/rpc/presentation_logout")
     return {
@@ -214,13 +227,17 @@ createServer(async (request, response) => {
   let result = { status: 200, body: {} };
   try {
     let raw = "";
-    for await (const chunk of request) raw += chunk;
+    for await (const chunk of request) {
+      raw += chunk;
+      if (Buffer.byteLength(raw) > 8192) throw new Error("AUTH_FAILED");
+    }
     const body = raw ? JSON.parse(raw) : {};
     const bearer = request.headers.authorization?.replace(/^Bearer /, "");
-    const user = tokens.get(bearer);
+    const user = readToken(bearer, "access");
     if (url.pathname === "/health")
       result.body = { mode: "TEST_DOUBLE", database: "real PostgreSQL" };
     else if (url.pathname === "/__test/link") {
+      if (!internalTestAuth()) throw new Error("AUTH_FAILED");
       const item = pending.get(url.searchParams.get("email"));
       if (!item) result = { status: 404, body: {} };
       else {
@@ -230,6 +247,7 @@ createServer(async (request, response) => {
         result.body = { url: `${item.redirect}?code=${code}` };
       }
     } else if (url.pathname === "/auth/v1/otp") {
+      if (!internalTestAuth()) throw new Error("AUTH_FAILED");
       pending.set(body.email, {
         email: body.email,
         challenge: body.code_challenge,
@@ -237,30 +255,35 @@ createServer(async (request, response) => {
       });
     } else if (url.pathname === "/auth/v1/token") {
       if (url.searchParams.get("grant_type") === "password") {
-        if (
-          body.email !== "recording@qa.invalid" ||
-          body.password !== "local-recording-test-password-only-2026"
-        )
-          throw new Error("invalid");
-        const existing = sql(
-          `select row_to_json(u) from auth.users u where id=${literal(SAMPLE_ID)}::uuid`,
-        );
-        if (!existing) throw new Error("unseeded");
-        const sample = {
-          ...JSON.parse(existing),
-          aud: "authenticated",
-          role: "authenticated",
-          app_metadata: { provider: "email" },
-          user_metadata: {},
-        };
-        users.set(sample.email, sample);
-        result.body = session(sample);
+        const input = credentials(body);
+        passwordRate(input.email, request.socket.remoteAddress ?? "unknown");
+        if (!(
+          internalTestAuth() &&
+          body.email === "recording@qa.invalid" &&
+          body.password === "local-recording-test-password-only-2026"
+        )) {
+          result.body = session(loginPassword(input));
+        } else {
+          const existing = sql(
+            `select row_to_json(u) from auth.users u where id=${literal(SAMPLE_ID)}::uuid`,
+          );
+          if (!existing) throw new Error("unseeded");
+          const sample = {
+            ...JSON.parse(existing),
+            aud: "authenticated",
+            role: "authenticated",
+            app_metadata: { provider: "email" },
+            user_metadata: {},
+          };
+          result.body = session(sample);
+        }
       } else if (url.searchParams.get("grant_type") === "refresh_token") {
-        const refreshUser = tokens.get(body.refresh_token);
+        const refreshUser = readToken(body.refresh_token, "refresh");
         if (!refreshUser) throw new Error("invalid");
-        tokens.delete(body.refresh_token);
+        revokeToken(body.refresh_token);
         result.body = session(refreshUser);
       } else {
+        if (!internalTestAuth()) throw new Error("AUTH_FAILED");
         const item = codes.get(body.auth_code);
         if (
           !item ||
@@ -270,34 +293,42 @@ createServer(async (request, response) => {
         )
           throw new Error("invalid");
         codes.delete(body.auth_code);
-        result.body = session(users.get(item.email) ?? newUser(item.email));
+        const existing = sql(
+          `select jsonb_build_object('id',id,'email',email,'is_anonymous',is_anonymous) from auth.users where lower(btrim(email))=${literal(item.email.trim().toLowerCase())} limit 1`,
+        );
+        result.body = session(
+          existing ? JSON.parse(existing) : newUser(item.email),
+        );
       }
+    } else if (url.pathname === "/auth/v1/user" && request.method === "PUT") {
+      if (Object.keys(body).some((k) => k !== "password"))
+        throw new Error("AUTH_FAILED");
+      passwordRate(
+        user?.email ?? "",
+        request.socket.remoteAddress ?? "unknown",
+      );
+      result.body = enrollPassword(user, body.password);
     } else if (url.pathname === "/auth/v1/user")
       result = user
         ? { body: user }
         : { status: 401, body: { code: "bad_jwt", message: "invalid token" } };
-    else if (url.pathname === "/auth/v1/signup")
-      result.body = session(newUser(undefined, true));
-    else if (url.pathname === "/auth/v1/logout") {
-      if (url.searchParams.get("scope") === "local") {
-        for (const token of sessionTokens.get(bearer) ?? []) {
-          tokens.delete(token);
-          sessionTokens.delete(token);
-        }
-      } else
-        for (const [token, owner] of tokens)
-          if (owner.id === user?.id) {
-            tokens.delete(token);
-            sessionTokens.delete(token);
-          }
+    else if (url.pathname === "/auth/v1/signup") {
+      if (body.email || body.password) {
+        const input = credentials(body);
+        passwordRate(input.email, request.socket.remoteAddress ?? "unknown");
+        result.body = session(registerPassword(input));
+      } else result.body = session(newUser(undefined, true));
+    } else if (url.pathname === "/auth/v1/logout") {
+      revokeToken(bearer, url.searchParams.get("scope") !== "local");
       result = { status: 204 };
     } else if (url.pathname.startsWith("/rest/v1/"))
       result = dataRequest(request, url, body, user);
     else result = { status: 404, body: {} };
-  } catch {
+  } catch (error) {
     result = {
-      status: 400,
-      body: { code: "invalid_request", message: "test request rejected" },
+      status:
+        error instanceof Error && error.message === "RATE_LIMITED" ? 429 : 400,
+      body: { code: "invalid_credentials", message: "Authentication failed" },
     };
   }
   response.writeHead(result.status ?? 200, {

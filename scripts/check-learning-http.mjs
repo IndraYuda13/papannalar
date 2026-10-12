@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { createServerClient } from "@supabase/ssr";
 import {
   verifyDiagnosticDatabase,
@@ -16,31 +16,17 @@ if (
   process.env.PNL_PROVIDER_PORT === "54325"
 )
   throw new Error("Explicit nonlive app/provider ports required");
-const verifier = randomUUID();
+const password = randomBytes(24).toString("hex");
 const email = `backend-${randomUUID()}@qa.invalid`;
 const headers = { "Content-Type": "application/json" };
-await fetch(
-  `${provider}/auth/v1/otp?redirect_to=${encodeURIComponent(app + "/auth/callback")}`,
-  {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      email,
-      code_challenge: createHash("sha256").update(verifier).digest("base64url"),
-    }),
-  },
-);
-const link = await (
-  await fetch(`${provider}/__test/link?email=${encodeURIComponent(email)}`)
-).json();
-const code = new URL(link.url).searchParams.get("code");
 const session = await (
-  await fetch(`${provider}/auth/v1/token?grant_type=pkce`, {
+  await fetch(`${provider}/auth/v1/signup`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ auth_code: code, code_verifier: verifier }),
+    body: JSON.stringify({ email, password }),
   })
 ).json();
+if (!session.access_token) throw new Error("Signup unavailable");
 const cookies = new Map();
 const auth = createServerClient(provider, "local-test-publishable-key", {
   cookieOptions: {

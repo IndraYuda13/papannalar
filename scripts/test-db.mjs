@@ -4,6 +4,13 @@ import { createServer } from "vite";
 import { createHash } from "node:crypto";
 
 const mode = process.argv[2] ?? "rls";
+if (mode === "password-auth") {
+  const output = sql(
+    await readFile("supabase/tests/password-auth.sql", "utf8"),
+  );
+  console.log(output.split("\n").at(-1));
+  process.exit(0);
+}
 if (mode === "learning") {
   for (const file of ["library", "group-lessons", "group-board"]) {
     const output = sql(await readFile(`supabase/tests/${file}.sql`, "utf8"));
@@ -52,6 +59,9 @@ if (mode === "prepare") {
     await mkdir("artifacts/qa/video-ready", { recursive: true });
     await writeFile("artifacts/qa/video-ready/library-sql.log", library + "\n");
     console.log(library);
+    console.log(
+      sql(await readFile("supabase/tests/password-auth.sql", "utf8")),
+    );
     for (const file of ["group-lessons", "group-board"]) {
       const output = sql(await readFile(`supabase/tests/${file}.sql`, "utf8"));
       await mkdir("artifacts/qa/learning", { recursive: true });

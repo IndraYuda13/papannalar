@@ -27,7 +27,7 @@ describe("deliveredLoginLink", () => {
     expect(await deliveredLoginLink("a@b.c")).toBeNull();
   });
 
-  test("returns a same-site callback path when enabled", async () => {
+  test("obsolete reveal flag cannot mint an in-band login capability", async () => {
     process.env[FLAG] = "1";
     process.env[PROVIDER] = "http://127.0.0.1:54325";
     const fetchMock = vi.fn(
@@ -40,13 +40,8 @@ describe("deliveredLoginLink", () => {
         ),
     );
     vi.stubGlobal("fetch", fetchMock);
-    expect(await deliveredLoginLink("a@b.c")).toBe(
-      `/auth/callback?code=${CODE}`,
-    );
-    expect(fetchMock).toHaveBeenCalledWith(
-      "http://127.0.0.1:54325/__test/link?email=a%40b.c",
-      { cache: "no-store" },
-    );
+    expect(await deliveredLoginLink("a@b.c")).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   test("refuses a foreign path and a malformed code", async () => {
