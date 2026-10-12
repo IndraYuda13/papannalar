@@ -134,13 +134,25 @@ try {
       process.exit(code ?? (signal ? 1 : 0));
     });
   }
-  console.log(
-    recording
-      ? `Rekaman lokal: ${appOrigin}/masuk → Coba dengan data contoh → /guru | papan /layar. PostgreSQL nyata; Auth/Realtimenya provider uji loopback. Ctrl+C untuk berhenti.`
-      : demoOn
-        ? `Demo adapter lokal: ${appOrigin}/demo | papan: ${appOrigin}/layar | Ctrl+C untuk berhenti. Auth/email/WebSocket live tidak dipakai.`
-        : `Adapter lokal aktif (demo OFF): ${appOrigin}/masuk | papan: ${appOrigin}/layar | /demo dan /auth/demo 404. Jalankan dengan --demo atau PAPANNALAR_DEMO_MODE=1 untuk mengaktifkan permukaan demo.`,
-  );
+  // The banner must describe what THIS process serves, so `recording` cannot be
+  // the first test: `--video` deliberately no longer implies demo mode (Layer 1),
+  // and the production unit runs `pnpm video`, so a recording branch reached with
+  // demo OFF told the operator to click a sample CTA that no longer renders on a
+  // path that answers 404. Demo mode now selects the copy first, and the
+  // recording flow is only advertised as ready when POST /auth/sample will
+  // really mint: the route refuses a SAMPLE_ACCESS_CODE shorter than 12
+  // characters (403), which includes the empty default this launcher passes when
+  // the operator does not set one.
+  const sampleCodeReady =
+    (process.env["SAMPLE_ACCESS_CODE"] ?? "").length >= 12;
+  const banner = demoOn
+    ? recording
+      ? sampleCodeReady
+        ? `Rekaman lokal: ${appOrigin}/masuk → Coba dengan data contoh (isi kode akses rekaman) → /guru | papan /layar. PostgreSQL nyata; Auth/Realtimenya provider uji loopback. Ctrl+C untuk berhenti.`
+        : `Rekaman lokal: ${appOrigin}/masuk | CTA "Coba dengan data contoh" belum siap: set SAMPLE_ACCESS_CODE minimal 12 karakter (permintaan ditolak, 403). Jalur siap pakai: ${appOrigin}/demo | papan: ${appOrigin}/layar. Ctrl+C untuk berhenti.`
+      : `Demo adapter lokal: ${appOrigin}/demo | papan: ${appOrigin}/layar | Ctrl+C untuk berhenti. Auth/email/WebSocket live tidak dipakai.`
+    : `Adapter lokal aktif (demo OFF): ${appOrigin}/masuk | papan: ${appOrigin}/layar | /demo dan /auth/demo 404. Jalankan dengan --demo atau PAPANNALAR_DEMO_MODE=1 untuk mengaktifkan permukaan demo.`;
+  console.log(banner);
   if (process.argv.includes("--smoke")) {
     let ready = false;
     for (let i = 0; i < 40; i++) {
