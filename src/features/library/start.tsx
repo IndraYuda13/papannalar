@@ -7,6 +7,8 @@ import { runSchema, publicLibraryItem } from "@/contracts/library";
 import { Button } from "@/ui/components/button";
 import { field, panel, libraryCall, jakartaDate } from "./client";
 import { PageHeader, StateNotice, WorkflowSteps } from "@/ui/components/studio";
+import { LessonAxis } from "@/ui/components/lesson-axis";
+import { lessonMoments } from "@/features/layar/package-navigation";
 import { LibraryItemView } from "./item-view";
 export function StartLesson({
   classId = "",
@@ -91,6 +93,17 @@ export function StartLesson({
         current={selected ? 2 : cls ? 1 : 0}
         steps={["Pilih kelas", "Pilih soal", "Mulai sesi"]}
       />
+      {/* D3.3/A45 — the lesson axis. On this screen the lesson is what is being *chosen*, so the
+          axis states the shape of the lesson the current selection produces (its own moments, in
+          `package-navigation.ts` order) and marks the first one, where the session will open.
+          Before a collection is picked there is no lesson yet, so no axis is rendered: the axis
+          must never be the place a teacher learns the screen is empty. */}
+      {selected && (
+        <LessonAxis
+          moments={lessonMoments(selected.document.items)}
+          current={0}
+        />
+      )}
       {!classes.length ? (
         <StateNotice
           title="Tambahkan kelas untuk memulai"

@@ -129,7 +129,11 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
           id="konten"
           className="studio-workspace min-w-0 px-4 pt-5 sm:px-8 lg:py-8"
         >
-          <div className="mx-auto w-full max-w-[960px]">
+          {/* `data-workspace-shell` is the content frame the ≥1280 two-track grid targets
+              (D3.2/A44). It keeps the 960 px reading measure by default, so every sibling
+              desktop surface is unchanged; only a page that marks its own tracks
+              (`[data-tracks]`) opts into the wider composition. */}
+          <div data-workspace-shell className="mx-auto w-full max-w-[960px]">
             <MotionSwap change={pathname}>
               {adaptive ? (
                 children

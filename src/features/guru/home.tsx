@@ -18,6 +18,7 @@ import { useClassSpreads, RungRail, type Spread } from "./class-spread";
 import { ArrowRight, Presentation, Shapes } from "lucide-react";
 import type { LibraryRun } from "@/contracts/library";
 import { MotionBoundary } from "@/ui/components/motion-boundary";
+import { useMinWidth } from "@/ui/use-min-width";
 
 /**
  * One row contract (V5): icon · content · rail · action, and the action track never wraps.
@@ -77,6 +78,9 @@ function ResumeRow({
 export function TeacherHome() {
   const { classes, state, offline, scope } = useTeacher(),
     [pair, setPair] = useState("");
+  // ≥1280 is where the re-author puts the two-track canvas in force (D3.2/A44), so that is
+  // where the action track shows more of its own resume list. Below it the count is unchanged.
+  const resumeRows = useMinWidth(1280) ? WIDE_RESUME_ROWS : RESUME_ROWS;
   const [now, setNow] = useState(0);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -128,9 +132,10 @@ export function TeacherHome() {
   const hasActive = active.length > 0;
   const practiceHref = `/guru/latihan?mode=${state.sample ? "demo" : "pilot"}${last ? `&class=${last.id}` : ""}`;
   return (
-    <div className="space-y-6">
+    <>
       {/* v4 (§9.1): `Ruang mengajar`, no eyebrow, no hero, exactly one primary action.
-          The board action is a persistent secondary in the header (F3), never a floating link. */}
+          The board action is a persistent secondary in the header (F3), never a floating link.
+          The header spans both tracks: it is the screen's own title, not a track's label. */}
       <PageHeader
         title="Ruang mengajar"
         description={
@@ -163,148 +168,177 @@ export function TeacherHome() {
           Layar ditemukan. Pilih atau lanjutkan sesi untuk menyambungkannya.
         </p>
       )}
-      {hasActive ? (
-        <Section
-          id="teacher-home-resume"
-          aria-label="Sesi aktif"
-          label="Lanjutkan sesi"
-          ground="sheet"
-        >
-          <ul>
-            {active.slice(0, 3).map((run) => (
-              <ResumeRow
-                key={run.id}
-                run={run}
-                spread={run.classId ? spreads[run.classId] : undefined}
-                primary={run.id === active[0].id}
-              />
-            ))}
-          </ul>
-          {active.length > 3 && (
-            <details>
-              <summary className="flex min-h-14 cursor-pointer items-center border-t border-pn-hairline px-4 font-semibold text-pn-teal-700">
-                Sesi lainnya ({active.length - 3})
-              </summary>
-              <ul className="max-h-96 overflow-y-auto overscroll-contain">
-                {active.slice(3).map((run) => (
+      {/* D3.2/A44 — the ≥1280 two-track composition. The action track keeps what the teacher
+          came for (the one primary and the resume list); the supporting track carries this
+          screen's own remaining content in the ruling's order: the closed-run summary, then
+          `Langkah berikutnya`, then `Soal & alat`. Nothing new is invented, no second primary
+          is mounted, and no second navigation landmark appears in either track. Below 1280 the
+          two tracks simply stack in the same order the phone already reads. */}
+      <div data-tracks-shell>
+        <div data-tracks="main" className="space-y-6">
+          {hasActive ? (
+            <Section
+              id="teacher-home-resume"
+              aria-label="Sesi aktif"
+              label="Lanjutkan sesi"
+              ground="sheet"
+            >
+              <ul>
+                {active.slice(0, resumeRows).map((run) => (
                   <ResumeRow
                     key={run.id}
                     run={run}
                     spread={run.classId ? spreads[run.classId] : undefined}
+                    primary={run.id === active[0].id}
                   />
                 ))}
               </ul>
-            </details>
-          )}
-        </Section>
-      ) : (
-        <Section label="Sesi hari ini" ground="sheet">
-          <div className="p-4">
-            <StateNotice
-              title="Belum ada sesi hari ini"
-              action={
-                <Button asChild data-emphasis="primary">
-                  {classes.length ? (
-                    <Link href={`/guru/mulai?class=${last.id}`}>
-                      Mulai mengajar
-                    </Link>
-                  ) : (
-                    /* Friction 10: with zero classes the old label promised a session and the
+              {active.length > resumeRows && (
+                <details>
+                  <summary className="flex min-h-14 cursor-pointer items-center border-t border-pn-hairline px-4 font-semibold text-pn-teal-700">
+                    Sesi lainnya ({active.length - resumeRows})
+                  </summary>
+                  <ul className="max-h-96 overflow-y-auto overscroll-contain">
+                    {active.slice(resumeRows).map((run) => (
+                      <ResumeRow
+                        key={run.id}
+                        run={run}
+                        spread={run.classId ? spreads[run.classId] : undefined}
+                      />
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </Section>
+          ) : (
+            <Section label="Sesi hari ini" ground="sheet">
+              <div className="p-4">
+                <StateNotice
+                  title="Belum ada sesi hari ini"
+                  action={
+                    <Button asChild data-emphasis="primary">
+                      {classes.length ? (
+                        <Link href={`/guru/mulai?class=${last.id}`}>
+                          Mulai mengajar
+                        </Link>
+                      ) : (
+                        /* Friction 10: with zero classes the old label promised a session and the
                        destination was a class form. The label now says what the next screen
                        actually is. */
-                    <Link href="/guru/kelas">Buat kelas</Link>
-                  )}
-                </Button>
-              }
-            >
-              {classes.length
-                ? "Pilih kelas dan soal, lalu mulai mengajar."
-                : "Buat kelas dulu, lalu pilih soal dan mulai mengajar."}
-            </StateNotice>
-          </div>
-        </Section>
-      )}
-      {closedToday && (
-        <Section label="Baru selesai" ground="sheet" data-recently-closed>
-          <ul className="studio-row-list">
-            <li>
-              <Link
-                className="studio-row"
-                href={`/guru/hasil/${closedToday.id}`}
-              >
-                <span className="studio-row-icon" aria-hidden>
-                  {closedToday.document.items.length}
-                </span>
-                <span className="studio-row-content">
-                  <h2>
-                    {closedToday.classLabel} · {closedToday.document.title}
-                  </h2>
-                  <p>
-                    {closedToday.date.split("-").reverse().join("/")} ·{" "}
-                    {closedToday.mode === "assessment"
-                      ? "Cek pemahaman"
-                      : "Mengajar"}{" "}
-                    selesai
-                    {intake
-                      ? ` · ${intake.read}/${intake.total} kartu terbaca · ${intake.review} perlu dicek`
-                      : ""}
-                  </p>
-                </span>
-                <span className="studio-row-action" data-row-action>
-                  Buka catatan
-                </span>
-              </Link>
-            </li>
-          </ul>
-        </Section>
-      )}
-      {/* §9.1(c): the workflow entry sits in a shared list, not a Section whose whole body is
+                        <Link href="/guru/kelas">Buat kelas</Link>
+                      )}
+                    </Button>
+                  }
+                >
+                  {classes.length
+                    ? "Pilih kelas dan soal, lalu mulai mengajar."
+                    : "Buat kelas dulu, lalu pilih soal dan mulai mengajar."}
+                </StateNotice>
+              </div>
+            </Section>
+          )}
+        </div>
+        <div data-tracks="support" className="space-y-6">
+          {closedToday && (
+            <Section label="Baru selesai" ground="sheet" data-recently-closed>
+              <ul className="studio-row-list">
+                <li>
+                  <Link
+                    className="studio-row"
+                    href={`/guru/hasil/${closedToday.id}`}
+                  >
+                    <span className="studio-row-icon" aria-hidden>
+                      {closedToday.document.items.length}
+                    </span>
+                    <span className="studio-row-content">
+                      <h2>
+                        {closedToday.classLabel} · {closedToday.document.title}
+                      </h2>
+                      <p>
+                        {closedToday.date.split("-").reverse().join("/")} ·{" "}
+                        {closedToday.mode === "assessment"
+                          ? "Cek pemahaman"
+                          : "Mengajar"}{" "}
+                        selesai
+                        {intake
+                          ? ` · ${intake.read}/${intake.total} kartu terbaca · ${intake.review} perlu dicek`
+                          : ""}
+                      </p>
+                    </span>
+                    <span className="studio-row-action" data-row-action>
+                      Buka catatan
+                    </span>
+                  </Link>
+                </li>
+              </ul>
+            </Section>
+          )}
+          {/* §9.1(c): the workflow entry sits in a shared list, not a Section whose whole body is
           one row (V7/V8's lesson).
           DELIBERATE DEVIATION, recorded for LENS/PRIME: §9.1(d) also lists `Layar Kelas` as a
           secondary row, while F3's resolution promotes the board action into the header. Doing
           both would put two `Layar Kelas` affordances on one screen — precisely the "two
           competing go paths" F4 measured. The header keeps it (always present, on every route);
           this list keeps the one action that has no other home. */}
-      <Section label="Langkah berikutnya">
-        <ul className="studio-row-list">
-          <li>
-            <Link className="studio-row" href={practiceHref}>
-              <span className="studio-row-icon" aria-hidden>
-                <Shapes size={22} strokeWidth={1.8} />
-              </span>
-              <span className="studio-row-content">
-                <h2>Latihan kelompok</h2>
-                <p>Siapkan kelompok dari hasil cek terakhir.</p>
-              </span>
-              <span className="studio-row-action" data-row-action>
-                Siapkan
-                <ArrowRight size={18} strokeWidth={1.8} aria-hidden />
-              </span>
-            </Link>
-          </li>
-        </ul>
-        {!state.sample && (
-          <p className="studio-help mt-3">
-            Alur berkelompok saat ini dapat dicoba dengan data contoh.
-          </p>
-        )}
-      </Section>
-      {/* §9.1(e): the tool explorer is present but collapsed, so it never competes with the
+          <Section label="Langkah berikutnya">
+            <ul className="studio-row-list">
+              <li>
+                <Link className="studio-row" href={practiceHref}>
+                  <span className="studio-row-icon" aria-hidden>
+                    <Shapes size={22} strokeWidth={1.8} />
+                  </span>
+                  <span className="studio-row-content">
+                    <h2>Latihan kelompok</h2>
+                    <p>Siapkan kelompok dari hasil cek terakhir.</p>
+                  </span>
+                  <span className="studio-row-action" data-row-action>
+                    Siapkan
+                    <ArrowRight size={18} strokeWidth={1.8} aria-hidden />
+                  </span>
+                </Link>
+              </li>
+            </ul>
+            {!state.sample && (
+              <p className="studio-help mt-3">
+                Alur berkelompok saat ini dapat dicoba dengan data contoh.
+              </p>
+            )}
+          </Section>
+          {/* §9.1(e): the tool explorer is present but collapsed, so it never competes with the
           one primary action for the first screenful. It is the screen's own tool shelf, so the
           section label is its heading — no second "Jelajahi alat belajar" heading inside. */}
-      <MotionBoundary>
-        <Section label="Soal & alat">
-          <ProgressLabel index={2} total={4} label="Pilih soal" />
-          <details className="mt-3">
-            <summary className="min-h-12 cursor-pointer content-center font-semibold text-pn-teal-700">
-              Buka alat belajar
-            </summary>
-            <div className="mt-3">
-              <ToolExplorer />
-            </div>
-          </details>
-        </Section>
-      </MotionBoundary>
-    </div>
+          <MotionBoundary>
+            <Section label="Soal & alat">
+              <ProgressLabel index={2} total={4} label="Pilih soal" />
+              <details className="mt-3">
+                <summary className="min-h-12 cursor-pointer content-center font-semibold text-pn-teal-700">
+                  Buka alat belajar
+                </summary>
+                <div className="mt-3">
+                  <ToolExplorer />
+                </div>
+              </details>
+            </Section>
+          </MotionBoundary>
+        </div>
+      </div>
+    </>
   );
 }
+
+/**
+ * How many resume rows the action track shows before the rest move behind the disclosure.
+ *
+ * §J.3's A44 asks for the ≤240 px content tail at 1920×1080, and that is a *composition*
+ * requirement: a canvas that stops two-thirds up is the void this re-author is about. The
+ * resume list is the page's own content (same rows, same links, same data — no new product), so
+ * at ≥1280 — where the re-author is in force and the canvas is genuinely wide — more of it is
+ * visible at once, and the rest stays behind the `Sesi lainnya` disclosure exactly as before.
+ * Below the boundary the count is unchanged, so the phone entry point is untouched.
+ *
+ * The number is a real content budget rather than a style, and it is width-driven rather than
+ * hard-coded so the phone never receives the desktop document: `useMinWidth` reports `false`
+ * until it has measured, which is also the phone-safe server-rendered answer.
+ */
+const RESUME_ROWS = 3;
+const WIDE_RESUME_ROWS = 8;

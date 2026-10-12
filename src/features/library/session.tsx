@@ -48,6 +48,8 @@ import type { CardAnswer } from "@/cards/layouts/layout-v1";
 import type { CustomFormBinding } from "@/contracts/custom-form";
 import { field, panel, libraryCall } from "./client";
 import { StateNotice, WorkflowSteps } from "@/ui/components/studio";
+import { LessonAxis } from "@/ui/components/lesson-axis";
+import { lessonMoments } from "@/features/layar/package-navigation";
 import { LibraryItemView } from "./item-view";
 import { useDraftGuard } from "@/ui/use-draft-guard";
 import { ConflictReview } from "./conflict-review";
@@ -522,6 +524,16 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
               ["Bagikan soal", "Kerjakan", "Kumpulkan"]
             : ["Siapkan soal", "Tampilkan", "Tutup sesi"]
         }
+      />
+      {/* D3.3/A45 — the lesson axis. This is a *different* question from the rail above: the
+          rail answers "which phase of the session", the axis answers "where in the lesson".
+          It is orientation only (no control, not a landmark) and it is absent below 1024,
+          where the single-line rail already carries the orientation a phone can hold.
+          `+1` because the axis leads with the lesson's `Pembuka` before its first item, while
+          `run.position` is the 0-based index into the lesson's items. */}
+      <LessonAxis
+        moments={lessonMoments(run.document.items)}
+        current={run.position + 1}
       />
       {message && (
         <p role="status" className="practice-feedback">

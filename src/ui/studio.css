@@ -118,9 +118,30 @@
   min-height: 100dvh;
   scroll-padding-bottom: var(--pn-nav-safe);
 }
+/* The sidebar is the desktop rail, and only that (§6.1: the phone shell is a different shell,
+   one column + bottom bar). Below 1024 the element keeps no box at all, so the phone shell is
+   exactly the phone shell and nothing matches `.studio-sidebar` as a visible sidebar (A44).
+   At ≥1024 it becomes the rail's own frame: brand + nav at the top, the account/board block at
+   the foot. The foot's `margin-top: auto` only means anything inside a flex parent, and the
+   aside declared none — so the rule was inert and the block sat directly under the nav,
+   stranding the whole lower half of a 1024+ canvas as void (T5 V10, §J.3 D3.1/A43). */
 .studio-sidebar {
   background: var(--pn-kertas);
   border-color: var(--pn-hairline);
+  display: contents;
+}
+@media (min-width: 1024px) {
+  .studio-sidebar {
+    display: flex;
+    flex-direction: column;
+    /* A definite block size, so the foot's `auto` margin has somewhere to resolve to. */
+    height: 100dvh;
+  }
+  /* §6.1 V10 — the foot is grouped above a rule, so "the bottom of the rail" is a band a
+     teacher can find, not an accident of where the nav happened to stop. */
+  .studio-sidebar .studio-sidebar-foot {
+    border-top: 1px solid var(--pn-hairline);
+  }
 }
 .studio-sidebar nav a {
   border: 1px solid transparent;
@@ -1537,4 +1558,98 @@
 .studio-workspace h1,
 .studio-workspace h2 {
   overflow-wrap: anywhere;
+}
+
+/* ── D3 · the ≥1024 teacher composition (§J.3 D3.2/D3.3, A44/A45) ───────────────────────────
+   The measure cap stays: a ~960 px column with a top-anchored rhythm is §5.4's decision and
+   "breathable negative space" is a requirement. What changes is that at ≥1280 a 960 px column
+   centred in a 1688 px track stops *being* the composition, so the screen gains ONE supporting
+   track carrying its own existing content. Master + supporting is a reading path, not more
+   product: no second navigation landmark, no second primary, no account/status widget. */
+
+/* The two-track working canvas. The page owns the grid (`[data-tracks-shell]`); the shell only
+   stops constraining it, and only when a descendant actually declares tracks — so sibling
+   desktop surfaces keep their measured single column and A44's scope cannot silently widen. */
+@media (min-width: 1280px) {
+  .studio-workspace > [data-workspace-shell]:has([data-tracks-shell]) {
+    max-width: none;
+  }
+  [data-tracks-shell] {
+    display: grid;
+    /* Action track + supporting track. `minmax(0,…)` on both so a long unbroken token can
+       never push the grid wider than its container. */
+    grid-template-columns: minmax(0, 1.9fr) minmax(320px, 1fr);
+    gap: 48px;
+    align-items: start;
+  }
+  [data-tracks="main"] {
+    min-width: 0;
+    /* The measure cap, still (§5.4): the action track never exceeds the reading column. */
+    max-width: 960px;
+  }
+  [data-tracks="support"] {
+    min-width: 0;
+    /* The supporting track is a reading path too, so it caps at the same measure. */
+    max-width: 560px;
+  }
+}
+
+/* A45 — the lesson axis. Orientation only: an <ol>, no control, never a navigation landmark.
+   Below 1024 the component returns null, so nothing here needs a hiding rule. */
+.studio-lesson-axis {
+  min-width: 0;
+}
+.studio-lesson-axis ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--pn-ink-600);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+}
+.studio-lesson-axis li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--pn-r-1);
+  white-space: nowrap;
+}
+/* The strip is a trace, not a row of controls: only the current moment is grounded, so the
+   axis never reads as a set of pressable chips the way the row contract's actions do. */
+.studio-lesson-axis li[data-state="current"] {
+  background: var(--pn-teal-100);
+  border-color: var(--pn-edge);
+  color: var(--pn-teal-800);
+  font-weight: 700;
+}
+.studio-lesson-axis li[data-state="done"] {
+  color: var(--pn-ink-900);
+}
+.studio-lesson-axis li > span:first-child {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--pn-r-1);
+  background: var(--pn-kertas);
+  color: var(--pn-ink-600);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.studio-lesson-axis li:not([data-state="current"]) > span:first-child {
+  background: transparent;
+}
+.studio-lesson-axis li[data-state="current"] > span:first-child {
+  background: var(--pn-teal-700);
+  color: var(--pn-putih);
 }

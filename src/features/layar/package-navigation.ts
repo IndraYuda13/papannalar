@@ -181,3 +181,29 @@ export function currentPackagePage(
   );
   return Math.max(0, index);
 }
+
+/**
+ * The lesson's own moments, in the authored order (INTERACTION_DELTA_V4 §J.3 D3.3 / A45).
+ *
+ * This is the session axis's **single source of order**, and it is derived from the same
+ * sequence `packagePages` walks: the unconditional `Pembuka`, one moment per lesson item, then
+ * the unconditional `Refleksi`. It names a *lesson* position, never a board page — `packagePages`
+ * is finer-grained on purpose (it expands a station into one page per task, and a check lesson
+ * into one page per question), which is display navigation for the projected board. Putting that
+ * list on a teacher-side axis would produce a 20-item rail that answers "which page" instead of
+ * "where am I in the lesson", so the axis answers the coarser, honest question.
+ *
+ * The labels are `packagePages`' own strings, so the two surfaces cannot drift apart.
+ */
+export function lessonMoments(
+  items: readonly { kind: string }[],
+): readonly string[] {
+  const moments = ["Pembuka"];
+  items.forEach((item, index) =>
+    moments.push(
+      item.kind === "card" ? `Soal ${index + 1}` : `Latihan ${index + 1}`,
+    ),
+  );
+  moments.push("Refleksi");
+  return moments;
+}
