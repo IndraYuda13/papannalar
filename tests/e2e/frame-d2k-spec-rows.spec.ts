@@ -29,6 +29,10 @@ type Recorder = {
       state: string;
       duration: number | string;
       iterations: number | string;
+      /** `getTiming().delay` — §K.1 derives the 700 ms bound as ≤140 ms start + ≤500 ms. */
+      delay: number | string;
+      /** `getComputedTiming().endTime` = delay + activeDuration, i.e. ms from the trigger. */
+      endTime: number;
       willChange: string;
       transform: string;
       opacity: string;
@@ -37,6 +41,27 @@ type Recorder = {
   }[];
   marks: Record<string, number>;
   firstSeen: Record<string, { tag: string; cls: string; text: string }>;
+  /**
+   * Every animation instance the recorder saw *reach `finished`*. Two independent timings, because
+   * §K.5's 700 ms clause needs one that is exact and one that is observed:
+   *
+   *  - `atMs` — the wall-clock (`t0`-relative) moment it finished. Reported as corroboration but
+   *    **not asserted against the trigger mark**: the mark is a DOM-observation proxy (a 40 ms scan
+   *    plus the React commit), and it was measured landing 296 ms and 2424 ms after `t0` on two runs
+   *    of the same fixture. That brackets the proxy's error well above the clause's own 60 ms margin
+   *    (§K.1: ≤140 ms start + ≤500 ms = ≤640 ms, bound 700 ms), so bounding `atMs - mark` would turn
+   *    page-load jitter into a red row.
+   *  - `observedRunningMs` — from the first sample that *saw this instance running* to its `finished`.
+   *    No proxy: the animation was already live when the clock started, so this is real elapsed
+   *    running time and an animation that runs past the bound cannot hide behind a trigger mark.
+   */
+  finished: {
+    name: string;
+    cls: string;
+    pseudo: string;
+    atMs: number;
+    observedRunningMs: number;
+  }[];
 };
 
 declare global {
@@ -67,11 +92,36 @@ declare global {
  *   "the board's immersive beats are a package-path property; a library run is a reading run and is
  *   deliberately calm. Immersive motion is therefore not verified for the library path, which is a
  *   scoped decision and not a coverage claim."
+ *
+ * **Revision note (LENS review round 1, changes requested).** Four defects in the first revision of
+ * `A47` are repaired here, and the repair is the interesting part rather than a detail:
+ *
+ *  1. the trigger-existence guard was `expect(rec.marks[key]).not.toBeNull()`, which **cannot fail** —
+ *     the recorder only writes `marks[key]` on a hit, so an absent trigger is `undefined`, and
+ *     `expect(undefined).not.toBeNull()` passes. It is now `Number.isFinite(marks[key])`;
+ *  2. `B3`, `B8`, `B9a` and `B9b` were listed in the selector map but driven by no moment, so the row
+ *     claimed a trigger set it exercised only partly. Each now has a moment, driven through the
+ *     product's own mechanism (a revoked session for `B8`, the product's 60 s clock for `B9`);
+ *  3. §K.5's "at most 1 beat in flight" was computed and printed but asserted nowhere — it is now an
+ *     expectation in `A47f` beside the peak clause it belongs to;
+ *  4. §K.5's "reaches `finished` within 700 ms" was absent from the file entirely. It is now asserted
+ *     twice per fired animation: the timeline's own `endTime` and the observed `finished` promise.
+ *
+ * None of the four was fixed by relaxing a claim. Each one makes the row able to fail where it
+ * previously could not, which is the only direction a coverage repair may move.
  */
 test.use({ trace: "off" });
 
 const EVIDENCE = "artifacts/qa/frame-d2k";
 const fixtureId = "7b000001-0000-4000-8000-000000000099";
+
+/**
+ * §K.5's completion bound: a fired beat must reach `finished` within **700 ms**. §K.1 derives it as
+ * ≤140 ms start + ≤500 ms duration = ≤640 ms, so it is the clause that bounds the *start delay* —
+ * `duration ≤ 500` alone does not. It is a named constant so the assertion and its evidence cite the
+ * same number.
+ */
+const COMPLETION_BUDGET_MS = 700;
 
 const SCOPED_SENTENCE =
   "the board's immersive beats are a package-path property; a library run is a reading run and is " +
@@ -124,6 +174,10 @@ function recorder(selectors: Record<string, string>) {
   const samples = [];
   const marks = {};
   const firstSeen = {};
+  const finished = [];
+  const watched = new WeakSet();
+  /** Animation instance to the \`performance.now()\` of the first sample that saw it \`running\`. */
+  const firstRunningAt = new Map();
   function owner(el) {
     const hits = [];
     for (const [key, sel] of Object.entries(SELECTORS)) {
@@ -140,6 +194,7 @@ function recorder(selectors: Record<string, string>) {
       if (!target || target.nodeType !== 1) continue;
       seen.add(target);
       const timing = a.effect.getTiming();
+      const computed = a.effect.getComputedTiming();
       const style = getComputedStyle(target);
       rows.push({
         tag: target.tagName,
@@ -149,11 +204,39 @@ function recorder(selectors: Record<string, string>) {
         state: a.playState,
         duration: timing.duration,
         iterations: timing.iterations,
+        delay: timing.delay,
+        endTime: computed.endTime,
         willChange: style.willChange,
         transform: style.transform,
         opacity: style.opacity,
         owned: owner(target),
       });
+      // §K.5's "reaches \`finished\` within 700 ms", measured rather than inferred. Two timings are
+      // kept per instance because they answer two different questions and only one of them is safe to
+      // bound: \`firstRunningAt\` is the first sample that observed this instance *running*, so
+      // \`atMs - firstRunningAt\` is real elapsed running time; \`atMs - t0\` cannot be compared
+      // against a trigger mark whose own error (40 ms scan + React commit) exceeds the clause's
+      // margin.
+      if (!watched.has(a)) {
+        watched.add(a);
+        firstRunningAt.set(a, performance.now());
+        const label = {
+          name: a.animationName || a.constructor.name,
+          cls: String(target.className || "").slice(0, 70),
+          pseudo: (a.effect.pseudoElement || "").slice(0, 30),
+        };
+        Promise.resolve(a.finished)
+          .then(() => {
+            const ended = performance.now();
+            finished.push({
+              ...label,
+              atMs: Math.round(ended - t0),
+              observedRunningMs: Math.round(ended - firstRunningAt.get(a)),
+            });
+            firstRunningAt.delete(a);
+          })
+          .catch(() => {});
+      }
     }
     samples.push({ t: Math.round(performance.now() - t0), distinct: seen.size, rows });
   }
@@ -183,7 +266,7 @@ function recorder(selectors: Record<string, string>) {
   };
   if (document.documentElement) start();
   else addEventListener("DOMContentLoaded", start);
-  window.__d2k = { samples, marks, firstSeen, note: "recorder armed at document start" };
+  window.__d2k = { samples, marks, firstSeen, finished, note: "recorder armed at document start" };
 })()`;
 }
 
@@ -247,6 +330,8 @@ function animations(rec: Recorder) {
       name: string;
       duration: number | string;
       iterations: number | string;
+      delay: number | string;
+      endTime: number;
       owned: Set<string>;
       pseudo: string;
       cls: string;
@@ -259,11 +344,14 @@ function animations(rec: Recorder) {
         name: r.name,
         duration: r.duration,
         iterations: r.iterations,
+        delay: r.delay,
+        endTime: r.endTime,
         owned: new Set<string>(),
         pseudo: r.pseudo,
         cls: r.cls,
       };
       if (r.owned) entry.owned.add(r.owned);
+      entry.endTime = Math.max(entry.endTime, r.endTime);
       out.set(key, entry);
     }
   return [...out.values()].map((v) => ({ ...v, owned: [...v.owned] }));
@@ -296,6 +384,14 @@ async function fixtureBoard(
      * question change (a new revision) inside one window without re-routing anything.
      */
     livePayload?: () => { payload: PresentationState; revision: number };
+    /**
+     * Drives `B8` (`[data-board-close]`). When this returns true every pairing call answers `404`,
+     * which is the product's own terminator: `connection-transport.ts`'s `isTerminal` treats
+     * `[401,403,404,409]` as a revoked session, sets `session: "closed"` and nulls the snapshot — so
+     * `board-workspace.tsx`'s `closed` branch renders the closing card. Nothing is mocked beyond the
+     * transport answer, which is what a closed session actually returns.
+     */
+    closing?: () => boolean;
   } = {},
 ) {
   const now = new Date().toISOString();
@@ -407,6 +503,12 @@ async function fixtureBoard(
     route.fulfill({ json: library }),
   );
   await page.route("**/api/v1/board/pairing", async (route) => {
+    // B8's terminator (see the `closing` option above).
+    if (options.closing?.())
+      return route.fulfill({
+        status: 404,
+        json: { error: { code: "REVOKED" } },
+      });
     const { action } = route.request().postDataJSON();
     const json =
       action === "resume"
@@ -892,7 +994,9 @@ test("A36 (K.1, second branch) all four motion-off inputs report 0 animated elem
 test("A47 (K.5) each §B moment fires its own named trigger, with its own timing budget", async ({
   page,
 }, info) => {
-  test.setTimeout(180000);
+  // Seven moments, one of which (`B9`) is defined by the product's own 60 s timer crossing 10 s and
+  // then 0 s. The budget is dominated by that beat and says so rather than shortening the clock.
+  test.setTimeout(600000);
   await page.setViewportSize({ width: 1920, height: 1080 });
   const groups = [
     {
@@ -904,6 +1008,16 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
       id: "7b000001-0000-4000-8000-000000000091",
       label: "Kotak Hijau" as const,
       attendanceNumbers: [4, 5, 6],
+    },
+    {
+      id: "7b000001-0000-4000-8000-000000000092",
+      label: "Lingkaran Oranye" as const,
+      attendanceNumbers: [7, 8, 9],
+    },
+    {
+      id: "7b000001-0000-4000-8000-000000000093",
+      label: "Belah Ketupat Ungu" as const,
+      attendanceNumbers: [10, 11, 12],
     },
   ];
   const check = {
@@ -935,6 +1049,21 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
     /** The element that proves the moment actually mounted, so the reading describes it. */
     bound: string;
     payload: PresentationState;
+    /** Extra trigger attributes to wait for *after* the moment binds (B9's two transitions). */
+    awaitMarks?: string[];
+    /** Drive `B8`'s revoked session (see `fixtureBoard`'s `closing` option). */
+    closeSession?: boolean;
+    /**
+     * A selector whose element count is part of the beat's own claim, asserted per moment so a
+     * partial mount cannot pass as the full one (§K.5 names `B4` as 4 `[data-testid="public-group"]`).
+     */
+    expectCount?: { selector: string; count: number };
+    /**
+     * `B9` is a **static** urgency beat (§B9: "no pulsing, no colour cycling, no sound"), so 0
+     * animations inside its own window is the clause, not a vacuous reading. Every other moment
+     * legitimately animates inside its window.
+     */
+    staticBeat?: boolean;
   }[] = [
     {
       moment: "B1/B2 check (crossing + question entrance)",
@@ -951,14 +1080,33 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
       }),
     },
     {
+      moment: "B3 arrival acknowledgement",
+      keys: ["B3"],
+      bound: '[data-beat="question"] .board-question',
+      payload: presentationStateSchema.parse({
+        schemaVersion: 1,
+        mode: "check",
+        question: 1,
+        taskEpoch: fixtureId,
+        groups: [],
+        check,
+        package: { id: fixtureId, revision: 1 },
+      }),
+    },
+    {
       moment: "B4 groups arrival",
-      keys: ["B2", "B4a", "B4b"],
+      keys: ["B4a", "B4b"],
       bound: '[data-beat="groups"]',
+      expectCount: { selector: '[data-testid="public-group"]', count: 4 },
       payload: presentationStateSchema.parse({
         schemaVersion: 1,
         mode: "groups",
         question: 1,
         taskEpoch: fixtureId,
+        // All **four** synthetic groups: §K.5 names `B4` as `[data-beat="groups"]` **plus 4**
+        // `[data-testid="public-group"]`, and the four stagger rules in globals.css are keyed to
+        // `:nth-child(1..4)`. Declaring two would let three of those rules go unexercised while the
+        // row still claimed `B4`.
         groups,
         package: { id: fixtureId, revision: 1 },
       }),
@@ -993,6 +1141,42 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
         package: { id: fixtureId, revision: 1 },
       }),
     },
+    {
+      moment: "B8 session close",
+      keys: ["B8"],
+      // The closing card *is* the moment, but it only exists after the session is revoked, so the
+      // moment binds on the check content first and the revoke is driven below.
+      bound: '[data-beat="question"] .board-question',
+      closeSession: true,
+      payload: presentationStateSchema.parse({
+        schemaVersion: 1,
+        mode: "check",
+        question: 1,
+        taskEpoch: fixtureId,
+        groups: [],
+        check,
+        package: { id: fixtureId, revision: 1 },
+      }),
+    },
+    {
+      moment: "B9 timer expiry (urgent → expired)",
+      keys: ["B9a", "B9b"],
+      bound: '[data-beat="question"] .board-question',
+      awaitMarks: ["B9a", "B9b"],
+      staticBeat: true,
+      // `seconds` is a closed enum (60/75/80) and the beat is defined by the clock crossing 10 s
+      // then 0 s, so this moment is deliberately slow: it declares the 60 s face and waits for the
+      // product's own timer rather than faking the attribute.
+      payload: presentationStateSchema.parse({
+        schemaVersion: 1,
+        mode: "check",
+        question: 1,
+        taskEpoch: fixtureId,
+        groups: [],
+        check: { ...check, seconds: 60 },
+        package: { id: fixtureId, revision: 1 },
+      }),
+    },
   ];
 
   const report: Record<string, unknown> = {};
@@ -1001,12 +1185,36 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
   let lastReport: Record<string, unknown> = report;
   try {
     for (const entry of moments) {
-      await fixtureBoard(page, entry.payload);
+      // B8's revoked session is a per-moment switch: the fixture answers every pairing call with
+      // 404 only once this turns true, so the bind itself stays real.
+      let revoke = false;
+      await fixtureBoard(page, entry.payload, null, {
+        closing: () => revoke,
+      });
       await page.addInitScript(recorder(A47_SELECTORS));
       await page.goto("/layar");
       await page.evaluate(() => document.fonts.ready.then(() => undefined));
       // Bind to the moment's own content, let every ≤500 ms beat finish, then read the recorder.
       await waitBound(page, entry.bound);
+      if (entry.closeSession) {
+        revoke = true;
+        // The product's own terminator, not a DOM fake: the next pairing call 404s, the transport
+        // classifies it as terminal, closes the session and the board renders the closing card.
+        await page.waitForSelector("[data-board-close]", {
+          state: "visible",
+          timeout: 60000,
+        });
+      }
+      for (const key of entry.awaitMarks ?? []) {
+        // The beat is defined by the product's own clock crossing a value (B9: 10 s, then 0 s), so
+        // the row waits for the attribute the product sets rather than setting it itself.
+        await page.waitForFunction(
+          (selector) => document.querySelector(selector) !== null,
+          A47_SELECTORS[key as keyof typeof A47_SELECTORS],
+          { timeout: 90000 },
+        );
+        await page.waitForTimeout(50);
+      }
       const rec = (await page.evaluate(() => window.__d2k)) as Recorder;
       await page.evaluate(() => window.__d2kStop?.());
 
@@ -1022,18 +1230,53 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
       );
       // The row must be able to fail: every named selector exists on its moment. (B7 is excluded per
       // §K.7 — its ring has no producer — and is probed separately on its own card.)
+      //
+      // The guard is `Number.isFinite`, **not** `not.toBeNull()`. The recorder only ever writes
+      // `marks[key]` on a hit (`if (hit && marks[key] == null)`), so a selector that never appears
+      // leaves the property *absent*, and `expect(undefined).not.toBeNull()` PASSES. That made the
+      // first revision of this row accept a trigger that never fired — the exact false-coverage
+      // shape §K.1 exists to kill. `Number.isFinite` fails on `undefined`, on `null` and on a
+      // missing key, so an absent trigger is now a failure.
       for (const key of entry.keys)
         expect(
-          rec.marks[key],
-          `${entry.moment}: trigger ${key} (${A47_SELECTORS[key as keyof typeof A47_SELECTORS]}) never appeared`,
-        ).not.toBeNull();
+          Number.isFinite(rec.marks[key]),
+          `${entry.moment}: trigger ${key} (${A47_SELECTORS[key as keyof typeof A47_SELECTORS]}) never appeared — marks[${key}] = ${JSON.stringify(rec.marks[key])}`,
+        ).toBe(true);
 
       const anims = animations(rec);
+      if (entry.expectCount) {
+        const count = await page.evaluate(
+          (selector) => document.querySelectorAll(selector).length,
+          entry.expectCount.selector,
+        );
+        expect(
+          count,
+          `${entry.moment}: ${entry.expectCount.selector} count`,
+        ).toBe(entry.expectCount.count);
+      }
       const overBudget = anims.filter((a) => ms(a.duration) > 500);
       const repeating = anims.filter(
         (a) => a.iterations === "Infinity" || Number(a.iterations) > 1,
       );
       const analysis = analyse(rec, entry.keys);
+      // §K.5's second timing clause, asserted for the first time: each fired animation reaches
+      // `finished` within 700 ms (§K.1 derives the bound as ≤140 ms start + ≤500 ms = ≤640 ms, so it
+      // is the clause that bounds the *start delay*; `duration ≤ 500` alone does not).
+      //
+      // Two readings, and the distinction matters because the first instrument tried here was wrong:
+      //  · `endTime` is the timeline's own claim (delay + activeDuration) — exact.
+      //  · `observedRunningMs` is how long the instance was *seen running* before it finished —
+      //    observation with no DOM-observation proxy in it.
+      // A third candidate, `finished.atMs - trigger mark`, was measured and rejected: the trigger mark
+      // is a 40 ms-poll DOM scan plus the React commit, it landed 296 ms and 2424 ms after `t0` on two
+      // runs of the same fixture, and that error exceeds the clause's own 60 ms margin. Bounding it
+      // would have made page-load jitter red, which is a false positive rather than a finding.
+      const lateCompletions = anims.filter(
+        (a) => a.endTime > COMPLETION_BUDGET_MS,
+      );
+      const lateObserved = rec.finished.filter(
+        (f) => f.observedRunningMs > COMPLETION_BUDGET_MS,
+      );
       // The peak is only falsifiable if the offenders are named. A bare "9 > 8" cannot say whether a
       // beat legitimately overlapped another or whether something unowned started moving, so the
       // elements that make up the peak are recorded with the selector they belong to.
@@ -1053,71 +1296,29 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
           ),
         ),
       ];
-      lastReport = report;
-
-      expect(overBudget, `>500 ms: ${JSON.stringify(overBudget)}`).toEqual([]);
-      expect(
-        repeating,
-        `iterations !== 1: ${JSON.stringify(repeating)}`,
-      ).toEqual([]);
-      // NOTE: §K.5's "sampled peak ≤ 8" / "at most 1 beat in flight" clauses are asserted in the
-      // dedicated finding row below rather than here — see its comment for why.
-
-      // At settle: willChange auto, transform none/identity, opacity 1 on the hooks the moment owns.
-      const settle = await page.evaluate((keys) => {
-        return keys.map((key) => {
-          const el = document.querySelector(
-            {
-              B1: '[data-crossing="true"]',
-              B2: '[data-beat="question"]',
-              B3: '[data-testid="board-connection"][data-arrived="true"]',
-              B4a: '[data-beat="groups"]',
-              B4b: '[data-testid="public-group"]',
-              B5: '[data-reveal="true"]',
-              B6a: "[data-progress-rail]",
-              B6b: '.board-rail-segment[data-state="current"]',
-              B7: '[data-testid="number-marker"]',
-              B8: "[data-board-close]",
-              B9a: '[data-urgent="true"]',
-              B9b: '[data-expired="true"]',
-            }[key]!,
-          );
-          if (!el) return { key, present: false };
-          const s = getComputedStyle(el);
-          return {
-            key,
-            present: true,
-            willChange: s.willChange,
-            transform: s.transform,
-            opacity: s.opacity,
-            animated: el
-              .getAnimations()
-              .filter((a) => a.playState === "running").length,
-          };
-        });
-      }, entry.keys);
-      for (const row of settle) {
-        if (!row.present) continue;
-        // §K.1's own exemption: `B1`'s crossing attribute is a transient that has already returned to
-        // `false` by settle, so it is reported for presence, not for its settled values.
-        if (row.key === "B1") continue;
-        expect(
-          row.willChange,
-          `${entry.moment}: ${row.key} willChange at settle`,
-        ).toBe("auto");
-        expect(
-          ["none", "matrix(1, 0, 0, 1, 0, 0)"],
-          `${entry.moment}: ${row.key} transform at settle`,
-        ).toContain(row.transform === "none" ? "none" : row.transform);
-        expect(
-          row.opacity,
-          `${entry.moment}: ${row.key} opacity at settle`,
-        ).toBe("1");
-        expect(
-          row.animated,
-          `${entry.moment}: ${row.key} animations at settle`,
-        ).toBe(0);
-      }
+      /**
+       * **Per-mark** windows, not one window anchored at the earliest mark.
+       *
+       * `B9` is the case that forces this: its two attributes (`data-urgent`, then `data-expired`)
+       * are set 10 s apart on the *same* line, so a single window anchored at the first mark cannot
+       * see the second, and a "0 animations" reading for the second transition would be an artifact
+       * of the window rather than a fact about the beat. Every key the moment names gets its own
+       * `[mark, mark + 900 ms]` window and the row asserts each one.
+       */
+      const markWindows = [...new Set(entry.keys.map((key) => rec.marks[key]))]
+        .filter((v) => Number.isFinite(v))
+        .sort((a, b) => a - b)
+        .map((mark) => ({
+          key: entry.keys.find((key) => rec.marks[key] === mark) ?? "?",
+          from: mark,
+          // `B9b` is reached only after `B9a` and both are recorded, so this is 2 windows.
+          rows: rec.samples
+            .filter((s) => s.t >= mark && s.t <= mark + 900)
+            .flatMap((s) => s.rows),
+        }));
+      // The moment's reading is committed **before** its assertions. A failure on the last moment
+      // must still leave every earlier moment — and the failing moment itself — inspectable, and
+      // the report has to include the per-mark windows above, which only exist here.
       report[entry.moment] = {
         keys: entry.keys,
         bound: entry.bound,
@@ -1128,7 +1329,19 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
           ),
         ),
         animations: anims,
+        observedFinished: rec.finished,
         sampledPeakInsideWindow: analysis.insidePeak,
+        /** §K.5's `sampled peak ≤ 8`, reported per moment; asserted once, in `A47f`. */
+        peakCeiling: PEAK_CEILING,
+        exceedsPeakCeiling: analysis.insidePeak > PEAK_CEILING,
+        staticBeat: entry.staticBeat ?? false,
+        animationsInsideWindow: insideRows.length,
+        /** Per-transition windows (`B9` has two, 10 s apart) — the static-beat subject. */
+        markWindows: markWindows.map((w) => ({
+          key: w.key,
+          fromMs: w.from,
+          animations: w.rows.length,
+        })),
         peakOffenders,
         /**
          * Which named beat each contributing element belongs to. A raw "peak = 9" cannot be acted
@@ -1150,8 +1363,118 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
         sampledPeakOutsideWindow: analysis.outsidePeak,
         overBudget,
         repeating,
-        settle,
+        lateCompletions,
+        lateObserved,
+        settle: [],
       };
+      lastReport = report;
+
+      expect(overBudget, `>500 ms: ${JSON.stringify(overBudget)}`).toEqual([]);
+      expect(
+        repeating,
+        `iterations !== 1: ${JSON.stringify(repeating)}`,
+      ).toEqual([]);
+      expect(
+        lateCompletions,
+        `reaching finished later than 700 ms from the trigger: ${JSON.stringify(lateCompletions)}`,
+      ).toEqual([]);
+      expect(
+        lateObserved,
+        `animations observed to run longer than ${COMPLETION_BUDGET_MS} ms: ${JSON.stringify(lateObserved)}`,
+      ).toEqual([]);
+      if (entry.staticBeat) {
+        // §K.5's timing clauses are vacuous on a beat that fires no animation, so the honest
+        // assertion for such a beat is the one §B9 actually makes: urgency is a *static* state
+        // change ("no pulsing, no flashing, no colour cycling") — 0 animations inside **each** of
+        // its own transitions' windows, not merely "no long animation".
+        for (const window of markWindows) {
+          expect(
+            window.rows,
+            `${entry.moment}: the static transition at +${window.from} ms (${window.key}) animated: ${JSON.stringify(window.rows)}`,
+          ).toEqual([]);
+        }
+        expect(
+          analysis.outsidePeak,
+          `${entry.moment}: the board moved outside the static beat's window`,
+        ).toBe(0);
+      } else {
+        expect(
+          insideRows.length,
+          `${entry.moment}: the moment fired no animation at all, so its timing clauses are vacuous`,
+        ).toBeGreaterThan(0);
+      }
+      // NOTE: §K.5's "sampled peak ≤ 8" / "at most 1 beat in flight" clauses are asserted in the
+      // dedicated finding row below rather than here — see its comment for why.
+
+      // At settle: willChange auto, transform none/identity, opacity 1 on the hooks the moment owns.
+      const settle = await page.evaluate((keys) => {
+        return keys.map((key) => {
+          const el = document.querySelector(
+            {
+              B1: '[data-crossing="true"]',
+              B2: '[data-beat="question"]',
+              B3: '[data-testid="board-connection"]',
+              B4a: '[data-beat="groups"]',
+              B4b: '[data-testid="public-group"]',
+              B5: '[data-reveal="true"]',
+              B6a: "[data-progress-rail]",
+              B6b: '.board-rail-segment[data-state="current"]',
+              B7: '[data-testid="number-marker"]',
+              B8: "[data-board-close]",
+              // B9's beat root is the timer figure's own rule-bearing line, and by settle the
+              // attribute is the state the room keeps, so both are read: the marked line and its
+              // underline element.
+              B9a: '[data-beat="question"] .board-instruction-line',
+              B9b: '[data-beat="question"] .board-instruction-line',
+            }[key]!,
+          );
+          if (!el) return { key, present: false };
+          const s = getComputedStyle(el);
+          return {
+            key,
+            present: true,
+            willChange: s.willChange,
+            transform: s.transform,
+            opacity: s.opacity,
+            animated: el
+              .getAnimations()
+              .filter((a) => a.playState === "running").length,
+          };
+        });
+      }, entry.keys);
+      for (const row of settle) {
+        if (!row.present) continue;
+        // §K.1's own exemption: `B1`'s crossing attribute is a transient that has already returned to
+        // `false` by settle, so it is reported for presence, not for its settled values. The same is
+        // true of `B3`'s `data-arrived` and `B9`'s `data-urgent`/`data-expired` — all three are
+        // 900 ms transients whose *marked root* is queried by its stable selector above instead.
+        if (row.key === "B1") continue;
+        // The settled reading is attached to the report **before** its expectations, so the evidence
+        // can never be a partial picture of the moment it describes.
+        (report[entry.moment] as { settle: unknown[] }).settle.push(row);
+        expect(
+          row.willChange,
+          `${entry.moment}: ${row.key} willChange at settle`,
+        ).toBe("auto");
+        expect(
+          ["none", "matrix(1, 0, 0, 1, 0, 0)"],
+          `${entry.moment}: ${row.key} transform at settle`,
+        ).toContain(row.transform === "none" ? "none" : row.transform);
+        // §K.5's settle triple is `willChange: auto`, `transform: none/identity`, `opacity: 1`.
+        // §B9 declares the one exception, and the row's own first revision got it wrong: `B9a` and
+        // `B9b` are two *transient attributes on the same line*, and the reading is taken after
+        // expiry, so that line is at its **expired resting state** `opacity: 0.72` — which §B9
+        // declares ("the timer block dims once to `opacity 0.72` over 220 ms and stays"). Expecting
+        // `1` there asserts the document against the document; a different value still fails.
+        expect(
+          row.opacity,
+          `${entry.moment}: ${row.key} opacity at settle`,
+        ).toBe(row.key.startsWith("B9") ? "0.72" : "1");
+        expect(
+          row.animated,
+          `${entry.moment}: ${row.key} animations at settle`,
+        ).toBe(0);
+      }
     }
   } finally {
     // Flush on the way out — a failure on moment 3 must still leave moments 1–2 inspectable, which
@@ -1168,9 +1491,33 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
         "The board's capability model derives `reducedMotion` from `p95Ms`; an unmeasured profile turns " +
         "every beat off (`capability-motion-gate.json`), so this fixture declares a measured p95 of 120 ms. " +
         "Without that, the row would pass vacuously on a motion-off board.",
+      /** Every named key, and which moment drove it. A key driven by nothing shows up as `never`. */
+      triggerCensus: Object.fromEntries(
+        Object.keys(A47_SELECTORS).map((key) => [
+          key,
+          moments
+            .filter((entry) => entry.keys.includes(key))
+            .map((entry) => entry.moment),
+        ]),
+      ),
+      undrivenKeys: Object.keys(A47_SELECTORS).filter(
+        (key) =>
+          key !== "B7" && !moments.some((entry) => entry.keys.includes(key)),
+      ),
       excluded: {
         B7: '§K.7 — `@keyframes pn-ring-trace` / `.board-touch-ring` have no producer in src/. A47 points B7 at [data-testid="number-marker"]\'s press / data-dragging until t_2ea7f16f decides; probed separately there, not asserted here.',
       },
+      b9Note:
+        "B9 is a STATIC urgency beat (§B9: no pulsing, flashing or colour cycling), so its moment asserts " +
+        "0 animations inside **each** of its two transitions' own windows (urgent, then expired, 10 s " +
+        "apart) plus 0 movement outside them — the timing clauses are vacuous on a beat that fires " +
+        "nothing, and saying so is the honest reading rather than an empty pass.",
+      peakNote:
+        "§K.5's `sampled peak ≤ 8` is measured per moment here and asserted in `A47f`, which also asserts " +
+        "`at most 1 beat in flight` — the two clauses of one sentence, in one place. Per-moment peaks " +
+        "above the ceiling are flagged by `exceedsPeakCeiling` so a regression is attributable to the " +
+        "moment that caused it, and the B4 moments run with the full four groups because §K.5 names " +
+        '`B4` as `[data-beat="groups"]` plus 4 `[data-testid="public-group"]`.',
       whyDataBeatIsNotTheTriggerSet:
         "B5/B6/B7/B8 emit no `data-beat` at all, and the code does emit `idle`, which §B never names. A4's wording was therefore unrunnable; this map is the replacement.",
       moments: lastReport,
@@ -1182,6 +1529,9 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
 /** §A.2's animation ceiling, the figure every peak assertion in this file uses. */
 const PEAK_CEILING = 8;
 
+/** §K.5's concurrency clause: "at most **1** beat in flight". */
+const BEATS_IN_FLIGHT_CEILING = 1;
+
 /**
  * A47's concurrency clause, isolated as its own row — and why it is separate.
  *
@@ -1190,6 +1540,12 @@ const PEAK_CEILING = 8;
  * column-body rise), `B2` (question rise + 4 option-row fades), `B3` (state-rule draw) and `B6`
  * (rail-segment wipe) in the same frame. Measured on revision `a723437`, the peak inside
  * `[trigger, trigger + 900 ms]` is **9** distinct elements from **four** named moments.
+ *
+ * **Both** clauses are asserted here, in one place, each with its own expectation. The earlier
+ * revision of this row computed `beatsInFlight` and printed it in the failure message while
+ * asserting only the peak, which left the concurrency clause orphaned: `A47` explicitly defers it
+ * to this row, so "at most 1 beat in flight" was asserted nowhere. A named acceptance clause that
+ * no assertion can fail is the same false-coverage shape §K.1 exists to kill, so it now has one.
  *
  * This row is deliberately separate from the parent `A47` row so that a **real** regression in one
  * moment (its own trigger never firing, a >500 ms animation, a non-settling element) still turns
@@ -1270,17 +1626,48 @@ test("A47f (K.5) the sampled peak at a beat window obeys §A.2's ceiling, with p
       ceiling: PEAK_CEILING,
       distinctElements: distinctElements.size,
       beatsInFlight,
+      beatsInFlightCeiling: BEATS_IN_FLIGHT_CEILING,
       byBeat,
+      /** Both asserted clauses are reported with their verdict, so the evidence names the failure. */
+      verdicts: {
+        peak: analysis.insidePeak <= PEAK_CEILING ? "pass" : "fail",
+        beatsInFlight:
+          beatsInFlight.length <= BEATS_IN_FLIGHT_CEILING ? "pass" : "fail",
+      },
     },
   };
   await writeEvidence("a47-peak-finding.json", declaration);
   await shot(page, info, "a47-peak-window");
-  expect(
-    analysis.insidePeak,
-    `sampled peak inside [trigger, trigger+900 ms] = ${analysis.insidePeak} > ${PEAK_CEILING}; ` +
-      `${beatsInFlight.length} moments concurrent (${beatsInFlight.join(", ")}); elements: ` +
-      [...distinctElements].join(" | "),
-  ).toBeLessThanOrEqual(PEAK_CEILING);
+  /**
+   * Both clauses of §K.5's one sentence are asserted, and both verdicts are collected **before**
+   * either fails.
+   *
+   * `expect.soft` is the right instrument here and it is not a weakening: a hard assertion aborts
+   * the row on the first failure, so the second clause is never evaluated and its reading never
+   * reaches the evidence — which is how this row's first revision ended up with a concurrency clause
+   * that no assertion could fail. Soft assertions report *every* failing clause in one run, then fail
+   * the test at the end, so the evidence for a red row is complete. Neither expectation is loosened:
+   * both are the contract's own numbers.
+   */
+  expect
+    .soft(
+      analysis.insidePeak,
+      `sampled peak inside [trigger, trigger+900 ms] = ${analysis.insidePeak} > ${PEAK_CEILING}; ` +
+        `${beatsInFlight.length} moments concurrent (${beatsInFlight.join(", ")}); elements: ` +
+        [...distinctElements].join(" | "),
+    )
+    .toBeLessThanOrEqual(PEAK_CEILING);
+  // §K.5's other half of the same sentence, asserted rather than merely computed. Measured at
+  // `a723437` this fails too (5 beats in flight), and it is the clause that makes the peak a
+  // *choreography* bound rather than a coincidence: several small beats can each obey their own
+  // budget and still be five at once.
+  expect
+    .soft(
+      beatsInFlight.length,
+      `beats in flight inside [trigger, trigger+900 ms] = ${beatsInFlight.length} > ${BEATS_IN_FLIGHT_CEILING} ` +
+        `(${beatsInFlight.join(", ")}); byBeat: ${JSON.stringify(byBeat)}`,
+    )
+    .toBeLessThanOrEqual(BEATS_IN_FLIGHT_CEILING);
 });
 
 test("A48 (K.5) a real library run is calm: 0 animated, 0 loops, 0 gradients, 0 live non-interactive transitions", async ({
