@@ -86,7 +86,7 @@ test("tab baru offline membuka latihan, contoh sesi dan papan; font, IndexedDB d
     if (message.type() === "error") errors.push(message.text());
   });
   await fresh.setViewportSize({ width: 390, height: 844 });
-  await fresh.goto("/guru/latihan");
+  await fresh.goto("/guru/latihan?mode=demo");
   await expect(
     fresh.getByRole("heading", { name: "Belajar berkelompok", exact: true }),
   ).toBeVisible();

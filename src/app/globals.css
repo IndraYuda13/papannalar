@@ -874,10 +874,75 @@
   width: 100%;
   min-width: 80px;
 }
+/* A projected ratio table shares a bounded activity page with its controls.
+   Keep inputs touch-sized without inheriting the standalone 96px field. */
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  .board-tool[data-tool="ratio"] {
+  --board-control: 48px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-content: start;
+}
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  [data-tool="ratio"]
+  > p {
+  grid-column: 1 / -1;
+}
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  [data-tool="ratio"]
+  > .flex {
+  align-content: start;
+  align-items: start;
+}
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  [data-tool="ratio"]
+  td {
+  min-height: 48px;
+}
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  [data-tool="ratio"]
+  label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  [data-tool="ratio"]
+  input {
+  min-height: 48px;
+  height: 48px;
+  padding: 6px;
+  font-size: var(--board-label);
+}
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  [data-tool="ratio"]
+  > .flex {
+  gap: 6px;
+  font-size: var(--board-label);
+}
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  [data-tool="ratio"]
+  > [role="status"] {
+  min-height: 0;
+}
 :is(.board-surface, [data-library-preview])
   [data-tool="algebra"]
   [data-algebra-group] {
   min-height: 120px;
+}
+.board-surface [data-library-tool] [data-tool="algebra"] {
+  --board-control: 48px;
+}
+.board-surface [data-library-tool] [data-tool="algebra"] > [role="status"] {
+  min-height: 0;
 }
 :is(.board-surface, [data-library-preview])
   [data-tool="algebra"]
@@ -1474,6 +1539,77 @@
   --board-fraction-whole: max(100cqw, var(--fraction-min-whole));
 }
 
+.board-surface [data-library-tool] [data-tool="graphs"] {
+  --board-control: 48px;
+  --board-label: 18px;
+  --board-body: 20px;
+  --board-gap: 0px;
+}
+
+.board-surface [data-library-tool] [data-testid="graph-plot"] svg {
+  max-height: 140px;
+}
+.board-surface
+  [data-library-tool]
+  .board-graph-workspace
+  > div:first-child
+  > [data-testid="graph-plot"] {
+  grid-row: 1 / span 6;
+}
+.board-surface [data-library-tool] .board-graph-workspace p {
+  font-size: 16px;
+  margin-block: 0;
+}
+.board-surface [data-library-tool] .board-graph-control > span {
+  grid-column: auto;
+}
+.board-surface [data-library-tool] [data-tool="graphs"] input {
+  min-height: 48px;
+  height: 48px;
+}
+.board-surface [data-library-tool] .board-graph-control input {
+  padding: 4px;
+  font-size: 18px;
+}
+.board-surface [data-library-tool] .board-graph-workspace [data-slot="button"] {
+  padding-inline: 6px;
+  font-size: 18px;
+}
+.board-surface [data-library-tool] .board-graph-workspace > div:last-child > * {
+  margin-block: 0;
+}
+.board-surface [data-library-tool] [data-tool="graphs"] > p {
+  font-size: 18px;
+  line-height: 1.25;
+}
+.board-surface [data-library-tool] [data-tool="graphs"] > [role="status"] {
+  grid-column: 1;
+  grid-row: 2 / span 3;
+  align-self: end;
+  min-height: 0;
+  font-size: 16px;
+  line-height: 1.1;
+}
+.board-surface
+  [data-library-tool]
+  [data-tool="graphs"]
+  .board-graph-coordinates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 18px;
+}
+.board-surface [data-library-tool] .board-graph-coordinates label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 18px;
+}
+.board-surface [data-library-tool] .board-graph-coordinates input {
+  width: 80px;
+  padding: 4px;
+  font-size: 18px;
+}
 .board-surface [data-testid="pairing-qr"] {
   flex-shrink: 1;
   min-height: 0;
@@ -1571,8 +1707,13 @@
 :is(.board-surface, [data-library-preview])
   [data-library-tool]
   [data-tool="balance"] {
+  --board-control: 48px;
+  --board-hit: 48px;
+  --board-body: 22px;
+  --board-label: 18px;
+  --board-gap: 1px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   align-content: start;
   align-items: center;
 }
@@ -1596,12 +1737,80 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+.board-surface [data-library-tool] .board-balance-operations label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.board-surface [data-library-tool] .board-balance-operations label input {
+  width: 80px;
+}
+.board-surface [data-library-tool] .board-balance-weights {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.board-surface [data-library-tool] .board-balance-weights button {
+  padding-inline: 4px;
+  font-size: 18px;
+}
 :is(.board-surface, [data-library-preview]) .board-balance-operations label {
   font-size: var(--board-label);
   min-width: 0;
 }
 :is(.board-surface, [data-library-preview]) .board-balance-operations input {
   width: 100%;
+}
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  [data-tool="balance"]
+  input {
+  min-height: 48px;
+  height: 48px;
+  padding: 6px;
+  font-size: var(--board-label);
+}
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  [data-tool="balance"]
+  > [role="status"] {
+  min-height: 0;
+}
+:is(.board-surface, [data-library-preview])
+  [data-library-tool]
+  [data-tool="balance"]
+  [data-testid="balance-drop"]
+  p {
+  font-size: var(--board-label);
+  margin-block: 0;
+}
+.board-surface
+  [data-library-tool]
+  [data-testid="balance-drop"]
+  .balance-weight {
+  min-width: 40px;
+  min-height: 40px;
+  padding-inline: 4px;
+  font-size: 18px;
+}
+.board-surface [data-library-tool] [data-testid="balance-drop"] .grid {
+  gap: 6px;
+}
+.board-surface [data-library-tool] [data-testid="balance-drop"] .border-b-8 {
+  padding: 4px;
+}
+.board-surface
+  [data-library-tool]
+  [data-testid="balance-drop"]
+  .border-b-8
+  > * {
+  margin-block: 0;
+}
+.board-surface
+  [data-library-tool]
+  [data-testid="balance-drop"]
+  [class~="pb-8"] {
+  padding-bottom: 0;
+  font-size: 32px;
 }
 @container (max-width: 650px) {
   [data-library-preview] [data-library-tool]:has([data-tool="balance"]) {

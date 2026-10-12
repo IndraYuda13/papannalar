@@ -347,7 +347,19 @@ const tools: PublicTool[] = [
 async function activityPage(page: Page) {
   const next = page.getByRole("button", { name: "Bagian berikutnya" });
   await expect(next).toBeEnabled();
-  while (await next.isEnabled()) await next.click();
+  // Resizing and tool replacement settle their measured pagination asynchronously.
+  // Follow observable pages, not a transient disabled state during remeasurement.
+  await expect
+    .poll(async () => {
+      if (
+        (await page.locator(".library-page-label").textContent()) ===
+        "Aktivitas"
+      )
+        return true;
+      if (await next.isEnabled()) await next.click();
+      return false;
+    })
+    .toBe(true);
   await expect(page.locator(".library-page-label")).toHaveText("Aktivitas");
 }
 test("V1 all six production tools fit the board after reading a long prompt", async ({

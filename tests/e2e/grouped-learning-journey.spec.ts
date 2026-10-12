@@ -260,6 +260,8 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
   await board
     .getByRole("button", { name: "Soal berikutnya", exact: true })
     .click();
+  // Navigation is an acknowledged server mutation, not optimistic local state.
+  await expect(board.getByTestId("group-board")).toContainText("Soal 2 dari 2");
   await board.reload();
   await expect(board.getByTestId("group-board")).toContainText("Soal 2 dari 2");
   await board.getByRole("button", { name: "B. 5", exact: true }).click();
