@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { randomIdSchema } from "./domain";
+import { collectionMappingSchema } from "./learning-evidence";
 import { publicToolSchema, publicTool } from "./tools";
 
 export const CHOICES = ["A", "B", "C", "D"] as const;
@@ -137,7 +138,7 @@ export const runDetailSchema = z.strictObject({
   run: runSchema,
   responses: z.array(responseSchema),
 });
-const itemPublic = z.union([
+export const publicLibraryItemSchema = z.union([
   z.strictObject({
     ...base,
     kind: z.literal("card"),
@@ -146,6 +147,8 @@ const itemPublic = z.union([
   interactiveItemSchema,
   writingItemSchema,
 ]);
+const itemPublic = publicLibraryItemSchema;
+export type PublicLibraryItem = z.infer<typeof publicLibraryItemSchema>;
 export const libraryBoardSchema = z.strictObject({
   id: randomIdSchema,
   title: z.string().max(90),
@@ -232,3 +235,72 @@ export function libraryNetworkAction(a: LibraryAction): LibraryAction {
   // Strict parsing rejects prohibited keys instead of serializing a local view.
   return libraryActionSchema.parse(a);
 }
+
+export const libraryResponseActionSchema = libraryActionSchema.options[7];
+export const responseMethodSchema = z.enum(["none", "cards"]);
+export const runV2Schema = runSchema.extend({
+  responseMethod: responseMethodSchema,
+  mapping: collectionMappingSchema,
+  parentLessonId: randomIdSchema.nullable(),
+  assignmentId: randomIdSchema.nullable(),
+});
+export const collectionV2Schema = collectionSchema.extend({
+  mapping: collectionMappingSchema,
+});
+export const responseV2Schema = responseSchema.extend({
+  answers: z.array(answerSchema.nullable()).min(1).max(5),
+  answerStates: z
+    .array(z.enum(["answered", "blank", "unreadable"]))
+    .min(1)
+    .max(5),
+  updatedAt: z.string(),
+});
+export const runDetailV2Schema = z.strictObject({
+  run: runV2Schema,
+  responses: z.array(responseV2Schema),
+});
+export const libraryStateV2Schema = z.strictObject({
+  collections: z.array(collectionV2Schema),
+  runs: z.array(runV2Schema),
+  sample: z.boolean(),
+});
+export const libraryV2ActionSchema = z
+  .discriminatedUnion("action", [
+    libraryActionSchema.options[0].extend({ contractVersion: z.literal(2) }),
+    libraryActionSchema.options[2].extend({ contractVersion: z.literal(2) }),
+    libraryActionSchema.options[4].extend({ contractVersion: z.literal(2) }),
+    libraryActionSchema.options[5].extend({ contractVersion: z.literal(2) }),
+    libraryActionSchema.options[6].extend({ contractVersion: z.literal(2) }),
+    libraryActionSchema.options[8].extend({ contractVersion: z.literal(2) }),
+    libraryActionSchema.options[1].extend({
+      contractVersion: z.literal(2),
+      mapping: collectionMappingSchema,
+    }),
+    libraryActionSchema.options[3].extend({
+      contractVersion: z.literal(2),
+      responseMethod: responseMethodSchema,
+    }),
+    libraryResponseActionSchema.extend({
+      contractVersion: z.literal(2),
+      source: z.enum(["scan", "manual"]),
+      answers: z.array(answerSchema.nullable()).min(1).max(5),
+      answerStates: z
+        .array(z.enum(["answered", "blank", "unreadable"]))
+        .min(1)
+        .max(5),
+    }),
+  ])
+  .refine(
+    (a) =>
+      a.action !== "response" ||
+      (a.answers.length === a.answerStates.length &&
+        a.answers.every(
+          (v, i) => (a.answerStates[i] === "answered") === (v !== null),
+        ) &&
+        (a.status !== "received" ||
+          a.answerStates.every((s) => s === "answered"))),
+  );
+export type LibraryV2Action = z.infer<typeof libraryV2ActionSchema>;
+export type LibraryRunV2 = z.infer<typeof runV2Schema>;
+export type RunDetail = z.infer<typeof runDetailV2Schema>;
+export type LibraryResponseV2 = z.infer<typeof responseV2Schema>;

@@ -4,7 +4,7 @@ import { openDataDatabase } from "./data-database";
 import { readLocalAccess } from "./access";
 import type { LocalScope } from "./scope";
 import {
-  libraryActionSchema,
+  libraryResponseActionSchema,
   libraryStateSchema,
   draftDocumentSchema,
   runDetailSchema,
@@ -62,7 +62,7 @@ export async function libraryCache<T extends CacheKind>(
     db.close();
   }
 }
-const pendingSchema = libraryActionSchema.options[7];
+const pendingSchema = libraryResponseActionSchema;
 type PendingRow = { key: string; value: unknown; conflict?: boolean };
 type Detail = { run: LibraryRun; responses: LibraryResponse[] };
 

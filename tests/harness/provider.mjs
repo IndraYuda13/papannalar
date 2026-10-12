@@ -63,6 +63,26 @@ function dataRequest(request, url, body, user) {
         `select public.presentation_logout(${body.p_controller_id ? literal(body.p_controller_id) + "::uuid" : "null"},${body.p_sample_controller ? literal(body.p_sample_controller) + "::uuid" : "null"})`,
       ),
     };
+  const learningRpc = {
+    "/rest/v1/rpc/library_action_v2": "library_action_v2",
+    "/rest/v1/rpc/group_lesson_action": "group_lesson_action",
+    "/rest/v1/rpc/group_board_action": "group_board_action",
+    "/rest/v1/rpc/learning_results": "learning_results",
+  }[url.pathname];
+  if (learningRpc) {
+    const extra =
+      learningRpc === "group_board_action"
+        ? `,${body.p_teacher_lesson ? literal(body.p_teacher_lesson) + "::uuid" : "null"}`
+        : learningRpc === "learning_results"
+          ? ""
+          : `,${body.p_controller ? literal(body.p_controller) + "::uuid" : "null"}`;
+    return {
+      body: asUser(
+        user,
+        `select public.${learningRpc}(${literal(JSON.stringify(body.p_input))}::jsonb${extra})`,
+      ),
+    };
+  }
   if (url.pathname === "/rest/v1/rpc/library_action")
     return {
       body: asUser(

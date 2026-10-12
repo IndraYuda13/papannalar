@@ -4,6 +4,16 @@ import { createServer } from "vite";
 import { createHash } from "node:crypto";
 
 const mode = process.argv[2] ?? "rls";
+if (mode === "learning") {
+  for (const file of ["library", "group-lessons", "group-board"]) {
+    const output = sql(await readFile(`supabase/tests/${file}.sql`, "utf8"));
+    await mkdir("artifacts/qa/learning", { recursive: true });
+    await writeFile(`artifacts/qa/learning/${file}-sql.log`, output + "\n");
+    console.log(output.split("\n").at(-1));
+  }
+  await import("./check-learning-tools.mjs");
+  process.exit(0);
+}
 if (mode === "prepare") {
   await mkdir("artifacts/qa/M01/m01c", { recursive: true });
   sql(await readFile("tests/harness/bootstrap.sql", "utf8"));
@@ -42,6 +52,12 @@ if (mode === "prepare") {
     await mkdir("artifacts/qa/video-ready", { recursive: true });
     await writeFile("artifacts/qa/video-ready/library-sql.log", library + "\n");
     console.log(library);
+    for (const file of ["group-lessons", "group-board"]) {
+      const output = sql(await readFile(`supabase/tests/${file}.sql`, "utf8"));
+      await mkdir("artifacts/qa/learning", { recursive: true });
+      await writeFile(`artifacts/qa/learning/${file}-sql.log`, output + "\n");
+      console.log(output.split("\n").at(-1));
+    }
     const videoConnection = sql(
       await readFile("supabase/tests/video-connection.sql", "utf8"),
     );
