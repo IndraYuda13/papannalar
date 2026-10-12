@@ -94,8 +94,7 @@ export function PrintCards({
             ? `Unduh Kartu Nalar · ${cardLayout(selectedKind).rows} baris`
             : "Unduh PDF A4"}
       </Button>
-      {/* Friction 14: the scale instruction is load-bearing and must be read before the
-          download, not after it. `PrintScaling.None` in the PDF is untouched. */}
+
       <p className="studio-print-note">
         Cetak ukuran asli 100%. Jangan pilih &quot;sesuaikan halaman&quot;.
       </p>

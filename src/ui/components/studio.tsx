@@ -24,10 +24,6 @@ export function WorkflowSteps({
   );
 }
 
-/**
- * The compact replacement for the retired stepper: `2/4 · Pilih soal`.
- * `label` is the human step name; `index` is 1-based (DESIGN_BRIEF §9.1).
- */
 export function ProgressLabel({
   index,
   total,
@@ -60,11 +56,7 @@ export function PageHeader({
 }: {
   title: ReactNode;
   description?: ReactNode;
-  /**
-   * Legacy orientation line. The tracked uppercase eyebrow is retired as a repeated device
-   * (§5.2), so this renders as a plain 13/18/600 label and no D1 page passes it. The
-   * remaining call sites live on D2 surfaces (/guru/mulai, /demo) and are removed there.
-   */
+
   eyebrow?: ReactNode;
   actions?: ReactNode;
 }) {
@@ -80,15 +72,6 @@ export function PageHeader({
   );
 }
 
-/**
- * Section — the replacement for the repeated bordered card (§8.1).
- *
- *   [label]──────────────  ← 13/18/600 label above a full-column rule
- *   content…
- *
- * `ground="sheet"` is the ONE level of containment allowed; a nested Section must use the
- * default rule variant, because boxes inside boxes is exactly what this replaces.
- */
 export function Section({
   label,
   action,
@@ -123,10 +106,6 @@ export function Section({
   );
 }
 
-/**
- * StateNotice — the one shared grammar for empty/loading/error/offline (§6.5):
- * icon + one-line title + one or two plain sentences + at most one action.
- */
 export function StateNotice({
   title,
   children,
@@ -161,10 +140,6 @@ export function StateNotice({
   );
 }
 
-/**
- * StatusChip — state, never a filter (§8.7). Static state has no fill and is a label,
- * never a button, so it can no longer read as a filter control.
- */
 export function StatusChip({ children }: { children: ReactNode }) {
   return (
     <span className="studio-status">
@@ -174,14 +149,6 @@ export function StatusChip({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * BoardLegality — the authored device of the item editor (§9.3, R6): a live reading of whether
- * the text the room will see actually fits the board's measure and type budget.
- *
- * The board's legibility rule is a *content* rule, so it is checked at authoring time rather
- * than enforced by shrinking type at render time. Keys off the same constants the board's
- * measure rule uses, so a change to one moves both.
- */
 export const BOARD_MAX_LINES = 2;
 export const BOARD_MAX_WORDS = 14;
 

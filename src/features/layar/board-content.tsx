@@ -25,16 +25,6 @@ type ContentProps = {
   plan?: BoardRunPlan;
 };
 
-/**
- * The board's own frame (INTERACTION_DELTA_V4 §B0) plus the two self-explanation devices
- * (§I.3): a `role-line` above the heading on every screen, and a `next-line` below the content
- * on every non-question screen. Neither introduces a container — both are text and a rule,
- * which is the board's own material — and neither animates its text size (§A.1.5).
- *
- * The column is anchored to the top because a consistent question origin is the single
- * highest-value composition decision on this surface (§B0.1); the threshold rule above the
- * column is the AMBANG device, drawn once per crossing (§B1).
- */
 export function BoardContent({ state, content, plan }: ContentProps) {
   const base = underlyingView(state);
   const copy = boardCopy(base);
@@ -98,10 +88,7 @@ export function BoardContent({ state, content, plan }: ContentProps) {
           }
         />
       )}
-      {/* The lesson objective is supporting context, so it sits *below* the decision the room
-          has to make. Above the question it pushed the question out of §6.1's origin band —
-          a screen whose first line is "Tujuan:" is a screen whose question starts too late
-          (A3b). */}
+
       <p
         data-testid="lesson-objective"
         hidden={state.mode === "reflection"}
@@ -303,12 +290,6 @@ function BoardBody({ state, content, plan }: ContentProps) {
   return null;
 }
 
-/**
- * `Sesi selesai` — the closing card (§B8).
- *
- * The lesson ends; the class does not win. No score, no per-student summary, nothing
- * celebratory, and one instruction addressed to the teacher: the results are on the phone.
- */
 export function BoardCloseCard({
   className,
   total,

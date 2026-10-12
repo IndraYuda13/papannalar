@@ -24,7 +24,8 @@ import {
   type LibraryRunV2,
   publicLibraryItem,
 } from "@/contracts/library";
-import { CompetencyField } from "@/features/library/mapping-fields";
+import { GroupEvidenceSummary } from "./group-evidence-summary";
+import { GroupPreparation } from "./group-preparation";
 import { AssignmentPrint } from "@/features/library/print-assignment";
 import { LibraryItemView } from "@/features/library/item-view";
 import { field, jakartaDate } from "@/features/library/client";
@@ -368,8 +369,7 @@ export function GroupWorkspace({
         action={<Button onClick={() => void load()}>Coba lagi</Button>}
       />
     );
-  const unknown =
-    lesson?.evidenceSnapshot.filter((e) => e.status === "unknown").length ?? 0;
+
   return (
     <div className="space-y-6">
       <Link
@@ -401,145 +401,31 @@ export function GroupWorkspace({
       </h2>
       {!lesson && <GroupDrafts classId={cls} />}
       {(phase === "prepare" || !lesson) && (
-        <Section label="Kelas dan pembagian">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label>
-              Kelas
-              <select
-                className={field}
-                value={cls}
-                disabled={!!lesson || busy}
-                onChange={(e) => setClass(e.target.value)}
-              >
-                {classes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <CompetencyField
-              value={competency}
-              onChange={setCompetency}
-              disabled={busy}
-            />
-          </div>
-          <p>{present.length} siswa hadir</p>
-          <details>
-            <summary className="min-h-12 cursor-pointer content-center font-semibold">
-              Periksa kehadiran
-            </summary>
-            {students.map((s) => (
-              <label key={s.id} className="flex min-h-12 items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={!absent.includes(s.id)}
-                  disabled={busy}
-                  onChange={(e) =>
-                    setAbsent((old) =>
-                      e.target.checked
-                        ? old.filter((id) => id !== s.id)
-                        : [...old, s.id],
-                    )
-                  }
-                />
-                {s.attendanceNumber}.{" "}
-                {names[s.id] ?? `Siswa ${s.attendanceNumber}`}
-              </label>
-            ))}
-          </details>
-          <label>
-            Jumlah kelompok
-            <input
-              className={field}
-              type="number"
-              min={1}
-              max={present.length || 1}
-              value={count}
-              onChange={(e) => setCount(Number(e.target.value))}
-            />
-          </label>
-          <fieldset>
-            <legend className="font-semibold">Pembagian kelompok</legend>
-            {(["random", "evidence"] as const).map((v) => (
-              <label className="flex min-h-12 items-center gap-3" key={v}>
-                <input
-                  type="radio"
-                  name="grouping"
-                  checked={source === v}
-                  disabled={busy || (v === "evidence" && !competency)}
-                  onChange={() => setSource(v)}
-                />
-                {v === "random" ? "Acak merata" : "Dari hasil topik ini"}
-              </label>
-            ))}
-          </fieldset>
-          <p className="text-sm">
-            {competency
-              ? "Hanya hasil pada soal dan versi yang sebanding dipakai. Siswa tanpa hasil tetap masuk kelompok. Anda dapat memilih acak atau mengedit pembagian."
-              : "Topik ini belum terhubung ke hasil siswa. Gunakan pembagian acak."}
-          </p>
-          {!present.length && (
-            <p>
-              Belum ada siswa hadir. Periksa kehadiran sebelum membuat kelompok.
-            </p>
-          )}
-          <Button
-            disabled={
-              busy ||
-              offline ||
-              !canMutate ||
-              !present.length ||
-              count < 1 ||
-              count > present.length
-            }
-            onClick={() => void prepare()}
-          >
-            {busy ? "Menyiapkan kelompok…" : "Buat kelompok"}
-          </Button>
-        </Section>
+        <GroupPreparation
+          classes={classes}
+          cls={cls}
+          setClass={setClass}
+          hasLesson={!!lesson}
+          busy={busy}
+          competency={competency}
+          setCompetency={setCompetency}
+          presentCount={present.length}
+          students={students}
+          names={names}
+          absent={absent}
+          setAbsent={setAbsent}
+          count={count}
+          setCount={setCount}
+          source={source}
+          setSource={setSource}
+          offline={offline}
+          canMutate={canMutate}
+          onPrepare={() => void prepare()}
+        />
       )}
       {lesson && phase !== "prepare" && (
         <>
-          <p>
-            {lesson.presence.length} siswa dalam {groups.length} kelompok
-          </p>
-          {unknown > 0 && (
-            <p>
-              {unknown} siswa belum memiliki hasil yang sesuai. Mereka tetap
-              masuk kelompok dan dapat dipindahkan.
-            </p>
-          )}
-          {unknown === lesson.presence.length && (
-            <p>
-              Belum ada hasil untuk topik ini. Pembagian ini sementara, bukan
-              tingkat kemampuan.
-            </p>
-          )}
-          <details>
-            <summary className="min-h-12 cursor-pointer content-center">
-              Hasil yang dipakai
-            </summary>
-            <ul className="space-y-3">
-              {lesson.evidenceSnapshot.map((e) => (
-                <li key={e.studentId}>
-                  Absen{" "}
-                  {
-                    lesson.presence.find((s) => s.id === e.studentId)
-                      ?.attendanceNumber
-                  }
-                  :{" "}
-                  {e.evidence
-                    ? `${e.evidence.correct}/${e.evidence.total} soal · Versi ${e.evidence.version} · ${e.evidence.assessedAt} · Kumpulan ${e.evidence.collectionId.slice(0, 8)}`
-                    : "Belum ada hasil untuk topik ini"}
-                </li>
-              ))}
-            </ul>
-            <p>
-              Hasil pada kumpulan ini, bukan tingkat kemampuan. Hasil baru hanya
-              memengaruhi saran kegiatan berikutnya.
-            </p>
-          </details>
+          <GroupEvidenceSummary lesson={lesson} groupCount={groups.length} />
           {groups.map((g) => {
             const a = assignments.find((a) => a.groupId === g.id),
               c = readyCollections.find((c) => c.id === a?.collectionId),

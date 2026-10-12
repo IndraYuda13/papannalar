@@ -1,14 +1,6 @@
 import type { PresentationState } from "@/contracts/presentation";
 import type { PublicStation } from "@/contracts/stations";
 
-/**
- * The four group shapes (§6.6). Filled SVG, never a text glyph: a `▲` inherits the font's own
- * silhouette and baseline, which makes the same "shape" render differently on every device and
- * behave like a letter. On the board the marks are the room's reading order, so they are drawn.
- *
- * Colour + shape + word are always together; a colour-only encoding fails for the 8% of boys
- * with a colour-vision deficiency that the brief's Rule A2 exists for.
- */
 const SHAPES = {
   "Segitiga Biru": {
     color: "var(--pn-grup-biru)",

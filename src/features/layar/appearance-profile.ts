@@ -1,13 +1,5 @@
 import { z } from "zod";
 
-/**
- * v4 (§4.7 R3): presets are named for the room, not for the UI.
- *
- * `compact/balanced/large` described the interface; a teacher thinks in distance. The question
- * floor (§4.7 R1) holds in all three — what changes is control size, model size and how much
- * chrome is on screen. `dekat` is the recorded, user-chosen deviation of §4.7 R4 (a small panel
- * the students physically touch), so the marker/control floors there are lower on purpose.
- */
 export const BOARD_PRESETS = [
   {
     id: "dekat",

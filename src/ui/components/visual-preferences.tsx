@@ -15,17 +15,6 @@ const Context = createContext({
 });
 const KEY = "pn-visual-preferences-v1";
 
-/**
- * One derived motion switch (INTERACTION_DELTA_V4 §A.3/A.5).
- *
- * Five inputs, one output. The four the delta names — OS `prefers-reduced-motion: reduce`,
- * the app's own `Kurangi animasi` preference, light-display mode and `navigator.connection.saveData`
- * — plus a hidden document, because a phone in a pocket must not animate.
- *
- * `data-motion` is the canonical attribute every CSS net reads. `data-reduced-motion` /
- * `data-light-display` survive as *aliases of the same derived value* for the board capability
- * path and for older assertions, so no consumer can observe a disagreement between them.
- */
 export function VisualPreferencesProvider({
   children,
 }: {

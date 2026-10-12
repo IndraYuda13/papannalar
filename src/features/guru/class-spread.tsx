@@ -6,18 +6,6 @@ import { deriveTimeline } from "@/features/session/package-session";
 import { getStep } from "@/content/ladder/registry";
 import { getClassTarget } from "@/content/ladder/targets";
 
-/**
- * The rung rail's data (§3.1, §9.1): a class's real 5-step distance-to-target distribution,
- * read from the same stored cycle snapshot `LearningSummary` uses. Bucket 0 means "at the class
- * target or above"; bucket 4 means "four rungs or more below", matching `--pn-jarak-*`.
- *
- * A spread belongs to exactly one class, so it is kept in a per-class map: a rail that
- * described a different class than the row it sits in would be a false statement, and several
- * home rows can each belong to a different class.
- *
- * Nothing is inferred from an unrelated score, and a class with no stored snapshot gets no
- * entry rather than an invented distribution.
- */
 export type Spread = {
   counts: readonly [number, number, number, number, number];
   total: number;
@@ -99,14 +87,6 @@ export function useClassSpreads(
   return spreads;
 }
 
-/**
- * The rail renders only when a stored cycle produced a real distribution. The ladder is the
- * product's core idea, but a placeholder rail everywhere would be noise, and `Tenang` (§2.1)
- * means the device appears when it has something true to say.
- *
- * Colour is never the only channel: bars read far-distance (left) to at-target (right) like the
- * brand's own ladder, and the whole rail carries both a spoken summary and a visible legend.
- */
 export function RungRail({ spread }: { spread?: Spread }) {
   if (!spread) return null;
   const { counts } = spread,

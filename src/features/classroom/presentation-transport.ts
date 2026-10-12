@@ -155,7 +155,7 @@ export function usePresentationTransport({
       const next = snapshotSchema.parse(result);
       clearPairingLink();
       receive(next);
-      // Friction 13: sent, not applied. The applied state is the board's own ACK.
+      // Sending a snapshot does not imply the board has applied it.
       setMessage("Terkirim ke papan.");
     } catch (error) {
       throw error;

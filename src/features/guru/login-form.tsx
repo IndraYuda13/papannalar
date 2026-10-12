@@ -62,11 +62,6 @@ export function LoginForm() {
       </label>
       <Button type="submit" disabled={busy} aria-busy={busy} className="w-full">
         {busy && (
-          /* §F A15 / §D.1: the in-flight state carries a spinner *and* the label. The label
-             alone leaves a screen-reader or low-vision user with only a text change. The
-             rotation stops under every motion-off input (the `.pending-spinner` rule), so
-             `Mengirim…` plus a still glyph is the reduced-motion rendering — the spinner is
-             `aria-hidden` because `aria-busy` states the condition for assistive tech. */
           <LoaderCircle
             className="pending-spinner"
             size={18}

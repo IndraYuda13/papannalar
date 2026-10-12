@@ -18,8 +18,7 @@ export function LibraryBoard({
   fallback: ReactNode;
 }) {
   const [value, setValue] = useState<LibraryBoardState | null>(null);
-  // L1: the footer rail resolves its position and total from the same object this renderer
-  // prints its own `Soal {position+1}/{total}` from, so the two can never disagree.
+
   const publish = useBoardProgressPublisher();
   useEffect(() => {
     publish(value);

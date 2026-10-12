@@ -35,14 +35,7 @@ export function jakartaDate(now = new Date()) {
   return `${get("year")}-${get("month")}-${get("day")}`;
 }
 
-/**
- * Shared class strings (DESIGN_BRIEF §8.3/§8.4).
- *
- * `field` — a control, so it takes the structural `--pn-edge` boundary (3.80:1 on paper),
- * not the decorative hairline. `panel` — the ONE level of containment allowed: a white sheet
- * with a single edge and no shadow, because hierarchy is carried by type weight and rules,
- * not by nested bordered boxes.
- */
+/* Controls use structural borders; panels provide one level of containment. */
 export const field =
   "studio-field mt-1 min-h-12 w-full rounded-input border border-pn-edge bg-white px-3 py-2 font-normal";
 export const panel =

@@ -56,7 +56,6 @@ export function StationBoard({
         Saat waktu habis, tunggu arahan guru sebelum berpindah.
       </p>
       {roles && (
-        /* §I.2 / A46: instruction copy, not role-play labels. */
         <p className="text-[40px]" data-testid="board-roles">
           {turnInstruction(roles)}
         </p>

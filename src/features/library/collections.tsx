@@ -942,8 +942,7 @@ function CollectionEditor({
                   row={preview + 1}
                 />
               </div>
-              {/* The preview's type is legitimately smaller than the board's, and a reviewer
-                  tuning the board against this scale would set the wrong number (T6 §4.4). */}
+
               <p className="studio-board-preview-note">
                 Ukuran teks di pratinjau ini lebih kecil daripada di Layar
                 Kelas. Papan memakai soal minimal 56 px pada layar 1920×1080.

@@ -192,8 +192,6 @@ export function TeacherProvider({ children }: { children: ReactNode }) {
       value={{ ...data, refresh, canMutate: !conflict && !locked }}
     >
       {data.state.sample && (
-        /* §8.7 / F6: this is a static state, so it is a label with an outline dot — no mint
-           filter fill, and never a button that could be mistaken for a filter control. */
         <div className="mb-4">
           <StatusChip>Data contoh · bukan siswa nyata</StatusChip>
         </div>

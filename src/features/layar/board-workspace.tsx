@@ -308,9 +308,6 @@ function BoardSessionWorkspace({
           setExpiredCode(undefined);
           setShowPairing(false);
         } else if (!stopped && response.expired === true) {
-          // Friction 5: the previous code stays readable and a replacement is issued, with one
-          // sentence naming what happened. Silently swapping the digits left a teacher typing a
-          // dead code with no explanation.
           setExpiredCode(challenge);
           setChallenge(undefined);
           void start();
@@ -428,14 +425,7 @@ function BoardSessionWorkspace({
     const timer = window.setTimeout(() => setArrived(false), 900);
     return () => window.clearTimeout(timer);
   }, [envelope?.revision]);
-  // The one closed connection vocabulary (friction 6). Same words on the board and on the
-  // phone; a teacher must never read two sentences for one condition. The board's set is stated
-  // verbatim by INTERACTION_DELTA_V4 friction 6: `Tersambung` · `Mengikuti lewat pemeriksaan
-  // berkala` · `Terputus` · `Sambungan ke layar terputus. Layar tetap menampilkan mode
-  // terakhir.` — one sentence, two facts: the condition, and what still works (§9.7's rule that
-  // a teacher mid-lesson must know exactly that, without an apology).
-  // The two local-control states are not connection states — the board is driving itself — so
-  // they are separate, and they say which of the two local situations it is.
+
   const stateWord = locallyControlled
     ? envelope
       ? "Kendali lokal di papan. Sambungkan HP untuk mengambil kendali."
@@ -449,10 +439,7 @@ function BoardSessionWorkspace({
           : connection?.realtime === false
             ? "Mengikuti lewat pemeriksaan berkala"
             : "Terputus";
-  // L1: the rail's position and total come from whichever source owns them on the path being
-  // rendered — the run plan on the package path, the bound library item on the library path, the
-  // check item's own total on a session check. `pages.length` alone is only the first of those, so
-  // a library run painted `Soal 1/0` beside a header reading `Soal 5/5`.
+
   const progress = boardProgress({
     library: progressSource.library,
     packagePages: packageView.pages.length,
@@ -703,8 +690,7 @@ function BoardSessionWorkspace({
                 Layar Kelas menunggu sesi. Semua siswa akan melihat papan ini.
               </p>
               <h1 className="board-heading">Layar Kelas menunggu.</h1>
-              {/* Friction 4: the old step 1 ("buka halaman ini") was circular — anyone reading
-                  the board has already opened it. Two real steps remain. */}
+
               <ol className="board-idle-steps">
                 <li>Buka sesi di HP guru.</li>
                 <li>Pindai QR atau masukkan kode.</li>
@@ -754,11 +740,6 @@ function BoardSessionWorkspace({
         </section>
       )}
       <footer className="board-foot" data-board-safe data-board-band>
-        {/* L1 + §J.2.1: the rail paints only when a source actually resolved a position and a
-            total. A zero-segment rail is not a truthful statement about a live session, and the
-            old code painted one whenever the publish payload carried no `package` key — which is
-            every library run. The four motion elements A2 names are marked here too, so the row
-            resolves on this path as well as on the library path. */}
         {displayed && progress && (
           <div
             className="board-rail"

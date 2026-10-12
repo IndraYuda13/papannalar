@@ -11,13 +11,6 @@ import {
 } from "react";
 import { CircleAlert, CheckCircle2, X } from "lucide-react";
 
-/**
- * Toasts (§8.6): one sentence, at most one action, one visible at a time (a second replaces
- * the first rather than stacking). Info/success dismiss after 4s; an error persists until it
- * is dismissed, because an error the teacher never saw is not an error that was reported.
- *
- * Never used for a result the teacher must act on — that belongs in a Section or a sheet.
- */
 type Toast = {
   id: string;
   message: string;

@@ -31,11 +31,7 @@ function ItemPages({
 }: ItemProps) {
   const root = useRef<HTMLElement>(null),
     body = useRef<HTMLDivElement>(null);
-  // §J.1/A41: the board's legibility rule is a *content* rule (BOARD_MAX_LINES / BOARD_MAX_WORDS,
-  // checked live in the item editor). A prompt that satisfies it is never split, whichever way a
-  // measurement falls — so pagination may only be entered for content the product itself calls
-  // illegal. The old trigger was a raw `length > 140`, which promoted a stress fixture to a
-  // contract and could paginate legal content on a narrow canvas.
+  // Paginate only content that exceeds the authored legibility limits.
   const legal = boardMeasure(item.prompt).legal;
   const [paginated, setPaginated] = useState(
     () =>
@@ -55,13 +51,7 @@ function ItemPages({
   const fontsReady = useRef(typeof document === "undefined" || !document.fonts);
   const optionsKey = JSON.stringify(item.kind === "card" ? item.options : null);
   const index = Math.min(position, Math.max(0, pages.length - 1));
-  // §J.1/A42: the reader's position is authoritative and the page list is frozen for a geometry.
-  // `measure` used to recompute on every scheduling tick; a count that moved mid-walk made two
-  // `position` values resolve to the same page and skipped one, and a spec accumulating by label
-  // read that skip as a fragment missing from the middle of a sentence. Here a measurement is
-  // reused whenever the geometry and the content are unchanged, so the list cannot move under a
-  // reader who is walking it. A preset switch, a resize or a new item does legitimately change
-  // the fit, and that is the only thing that re-measures.
+  // Freeze pagination for unchanged geometry so the reading position remains stable.
   const measuredFor = useRef<string>("");
   const current = pages[index] ?? {
     kind: hidePrompt && item.kind !== "card" ? "workspace" : "prompt",
@@ -99,7 +89,7 @@ function ItemPages({
           region.scrollHeight > region.clientHeight + 1 ||
           region.scrollWidth > region.clientWidth + 1
         ) {
-          // A41: legal content is never paginated, even when a canvas cannot show it whole.
+          // Paginate only content that exceeds the authored legibility limits.
           if (legal) return;
           measuredFor.current = "";
           setPaginated(true);
@@ -201,11 +191,7 @@ function ItemPages({
   }, [item.prompt, item.kind, optionsKey, paginated, hidePrompt, legal]);
   return (
     <section ref={root} className="library-item" data-testid="library-item">
-      {/* §J.2.2/§J.2.3: `data-board-question` and `data-board-band` bind a verification row to
-          the *element the board actually renders*, on both paths. The package path renders
-          `h1.board-question`; on this path the same role is played by `h1.library-prompt` when
-          the prompt is on one screen, and by the visible prompt page when it is not — exactly one
-          at a time, because the other is `hidden`. */}
+      {/* Only the visible question owns the board-question landmark. */}
       <h1
         className="library-prompt"
         data-board-question

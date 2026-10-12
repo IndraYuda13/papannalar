@@ -25,7 +25,6 @@ import {
 } from "@/ui/components/studio";
 import { Check, Search, UsersRound } from "lucide-react";
 
-/** The one canonical segmented control (§9.3): never pills *and* a tab strip. */
 function Segmented<T extends string>({
   label,
   value,

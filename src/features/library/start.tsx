@@ -216,8 +216,6 @@ export function StartLesson({
           {unavailable.length > 0 && (
             <details className="text-sm">
               <summary className="min-h-12 cursor-pointer font-semibold text-primary">
-                {/* F9: the unexplained count is gone. The disclosure names the situation; the
-                    explanation is inline, in the panel it opens. */}
                 Soal saya belum muncul?
               </summary>
               <ul className="space-y-3">

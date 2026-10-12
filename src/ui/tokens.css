@@ -1,8 +1,3 @@
-/* PapanNalar design tokens.
-   v4 (AMBANG): the private/public threshold is the layout system. Colour roles, the
-   hairline/edge split and the radii/elevation/hit-area scales are the whole DNA, so this
-   file is the single source both teacher and board surfaces read. Brand values never
-   change; v4 changes what they are allowed to do. See DESIGN_BRIEF_V4.md §4. */
 :root {
   /* Brand values (unchanged — docs/04_BRAND_DESAIN.md). */
   --pn-teal-700: #0b6b6b;
@@ -28,14 +23,10 @@
   --pn-jarak-1: #237d79;
   --pn-jarak-0: #085252;
 
-  /* v4 additions (§4.2). --pn-ink-500 and --pn-amber-100 were referenced by utilities
-     that compiled to nothing; every one of the three now resolves. */
   --pn-ink-500: #6e7f8c;
   --pn-amber-100: #fce4c2;
   --pn-sukses-100: #e7f3ea;
 
-  /* v4 semantic split (§4.3): a hairline is decoration inside an established group;
-     an edge is a structural boundary and must clear 3:1 on paper and on white. */
   --pn-hairline: var(--pn-line);
   --pn-edge: var(--pn-ink-500);
 
@@ -43,7 +34,6 @@
      token existed, so the preview rendered without the board's paper ground. */
   --pn-board: var(--pn-kertas);
 
-  /* v4 geometry and elevation (§4.8, §6.4). Radius shrinks as viewing distance grows. */
   --pn-r-1: 6px;
   --pn-r-2: 10px;
   --pn-r-3: 14px;
@@ -51,7 +41,6 @@
   --pn-e1: 0 1px 2px #14212b0f;
   --pn-e2: 0 8px 24px #14212b1f;
 
-  /* v4 hit areas (§4.8, §6.1). */
   --pn-tap: 48px;
   --pn-tap-lg: 56px;
   /* The bottom bar's own block size, including its 1px top rule. The bar and the space the
@@ -59,8 +48,6 @@
   --pn-nav-h: 68px;
   --pn-nav-safe: calc(var(--pn-nav-h) + env(safe-area-inset-bottom));
 
-  /* LANGKAH motion timing (INTERACTION_DELTA_V4 §A.3). Every value is a ceiling, not a
-     target. C1 state 120 · C2/C2d/C6 arrival 180 · C3/C4/C5 220-300 · C5 hero 500. */
   --pn-t-1: 120ms;
   --pn-t-2: 180ms;
   --pn-t-3: 220ms;
@@ -77,7 +64,6 @@
   --pn-ease-consequence: cubic-bezier(0.16, 1, 0.3, 1);
   --pn-ease-exit: cubic-bezier(0.4, 0, 1, 1);
 
-  /* LANGKAH travel. Sub-perceptual on a board by design (§A.1.2): 16px at 8m is 0.35deg. */
   --pn-m-1: 2px;
   --pn-m-2: 4px;
   --pn-m-3: 8px;

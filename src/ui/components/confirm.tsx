@@ -9,18 +9,6 @@ import {
 import { Sheet } from "./sheet";
 import { Button } from "./button";
 
-/**
- * `Sheet`-backed confirmation for consequential actions (§8.5, INTERACTION_DELTA_V4 §E-7).
- *
- * The product's most destructive actions used to render browser chrome via `window.confirm`,
- * which has no consequence sentence, no focus-return contract and no typography — and on a
- * projected classroom screen it made the browser the most visible thing in the room. This
- * module replaces them with the product's own dialog.
- *
- * It is a module-level request register rather than a context hook because one of the callers
- * (`use-draft-guard`) intercepts a navigation click outside the React tree. Both entry points
- * resolve to the same dialog, so there is exactly one confirmation surface in the product.
- */
 export type ConfirmSpec = {
   title: string;
   consequence: string;

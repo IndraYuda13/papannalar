@@ -19,17 +19,6 @@ import { ArrowRight, Presentation, Shapes } from "lucide-react";
 import type { LibraryRun } from "@/contracts/library";
 import { MotionBoundary } from "@/ui/components/motion-boundary";
 
-/**
- * One row contract (V5): icon · content · rail · action, and the action track never wraps.
- * The rail is §9.1's signature device: the row shows *this* run's class distribution, so the
- * home screen teaches the product's core idea every time it is opened.
- *
- * The top-most active run owns the screen's single primary action (§F A16). It was already
- * *painted* filled (`.studio-row[data-primary-row]`), but nothing carried the measurable
- * attribute, so on a screen with ≥2 runs `[data-emphasis="primary"]` counted 0 — a rule the row
- * asserts but the DOM never exposed. The attribute belongs on the filled action itself, and it
- * must not be a second one: the header's `Mulai mengajar` is only rendered when no run is active.
- */
 function ResumeRow({
   run,
   spread,
@@ -93,9 +82,7 @@ export function TeacherHome() {
       (r) => r.status === "active" && !r.parentLessonId,
     ),
     last = classes.find((c) => c.id === active[0]?.classId) ?? classes[0];
-  // Friction 8: a closing teach run used to land on Beranda with no summary at all. The most
-  // recently closed run of the day is stated once, with numbers only, and links to its notes
-  // when any response exists.
+
   const today = now > 0 ? jakartaDate(new Date(now)) : "";
   const closedToday = today
     ? state.runs.find(
@@ -133,8 +120,6 @@ export function TeacherHome() {
   const practiceHref = `/guru/latihan?mode=${state.sample ? "demo" : "pilot"}${last ? `&class=${last.id}` : ""}`;
   return (
     <div className="space-y-6">
-      {/* v4 (§9.1): `Ruang mengajar`, no eyebrow, no hero, exactly one primary action.
-          The board action is a persistent secondary in the header (F3), never a floating link. */}
       <PageHeader
         title="Ruang mengajar"
         description={
@@ -213,9 +198,6 @@ export function TeacherHome() {
                       Mulai mengajar
                     </Link>
                   ) : (
-                    /* Friction 10: with zero classes the old label promised a session and the
-                       destination was a class form. The label now says what the next screen
-                       actually is. */
                     <Link href="/guru/kelas">Buat kelas</Link>
                   )}
                 </Button>
@@ -262,13 +244,7 @@ export function TeacherHome() {
           </ul>
         </Section>
       )}
-      {/* §9.1(c): the workflow entry sits in a shared list, not a Section whose whole body is
-          one row (V7/V8's lesson).
-          DELIBERATE DEVIATION, recorded for LENS/PRIME: §9.1(d) also lists `Layar Kelas` as a
-          secondary row, while F3's resolution promotes the board action into the header. Doing
-          both would put two `Layar Kelas` affordances on one screen — precisely the "two
-          competing go paths" F4 measured. The header keeps it (always present, on every route);
-          this list keeps the one action that has no other home. */}
+
       <Section label="Langkah berikutnya">
         <ul className="studio-row-list">
           <li>
@@ -293,9 +269,7 @@ export function TeacherHome() {
           </p>
         )}
       </Section>
-      {/* §9.1(e): the tool explorer is present but collapsed, so it never competes with the
-          one primary action for the first screenful. It is the screen's own tool shelf, so the
-          section label is its heading — no second "Jelajahi alat belajar" heading inside. */}
+
       <MotionBoundary>
         <Section label="Soal & alat">
           <ProgressLabel index={2} total={4} label="Pilih soal" />

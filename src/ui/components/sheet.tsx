@@ -2,13 +2,6 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { X } from "lucide-react";
 
-/**
- * Bottom sheet on phone / centred dialog from 1024 (§8.5).
- *
- * Contract: opens only on a user action, traps focus, closes on Esc and on an explicit close
- * control, and returns focus to the trigger. The header carries the title plus one sentence
- * naming the consequence — for a destructive action the consequence is literal.
- */
 export function Sheet({
   open,
   onClose,

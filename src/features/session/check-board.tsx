@@ -53,11 +53,7 @@ export function CheckBoard({ state }: { state: PresentationState }) {
       {needsQuestionVisual(state) && (
         <QuestionVisual prompt={value.question.prompt} />
       )}
-      {/* The position band states the question's place in the set, the card row it is written on
-          (a student holding a printed card needs that), and the time left — once, inside the
-          region a screen reader enters (§I.3, §B2). It sits *below* the question on purpose:
-          §B0.1 makes the question the first thing at the top of the column, so a band above it
-          would push the single highest-value composition decision out of its 8–20 % band. */}
+
       <p className="board-note board-position-band">
         {value.total === 10 ? "Cek pertama" : "Cek lanjutan"} · Soal{" "}
         {state.question}/{value.total} · Baris {state.question} pada kartu ·{" "}

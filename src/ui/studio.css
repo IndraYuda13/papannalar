@@ -97,7 +97,7 @@
     padding: 0.65rem;
   }
 }
-/* Navigation labels: the hard 12px floor (§5.2 V4). Never uppercase. */
+
 .nav-label {
   font-size: 12px;
   line-height: 16px;
@@ -174,8 +174,7 @@
   font-weight: 800;
   letter-spacing: -0.035em;
 }
-/* The tracked uppercase eyebrow is retired as a repeated device (§5.2): it survives only
-   as the one-off editorial line on the login intro, where it is scoped. */
+
 .studio-eyebrow {
   color: var(--pn-teal-700);
   font-size: 13px;
@@ -202,7 +201,7 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-/* One sheet: flat white, a single structural edge, and level-1 elevation at most (§2.2). */
+
 .studio-panel {
   border-radius: var(--pn-r-3);
   border: 1px solid var(--pn-edge);
@@ -264,7 +263,7 @@
   line-height: 16px;
   font-weight: 600;
 }
-/* State, never a filter: the static chip has no mint fill and is never a control (§8.7). */
+
 .studio-status > span {
   width: 7px;
   height: 7px;
@@ -358,8 +357,7 @@
   font-weight: 700;
   color: var(--pn-teal-700);
 }
-/* The row that owns the screen's one primary action (§8.3, §9.1b). A filled action inside a
-   row is that primary; the row's own content stays secondary so it cannot compete with it. */
+
 .studio-row[data-primary-row] .studio-row-action {
   justify-content: center;
   padding-inline: 16px;
@@ -374,11 +372,6 @@
   background: var(--pn-teal-800);
 }
 
-/* ── v4 primitives (DESIGN_BRIEF §6.2, §8) ─────────────────────────────────────────────
-   A teacher page is a sequence of SECTIONS separated by rules, not nested boxes. These are
-   the shared building blocks every D1 screen composes from. */
-
-/* §8.1 — Section. Label above a full-width rule; the rule spans the column to the gutter. */
 .studio-section {
   display: grid;
   gap: 12px;
@@ -451,7 +444,6 @@
   background: var(--pn-teal-100);
 }
 
-/* §8.1/§5.2 — compact orientation label; a single line can never orphan (V7). */
 .studio-progress-label {
   display: inline-flex;
   align-items: center;
@@ -462,7 +454,6 @@
   font-weight: 600;
 }
 
-/* §8.7 / §9.3 — the one canonical segmented control. Never pills plus a tab strip. */
 .studio-segmented {
   display: inline-flex;
   flex-wrap: wrap;
@@ -494,9 +485,6 @@
   color: var(--pn-teal-800);
 }
 
-/* §9.2 — attendance control: a deliberate 44px square with a check glyph, not a 13px box.
-   The native checkbox stays the real control (so it is keyboard- and test-operable) and is
-   stretched over the 44px box, which keeps the effective target at T5's measured 48px+. */
 .studio-attend {
   position: relative;
   display: inline-flex;
@@ -544,7 +532,6 @@
   outline-offset: 4px;
 }
 
-/* §9.2 — the numeral chip: attendance number as an identity-free figure (Jakarta, tabular). */
 .studio-numeral-chip {
   display: grid;
   place-items: center;
@@ -560,7 +547,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* §3.1 — the rung rail: the brand's own five-step ramp used as a real distribution device. */
 .studio-rail {
   display: flex;
   align-items: flex-end;
@@ -583,7 +569,6 @@
   line-height: 18px;
 }
 
-/* §8.5 — bottom sheet on phone, centred dialog from 1024. --pn-e2 belongs to dialogs only. */
 .studio-overlay {
   position: fixed;
   inset: 0;
@@ -633,7 +618,6 @@
   margin-top: 20px;
 }
 
-/* §8.6 — toast: one sentence, at most one action; errors persist until dismissed. */
 .studio-toast {
   position: fixed;
   z-index: 70;
@@ -658,7 +642,6 @@
   flex: none;
 }
 
-/* §8.9 grammar applied to a D1 preview: a flat board ground with hard corners, no shadow. */
 .studio-board-preview {
   border: 1px solid var(--pn-edge);
   border-radius: var(--pn-r-1);
@@ -672,7 +655,6 @@
   line-height: 18px;
 }
 
-/* §9.3 — the board-legality meter (R6). Amber ground + amber edge, never hue alone (A3). */
 .studio-legality {
   display: inline-flex;
   flex-wrap: wrap;
@@ -693,7 +675,6 @@
   color: var(--pn-ink-900);
 }
 
-/* Field labels are always visible above the field (§8.4). */
 .studio-label {
   display: block;
   color: var(--pn-ink-900);
@@ -919,9 +900,7 @@
 .studio-session-progress [data-state="done"] {
   background: var(--pn-teal-700);
 }
-/* Friction 12: `current` is taller *and* differently grounded, so the strip answers "where am
-   I" from geometry alone — a teacher standing behind the phone cannot compare two identical
-   teal segments. */
+
 .studio-session-progress [data-state="current"] {
   height: 6px;
   background: var(--pn-teal-700);
@@ -1095,15 +1074,12 @@
   border-color: var(--pn-edge);
   color: var(--pn-teal-700);
 }
-/* `.studio-step` is retired (§E-3). `/guru/mulai` carried two orientation systems on one
-   screen — the top `WorkflowSteps` and a per-field numeral — which is the same defect as
-   pills + tabs. One canonical orientation device survives: `WorkflowSteps`. */
+
 .studio-start-summary {
   border-top: 1px solid var(--pn-hairline);
   padding-top: 16px;
 }
-/* The scale note (friction 14). A 1px `--pn-edge` boundary, never amber alone: this is an
-   instruction, not a warning (§4.5 Rule A3). */
+
 .studio-print-note {
   margin-top: 8px;
   padding: 8px 12px;
@@ -1126,8 +1102,7 @@
   font-weight: 500;
   color: var(--pn-ink-600);
 }
-/* The one hero comprehension metric (F5/V8), then a single supporting intake line — never
-   three equal-weight tiles. */
+
 .studio-comprehension-question {
   margin: 0;
   font-size: 22px;
@@ -1178,8 +1153,7 @@
   color: var(--pn-ink-600);
   font-variant-numeric: tabular-nums;
 }
-/* The offline line (§9.7): one persistent line at the top of the working area, mint ground,
-   `--pn-edge`, never a modal and never repeated. */
+
 .studio-offline-line {
   display: flex;
   align-items: center;
@@ -1370,9 +1344,6 @@
   text-align: center;
 }
 
-/* Group cards (§6.6, B4). Both the old preview classes are kept here so the board and the
-   teacher's `[data-library-preview]` share one card, and the shape block is a real SVG at
-   >=1.5x the adjacent text height. */
 .board-groups {
   display: grid;
   width: 100%;

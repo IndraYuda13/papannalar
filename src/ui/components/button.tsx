@@ -5,11 +5,6 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/ui/lib/cn";
 
-/**
- * v4 (§8.3). `primary` appears exactly once per screen; every other action is `secondary`
- * or `quiet`. Two primaries may never be adjacent. Board sizing lives on the board surface,
- * not here, so these variants stay teacher-scale.
- */
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 rounded-tombol font-semibold transition-[background-color,border-color,color,transform] duration-150 active:translate-y-px motion-reduce:transform-none motion-reduce:transition-none disabled:transform-none disabled:cursor-not-allowed disabled:opacity-60 [&_svg]:shrink-0",
   {

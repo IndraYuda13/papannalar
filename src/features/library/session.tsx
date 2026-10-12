@@ -501,10 +501,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
         current={run.status === "closed" ? 2 : 1}
         steps={
           run.responseMethod === "cards"
-            ? /* Friction 11: lesson vocabulary, subset-consistent with the conductor strip.
-                 The full-lesson ladder stays on /guru/latihan; this rail is navigation for
-                 the lesson, not a second app taxonomy. */
-              ["Bagikan soal", "Kerjakan", "Kumpulkan"]
+            ? ["Bagikan soal", "Kerjakan", "Kumpulkan"]
             : ["Siapkan soal", "Tampilkan", "Tutup sesi"]
         }
       />
@@ -513,9 +510,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
           {message}
         </p>
       )}
-      {/* Friction 12: three states, not a boolean. "Done" and "current" used to be the same
-          colour, so the strip could not answer "where am I". The difference is geometry plus
-          ground, and the live region carries the words. */}
+
       <div
         className="studio-session-progress"
         role="group"
@@ -558,8 +553,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
                   ? "Menunggu layar menerapkan tampilan."
                   : "Sambungkan Layar"}
             </h2>
-            {/* D6 Siar: the room, seen from the phone. This is the signature screen of the
-                product — the teacher can see what the class sees without turning around. */}
+
             {transport.snapshot && (
               <div className="studio-siar" data-siar>
                 <p className="studio-siar-label">Sedang tampil di papan</p>
@@ -695,10 +689,7 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
             </li>
           </ol>
           <AssignmentPrint run={run} />
-          {/* Friction 14: the `ukuran asli 100%` instruction must be readable *before* the
-              download control, not after it. A teacher who prints "sesuaikan halaman" gets
-              cards the OMR worker cannot read, and the instruction arrived too late to stop
-              them. `PrintScaling.None` in the PDF is untouched. */}
+
           <p className="studio-print-note">
             Cetak ukuran asli 100%. Jangan pilih &quot;sesuaikan halaman&quot;.
           </p>

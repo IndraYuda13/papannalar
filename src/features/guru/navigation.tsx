@@ -15,17 +15,6 @@ import { TeacherProvider } from "./app-context";
 import { logoutTeacher } from "@/features/classroom/logout-transport";
 import { MotionSwap } from "@/ui/components/interactive-motion";
 
-/**
- * v4 navigation (§6.1, §10.1 V3/V4/V6/V10).
- *
- * Four destinations, not five: `Latihan kelompok` is a workflow reachable from home and from
- * a class, not a top-level destination. That removes the duplicate `UsersRound` silhouette
- * (V3) structurally rather than by swapping a glyph, and it gives the remaining four 12px
- * labels room to breathe at 360px (V4).
- *
- * The sidebar appears at 1024, not 768 (V6); the account block and the board action are
- * grouped at the sidebar foot above a rule (V10).
- */
 const entries = [
   ["/guru", "Beranda", Home],
   ["/guru/kelas", "Kelas", UsersRound],

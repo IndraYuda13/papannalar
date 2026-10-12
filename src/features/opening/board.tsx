@@ -40,9 +40,6 @@ export function OpeningBoard({
       ) : (
         <>
           {roles && (
-            /* §I.2 / A46: the turn is stated as an instruction in plain Indonesian, next to the
-               interaction it describes. The role-play label and the two-bare-numbers row are gone;
-               the attendance numbers stay because that is the part a student acts on. */
             <p data-testid="opening-roles" className="text-[40px]">
               {turnInstruction(roles)}
             </p>

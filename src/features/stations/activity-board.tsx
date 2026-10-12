@@ -29,7 +29,6 @@ export function ActivityBoard({ state }: { state: PresentationState }) {
         <MathPrompt value={activity.prompt} />
       </h2>
       {state.roles && (
-        /* §I.2 / A46: instruction copy, not role-play labels. */
         <p data-testid="board-roles" className="text-[32px]">
           {turnInstruction(state.roles)}
         </p>
