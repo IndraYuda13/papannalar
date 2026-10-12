@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { appOrigin, providerOrigin } from "../harness/ports.mjs";
 import { openBoard } from "../browser/helpers";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 async function call(page: Page, path: string, data: object) {
   const response = await page.request.post(path, {
     headers: { Origin: appOrigin },
@@ -192,6 +192,37 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
       fullPage: true,
     });
   }
+  await page.setViewportSize({ width: 360, height: 800 });
+  const primary = page.getByRole("button", {
+    name: "Periksa kesiapan",
+    exact: true,
+  });
+  const initial = await primary.boundingBox();
+  await primary.scrollIntoViewIfNeeded();
+  await primary.focus();
+  const geometry = await page.evaluate(() => {
+    const button = [...document.querySelectorAll("button")].find(
+      (b) => b.textContent?.trim() === "Periksa kesiapan",
+    )!;
+    const nav = document.querySelector('nav[aria-label="Menu utama"]')!;
+    const r = button.getBoundingClientRect(),
+      n = nav.getBoundingClientRect();
+    return {
+      top: r.top,
+      bottom: r.bottom,
+      navTop: n.top,
+      focus: document.activeElement === button,
+      scrollY: window.scrollY,
+    };
+  });
+  expect(geometry.focus).toBe(true);
+  expect(geometry.top).toBeGreaterThanOrEqual(0);
+  expect(geometry.bottom).toBeLessThanOrEqual(geometry.navTop);
+  await writeFile(
+    `${root}/nav-geometry.json`,
+    JSON.stringify({ initial, focused: geometry }, null, 2),
+  );
+  await page.screenshot({ path: `${root}/nav-focused-360.png` });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page.evaluate(
@@ -210,6 +241,11 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
     .getByRole("button", { name: "Unduh lembar soal", exact: true })
     .click();
   await (await download).saveAs(`${root}/assignment-questions.pdf`);
+  const cardDownload = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Unduh kartu jawaban", exact: true })
+    .click();
+  await (await cardDownload).saveAs(`${root}/assignment-cards.pdf`);
   await page.getByLabel("Lembar soal dan kartu sudah disiapkan").check();
   await page
     .getByRole("button", { name: "Mulai kegiatan", exact: true })

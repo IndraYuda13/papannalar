@@ -24,6 +24,7 @@ import {
   type LibraryRunV2,
   publicLibraryItem,
 } from "@/contracts/library";
+import { evidenceReasonCopy } from "./evidence-copy";
 import { GroupEvidenceSummary } from "./group-evidence-summary";
 import { GroupPreparation } from "./group-preparation";
 import { AssignmentPrint } from "@/features/library/print-assignment";
@@ -485,7 +486,13 @@ export function GroupWorkspace({
                                 (e) => e.studentId === studentId,
                               )?.status === "unknown" && (
                                 <p className="text-sm text-muted-foreground">
-                                  Belum ada hasil untuk topik ini
+                                  {
+                                    evidenceReasonCopy[
+                                      lesson.evidenceSnapshot.find(
+                                        (e) => e.studentId === studentId,
+                                      )!.reason
+                                    ]
+                                  }
                                 </p>
                               )}
                               {move?.studentId === studentId && (

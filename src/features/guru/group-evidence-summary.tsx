@@ -1,3 +1,4 @@
+import { evidenceReasonCopy } from "./evidence-copy";
 import type { GroupLesson } from "@/contracts/group-lesson";
 export function GroupEvidenceSummary({
   lesson,
@@ -9,6 +10,13 @@ export function GroupEvidenceSummary({
   const unknown = lesson.evidenceSnapshot.filter(
     (e) => e.status === "unknown",
   ).length;
+  const reasons = [
+    ...new Set(
+      lesson.evidenceSnapshot
+        .filter((e) => e.status === "unknown")
+        .map((e) => e.reason),
+    ),
+  ];
   return (
     <>
       <p>
@@ -20,11 +28,18 @@ export function GroupEvidenceSummary({
           kelompok dan dapat dipindahkan.
         </p>
       )}
-      {unknown === lesson.presence.length && (
-        <p>
-          Belum ada hasil untuk topik ini. Pembagian ini sementara, bukan
-          tingkat kemampuan.
+      {reasons.map((reason) => (
+        <p key={reason}>
+          {
+            lesson.evidenceSnapshot.filter(
+              (e) => e.status === "unknown" && e.reason === reason,
+            ).length
+          }{" "}
+          siswa: {evidenceReasonCopy[reason]}
         </p>
+      ))}
+      {unknown === lesson.presence.length && (
+        <p>Pembagian ini sementara, bukan tingkat kemampuan.</p>
       )}
       <details>
         <summary className="min-h-12 cursor-pointer content-center">
@@ -41,7 +56,7 @@ export function GroupEvidenceSummary({
               :{" "}
               {e.evidence
                 ? `${e.evidence.correct}/${e.evidence.total} soal · Versi ${e.evidence.version} · ${e.evidence.assessedAt} · Kumpulan ${e.evidence.collectionId.slice(0, 8)}`
-                : "Belum ada hasil untuk topik ini"}
+                : evidenceReasonCopy[e.reason]}
             </li>
           ))}
         </ul>
