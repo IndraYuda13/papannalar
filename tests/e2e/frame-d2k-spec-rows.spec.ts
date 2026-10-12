@@ -1228,8 +1228,10 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
           },
         ]),
       );
-      // The row must be able to fail: every named selector exists on its moment. (B7 is excluded per
-      // §K.7 — its ring has no producer — and is probed separately on its own card.)
+      // The row must be able to fail: every named selector exists on its moment. (B7 is excluded
+      // from the trigger guard because §B7 fires on a `pointerup` on a tool object, not on a
+      // page-load attribute — its producer now exists (`t_2ea7f16f`) and the beat is measured on
+      // its own row, `tests/e2e/frame-t2ea-touch-trace.spec.ts`.)
       //
       // The guard is `Number.isFinite`, **not** `not.toBeNull()`. The recorder only ever writes
       // `marks[key]` on a hit (`if (hit && marks[key] == null)`), so a selector that never appears
@@ -1505,7 +1507,7 @@ test("A47 (K.5) each §B moment fires its own named trigger, with its own timing
           key !== "B7" && !moments.some((entry) => entry.keys.includes(key)),
       ),
       excluded: {
-        B7: '§K.7 — `@keyframes pn-ring-trace` / `.board-touch-ring` have no producer in src/. A47 points B7 at [data-testid="number-marker"]\'s press / data-dragging until t_2ea7f16f decides; probed separately there, not asserted here.',
+        B7: "§K.7 declared B7 an orphan at `dc5242b` (a keyframe and a rule with no producer). `t_2ea7f16f` wired the producer, so the orphan no longer exists: the trace is a real beat with an implementable subject, and B7 is measured on its own row — `tests/e2e/frame-t2ea-touch-trace.spec.ts` — rather than folded into this per-moment map, because §B7 fires on `pointerup` on six named tool objects and so has no page-load moment to record here.",
       },
       b9Note:
         "B9 is a STATIC urgency beat (§B9: no pulsing, flashing or colour cycling), so its moment asserts " +

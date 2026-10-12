@@ -2,6 +2,7 @@
 import { Brand } from "@/ui/components/brand";
 import { Button } from "@/ui/components/button";
 import { FullscreenButton } from "@/features/layar/fullscreen-button";
+import { TouchTrace } from "@/ui/components/touch-trace";
 import { BoardWorkspace } from "./board-workspace";
 import { BoardProgressProvider } from "./board-progress-context";
 import {
@@ -26,6 +27,9 @@ function BoardSurface() {
       data-interaction-zone={active?.settings.interactionZone ?? "auto"}
       className="board-surface font-kelas"
     >
+      {/* §B7's trace: a producer for the board's own beat, mounted on the surface so it covers
+          every tool and both board paths (package and library). */}
+      <TouchTrace />
       <a className="skip-link" href="#konten">
         Langsung ke isi
       </a>

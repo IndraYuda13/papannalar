@@ -836,6 +836,14 @@
   cursor: grab;
   touch-action: none;
 }
+/* §B7's press offset on the marker. A **state**, not an animation: `A11` requires "no animation
+   targets it" during the move, and §A.4 forbids motion while a pointer is down. The offset is
+   instant and returns on release, and it is deliberately *not* suppressed by the reduced-motion
+   net — §B7 keeps it as the one carrier the gesture still gets. */
+:is(.board-surface, [data-library-preview])
+  [data-testid="number-marker"]:active {
+  transform: translateY(2px);
+}
 :is(.board-surface, [data-library-preview]) .number-line-hit:focus-visible {
   stroke: var(--pn-teal-700);
   stroke-width: 3px;
@@ -2028,14 +2036,32 @@
   .board-close-card {
     animation: pn-beat-rise var(--pn-t-3) var(--pn-ease-arrive) both;
   }
-  /* B7 — the touch trace. One 2px ring, once, per pointer. */
+  /* B7 — the touch trace (`Sentuh`). One 2 px ring, once, per pointer. The producer is
+     `src/ui/components/touch-trace.tsx`; before it existed this rule and the keyframe above
+     named a beat the product never produced (t_2ea7f16f). Ring geometry only — the animation
+     is the one line below, inside the same reduced-motion block as every other beat. */
+  .board-touch-trace {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .board-touch-point {
+    position: absolute;
+    transform: translate(-50%, -50%);
+  }
   .board-touch-ring {
+    display: block;
+    width: 88px;
+    height: 88px;
+    border: 2px solid var(--pn-ink-900);
+    border-radius: 9999px;
     animation: pn-ring-trace var(--pn-t-4) var(--pn-ease-consequence) both;
   }
   /* C1 — press feedback on the board's own interactive objects. Never while a pointer is
      down (§A.4): the release is what animates. */
-  .board-surface [data-slot="button"]:active,
-  .board-board-press:active {
+  .board-surface [data-slot="button"]:active {
     animation: pn-press var(--pn-t-1) var(--pn-ease-state) both;
   }
   /* C2d — a metric or rail appears by fading; it must never grow from zero width, because a
