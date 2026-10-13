@@ -27,8 +27,17 @@ run(admin, `create database ${name}`);
 url.pathname = `/${name}`;
 const dsn = url.toString();
 run(dsn, await readFile("tests/harness/bootstrap.sql", "utf8"));
+const LEARNING_BASE = "202610130042_learning_groups.sql";
+// Migrations that must run AFTER the predecessor fixture (library.sql). They are applied in
+// order at the end of the run, because every one of them depends on learning_groups, which
+// the fixture does not provide. `> LEARNING_BASE` is a strict pathname comparison and
+// therefore excludes learning_groups itself, which is applied explicitly below: it uses
+// plain `create function`, so applying it twice would fail rather than no-op.
+const learnedAfterFixture = (await readdir("supabase/migrations"))
+  .filter((file) => /^\d+_[a-z_]+\.sql$/.test(file) && file > LEARNING_BASE)
+  .sort();
 for (const file of (await readdir("supabase/migrations")).sort()) {
-  if (!/^\d+_[a-z_]+\.sql$/.test(file) || file.startsWith("20261013")) continue;
+  if (!/^\d+_[a-z_]+\.sql$/.test(file) || file >= LEARNING_BASE) continue;
   run(dsn, await readFile(`supabase/migrations/${file}`, "utf8"));
 }
 let fixture = await readFile("supabase/tests/library.sql", "utf8");
@@ -38,13 +47,10 @@ const before = run(
   dsn,
   "select count(*) from public.library_runs;select count(*) from public.library_responses;select count(*) from public.question_versions;",
 );
-run(
-  dsn,
-  await readFile(
-    "supabase/migrations/202610130042_learning_groups.sql",
-    "utf8",
-  ),
-);
+run(dsn, await readFile(`supabase/migrations/${LEARNING_BASE}`, "utf8"));
+for (const file of learnedAfterFixture) {
+  run(dsn, await readFile(`supabase/migrations/${file}`, "utf8"));
+}
 const after = run(
   dsn,
   "select count(*) from public.library_runs;select count(*) from public.library_responses;select count(*) from public.question_versions;",
