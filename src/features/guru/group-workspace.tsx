@@ -36,6 +36,7 @@ import { confirmAction } from "@/ui/components/confirm";
 import { GroupDrafts } from "./group-drafts";
 import { useDraftGuard } from "@/ui/use-draft-guard";
 import { GroupTeacherBoard } from "@/features/library/group-board";
+import { clampGroupCount } from "@/ui/group-count";
 
 type AssignmentInput = Pick<
   GroupAssignment,
@@ -60,7 +61,7 @@ export function GroupWorkspace({
     [names, setNames] = useState<Record<string, string>>({}),
     [absent, setAbsent] = useState<string[]>([]),
     [competency, setCompetency] = useState<CompetencyMapping>(null),
-    [count, setCount] = useState(1),
+    [count, setCount] = useState("1"),
     [source, setSource] = useState<"evidence" | "random">("random"),
     [lesson, setLesson] = useState<GroupLesson>(),
     [groups, setGroups] = useState<GroupLesson["groups"]>([]),
@@ -103,7 +104,7 @@ export function GroupWorkspace({
     setCompetency(next.competency);
     setAbsent(next.absentStudentIds);
     setSource(next.groupingSource === "random" ? "random" : "evidence");
-    setCount(next.groups.length);
+    setCount(String(next.groups.length));
     setDirty(false);
   }, []);
   const load = useCallback(async () => {
@@ -131,18 +132,22 @@ export function GroupWorkspace({
       setStudents(data.students.filter((s) => s.active));
       const presence = await classPresence(scope, cls, date);
       setAbsent(presence);
-      setCount(
-        Math.max(
-          1,
-          Math.min(
-            6,
-            Math.ceil(
-              data.students.filter((s) => s.active && !presence.includes(s.id))
-                .length / 6,
+      if (!lessonId)
+        setCount(
+          String(
+            Math.max(
+              1,
+              Math.min(
+                6,
+                Math.ceil(
+                  data.students.filter(
+                    (s) => s.active && !presence.includes(s.id),
+                  ).length / 6,
+                ),
+              ),
             ),
           ),
-        ),
-      );
+        );
       const repo = createNameRepository(scope);
       try {
         setNames(
@@ -242,7 +247,7 @@ export function GroupWorkspace({
         date,
         competency,
         absentStudentIds: absent,
-        groupCount: count,
+        groupCount: clampGroupCount(count, present.length),
         seed: seed.current,
         source: competency ? source : "random",
       });
@@ -416,7 +421,7 @@ export function GroupWorkspace({
           absent={absent}
           setAbsent={setAbsent}
           count={count}
-          setCount={setCount}
+          onCountChange={setCount}
           source={source}
           setSource={setSource}
           offline={offline}
