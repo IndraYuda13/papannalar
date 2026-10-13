@@ -441,7 +441,7 @@ export function GroupWorkspace({
                 ? "Siap mulai?"
                 : "Periksa pembagian dan pilih kegiatan"}
       </h2>
-      {!lesson && <GroupDrafts classId={cls} />}
+      {!lesson && <GroupDrafts />}
       {(phase === "prepare" || !lesson) && (
         <GroupPreparation
           classes={classes}
