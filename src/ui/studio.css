@@ -300,6 +300,11 @@
 .studio-row:has(> :nth-child(4)) {
   grid-template-columns: auto minmax(0, 1fr) auto auto;
 }
+/* Two-cell rows (content + action/meta) without an icon keep two explicit tracks:
+   content flexible, trailing cell sized to its content so it can never collapse (V6). */
+.studio-row:not(:has(.studio-row-icon)):not(:has(> :nth-child(3))) {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
 .studio-row:hover {
   background: #f4f8f5;
 }

@@ -37,14 +37,34 @@ test("draft tersimpan bisa dilanjutkan lewat klik (soft navigation)", async ({
   await page.goto("/guru");
   await page.goto(`/guru/latihan?class=${classId}`);
 
+  // Rendered-defect guard: at 360px the trailing action cell must keep its own
+  // track inside the row, not collapse into the flexible middle track.
+  await page.setViewportSize({ width: 360, height: 800 });
+
   // Buka daftar kegiatan tersimpan dan klik Lanjutkan (soft navigation).
   await page
     .getByText("Lanjutkan persiapan atau kegiatan tersimpan", { exact: true })
     .click();
-  await page
-    .getByRole("link", { name: /Lanjutkan/ })
-    .first()
-    .click();
+
+  const resumeLink = page.getByRole("link", { name: /Lanjutkan/ }).first();
+  const box = await resumeLink.evaluate((el) => {
+    const action = el.querySelector(".studio-row-action")!;
+    // The rendered glyphs, not the span box: a collapsed track can report a
+    // zero-width span while its nowrap text still overflows the row.
+    const range = document.createRange();
+    range.selectNodeContents(action);
+    const text = range.getBoundingClientRect();
+    const row = el.getBoundingClientRect();
+    return {
+      textRight: text.right,
+      textWidth: text.width,
+      rowRight: row.right,
+    };
+  });
+  expect(box.textWidth).toBeGreaterThan(0);
+  expect(box.textRight).toBeLessThanOrEqual(box.rowRight + 0.5);
+
+  await resumeLink.click();
 
   // FIX utama: UI ikut berpindah, bukan cuma URL.
   await expect(
