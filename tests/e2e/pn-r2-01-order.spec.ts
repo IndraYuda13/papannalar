@@ -13,23 +13,24 @@ import { appOrigin } from "../harness/ports.mjs";
 import { registerTeacher } from "../browser/helpers";
 import { mkdir, writeFile } from "node:fs/promises";
 
-const OUT = process.env["PNL_FRAME_EVIDENCE"] ?? "artifacts/qa/learning/pn-r2-01";
+const OUT =
+  process.env["PNL_FRAME_EVIDENCE"] ?? "artifacts/qa/learning/pn-r2-01";
 const WIDTHS = [360, 1366];
 const GRID = 'ul[aria-label="Kelompok yang perlu diatur"] > li';
 const ROWS = 'ul[aria-label="Ringkasan kesiapan kelompok"] > li';
 
-async function call(page: Page, path: string, data: object) {
+async function call<T>(page: Page, path: string, data: object): Promise<T> {
   const response = await page.request.post(path, {
     headers: { Origin: appOrigin },
     data,
   });
   expect(response.ok(), await response.text()).toBe(true);
-  return response.json();
+  return (await response.json()) as T;
 }
 
 async function seedLesson(page: Page, label: string, count: number) {
   const classId = crypto.randomUUID();
-  await call(page, "/api/v1/classes", {
+  await call<unknown>(page, "/api/v1/classes", {
     id: classId,
     label,
     grade: 7,
@@ -37,7 +38,7 @@ async function seedLesson(page: Page, label: string, count: number) {
     mode: "pilot",
   });
   const collectionId = crypto.randomUUID();
-  await call(page, "/api/v1/library", {
+  await call<unknown>(page, "/api/v1/library", {
     contractVersion: 2,
     action: "save",
     id: collectionId,
@@ -153,6 +154,42 @@ type Shot = {
   innerWidth: number;
 };
 
+type DtoGroup = { id: string; label: string };
+type DtoAssignment = { groupId: string };
+type LessonDto = { groups: DtoGroup[]; assignments: DtoAssignment[] };
+
+// What the DOM rendered for one lesson at one viewport width.
+type WidthEntry = {
+  gridOrder: (string | null)[];
+  readyOrder: (string | null)[];
+  rows: Row[];
+  hint: string | null;
+  ordersMatch: boolean;
+  matchesApiGroupOrder: boolean;
+  noHorizontalOverflow: boolean;
+  scrollWidth: number;
+  innerWidth: number;
+};
+
+// One sampled lesson: its DTO ordering evidence plus the per-width DOM observation,
+// and the reload-stability re-read taken after the width loop.
+type LessonEntry = {
+  classLabel: string;
+  lessonId: string;
+  groupCount: number;
+  api: {
+    groupOrder: string[];
+    assignmentOrder: string[];
+    assignmentFollowsGroupOrder: boolean;
+    assignmentIsUuidSorted: boolean;
+    uuidOrderDiffersFromGroupOrder: boolean;
+    preFixWouldRender: string[];
+  };
+  widths: Record<number, WidthEntry>;
+  afterReload?: { readyOrder: (string | null)[]; stable: boolean };
+  discriminating?: boolean;
+};
+
 async function shot(page: Page): Promise<Shot> {
   return page.evaluate(
     ([gridSel, rowSel]) => {
@@ -160,7 +197,9 @@ async function shot(page: Page): Promise<Shot> {
         [...document.querySelectorAll(`${sel}`)].map((li) => {
           const node = li as HTMLElement;
           const box = node.getBoundingClientRect();
-          const meta = node.querySelector(".studio-row-meta") as HTMLElement | null;
+          const meta = node.querySelector(
+            ".studio-row-meta",
+          ) as HTMLElement | null;
           const input = node.querySelector(
             'input[type="checkbox"]',
           ) as HTMLInputElement | null;
@@ -191,8 +230,9 @@ async function shot(page: Page): Promise<Shot> {
         readyOrder: rows.map((r) => r.heading),
         rows,
         hint:
-          document.body.innerText.match(/Centang [\s\S]{0,200}?sebelum mulai\./)?.[0] ??
-          null,
+          document.body.innerText.match(
+            /Centang [\s\S]{0,200}?sebelum mulai\./,
+          )?.[0] ?? null,
         scrollWidth: document.documentElement.scrollWidth,
         innerWidth: window.innerWidth,
       };
@@ -213,39 +253,40 @@ test("PN-R2-01 ready checklist follows the grid's group order", async ({
     consoleErrors: [],
   };
   const consoleErrors = log.consoleErrors as string[];
-  page.on("console", (m) => m.type() === "error" && consoleErrors.push(m.text()));
+  page.on(
+    "console",
+    (m) => m.type() === "error" && consoleErrors.push(m.text()),
+  );
   page.on("pageerror", (e) => consoleErrors.push(`pageerror: ${e.message}`));
 
   await registerTeacher(page);
 
-  const lessons: Record<string, any>[] = [];
+  const lessons: LessonEntry[] = [];
   let discriminating = 0;
   for (let attempt = 1; attempt <= 6 && discriminating < 2; attempt++) {
     // GROUP_PAGE_SIZE is 4, so both lessons stay within one grid page: the DOM comparison
     // below is then a complete list-vs-list check instead of a page-1 slice.
     const count = attempt % 2 === 0 ? 4 : 3;
     const seeded = await seedLesson(page, `Kelas urut ${attempt}`, count);
-    const dto = await call(page, "/api/v1/group-lessons", {
+    const dto = await call<LessonDto>(page, "/api/v1/group-lessons", {
       action: "detail",
       id: seeded.lessonId,
     });
-    const nameOf = Object.fromEntries(
-      (dto.groups as { id: string; label: string }[]).map((g) => [g.id, g.label]),
-    ) as Record<string, string>;
-    const groupIds = (dto.groups as { id: string }[]).map((g) => g.id);
-    const assignIds = (dto.assignments as { groupId: string }[]).map(
-      (a) => a.groupId,
+    const nameOf: Record<string, string> = Object.fromEntries(
+      dto.groups.map((g) => [g.id, g.label]),
     );
+    const groupIds = dto.groups.map((g) => g.id);
+    const assignIds = dto.assignments.map((a) => a.groupId);
     // A uuid sort must differ from the stored arrangement, else this lesson cannot tell a
     // fixed build from a broken one.
     const isDiscriminating =
       JSON.stringify([...groupIds].sort()) !== JSON.stringify(groupIds);
-    const entry: Record<string, any> = {
+    const entry: LessonEntry = {
       classLabel: `Kelas urut ${attempt}`,
       lessonId: seeded.lessonId,
       groupCount: count,
       api: {
-        groupOrder: (dto.groups as { label: string }[]).map((g) => g.label),
+        groupOrder: dto.groups.map((g) => g.label),
         assignmentOrder: assignIds.map((id) => nameOf[id] ?? id.slice(0, 8)),
         assignmentFollowsGroupOrder:
           JSON.stringify(groupIds) === JSON.stringify(assignIds),
@@ -257,7 +298,7 @@ test("PN-R2-01 ready checklist follows the grid's group order", async ({
           .sort()
           .map((id) => nameOf[id] ?? id.slice(0, 8)),
       },
-      widths: {} as Record<string, any>,
+      widths: {},
     };
 
     for (const width of WIDTHS) {
@@ -273,10 +314,8 @@ test("PN-R2-01 ready checklist follows the grid's group order", async ({
         hint: s.hint,
         ordersMatch: JSON.stringify(gridOrder) === JSON.stringify(readyOrder),
         matchesApiGroupOrder:
-          JSON.stringify(readyOrder) ===
-          JSON.stringify(entry.api.groupOrder) &&
-          JSON.stringify(gridOrder) ===
-            JSON.stringify(entry.api.groupOrder),
+          JSON.stringify(readyOrder) === JSON.stringify(entry.api.groupOrder) &&
+          JSON.stringify(gridOrder) === JSON.stringify(entry.api.groupOrder),
         noHorizontalOverflow: s.scrollWidth <= s.innerWidth,
         scrollWidth: s.scrollWidth,
         innerWidth: s.innerWidth,
@@ -353,7 +392,7 @@ test("PN-R2-01 ready checklist follows the grid's group order", async ({
       ).toBe(true);
     }
     expect(
-      entry.afterReload.stable,
+      entry.afterReload?.stable,
       `order survives reload (${entry.classLabel})`,
     ).toBe(true);
   }
@@ -363,8 +402,10 @@ test("PN-R2-01 ready checklist follows the grid's group order", async ({
   for (const entry of lessons) {
     const w = entry.widths[360];
     expect(w.rows.length, "one readiness row per group").toBe(entry.groupCount);
-    for (const row of w.rows as Row[]) {
-      expect(row.metaInsideRow, "trailing cell stays inside the row").toBe(true);
+    for (const row of w.rows) {
+      expect(row.metaInsideRow, "trailing cell stays inside the row").toBe(
+        true,
+      );
       expect(row.overflowsRow, "trailing cell does not overflow the row").toBe(
         false,
       );
