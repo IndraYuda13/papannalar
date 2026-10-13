@@ -37,6 +37,7 @@ import { GroupDrafts } from "./group-drafts";
 import { useDraftGuard } from "@/ui/use-draft-guard";
 import { GroupTeacherBoard } from "@/features/library/group-board";
 import { clampGroupCount } from "@/ui/group-count";
+import { GroupFlowSteps } from "./group-flow-steps";
 
 type AssignmentInput = Pick<
   GroupAssignment,
@@ -394,6 +395,12 @@ export function GroupWorkspace({
         }
         description="Bagi siswa, pilih cara belajar dan soal, lalu mulai bersama."
       />
+      {(!lesson || lesson.status === "draft") && (
+        <GroupFlowSteps
+          phase={phase}
+          groupCount={groups.length || Number.parseInt(count, 10) || 0}
+        />
+      )}
       <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
         {lesson?.status === "active"
           ? "Kelompok belajar bersamaan"
