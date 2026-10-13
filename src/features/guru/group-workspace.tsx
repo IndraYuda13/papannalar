@@ -31,6 +31,7 @@ import { GroupFlowSteps } from "./group-flow-steps";
 import { GroupCardGrid } from "./group-card-grid";
 import {
   GroupAssignmentCard,
+  methodLabel,
   type AssignmentInput,
 } from "./group-assignment-card";
 export function GroupWorkspace({
@@ -343,6 +344,10 @@ export function GroupWorkspace({
       setRuns(Object.fromEntries(details.map((d) => [d.run.id, d.run])));
       setPrinted({});
       setPhase("ready");
+      setMessage(
+        `Siap. ${next.assignments.length} kelompok sudah punya cara belajar dan soal. Periksa lembar soal dan kartu di bawah, lalu pilih Mulai kegiatan.`,
+      );
+      heading.current?.focus();
     });
   }
   async function begin() {
@@ -515,9 +520,15 @@ export function GroupWorkspace({
                     busy || offline || !canMutate || !!move || !!problems.length
                   }
                   onClick={() => void save()}
+                  title={problems[0] ?? undefined}
                 >
                   {busy ? "Menyimpan…" : "Periksa kesiapan"}
                 </Button>
+                {problems.length > 0 && (
+                  <p className="text-sm">
+                    Lengkapi dulu: {problems.length} hal pada daftar di atas.
+                  </p>
+                )}
                 <Button
                   variant="outline"
                   disabled={busy}
@@ -530,6 +541,29 @@ export function GroupWorkspace({
           )}
           {lesson.status === "draft" && phase === "ready" && (
             <>
+              <ul
+                className="studio-row-list"
+                aria-label="Ringkasan kesiapan kelompok"
+              >
+                {lesson.assignments.map((a) => (
+                  <li key={a.id} className="studio-row">
+                    <span className="studio-row-content">
+                      <h2>
+                        {groups.find((g) => g.id === a.groupId)?.label ??
+                          "Kelompok"}
+                      </h2>
+                      <p>{methodLabel[a.method]}</p>
+                    </span>
+                    <span className="studio-row-meta">
+                      {a.method === "cards"
+                        ? printed[a.id]
+                          ? "Cetakan siap"
+                          : "Perlu cetak"
+                        : "Tanpa cetak"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
               <p>
                 Penugasan dan kode cetakan telah tersimpan. Mulai memakai
                 pilihan yang sama. Jika diubah, unduh ulang soal dan kartu.
