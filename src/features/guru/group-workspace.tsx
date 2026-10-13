@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTeacher } from "./app-context";
 import { classDetailSchema } from "@/contracts/classes";
 import type { StudentDto } from "@/contracts/api";
-import {
-  type GroupLesson,
-  type GroupAssignment,
-} from "@/contracts/group-lesson";
+import type { GroupLesson } from "@/contracts/group-lesson";
 import type { CompetencyMapping } from "@/contracts/learning-evidence";
 import {
   groupLessonCall,
@@ -19,33 +16,24 @@ import {
 import { libraryCache } from "@/local/library";
 import { classPresence } from "@/local/class-presence";
 import { createNameRepository } from "@/local/names";
-import {
-  runDetailV2Schema,
-  type LibraryRunV2,
-  publicLibraryItem,
-} from "@/contracts/library";
-import { evidenceReasonCopy } from "./evidence-copy";
+import { runDetailV2Schema, type LibraryRunV2 } from "@/contracts/library";
 import { GroupEvidenceSummary } from "./group-evidence-summary";
 import { GroupPreparation } from "./group-preparation";
-import { AssignmentPrint } from "@/features/library/print-assignment";
-import { LibraryItemView } from "@/features/library/item-view";
-import { field, jakartaDate } from "@/features/library/client";
-import { PageHeader, Section, StateNotice } from "@/ui/components/studio";
+import { jakartaDate } from "@/features/library/client";
+import { PageHeader, StateNotice } from "@/ui/components/studio";
 import { Button } from "@/ui/components/button";
 import { confirmAction } from "@/ui/components/confirm";
 import { GroupDrafts } from "./group-drafts";
 import { useDraftGuard } from "@/ui/use-draft-guard";
 import { GroupTeacherBoard } from "@/features/library/group-board";
-
-type AssignmentInput = Pick<
-  GroupAssignment,
-  "id" | "groupId" | "method" | "collectionId" | "version"
->;
-export const methodLabel = {
-  teacher: "Dibimbing guru",
-  board: "Menjawab di layar",
-  cards: "Mengerjakan soal dengan kartu",
-};
+import { clampGroupCount } from "@/ui/group-count";
+import { GroupFlowSteps } from "./group-flow-steps";
+import { GroupCardGrid } from "./group-card-grid";
+import {
+  GroupAssignmentCard,
+  methodLabel,
+  type AssignmentInput,
+} from "./group-assignment-card";
 export function GroupWorkspace({
   classId = "",
   lessonId = "",
@@ -60,7 +48,7 @@ export function GroupWorkspace({
     [names, setNames] = useState<Record<string, string>>({}),
     [absent, setAbsent] = useState<string[]>([]),
     [competency, setCompetency] = useState<CompetencyMapping>(null),
-    [count, setCount] = useState(1),
+    [count, setCount] = useState("1"),
     [source, setSource] = useState<"evidence" | "random">("random"),
     [lesson, setLesson] = useState<GroupLesson>(),
     [groups, setGroups] = useState<GroupLesson["groups"]>([]),
@@ -103,7 +91,7 @@ export function GroupWorkspace({
     setCompetency(next.competency);
     setAbsent(next.absentStudentIds);
     setSource(next.groupingSource === "random" ? "random" : "evidence");
-    setCount(next.groups.length);
+    setCount(String(next.groups.length));
     setDirty(false);
   }, []);
   const load = useCallback(async () => {
@@ -131,18 +119,22 @@ export function GroupWorkspace({
       setStudents(data.students.filter((s) => s.active));
       const presence = await classPresence(scope, cls, date);
       setAbsent(presence);
-      setCount(
-        Math.max(
-          1,
-          Math.min(
-            6,
-            Math.ceil(
-              data.students.filter((s) => s.active && !presence.includes(s.id))
-                .length / 6,
+      if (!lessonId)
+        setCount(
+          String(
+            Math.max(
+              1,
+              Math.min(
+                6,
+                Math.ceil(
+                  data.students.filter(
+                    (s) => s.active && !presence.includes(s.id),
+                  ).length / 6,
+                ),
+              ),
             ),
           ),
-        ),
-      );
+        );
       const repo = createNameRepository(scope);
       try {
         setNames(
@@ -242,7 +234,7 @@ export function GroupWorkspace({
         date,
         competency,
         absentStudentIds: absent,
-        groupCount: count,
+        groupCount: clampGroupCount(count, present.length),
         seed: seed.current,
         source: competency ? source : "random",
       });
@@ -271,6 +263,45 @@ export function GroupWorkspace({
     setDirty(true);
     setPrinted({});
     setRuns({});
+  }
+  function commitMove(studentId: string, from: string, to: string) {
+    if (!to || from === to) return;
+    setGroups((old) =>
+      old.map((group) =>
+        group.id === from
+          ? {
+              ...group,
+              studentIds: group.studentIds.filter((id) => id !== studentId),
+            }
+          : group.id === to
+            ? { ...group, studentIds: [...group.studentIds, studentId] }
+            : group,
+      ),
+    );
+    setAssignments((old) =>
+      old.map((a) =>
+        a.groupId === from || a.groupId === to
+          ? { ...a, id: crypto.randomUUID() }
+          : a,
+      ),
+    );
+    setMove(undefined);
+    setDirty(true);
+    setRuns({});
+    setPrinted({});
+  }
+  function completeAssignment(assignmentId: string, revision: number) {
+    if (!lesson) return;
+    void execute(async () =>
+      apply(
+        await groupLessonCall({
+          action: "complete-assignment",
+          id: lesson.id,
+          assignmentId,
+          assignmentRevision: revision,
+        }),
+      ),
+    );
   }
   const problems = groups.flatMap((g) => {
     const a = assignments.find((a) => a.groupId === g.id),
@@ -313,6 +344,10 @@ export function GroupWorkspace({
       setRuns(Object.fromEntries(details.map((d) => [d.run.id, d.run])));
       setPrinted({});
       setPhase("ready");
+      setMessage(
+        `Siap. ${next.assignments.length} kelompok sudah punya cara belajar dan soal. Periksa lembar soal dan kartu di bawah, lalu pilih Mulai kegiatan.`,
+      );
+      heading.current?.focus();
     });
   }
   async function begin() {
@@ -389,6 +424,12 @@ export function GroupWorkspace({
         }
         description="Bagi siswa, pilih cara belajar dan soal, lalu mulai bersama."
       />
+      {(!lesson || lesson.status === "draft") && (
+        <GroupFlowSteps
+          phase={phase}
+          groupCount={groups.length || Number.parseInt(count, 10) || 0}
+        />
+      )}
       <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
         {lesson?.status === "active"
           ? "Kelompok belajar bersamaan"
@@ -400,7 +441,7 @@ export function GroupWorkspace({
                 ? "Siap mulai?"
                 : "Periksa pembagian dan pilih kegiatan"}
       </h2>
-      {!lesson && <GroupDrafts classId={cls} />}
+      {!lesson && <GroupDrafts />}
       {(phase === "prepare" || !lesson) && (
         <GroupPreparation
           classes={classes}
@@ -416,7 +457,7 @@ export function GroupWorkspace({
           absent={absent}
           setAbsent={setAbsent}
           count={count}
-          setCount={setCount}
+          onCountChange={setCount}
           source={source}
           setSource={setSource}
           offline={offline}
@@ -427,338 +468,33 @@ export function GroupWorkspace({
       {lesson && phase !== "prepare" && (
         <>
           <GroupEvidenceSummary lesson={lesson} groupCount={groups.length} />
-          {groups.map((g) => {
-            const a = assignments.find((a) => a.groupId === g.id),
-              c = readyCollections.find((c) => c.id === a?.collectionId),
-              stored = lesson.assignments.find((a) => a.groupId === g.id);
-            return (
-              <Section
+          <GroupCardGrid
+            groups={groups}
+            label="Kelompok yang perlu diatur"
+            renderCard={(g) => (
+              <GroupAssignmentCard
                 key={g.id}
-                label={`${g.label} · ${g.studentIds.length} siswa`}
-              >
-                <p>
-                  {a ? methodLabel[a.method] : "Pilih cara belajar"} ·{" "}
-                  {c?.document.title ?? "Belum memilih soal"}
-                  {stored && lesson.status !== "draft"
-                    ? ` · ${stored.status === "completed" ? "Tugas selesai" : stored.status === "stopped" ? "Dihentikan" : "Berlangsung"}`
-                    : ""}
-                </p>
-                <details open={phase === "ready"}>
-                  <summary className="min-h-12 cursor-pointer content-center font-semibold">
-                    Lihat anggota dan kegiatan
-                  </summary>
-                  <div className="grid gap-5 lg:grid-cols-2">
-                    <div>
-                      <h3 className="font-semibold">Anggota kelompok</h3>
-                      <ul>
-                        {g.studentIds.map((studentId) => {
-                          const student = lesson.presence.find(
-                            (s) => s.id === studentId,
-                          );
-                          return (
-                            <li key={studentId} className="border-b py-2">
-                              <div className="flex flex-wrap items-center justify-between gap-2">
-                                <span className="min-w-0 break-words">
-                                  {student?.attendanceNumber}.{" "}
-                                  {names[studentId] ??
-                                    `Siswa ${student?.attendanceNumber}`}
-                                </span>
-                                {lesson.status === "draft" &&
-                                  phase === "edit" && (
-                                    <Button
-                                      variant="quiet"
-                                      disabled={
-                                        busy || g.studentIds.length === 1
-                                      }
-                                      onClick={() =>
-                                        setMove({
-                                          studentId,
-                                          from: g.id,
-                                          to: "",
-                                        })
-                                      }
-                                    >
-                                      Pindahkan
-                                    </Button>
-                                  )}
-                              </div>
-                              {lesson.evidenceSnapshot.find(
-                                (e) => e.studentId === studentId,
-                              )?.status === "unknown" && (
-                                <p className="text-sm text-muted-foreground">
-                                  {
-                                    evidenceReasonCopy[
-                                      lesson.evidenceSnapshot.find(
-                                        (e) => e.studentId === studentId,
-                                      )!.reason
-                                    ]
-                                  }
-                                </p>
-                              )}
-                              {move?.studentId === studentId && (
-                                <form
-                                  className="space-y-3"
-                                  onSubmit={(e) => {
-                                    e.preventDefault();
-                                    if (!move.to) return;
-                                    setGroups(
-                                      groups.map((group) =>
-                                        group.id === move.from
-                                          ? {
-                                              ...group,
-                                              studentIds:
-                                                group.studentIds.filter(
-                                                  (id) => id !== studentId,
-                                                ),
-                                            }
-                                          : group.id === move.to
-                                            ? {
-                                                ...group,
-                                                studentIds: [
-                                                  ...group.studentIds,
-                                                  studentId,
-                                                ],
-                                              }
-                                            : group,
-                                      ),
-                                    );
-                                    setAssignments((old) =>
-                                      old.map((a) =>
-                                        a.groupId === move.from ||
-                                        a.groupId === move.to
-                                          ? { ...a, id: crypto.randomUUID() }
-                                          : a,
-                                      ),
-                                    );
-                                    setMove(undefined);
-                                    setDirty(true);
-                                    setRuns({});
-                                    setPrinted({});
-                                  }}
-                                >
-                                  <label>
-                                    Pindahkan ke kelompok
-                                    <select
-                                      className={field}
-                                      value={move.to}
-                                      onChange={(e) =>
-                                        setMove({ ...move, to: e.target.value })
-                                      }
-                                    >
-                                      <option value="">Pilih kelompok</option>
-                                      {groups
-                                        .filter((group) => group.id !== g.id)
-                                        .map((group) => (
-                                          <option
-                                            key={group.id}
-                                            value={group.id}
-                                          >
-                                            {group.label}
-                                          </option>
-                                        ))}
-                                    </select>
-                                  </label>
-                                  <Button disabled={!move.to}>
-                                    Simpan perubahan
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => setMove(undefined)}
-                                  >
-                                    Batal
-                                  </Button>
-                                </form>
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                    <div className="space-y-3">
-                      {lesson.status === "draft" && phase === "edit" ? (
-                        <>
-                          <fieldset disabled={busy}>
-                            <legend className="font-semibold">
-                              Kelompok ini belajar bagaimana?
-                            </legend>
-                            {(["teacher", "board", "cards"] as const).map(
-                              (method) => (
-                                <label
-                                  className="flex min-h-12 items-center gap-3"
-                                  key={method}
-                                >
-                                  <input
-                                    type="radio"
-                                    name={`method-${g.id}`}
-                                    checked={a?.method === method}
-                                    onChange={() =>
-                                      updateAssignment(g.id, { method })
-                                    }
-                                  />
-                                  {methodLabel[method]}
-                                </label>
-                              ),
-                            )}
-                          </fieldset>
-                          <label>
-                            Soal yang dipakai
-                            <select
-                              className={field}
-                              disabled={busy}
-                              value={a?.collectionId ?? ""}
-                              onChange={(e) => {
-                                const c = readyCollections.find(
-                                  (c) => c.id === e.target.value,
-                                );
-                                updateAssignment(g.id, {
-                                  collectionId: e.target.value,
-                                  version: c?.version ?? 1,
-                                });
-                              }}
-                            >
-                              <option value="">
-                                Pilih kumpulan siap digunakan
-                              </option>
-                              {(["teacher", "system"] as const).map(
-                                (source) => (
-                                  <optgroup
-                                    key={source}
-                                    label={
-                                      source === "teacher"
-                                        ? "Soal saya"
-                                        : "Soal siap pakai"
-                                    }
-                                  >
-                                    {readyCollections
-                                      .filter((c) => c.source === source)
-                                      .map((c) => (
-                                        <option key={c.id} value={c.id}>
-                                          {c.document.title}
-                                        </option>
-                                      ))}
-                                  </optgroup>
-                                ),
-                              )}
-                            </select>
-                          </label>
-                        </>
-                      ) : (
-                        <p>
-                          {stored
-                            ? methodLabel[stored.method]
-                            : "Belum ditetapkan"}
-                        </p>
-                      )}
-                      {(runs[stored?.runId ?? ""]?.document ?? c?.document) && (
-                        <>
-                          <p>
-                            {
-                              (
-                                runs[stored?.runId ?? ""]?.document ??
-                                c!.document
-                              ).items.length
-                            }{" "}
-                            soal ·{" "}
-                            {(
-                              runs[stored?.runId ?? ""]?.document ?? c!.document
-                            ).kind === "cards"
-                              ? "Pilihan ganda"
-                              : "Alat interaktif"}{" "}
-                            · Versi {a?.version}
-                          </p>
-                          <Button
-                            variant="outline"
-                            onClick={() =>
-                              setPreview(preview === g.id ? undefined : g.id)
-                            }
-                          >
-                            Lihat soal
-                          </Button>
-                          {preview === g.id && (
-                            <div data-library-preview className="space-y-4">
-                              {(
-                                runs[stored?.runId ?? ""]?.document ??
-                                c!.document
-                              ).items.map((item, i) => (
-                                <LibraryItemView
-                                  key={item.id}
-                                  item={publicLibraryItem(item)}
-                                  row={i + 1}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </>
-                      )}
-                      {a?.method === "cards" && (
-                        <p>
-                          Kartu Nalar adalah lembar jawaban. Kelompok ini juga
-                          memerlukan lembar soal cetak.
-                        </p>
-                      )}
-                      {a?.method === "board" && (
-                        <p>
-                          Kelompok menjawab dan memilih Soal berikutnya sendiri.
-                          Jawaban bersama bukan nilai tiap siswa.
-                        </p>
-                      )}
-                      {phase === "ready" &&
-                        stored?.method === "cards" &&
-                        runs[stored.runId] && (
-                          <>
-                            <AssignmentPrint run={runs[stored.runId]} />
-                            <label className="flex min-h-12 items-center gap-3">
-                              <input
-                                type="checkbox"
-                                checked={!!printed[stored.id]}
-                                onChange={(e) =>
-                                  setPrinted({
-                                    ...printed,
-                                    [stored.id]: e.target.checked,
-                                  })
-                                }
-                              />
-                              Lembar soal dan kartu sudah disiapkan
-                            </label>
-                          </>
-                        )}
-                      {lesson.status !== "draft" &&
-                        stored?.method === "cards" && (
-                          <Button asChild variant="outline">
-                            <Link href={`/guru/sesi/${stored.runId}`}>
-                              Pindai atau input jawaban
-                            </Link>
-                          </Button>
-                        )}
-                      {lesson.status === "active" &&
-                        stored?.method !== "board" &&
-                        stored?.status === "active" && (
-                          <Button
-                            variant="outline"
-                            disabled={busy}
-                            onClick={() =>
-                              void execute(async () =>
-                                apply(
-                                  await groupLessonCall({
-                                    action: "complete-assignment",
-                                    id: lesson.id,
-                                    assignmentId: stored.id,
-                                    assignmentRevision: stored.revision,
-                                  }),
-                                ),
-                              )
-                            }
-                          >
-                            Tandai tugas selesai
-                          </Button>
-                        )}
-                    </div>
-                  </div>
-                </details>
-              </Section>
-            );
-          })}
+                group={g}
+                assignment={assignments.find((a) => a.groupId === g.id)}
+                stored={lesson.assignments.find((a) => a.groupId === g.id)}
+                lesson={lesson}
+                names={names}
+                busy={busy}
+                phase={phase}
+                runs={runs}
+                printed={printed}
+                setPrinted={setPrinted}
+                preview={preview}
+                setPreview={setPreview}
+                move={move}
+                setMove={setMove}
+                readyCollections={readyCollections}
+                updateAssignment={updateAssignment}
+                commitMove={commitMove}
+                completeAssignment={completeAssignment}
+              />
+            )}
+          />
           {lesson.status === "draft" && !readyCollections.length && (
             <StateNotice
               title="Belum ada soal siap digunakan"
@@ -784,9 +520,15 @@ export function GroupWorkspace({
                     busy || offline || !canMutate || !!move || !!problems.length
                   }
                   onClick={() => void save()}
+                  title={problems[0] ?? undefined}
                 >
                   {busy ? "Menyimpan…" : "Periksa kesiapan"}
                 </Button>
+                {problems.length > 0 && (
+                  <p className="text-sm">
+                    Lengkapi dulu: {problems.length} hal pada daftar di atas.
+                  </p>
+                )}
                 <Button
                   variant="outline"
                   disabled={busy}
@@ -799,6 +541,29 @@ export function GroupWorkspace({
           )}
           {lesson.status === "draft" && phase === "ready" && (
             <>
+              <ul
+                className="studio-row-list"
+                aria-label="Ringkasan kesiapan kelompok"
+              >
+                {lesson.assignments.map((a) => (
+                  <li key={a.id} className="studio-row">
+                    <span className="studio-row-content">
+                      <h2>
+                        {groups.find((g) => g.id === a.groupId)?.label ??
+                          "Kelompok"}
+                      </h2>
+                      <p>{methodLabel[a.method]}</p>
+                    </span>
+                    <span className="studio-row-meta">
+                      {a.method === "cards"
+                        ? printed[a.id]
+                          ? "Cetakan siap"
+                          : "Perlu cetak"
+                        : "Tanpa cetak"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
               <p>
                 Penugasan dan kode cetakan telah tersimpan. Mulai memakai
                 pilihan yang sama. Jika diubah, unduh ulang soal dan kartu.

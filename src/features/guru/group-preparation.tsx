@@ -7,6 +7,7 @@ import { CompetencyField } from "@/features/library/mapping-fields";
 import { field } from "@/features/library/client";
 import { Section } from "@/ui/components/studio";
 import { Button } from "@/ui/components/button";
+import { clampGroupCount, normaliseGroupCount } from "@/ui/group-count";
 type Props = {
   classes: ClassDto[];
   cls: string;
@@ -20,8 +21,8 @@ type Props = {
   names: Record<string, string>;
   absent: string[];
   setAbsent: Dispatch<SetStateAction<string[]>>;
-  count: number;
-  setCount: (value: number) => void;
+  count: string;
+  onCountChange: (raw: string) => void;
   source: "random" | "evidence";
   setSource: (value: "random" | "evidence") => void;
   offline: boolean;
@@ -42,7 +43,7 @@ export function GroupPreparation({
   absent,
   setAbsent,
   count,
-  setCount,
+  onCountChange,
   source,
   setSource,
   offline,
@@ -96,17 +97,26 @@ export function GroupPreparation({
           </label>
         ))}
       </details>
-      <label>
+      <label className="block max-w-sm">
         Jumlah kelompok
         <input
           className={field}
-          type="number"
-          min={1}
-          max={presentCount || 1}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          pattern="[0-9]*"
+          maxLength={2}
+          placeholder="Contoh: 3"
           value={count}
-          onChange={(e) => setCount(Number(e.target.value))}
+          disabled={busy}
+          onChange={(e) => onCountChange(normaliseGroupCount(e.target.value))}
         />
       </label>
+      <p className="text-sm">
+        {count
+          ? `${clampGroupCount(count, presentCount)} kelompok dari ${presentCount} siswa hadir.`
+          : `Isi jumlah kelompok, maksimal ${presentCount || 1}.`}
+      </p>
       <fieldset>
         <legend className="font-semibold">Pembagian kelompok</legend>
         {(["random", "evidence"] as const).map((v) => (
@@ -133,14 +143,7 @@ export function GroupPreparation({
         </p>
       )}
       <Button
-        disabled={
-          busy ||
-          offline ||
-          !canMutate ||
-          !presentCount ||
-          count < 1 ||
-          count > presentCount
-        }
+        disabled={busy || offline || !canMutate || !presentCount || !count}
         onClick={onPrepare}
       >
         {busy ? "Menyiapkan kelompok…" : "Buat kelompok"}
