@@ -27,8 +27,13 @@ run(admin, `create database ${name}`);
 url.pathname = `/${name}`;
 const dsn = url.toString();
 run(dsn, await readFile("tests/harness/bootstrap.sql", "utf8"));
+// The learning series (20261013+) is applied in order after the predecessor fixture:
+// every file in it depends on 202610130042, so none of them may run in the loop above.
+const learningSeries = (await readdir("supabase/migrations"))
+  .filter((file) => /^\d+_[a-z_]+\.sql$/.test(file) && file > "202610130042")
+  .sort();
 for (const file of (await readdir("supabase/migrations")).sort()) {
-  if (!/^\d+_[a-z_]+\.sql$/.test(file) || file.startsWith("20261013")) continue;
+  if (!/^\d+_[a-z_]+\.sql$/.test(file) || file >= "20261013") continue;
   run(dsn, await readFile(`supabase/migrations/${file}`, "utf8"));
 }
 let fixture = await readFile("supabase/tests/library.sql", "utf8");
@@ -45,6 +50,9 @@ run(
     "utf8",
   ),
 );
+for (const file of learningSeries) {
+  run(dsn, await readFile(`supabase/migrations/${file}`, "utf8"));
+}
 const after = run(
   dsn,
   "select count(*) from public.library_runs;select count(*) from public.library_responses;select count(*) from public.question_versions;",

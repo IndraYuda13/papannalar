@@ -55,4 +55,12 @@ select public.group_lesson_action('{"action":"finalize","id":"a6000000-0000-4000
 select public.library_action_v2((select v||'{"revision":1,"answers":["B","B"]}' from receipt where k='late'));
 select pg_temp.ok((select payload->>'assessmentRevision'='2' from public.group_lessons),'late correction advances assessment revision');
 select pg_temp.ok((select payload->'groups'=(select v->'groups' from receipt where k='lesson') from public.group_lessons),'correction preserves old group snapshot');
+-- PN-R2-01: assignments[] must follow the group order the teacher arranged, not group_id.
+-- Store the groups in REVERSE uuid order so a uuid sort is provably a different sequence:
+-- without the fix these rows come back ascending and the assertion fails every run.
+reset role;
+update public.group_lessons set payload=jsonb_set(payload,'{groups}',coalesce((select jsonb_agg(g order by g->>'id' desc) from jsonb_array_elements(payload->'groups') g),'[]')) where id='a6000000-0000-4000-8000-000000000001';
+set local role authenticated;set local request.jwt.claims='{"sub":"a1000000-0000-4000-8000-000000000001","is_anonymous":false}';
+select pg_temp.ok((select jsonb_agg(g->>'id' order by gn) from public.group_lessons l,jsonb_array_elements(l.payload->'groups') with ordinality t(g,gn) where l.id='a6000000-0000-4000-8000-000000000001')<>(select jsonb_agg(g->>'id' order by g->>'id') from public.group_lessons l,jsonb_array_elements(l.payload->'groups') g where l.id='a6000000-0000-4000-8000-000000000001'),'fixture group order differs from group_id order');
+select pg_temp.ok((select jsonb_agg(a->>'groupId' order by an) from jsonb_array_elements(public.group_lesson_action('{"action":"detail","id":"a6000000-0000-4000-8000-000000000001"}')->'assignments') with ordinality t(a,an))=(select jsonb_agg(g->>'id' order by gn) from public.group_lessons l,jsonb_array_elements(l.payload->'groups') with ordinality t(g,gn) where l.id='a6000000-0000-4000-8000-000000000001'),'assignment rows follow the stored group order');
 reset role;select count(*)||' group lesson assertions PASS' from assertions;rollback;

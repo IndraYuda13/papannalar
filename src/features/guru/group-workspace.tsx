@@ -27,6 +27,7 @@ import { GroupDrafts } from "./group-drafts";
 import { useDraftGuard } from "@/ui/use-draft-guard";
 import { GroupTeacherBoard } from "@/features/library/group-board";
 import { clampGroupCount } from "@/ui/group-count";
+import { orderAssignmentsByGroup } from "@/ui/group-order";
 import { GroupFlowSteps } from "./group-flow-steps";
 import { GroupCardGrid } from "./group-card-grid";
 import {
@@ -323,11 +324,16 @@ export function GroupWorkspace({
     );
   // Groups whose card sheet is not ticked yet; they are what keeps "Mulai
   // kegiatan" locked, so the teacher needs to see which ones by name.
-  const unprintedGroups = (lesson?.assignments ?? [])
-    .filter((a) => a.method === "cards" && !printed[a.id])
-    .map(
-      (a) => groups.find((g) => g.id === a.groupId)?.label ?? "Kelompok",
-    );
+  // Both this list and the ready-summary rows below follow the grid's group
+  // order, so the group named in the gate hint is the one the teacher sees
+  // first on the card it belongs to.
+  const readyAssignments = orderAssignmentsByGroup(
+      groups,
+      lesson?.assignments ?? [],
+    ),
+    unprintedGroups = readyAssignments
+      .filter((a) => a.method === "cards" && !printed[a.id])
+      .map((a) => groups.find((g) => g.id === a.groupId)?.label ?? "Kelompok");
   async function save() {
     await execute(async () => {
       if (!lesson || problems.length) return;
@@ -552,7 +558,7 @@ export function GroupWorkspace({
                 className="studio-row-list"
                 aria-label="Ringkasan kesiapan kelompok"
               >
-                {lesson.assignments.map((a) => (
+                {readyAssignments.map((a) => (
                   <li key={a.id} className="studio-row">
                     <span className="studio-row-content">
                       <h2>
