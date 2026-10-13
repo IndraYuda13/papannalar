@@ -141,11 +141,12 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
   ).toBeVisible();
 
   const groups = page.locator("section").filter({
-    has: page.locator("summary", { hasText: "Lihat anggota dan kegiatan" }),
+    has: page.locator("summary", { hasText: "Anggota kelompok" }),
   });
   for (let i = 0; i < 2; i++) {
     const group = groups.nth(i);
-    await group.locator("summary").first().click();
+    // Method and question set are always visible now; only the member list is
+    // behind a toggle, so the radios can be driven without opening anything.
     await group
       .getByLabel(
         i === 0 ? "Menjawab di layar" : "Mengerjakan soal dengan kartu",
@@ -154,6 +155,8 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
       .check();
     await group.getByLabel("Soal yang dipakai").selectOption(collectionId);
   }
+  // The move flow lives inside the member list, so open that one toggle.
+  await groups.nth(0).locator("summary").first().click();
   await groups
     .nth(0)
     .getByRole("button", { name: "Pindahkan", exact: true })
@@ -234,6 +237,13 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
     .getByRole("button", { name: "Unduh kartu jawaban", exact: true })
     .click();
   await (await cardDownload).saveAs(`${root}/assignment-cards.pdf`);
+  // The cards group is gated until its print sheet is ticked. Both the card
+  // checkbox and the readiness-list checkbox write the same key, and the locked
+  // button now names the group that is blocking, so assert that too.
+  await expect(
+    page.getByRole("button", { name: "Mulai kegiatan", exact: true }),
+  ).toBeDisabled();
+  await expect(page.getByText(/Centang “Cetakan siap” untuk:/)).toBeVisible();
   await page.getByLabel("Lembar soal dan kartu sudah disiapkan").check();
   await page
     .getByRole("button", { name: "Mulai kegiatan", exact: true })
@@ -372,9 +382,8 @@ test("real-class explicit methods, persisted groups, autonomous board and late b
     .getByRole("button", { name: "Buat kelompok", exact: true })
     .click();
   const toolGroup = page.locator("section").filter({
-    has: page.locator("summary", { hasText: "Lihat anggota dan kegiatan" }),
+    has: page.locator("summary", { hasText: "Anggota kelompok" }),
   });
-  await toolGroup.locator("summary").first().click();
   await toolGroup.getByLabel("Menjawab di layar", { exact: true }).check();
   await toolGroup.getByLabel("Soal yang dipakai").selectOption(toolId);
   await page

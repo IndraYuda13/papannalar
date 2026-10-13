@@ -321,6 +321,13 @@ export function GroupWorkspace({
     problems.push(
       "Satu layar hanya dapat dipakai satu kelompok. Ganti cara belajar kelompok lainnya.",
     );
+  // Groups whose card sheet is not ticked yet; they are what keeps "Mulai
+  // kegiatan" locked, so the teacher needs to see which ones by name.
+  const unprintedGroups = (lesson?.assignments ?? [])
+    .filter((a) => a.method === "cards" && !printed[a.id])
+    .map(
+      (a) => groups.find((g) => g.id === a.groupId)?.label ?? "Kelompok",
+    );
   async function save() {
     await execute(async () => {
       if (!lesson || problems.length) return;
@@ -554,13 +561,26 @@ export function GroupWorkspace({
                       </h2>
                       <p>{methodLabel[a.method]}</p>
                     </span>
-                    <span className="studio-row-meta">
-                      {a.method === "cards"
-                        ? printed[a.id]
-                          ? "Cetakan siap"
-                          : "Perlu cetak"
-                        : "Tanpa cetak"}
-                    </span>
+                    {a.method === "cards" ? (
+                      // The begin gate reads this exact key, so the teacher can
+                      // clear it here instead of hunting inside the card.
+                      <label className="studio-row-meta flex min-h-12 items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={!!printed[a.id]}
+                          disabled={busy}
+                          onChange={(e) =>
+                            setPrinted((old) => ({
+                              ...old,
+                              [a.id]: e.target.checked,
+                            }))
+                          }
+                        />
+                        Cetakan siap
+                      </label>
+                    ) : (
+                      <span className="studio-row-meta">Tanpa cetak</span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -590,6 +610,18 @@ export function GroupWorkspace({
                   Ubah kegiatan
                 </Button>
               </div>
+              {unprintedGroups.length > 0 && (
+                <p className="text-sm">
+                  Centang &ldquo;Cetakan siap&rdquo; untuk:{" "}
+                  {unprintedGroups.join(", ")} di daftar di atas sebelum mulai.
+                </p>
+              )}
+              {unprintedGroups.length === 0 && dirty && (
+                <p className="text-sm">Simpan dulu perubahan.</p>
+              )}
+              {unprintedGroups.length === 0 && !dirty && offline && (
+                <p className="text-sm">Tidak ada koneksi.</p>
+              )}
             </>
           )}
           {lesson.status === "active" &&
