@@ -30,18 +30,23 @@ export function GroupCardGrid<T extends { id: string }>({
         ))}
       </ul>
       {view.pageCount > 1 && (
-        <div className="flex flex-wrap items-center gap-3">
+        // Mobile: the counter takes its own line, the button pair shares the next
+        // one, left aligned. sm+: a single centred row with the counter between the
+        // buttons. The compact sizing is what keeps both labels on one line at 360.
+        <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:justify-center sm:gap-3">
           <Button
+            className="order-1 px-2 text-[13px] sm:px-5 sm:text-base"
             variant="outline"
             disabled={view.page === 1}
             onClick={() => setPage(view.page - 1)}
           >
             Kelompok sebelumnya
           </Button>
-          <p className="studio-progress-label">
+          <p className="studio-progress-label order-first w-full sm:order-2 sm:w-auto">
             Halaman {view.page} dari {view.pageCount}
           </p>
           <Button
+            className="order-3 px-2 text-[13px] sm:px-5 sm:text-base"
             variant="outline"
             disabled={view.page === view.pageCount}
             onClick={() => setPage(view.page + 1)}

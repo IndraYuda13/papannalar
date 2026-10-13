@@ -97,7 +97,7 @@ export function GroupPreparation({
           </label>
         ))}
       </details>
-      <label>
+      <label className="block max-w-sm">
         Jumlah kelompok
         <input
           className={field}
