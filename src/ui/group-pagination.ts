@@ -21,5 +21,12 @@ export function paginateGroups<T>(
   const page = Math.min(Math.max(1, Math.trunc(requestedPage) || 1), pageCount);
   const start = (page - 1) * size;
   const end = Math.min(start + size, total);
-  return { page, pageCount, items: groups.slice(start, end), start, end, total };
+  return {
+    page,
+    pageCount,
+    items: groups.slice(start, end),
+    start,
+    end,
+    total,
+  };
 }

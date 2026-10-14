@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  normaliseGroupCount,
-  clampGroupCount,
-} from "../../src/ui/group-count";
+import { normaliseGroupCount, clampGroupCount } from "../../src/ui/group-count";
 
 describe("group count input", () => {
   it("keeps the empty draft instead of collapsing to 0", () => {

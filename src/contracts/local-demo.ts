@@ -36,7 +36,7 @@ export function isLocalDemoEnvironment(
 }
 
 // Explicit operator opt-in for every demo/sample surface. The local-adapter
-// flag alone is NOT an authorization boundary (SENTINEL F-01/F-03): a launcher
+// flag alone is not an authorization boundary: a launcher
 // that hardcodes the loopback pair can still be deployed to a public host, so a
 // second, deliberate switch must be present. Absent or non-"1" fails closed.
 export function demoModeEnabled(value: string | undefined): boolean {
@@ -80,8 +80,8 @@ export function isLoopbackHostHeader(host: string | null | undefined): boolean {
 }
 
 // A present X-Forwarded-* header that is not itself loopback/http is proof of a
-// non-local hop, so it must not be smuggled past a loopback Host (SENTINEL
-// GATE 3). Next.js itself injects x-forwarded-for/host/proto with the local
+// non-local hop, so it must not be smuggled past a loopback Host.
+// Next.js itself injects x-forwarded-for/host/proto with the local
 // socket values for direct requests, so a direct loopback call still passes.
 function forwardedHeadersAreLocal(headers: Headers): boolean {
   const proto = headers.get("x-forwarded-proto");
@@ -91,8 +91,8 @@ function forwardedHeadersAreLocal(headers: Headers): boolean {
   return true;
 }
 
-// Config-derived production floor (SENTINEL GATE 2). A real public deployment
-// sets PUBLIC_APP_ORIGIN to its external https origin (the F-02 fix); when it
+// Config-derived production floor. A real public deployment
+// sets PUBLIC_APP_ORIGIN to its external https origin; when it
 // does, demo surfaces are refused unless the operator explicitly acknowledges a
 // public demo with PAPANNALAR_ALLOW_PUBLIC_DEMO=1. This term depends on no proxy
 // property (it cannot flip if the ingress stops setting X-Real-IP) and is the
@@ -114,8 +114,7 @@ function productionFloorIsSatisfied(
   return allowPublicDemo === "1";
 }
 
-// The single gate every demo/sample surface must clear (ORION-arbitrated
-// layering, SENTINEL F-01/F-03 + retest residuals):
+// The single gate every demo/sample surface must clear (defense in depth layering):
 //   1. PAPANNALAR_DEMO_MODE=1 — an explicit, operator-controlled opt-in that is
 //      separate from the local-adapter flag (which the demo launcher sets for
 //      every deployment, and is therefore not an authorization boundary). The

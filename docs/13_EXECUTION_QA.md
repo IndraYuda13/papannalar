@@ -1,8 +1,7 @@
 # Rencana kerja dan pengujian U0-U5
 
 Dokumen ini mencatat rencana upgrade UI/AI terdahulu dan matriks acceptance.
-Bukan antrean pekerjaan aktif atau bukti kelulusan. Hasil aktual tersedia di
-[artifacts/qa](../artifacts/qa/); perintah validasi saat ini ada di [README](../README.md).
+Bukan antrean pekerjaan aktif atau bukti kelulusan. Perintah validasi saat ini ada di [README](../README.md).
 
 ## U0 - Integrasi dokumen dan baseline pendek
 

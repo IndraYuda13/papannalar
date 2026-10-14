@@ -175,7 +175,7 @@ async function readablePage(page: Page) {
   expect(geometry.copyBottom).toBeLessThanOrEqual(geometry.bottom + 1);
 }
 
-// AURORA §J.1 splits the old "400-character prompt remains complete and bounded" row in two.
+// Specification note: splits the old "400-character prompt remains complete and bounded" row in two.
 // Its title promoted a stress fixture to a contract: 400 characters is illegal content by the
 // product's own law (`BOARD_MAX_LINES = 2`, `BOARD_MAX_WORDS = 14`, `studio.tsx:185-186`), so
 // "complete on one page" was never a claim the product made about legal items. What the product

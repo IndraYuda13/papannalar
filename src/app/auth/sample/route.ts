@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     // Fail closed: this surface exists only under the explicit operator opt-in
     // (PAPANNALAR_DEMO_MODE=1) plus a loopback config pair and a direct
     // (unproxied) loopback request. The loopback APP_ORIGIN of a demo launcher
-    // is NOT an authorization boundary (SENTINEL F-01).
+    // is not an authorization boundary.
     if (process.env["SAMPLE_ENABLED"] !== "true") throw new Error("NOT_FOUND");
     if (!demoAllowedForRequest(request)) throw new Error("NOT_FOUND");
     const input = await readBody(
@@ -30,10 +30,9 @@ export async function POST(request: NextRequest) {
     attempts.set(ip, bucket);
     if (bucket.count > 20 || attempts.size > 10000)
       throw new Error("RATE_LIMITED");
-    // An empty access code is refused outright (ORION-arbitrated Layer 1): the
-    // loopback origin of a mis-deployed demo launcher is not an authorization
-    // boundary, so an empty default must mean "demo disabled", never "no code
-    // needed". A public demo operator must set a strong code.
+    // An empty access code is refused outright: the loopback origin of a demo
+    // launcher is not an authorization boundary, so an empty default must mean
+    // "demo disabled", never "no code needed". A public demo operator must set a strong code.
     const code = process.env["SAMPLE_ACCESS_CODE"] ?? "";
     if (
       code.length < 12 ||

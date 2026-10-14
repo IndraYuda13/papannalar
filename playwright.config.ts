@@ -34,7 +34,7 @@ export default defineConfig({
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "test-only-publishable-key",
         PAIRING_SECRET: "test-only-pairing-pepper-never-production-2026",
         PAPANNALAR_LOCAL_ADAPTER: "1",
-        // Explicit demo opt-in for the browser suite (ORION-arbitrated Layer 1);
+        // Explicit demo opt-in for the browser suite;
         // absent in production so /demo and /auth/demo 404 there.
         PAPANNALAR_DEMO_MODE: "1",
         SAMPLE_ENABLED: "true",

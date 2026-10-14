@@ -11,10 +11,10 @@ const require = createRequire(import.meta.url),
 // Demo surfaces are enabled by an EXPLICIT operator/dev opt-in only: the
 // PAPANNALAR_DEMO_MODE=1 env var or a dedicated `--demo`/`--smoke` flag.
 // `--video` (recording) deliberately does NOT imply demo mode: production's
-// unit runs `pnpm video`, and ORION's binding Layer 1 requires that an unchanged
+// unit runs `pnpm video`, and security isolation requires that an unchanged
 // unit leaves demo surfaces 404. To record against sample data, run
 // `PAPANNALAR_DEMO_MODE=1 pnpm video`. Absent -> /demo and /auth/demo 404
-// (ORION-arbitrated Layer 1; SENTINEL F-01/F-03).
+// (fail-closed security default).
 const demoOn =
   process.env["PAPANNALAR_DEMO_MODE"] === "1" ||
   process.argv.includes("--demo") ||

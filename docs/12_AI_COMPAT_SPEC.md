@@ -64,7 +64,7 @@ File contoh: `config/.env.ui-ai.example`. Field inti:
   https://api.anthropic.com/v1. Tambahkan hanya suffix protokol, bukan `/v1` lagi.
   Gateway dengan prefix path tetap harus didukung. Tolak URL berakhiran endpoint
   `/messages`, `/chat/completions`, `/responses` ketika field meminta base root.
-- Key berbeda dari model. ID Sol Max pada Codex tidak menjadi model string aplikasi;
+- Key berbeda dari model. Model eksternal tidak menjadi model string default aplikasi;
   'max' adalah opsi model tertentu, bukan suffix universal.
 - OpenAI profile baru tidak boleh diam-diam meminjam ANTHROPIC_API_KEY lama.
 - Tanpa AI_PROTOCOL dan hanya konfigurasi Anthropic lama: explicit legacy mapping
@@ -252,7 +252,7 @@ semestinya; satu sukses tidak berarti semua model/gateway kompatibel.
 
 Model fixture `configured-model` / `fixture-requested-alias` bukan model default
 aplikasi. Model reported alias/snapshot boleh berbeda. Operator wajib mengisi
-`AI_MODEL`; model coding Codex tidak dipakai sebagai default.
+`AI_MODEL`; model eksternal tidak dipakai sebagai default tanpa konfigurasi.
 
 Gunakan [.env.example](../.env.example) atau
 [config/.env.ui-ai.example](../config/.env.ui-ai.example), **OFF** secara default.

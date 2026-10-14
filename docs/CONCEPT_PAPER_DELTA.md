@@ -2,7 +2,7 @@
 
 DOCX concept paper terakhir tidak diubah pada paket ini. Diagram/alur yang sudah
 benar tidak perlu diganti hanya karena skin UI/provider berubah. Teks berikut
-baru boleh diterapkan setelah Codex melaporkan implementasi dan hasil pengujian
+baru boleh diterapkan setelah tim pengembang memverifikasi implementasi dan hasil pengujian
 actual; jangan menyebutnya fitur sudah jadi hari ini.
 
 ## Calon paragraf desain (setelah UI lulus)

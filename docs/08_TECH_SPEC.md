@@ -18,9 +18,9 @@ Target awal: prototipe penyisihan kelas 7B. Target final: seluruh fitur wajib su
 
 ## 0. Cara memakai spesifikasi dan asal keputusan
 
-Baca bersama [panduan pengembangan](../AGENTS.md) dan [README](../README.md).
-File ini mengubah delapan dokumen produk menjadi kontrak rekayasa. Register
-konflik ada di bagian 2; bukti hasil pengujian ada di [artifacts/qa](../artifacts/qa/).
+Baca bersama [README](../README.md).
+File ini mengubah dokumen produk menjadi kontrak rekayasa. Register
+konflik ada di bagian 2.
 
 Rujukan PLAN, VIDEO_HANDOFF dan UI_AI_HANDOFF pada catatan milestone di bawah
 adalah rujukan historis. Dokumen tersebut telah dihapus dari pohon kerja; versi
@@ -30,7 +30,7 @@ Rujukan itu bukan instruksi untuk membuat ulang jurnal atau mengulang milestone.
 Label yang digunakan:
 
 - **[S] Sumber:** persyaratan yang dinyatakan dokumen pengguna.
-- **[D] Desain usulan:** rincian rekayasa tambahan agar Codex dapat mengimplementasikan
+- **[D] Desain usulan:** rincian rekayasa tambahan agar pengembang dapat mengimplementasikan
   persyaratan. Ini bukan klaim bahwa penulis sumber sudah menyetujui rincian itu.
 - **[K] Keputusan terbuka:** konflik/gap yang tidak boleh diam-diam diubah menjadi
   fakta. Blokir hanya fitur atau rilis yang bergantung kepadanya, bukan seluruh repo.
@@ -71,7 +71,7 @@ langkah lama. Guidebook asli tidak diverifikasi ulang untuk paket ini.
 Tanggal lomba, riset pendidikan, statistik nasional, harga, legalitas, dan klaim
 kompetitor dalam sumber dipertahankan sebagai isi sumber, bukan dianggap telah
 terverifikasi ulang. Jangan mengambil angka itu menjadi klaim produk atau seed
-"hasil nyata". Paket ini tidak menetapkan model Codex, ID model API, harga model,
+"hasil nyata". Paket ini tidak menetapkan model tertentu, ID model API, harga model,
 atau nilai reasoning yang belum dicek pada akun dan dokumentasi aktual.
 
 ### 0.3 Prioritas saat membaca persyaratan
@@ -167,7 +167,7 @@ Catat keputusan baru pada register ini dengan tanggal, alasan dan bukti terkait.
 | K16 | S6 uji di Samarinda; S4 menyebut Bandung paling realistis | Lokasi pilot konfigurasi/keterangan yang belum dipilih; tidak hard-code klaim mitra | Tidak menghalangi kode; perlu keputusan sebelum paper/pilot |
 | K17 | S7 target semua wajib 25 Okt, tetapi opsi langkah alat pindah 26-28 Okt | Simpan 25 Okt sebagai gerbang sumber. Jika mundur, laporkan fitur belum selesai di berkas, bukan ubah deadline diam-diam | Konfirmasi jadwal asli/panitia; no false pass |
 | K18 | S1 sekitar 30 kartu di 3 cahaya; S7 menyebut 30 foto; target bisa ditafsir berbeda | Gunakan 30 kartu berbeda x 3 kondisi = 90 foto, termasuk fotokopi generasi kedua; laporkan denominator | Rancangan uji lebih eksplisit, belum hasil uji |
-| K19 | Daftar miskonsepsi ada tetapi isi lengkap 23 kartu strategi dan alasan empat pilihan belum tersedia; semua masih draf untuk review | Codex boleh membuat draft terpisah, tidak memberi status `reviewed`; konten pilot harus disahkan manusia | Gate konten dan FINAL; tidak mengarang nama reviewer |
+| K19 | Daftar miskonsepsi ada tetapi isi lengkap 23 kartu strategi dan alasan empat pilihan belum tersedia; semua masih draf untuk review | Draf dapat dibuat terpisah, tidak memberi status `reviewed`; konten pilot harus disahkan manusia | Gate konten dan FINAL; tidak mengarang nama reviewer |
 | K20 | S1 larangan kata salah/cross; pola resmi bernama Cari Kesalahan dan ada tanda kali matematika | Lint pesan umpan balik yang menghakimi siswa, bukan substring "salah" atau simbol kali pada rumus | Interpretasi domain, perlu visual review |
 | K21 | S1 Cek Awal 75 detik; S5 menyebut default SD 80 detik | Mode awal ikut 75 detik sumber S1; mingguan SD 80, lainnya 75; singkat 60 | Catat sebagai konflik kecil, waktu tidak diklaim uji lapangan |
 | K22 | S7 menyebut "Cek Awal A5" | **Bukan kode level. A5 adalah ukuran kartu menurut S1 F2** | CLOSED; koreksi salah baca pada jawaban chat terdahulu |
@@ -359,7 +359,7 @@ dependency latest atau mencampur package manager/lockfile.
 ### 3.4 Struktur direktori tujuan [D]
 
 ```text
-AGENTS.md
+README.md
 docs/00_...md ... docs/08_TECH_SPEC.md
 src/app/(public)/masuk/page.tsx
 src/app/auth/callback/route.ts
@@ -764,7 +764,7 @@ D6 dan kode tambahan katalog tidak otomatis menjadi daftar resmi.
 
 [D] Tiap record memuat id, version, status, sourceRef, reviewer, reviewedAt,
 contentHash. `reviewed` memerlukan nama/peran reviewer manusia dan tanggal nyata.
-Codex tidak dapat menandai hasil tulisannya sendiri sudah direview guru.
+Pengembang tidak dapat menandai hasil tulisannya sendiri sudah direview guru.
 Konten `draft` boleh di lingkungan demo berlabel; pilot hanya `reviewed`.
 
 ### 7.2 Kontrak templat
@@ -1494,8 +1494,8 @@ angka penting dari pembaca layar. Automated axe tidak menggantikan uji kelas.
 
 ### 15.1 Adapter provider [D; batas produk S0/S1 F3/F7]
 
-Provider/model aplikasi terpisah dari model yang dipakai Codex untuk menulis kode.
-Jangan hard-code Astra/Sol atau menyimpulkan model tersedia dari percakapan lama.
+Provider/model aplikasi terpisah dari model lingkungan pengembang.
+Jangan hard-code model internal atau menyimpulkan model tersedia dari asumsi lama.
 S6 menggunakan Claude dalam asumsi biaya, bukan kontrak API teruji dalam repo.
 Pilih satu adapter dengan model ID yang benar-benar tersedia saat implementasi;
 catat keputusan, versi SDK, dan cara uji. Tanpa credential gunakan adapter disabled
@@ -1776,7 +1776,7 @@ atau secret production kepada tes/PR tidak terpercaya.
 
 ### 19.3 Format evidence
 
-Setiap laporan di `artifacts/qa/<milestone>/` (dibuat Codex saat implementasi) berisi:
+Setiap laporan verifikasi QA berisi:
 commit SHA, app/schema/content/layout version, test command, exit code, timestamp,
 lingkungan/perangkat/browser, jumlah sampel, hasil aktual, target, failure dan
 keterbatasan. Screenshot hanya data demo. Bedakan automated, synthetic, real-device,
@@ -1899,7 +1899,7 @@ menyebut yang belum selesai. Pembagian pekerjaan baru tidak mengaku sama dengan
 17 langkah lama. Waktu/jumlah jam ketersediaan tim tidak diasumsikan sudah pasti.
 
 Konten reviewed, persetujuan/izin, lokasi/perangkat nyata, kebijakan retensi dan
-privacy free-text adalah gate manusia sebelum pilot. Codex tidak dapat mengisi
+privacy free-text adalah gate manusia sebelum pilot. Pengembang tidak dapat mengisi
 checkbox itu dari hasil unit test. K01 tetap gate final semua jenjang, bukan alasan
 mengubah spesifikasi sumber. Keberhasilan uji1-2 sesi bukan bukti hasil belajar
 meningkat; modelBKT juga bukan ukuran kausal dampak pendidikan.
@@ -1927,7 +1927,7 @@ dijalankan; spesifikasi ini juga tidak mengklaim telah membangun aplikasi.
 ## 23. Referensi platform resmi [V]
 
 Referensi dibaca untuk mendukung desain implementasi, terpisah dari fakta produk
-S0-S7. URL/documentation bisa berubah; saat memilih versi, Codex mencatat rujukan
+S0-S7. URL/documentation bisa berubah; saat memilih versi, pengembang mencatat rujukan
 aktual dan tanggal verifikasi pada jurnal. Tidak menganggap versi/API terbaru
 kompatibel tanpa memeriksa lockfile dan dokumentasinya.
 
@@ -1941,7 +1941,7 @@ kompatibel tanpa memeriksa lockfile dan dokumentasinya.
 | V6 | [Supabase Server-side Clients](https://supabase.com/docs/guides/auth/server-side/creating-a-client?queryGroups=framework&framework=nextjs) | Browser/server SDK boundaries dan session validation |
 | V7 | [Supabase Broadcast](https://supabase.com/docs/guides/realtime/broadcast) | Server/DB broadcast payload terkontrol |
 | V8 | [MDN Pointer Events](https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events) | Pointer identity, capture, cancellation, multitouch |
-| V9 | [OpenAI Codex AGENTS.md guidance](https://developers.openai.com/codex/guides/agents-md) | Instruksi repo yang ringkas, dengan rujukan ke spesifikasi/plan |
+| V9 | [TypeScript Documentation](https://www.typescriptlang.org/docs/) | Pedoman pengetikan ketat dan validasi skema |
 
 Akhir spesifikasi. Dokumen sumber tetap utuh; keputusan baru dan hasil implementasi
 harus memiliki jejak, bukan ditambahkan seolah telah ada dalam sumber.

@@ -397,7 +397,7 @@ test("PN-R2-01 ready checklist follows the grid's group order", async ({
     ).toBe(true);
   }
 
-  // PRISM's regression risk: the reorder must not disturb the readiness row layout that
+  // Regression verification: the reorder must not disturb the readiness row layout that
   // carries the "Cetakan siap" control, which was measured at 360px before the fix.
   for (const entry of lessons) {
     const w = entry.widths[360];

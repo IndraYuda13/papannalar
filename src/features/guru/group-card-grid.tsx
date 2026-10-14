@@ -21,7 +21,8 @@ export function GroupCardGrid<T extends { id: string }>({
           {view.start + 1}-{view.end}/{view.total}
         </span>
         <span className="sr-only">
-          Menampilkan kelompok {view.start + 1} sampai {view.end} dari {view.total}
+          Menampilkan kelompok {view.start + 1} sampai {view.end} dari{" "}
+          {view.total}
         </span>
       </p>
       <ul className="grid gap-5 lg:grid-cols-2" aria-label={label}>

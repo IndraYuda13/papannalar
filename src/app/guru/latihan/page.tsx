@@ -6,7 +6,9 @@ export const metadata = { title: "Belajar berkelompok" };
 
 export default function Page() {
   return (
-    <Suspense fallback={<StateNotice kind="loading" title="Memuat kegiatan…" />}>
+    <Suspense
+      fallback={<StateNotice kind="loading" title="Memuat kegiatan…" />}
+    >
       <GroupEntry />
     </Suspense>
   );

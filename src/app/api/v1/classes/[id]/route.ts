@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, params: Params) {
 export async function PATCH(request: NextRequest, params: Params) {
   let context: ReturnType<typeof authContext> | undefined;
   try {
-    // Authenticate before parsing (SENTINEL F-09).
+    // Authenticate before parsing request body.
     context = authContext(request);
     await requireTeacher(context);
     await requireSampleController(request, context);
@@ -56,7 +56,7 @@ export async function PATCH(request: NextRequest, params: Params) {
 export async function DELETE(request: NextRequest, params: Params) {
   let context: ReturnType<typeof authContext> | undefined;
   try {
-    // Authenticate before parsing (SENTINEL F-09).
+    // Authenticate before parsing request body.
     context = authContext(request);
     await requireTeacher(context);
     await requireSampleController(request, context);

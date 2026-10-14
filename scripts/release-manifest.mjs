@@ -16,7 +16,6 @@ const roots = [
   ".github",
   "docs",
   "public/fonts",
-  "AGENTS.md",
   "README.md",
   ".env.example",
   ".gitignore",

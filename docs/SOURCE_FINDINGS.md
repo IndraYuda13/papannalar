@@ -53,5 +53,5 @@ merupakan invarian. Jangan menyalin dataset palsu ke UI untuk membuat screenshot
 Yang disiapkan di sini: dokumen perubahan, script safe-addendum, aset GLB/poster
 asli dan contoh codec/test murni. Belum memasang dependency ke repo, belum mengetes
 Next.js runtime aktual, belum menjalankan hosted AI/Supabase atau deployment.
-Perubahan code/DB/UI akhir dikerjakan Codex sesuai acceptance dan diverifikasi di
+Perubahan code/DB/UI akhir dikerjakan sesuai acceptance dan diverifikasi di
 lingkungannya. Angka audit lama tidak dipakai sebagai skor kesesuaian perubahan ini.

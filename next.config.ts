@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-// Baseline security headers for every route (SENTINEL F-07). HSTS is safe here
+// Baseline security headers for every route. HSTS is safe here
 // because Cloudflare terminates TLS and redirects http->https for this host;
 // it is only emitted when the public origin is https (production), so the local
 // http harness is unaffected. `camera=(self)` is required because the card

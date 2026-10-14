@@ -4,7 +4,7 @@ import { z } from "zod";
 import { isSameOrigin } from "../contracts/auth";
 import { acceptedOrigins } from "./auth/origin";
 
-// Best-effort client identity for IP-keyed rate limits (SENTINEL F-04).
+// Best-effort client identity for IP-keyed rate limits.
 //
 // Next.js 16 exposes no transport socket address to a route handler, so we
 // cannot read the true peer. Instead of trusting the left-most

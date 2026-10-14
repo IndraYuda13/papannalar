@@ -14,9 +14,8 @@ export type ContentApproval = Readonly<{
 export const CONTENT_APPROVALS: readonly ContentApproval[] = [];
 // Free-text (teacher-typed question) is a separate privacy decision. It stays
 // unreviewed until a human records a real, evidence-backed review; a
-// self-asserted constant (the frozen commit briefly shipped one) is forbidden
-// by AGENTS.md ("review materi/privasi tidak boleh dipalsukan"). null => the
-// free-text path falls back with reason "privacy".
+// self-asserted constant is forbidden by privacy rules (review materi/privasi
+// tidak boleh dipalsukan). null => the free-text path falls back with reason "privacy".
 export const BISIK_PRIVACY_REVIEW: Readonly<{
   reviewer: string;
   reviewedAt: string;
@@ -27,7 +26,7 @@ export function isApproved(
   hash: string,
   approvals: readonly ContentApproval[] = CONTENT_APPROVALS,
 ) {
-  // Fail closed (SENTINEL F-06 / T2-02 / T4 F-gate): an empty approval list
+  // Fail closed security gate: an empty approval list
   // approves NOTHING. The previous `if (!approvals.length) return true;`
   // shortcut approved any id/hash whenever the list was empty.
   return approvals.some(

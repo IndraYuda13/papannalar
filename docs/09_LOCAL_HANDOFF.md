@@ -35,8 +35,7 @@ pnpm exec node scripts/release-manifest.mjs
 Setelah build tersedia, script menghasilkan
 `artifacts/releases/local-final-mvp/manifest.json` dengan hash source, migration,
 dependency, build ID, aset dan hasil gladi lokal bila tersedia. Hasil dari build
-berbeda ditolak. Output ini diabaikan Git; bukan tautan ke bukti yang sudah
-tersedia dalam repository. Bukti yang disertakan ada di [artifacts/qa](../artifacts/qa/).
+berbeda ditolak. Output ini diabaikan Git.
 
 ## Memulihkan backup uji
 

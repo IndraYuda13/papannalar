@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 // Browser-visible origin resolution.
 //
-// Order of preference (SENTINEL F-02):
+// Order of preference:
 //  1. PUBLIC_APP_ORIGIN — the operator's real external origin. When the app is
 //     fronted by the local nginx (which rewrites Host/Origin/X-Forwarded-*), this
 //     is the only trustworthy source for the origin the browser actually used,

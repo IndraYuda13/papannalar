@@ -1,10 +1,7 @@
 "use client";
 import Link from "next/link";
 import type { Dispatch, SetStateAction } from "react";
-import type {
-  GroupAssignment,
-  GroupLesson,
-} from "@/contracts/group-lesson";
+import type { GroupAssignment, GroupLesson } from "@/contracts/group-lesson";
 import type { LibraryRunV2, Collection } from "@/contracts/library";
 import { publicLibraryItem } from "@/contracts/library";
 import { evidenceReasonCopy } from "./evidence-copy";
@@ -124,7 +121,9 @@ export function GroupAssignmentCard({
                   {(["teacher", "system"] as const).map((source) => (
                     <optgroup
                       key={source}
-                      label={source === "teacher" ? "Soal saya" : "Soal siap pakai"}
+                      label={
+                        source === "teacher" ? "Soal saya" : "Soal siap pakai"
+                      }
                     >
                       {readyCollections
                         .filter((c) => c.source === source)
@@ -183,24 +182,26 @@ export function GroupAssignmentCard({
               bersama bukan nilai tiap siswa.
             </p>
           )}
-          {phase === "ready" && stored?.method === "cards" && runs[stored.runId] && (
-            <>
-              <AssignmentPrint run={runs[stored.runId]} />
-              <label className="flex min-h-12 items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={!!printed[stored.id]}
-                  onChange={(e) =>
-                    setPrinted({
-                      ...printed,
-                      [stored.id]: e.target.checked,
-                    })
-                  }
-                />
-                Lembar soal dan kartu sudah disiapkan
-              </label>
-            </>
-          )}
+          {phase === "ready" &&
+            stored?.method === "cards" &&
+            runs[stored.runId] && (
+              <>
+                <AssignmentPrint run={runs[stored.runId]} />
+                <label className="flex min-h-12 items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={!!printed[stored.id]}
+                    onChange={(e) =>
+                      setPrinted({
+                        ...printed,
+                        [stored.id]: e.target.checked,
+                      })
+                    }
+                  />
+                  Lembar soal dan kartu sudah disiapkan
+                </label>
+              </>
+            )}
           {lesson.status !== "draft" && stored?.method === "cards" && (
             <Button asChild variant="outline">
               <Link href={`/guru/sesi/${stored.runId}`}>
@@ -226,9 +227,7 @@ export function GroupAssignmentCard({
           </summary>
           <ul className="mt-2">
             {group.studentIds.map((studentId) => {
-              const student = lesson.presence.find(
-                (s) => s.id === studentId,
-              );
+              const student = lesson.presence.find((s) => s.id === studentId);
               return (
                 <li key={studentId} className="border-b py-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">

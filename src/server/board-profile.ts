@@ -20,7 +20,7 @@ export async function boardProfileRequest(
     }
     // Authenticate first, then parse: a malformed presentationId must read as
     // INVALID_INPUT (422), never as a transient 503 that would distinguish
-    // "malformed" from "not yours" by status code (SENTINEL F-11).
+    // "malformed" from "not yours" by status code.
     const input =
       surface === "board"
         ? publicBoardProfile(await readBody(request, boardProfileSchema))

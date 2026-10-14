@@ -30,17 +30,17 @@ describe("C01 local CSV identity boundary", () => {
   it("maps attendance to random IDs locally, accepts UTF8 BOM/quotes/empty deletion", () => {
     expect(
       parseLocalRosterCsv(
-        '\uFEFFabsen,nama\r\n01,"PRIVATE, SENTINEL"\r\n02,\r\n',
+        '\uFEFFabsen,nama\r\n01,"PRIVATE, SISWA"\r\n02,\r\n',
         roster,
       ),
     ).toEqual([
-      { studentId: roster[0].id, displayName: "PRIVATE, SENTINEL" },
+      { studentId: roster[0].id, displayName: "PRIVATE, SISWA" },
       { studentId: roster[1].id, displayName: "" },
     ]);
     expect(
-      parseLocalRosterCsv('absen,nama\n1,"PRIVATE ""SENTINEL"""', roster)[0]
+      parseLocalRosterCsv('absen,nama\n1,"PRIVATE ""SISWA"""', roster)[0]
         .displayName,
-    ).toBe('PRIVATE "SENTINEL"');
+    ).toBe('PRIVATE "SISWA"');
   });
   it.each([
     "absen,nama\n1,X\n1,Y",

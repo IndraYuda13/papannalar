@@ -43,7 +43,7 @@ export function demoConfiguredForEnvironment(): boolean {
   );
 }
 
-// Operator visibility (ORION-arbitrated Layer 1). The gate fails closed when
+// Operator visibility layer. The gate fails closed when
 // PUBLIC_APP_ORIGIN names an external origin; this warns when demo mode is on so
 // an accidental public demo is loud rather than silent.
 if (process.env["PAPANNALAR_DEMO_MODE"] === "1") {
