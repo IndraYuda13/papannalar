@@ -24,7 +24,8 @@ function BoardSurface() {
       data-surface="layar"
       data-board-preset={active?.settings.preset ?? "sedang"}
       data-interaction-zone={active?.settings.interactionZone ?? "auto"}
-      className="board-surface font-kelas"
+      className="board-surface pn-board font-kelas"
+      data-board-view={appearance.editing ? "appearance" : "workspace"}
     >
       <a className="skip-link" href="#konten">
         Langsung ke isi

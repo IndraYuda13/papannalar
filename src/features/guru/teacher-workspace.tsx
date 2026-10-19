@@ -404,7 +404,7 @@ export function TeacherWorkspace({
       </div>
     );
   return (
-    <div className="space-y-5">
+    <div className="pn-adaptive-content space-y-5">
       {offline && (
         <p role="status" className="text-sm">
           Tanpa internet · latihan tersimpan tetap dapat digunakan pada

@@ -26,13 +26,10 @@ export function MotionBoundary({
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
-        node.animate(
-          [
-            { opacity: 0.65, transform: "translateY(10px)" },
-            { opacity: 1, transform: "translateY(0)" },
-          ],
-          { duration: 280, easing: "ease-out" },
-        );
+        node.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: 150,
+          easing: "ease-out",
+        });
         observer.disconnect();
       },
       { threshold: 0.08 },

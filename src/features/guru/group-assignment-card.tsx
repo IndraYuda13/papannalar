@@ -70,14 +70,24 @@ export function GroupAssignmentCard({
   const c = readyCollections.find((c) => c.id === a?.collectionId),
     document = runs[stored?.runId ?? ""]?.document ?? c?.document;
   return (
-    <Section label={`${group.label} · ${group.studentIds.length} siswa`}>
-      <p>
-        {a ? methodLabel[a.method] : "Pilih cara belajar"} ·{" "}
-        {c?.document.title ?? "Belum memilih soal"}
-        {stored && lesson.status !== "draft"
-          ? ` · ${stored.status === "completed" ? "Tugas selesai" : stored.status === "stopped" ? "Dihentikan" : "Berlangsung"}`
-          : ""}
-      </p>
+    <Section
+      className="pn-group-assignment"
+      ground="inset"
+      label={`${group.label} · ${group.studentIds.length} siswa`}
+    >
+      <div className="pn-group-assignment-summary">
+        <span>{a ? methodLabel[a.method] : "Pilih cara belajar"}</span>
+        <p>{document?.title ?? "Belum memilih soal"}</p>
+        {stored && lesson.status !== "draft" && (
+          <span className="pn-group-status" data-status={stored.status}>
+            {stored.status === "completed"
+              ? "Tugas selesai"
+              : stored.status === "stopped"
+                ? "Dihentikan"
+                : "Berlangsung"}
+          </span>
+        )}
+      </div>
       <div className="space-y-4">
         <div className="space-y-3">
           {lesson.status === "draft" && phase === "edit" ? (
@@ -137,9 +147,7 @@ export function GroupAssignmentCard({
                 </select>
               </label>
             </>
-          ) : (
-            <p>{stored ? methodLabel[stored.method] : "Belum ditetapkan"}</p>
-          )}
+          ) : null}
           {document && (
             <>
               <p>
@@ -151,11 +159,12 @@ export function GroupAssignmentCard({
               </p>
               <Button
                 variant="outline"
+                aria-expanded={preview === group.id}
                 onClick={() =>
                   setPreview(preview === group.id ? undefined : group.id)
                 }
               >
-                Lihat soal
+                {preview === group.id ? "Tutup pratinjau soal" : "Lihat soal"}
               </Button>
               {preview === group.id && (
                 <div data-library-preview className="space-y-4">

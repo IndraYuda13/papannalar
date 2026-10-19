@@ -195,7 +195,7 @@ export function GroupWorkspace({
     return () => clearInterval(timer);
   }, [lesson?.status, reloadLesson]);
   useEffect(() => {
-    heading.current?.focus();
+    heading.current?.focus({ preventScroll: true });
   }, [phase]);
   async function execute(work: () => Promise<void>) {
     if (lock.current || offline || !canMutate) return;
@@ -420,7 +420,7 @@ export function GroupWorkspace({
     );
 
   return (
-    <div className="space-y-6">
+    <div className="pn-group-page space-y-6" data-group-phase={phase}>
       <Link
         className="inline-flex min-h-12 items-center text-primary"
         href={`/guru/kelas/${cls}`}
@@ -435,7 +435,13 @@ export function GroupWorkspace({
               ? "Kegiatan selesai"
               : "Siapkan kelompok"
         }
-        description="Bagi siswa, pilih cara belajar dan soal, lalu mulai bersama."
+        description={
+          lesson?.status === "active"
+            ? "Pantau kegiatan setiap kelompok dan bantu siswa saat diperlukan."
+            : lesson?.status === "closed"
+              ? "Tinjau kegiatan kelompok dan lanjutkan ke hasil pembelajaran."
+              : "Bagi siswa, pilih cara belajar dan soal, lalu mulai bersama."
+        }
       />
       {(!lesson || lesson.status === "draft") && (
         <GroupFlowSteps
@@ -443,7 +449,11 @@ export function GroupWorkspace({
           groupCount={groups.length || Number.parseInt(count, 10) || 0}
         />
       )}
-      <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
+      <h2
+        ref={heading}
+        tabIndex={-1}
+        className="pn-group-phase-title text-xl font-bold"
+      >
         {lesson?.status === "active"
           ? "Kelompok belajar bersamaan"
           : lesson?.status === "closed"
@@ -483,7 +493,11 @@ export function GroupWorkspace({
           <GroupEvidenceSummary lesson={lesson} groupCount={groups.length} />
           <GroupCardGrid
             groups={groups}
-            label="Kelompok yang perlu diatur"
+            label={
+              lesson.status === "draft"
+                ? "Kelompok yang perlu diatur"
+                : "Kegiatan setiap kelompok"
+            }
             renderCard={(g) => (
               <GroupAssignmentCard
                 key={g.id}

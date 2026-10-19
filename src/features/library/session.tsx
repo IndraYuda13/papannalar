@@ -538,10 +538,14 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
           <section
             className={`${panel} studio-session-pairing`}
             aria-label="Sambungan layar"
+            data-testid="board-connection"
             data-connected={transport.connected}
             data-motion-class="C4"
           >
-            <h2 className="flex items-center gap-2 font-bold">
+            <h2
+              className="flex items-center gap-2 font-bold"
+              data-testid="pairing-status"
+            >
               {transport.connected ? (
                 <CircleCheck size={20} aria-hidden />
               ) : (
@@ -602,7 +606,12 @@ export function SessionWorkspace({ initial }: { initial: Detail }) {
           </p>
         )}
         <section className={`${panel} studio-session-question`}>
-          <MotionSwap change={item.id} className="session-question-copy">
+          <MotionSwap
+            change={item.id}
+            motion="slide"
+            position={run.position}
+            className="session-question-copy"
+          >
             {item.kind !== "card" && (
               <ActivityIcon
                 kind={item.kind === "writing" ? "writing" : item.tool.kind}

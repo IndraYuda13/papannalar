@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { OfflineBootstrap } from "@/ui/components/offline-bootstrap";
 import "./globals.css";
+import "@/ui/redesign.css";
+import "@/ui/workspace-pages.css";
+import "@/ui/board-redesign.css";
+import "@/ui/motion.css";
 import { VisualPreferencesProvider } from "@/ui/components/visual-preferences";
 import { ConfirmProvider } from "@/ui/components/confirm";
 import { OfflineBanner } from "@/ui/components/offline-banner";

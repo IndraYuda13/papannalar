@@ -7,26 +7,43 @@ export function MotionSwap({
   children,
   change,
   className = "",
+  motion = "fade",
+  position,
 }: {
   children: ReactNode;
   change: string | number;
   className?: string;
+  motion?: "fade" | "slide";
+  position?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const previousPosition = useRef(position);
   const { ready, reduced, light, saveData } = useVisualPreferences();
   useEffect(() => {
+    const direction =
+      position !== undefined &&
+      previousPosition.current !== undefined &&
+      position < previousPosition.current
+        ? -1
+        : 1;
+    previousPosition.current = position;
     if (!ready || reduced || light || saveData) return;
     const animation = ref.current?.animate(
-      [
-        { opacity: 0.65, transform: "translateY(8px)" },
-        { opacity: 1, transform: "translateY(0)" },
-      ],
-      { duration: 220, easing: "ease-out" },
+      motion === "slide"
+        ? [
+            { opacity: 0, transform: `translateX(${direction * 28}px)` },
+            { opacity: 1, transform: "translateX(0)" },
+          ]
+        : [{ opacity: 0 }, { opacity: 1 }],
+      {
+        duration: motion === "slide" ? 240 : 150,
+        easing: motion === "slide" ? "ease" : "ease-out",
+      },
     );
     return () => animation?.cancel();
-  }, [change, ready, reduced, light, saveData]);
+  }, [change, ready, reduced, light, saveData, motion, position]);
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} className={className} data-motion-swap={motion}>
       {children}
     </div>
   );

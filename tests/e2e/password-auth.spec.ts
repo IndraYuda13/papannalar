@@ -25,6 +25,7 @@ test("registration, logout and password login retain class; rejected credentials
   expect(saved.ok()).toBe(true);
   await page.goto("/guru/kelas");
   await expect(page.getByText("Kelas akun uji", { exact: true })).toBeVisible();
+  await page.getByLabel("Menu akun guru", { exact: true }).click();
   await page
     .getByRole("button", { name: "Keluar akun", exact: true })
     .filter({ visible: true })

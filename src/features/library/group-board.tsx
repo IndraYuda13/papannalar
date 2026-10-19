@@ -152,6 +152,8 @@ export function GroupTeacherBoard({
     <section
       className="space-y-4 border-t pt-5"
       aria-label="Hubungkan Layar Kelas"
+      data-testid="board-connection"
+      data-connected={transport.connected}
     >
       <h2 className="text-xl font-bold">Hubungkan Layar Kelas</h2>
       <p>
@@ -161,7 +163,7 @@ export function GroupTeacherBoard({
       {!transport.connected && (
         <PairingCodeInput onPair={transport.pair} disabled={transport.busy} />
       )}
-      <p role="status">
+      <p role="status" data-testid="pairing-status">
         {transport.message ||
           message ||
           (transport.connected

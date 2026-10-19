@@ -140,7 +140,7 @@ export function RatioTable({
           Pengali{" "}
           <input
             aria-label="Pengali rasio"
-            className="min-h-24 w-40 border bg-white p-3"
+            className="min-h-24 w-24 max-w-full border bg-white p-3"
             value={factor}
             onChange={(e) => setFactor(e.target.value)}
           />

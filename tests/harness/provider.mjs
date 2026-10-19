@@ -229,7 +229,7 @@ createServer(async (request, response) => {
     let raw = "";
     for await (const chunk of request) {
       raw += chunk;
-      if (Buffer.byteLength(raw) > 8192) throw new Error("AUTH_FAILED");
+      if (Buffer.byteLength(raw) > 524288) throw new Error("AUTH_FAILED");
     }
     const body = raw ? JSON.parse(raw) : {};
     const bearer = request.headers.authorization?.replace(/^Bearer /, "");

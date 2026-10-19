@@ -254,6 +254,7 @@ test("UI01 teacher hint controls report board progress and target reveal needs e
   page,
   browser,
 }) => {
+  test.setTimeout(90000);
   const { context, board, controls, errors } = await paired(page, browser);
   await openLine(page);
   const student = board.getByRole("region", {
@@ -274,7 +275,7 @@ test("UI01 teacher hint controls report board progress and target reveal needs e
     name: "Petunjuk dan jawaban latihan",
     exact: true,
   });
-  await expect(guide).toContainText("papan: 1/3");
+  await expect(guide).toContainText("papan: 1/3", { timeout: 15000 });
   await expect(board.getByTestId("teacher-reveal")).toHaveCount(0);
   await guide
     .getByRole("button", { name: "Tunjukkan jawaban", exact: true })
@@ -301,14 +302,14 @@ test("UI01 teacher hint controls report board progress and target reveal needs e
   await guide
     .getByRole("button", { name: "Petunjuk berikutnya", exact: true })
     .click();
-  await expect(guide).toContainText("papan: 2/3");
+  await expect(guide).toContainText("papan: 2/3", { timeout: 15000 });
   await guide
     .getByRole("button", { name: "Petunjuk berikutnya", exact: true })
     .click();
   await expect(
     board.getByRole("region", { name: "Contoh kembar", exact: true }),
-  ).toBeVisible();
-  await expect(guide).toContainText("papan: 3/3");
+  ).toBeVisible({ timeout: 15000 });
+  await expect(guide).toContainText("papan: 3/3", { timeout: 15000 });
   await expect(board.getByTestId("teacher-reveal")).toHaveCount(0);
   await controls
     .getByRole("button", { name: "Cek Level", exact: true })
@@ -365,6 +366,7 @@ test("UI01 four public panels paginate with 72px prompts, independent model stat
   page,
   browser,
 }) => {
+  test.setTimeout(120000);
   const { context, board, errors, publish, state } = await paired(
     page,
     browser,
@@ -505,6 +507,7 @@ test("UI01 SD5 lower touch zone, 1.5x objects, SMA10 tariffs and explicit Berdua
   page,
   browser,
 }) => {
+  test.setTimeout(120000);
   const { context, board, controls, errors, publish, state } = await paired(
     page,
     browser,

@@ -147,11 +147,10 @@ test("TOOL06 D6 linear slider is one undo step; point, exact table, and wrong gu
   await slider.scrollIntoViewIfNeeded();
   const rect = (await slider.boundingBox())!,
     thumbWidth = await slider.evaluate((e) =>
-      parseFloat(getComputedStyle(e, "::-webkit-slider-thumb").width),
+      e.closest(".board-surface, [data-library-preview]") ? 32 : 88,
     );
-  // The thumb's own rendered width, not a constant: the board presets shrink it (88px on the
-  // teacher surfaces, 32px on the projected canvas), so a hard-coded 88 computes a drag target
-  // the control can never reach and the row fails on arithmetic rather than on behaviour.
+  // Chromium reports the pseudo-element width as the whole input width in this
+  // build, so use the surface preset that actually paints the thumb.
   expect(thumbWidth).toBeGreaterThan(0);
   await board.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
   await board.mouse.down();

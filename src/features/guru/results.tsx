@@ -263,7 +263,7 @@ export function ResultPage({
             title={`Hasil · ${result.lesson.classLabel}`}
             description={`Kegiatan kelompok · ${result.lesson.date} · ${result.lesson.status === "closed" ? "Selesai" : "Berlangsung"}`}
           />
-          <Section label="Ringkasan kegiatan">
+          <Section label="Ringkasan kegiatan" className="pn-group-result">
             <p>
               Jawaban bersama di layar bukan nilai tiap siswa. Kelompok
               tersimpan sesuai saat kegiatan dimulai.
@@ -408,6 +408,8 @@ function LibraryResult({
         />
       )}
       <Section
+        className="pn-library-result"
+        ground="inset"
         label={
           run.responseMethod === "none"
             ? "Ringkasan kegiatan"

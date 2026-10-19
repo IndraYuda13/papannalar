@@ -9,6 +9,7 @@ export function Brand({ large = false }: { large?: boolean }) {
           ? "text-[32px] leading-10 sm:gap-4 sm:text-[40px]"
           : "text-[22px] leading-7",
       )}
+      role="img"
       aria-label="PapanNalar"
     >
       <svg

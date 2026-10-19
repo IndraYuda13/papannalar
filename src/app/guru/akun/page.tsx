@@ -3,7 +3,7 @@ import { LoginForm } from "@/features/guru/login-form";
 export const metadata: Metadata = { title: "Kata sandi akun" };
 export default function AccountPage() {
   return (
-    <section className="mx-auto max-w-lg space-y-5">
+    <section className="pn-account-page mx-auto max-w-lg space-y-5">
       <h1 className="text-[28px] font-extrabold">Kata sandi akun lama</h1>
       <p>
         Untuk akun lama yang belum memiliki kata sandi, simpan kata sandi dari

@@ -475,6 +475,7 @@ test("U15 two cached classes open offline; revised pending response syncs once a
       ),
     )
     .toBe(0);
+  await page.getByLabel("Menu akun guru", { exact: true }).click();
   await page
     .getByRole("button", { name: "Keluar akun", exact: true })
     .first()

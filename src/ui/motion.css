@@ -1,0 +1,112 @@
+/* Measured Quizlet references: controls 120ms, card slide 240ms,
+   card flip 250ms, modal/overlay entry 400ms. A flip is not used for the
+   public math stage: it has no term/definition reverse side. */
+:root {
+  --pn-motion-control: 120ms;
+  --pn-motion-popover: 150ms;
+  --pn-motion-slide: 240ms;
+  --pn-motion-flip: 250ms;
+  --pn-motion-dialog: 400ms;
+  --pn-motion-control-ease: cubic-bezier(0.47, 0, 0.745, 0.715);
+  --pn-motion-dialog-ease: cubic-bezier(0.3, 0, 0.44, 1);
+}
+.pn-workspace :is(a, button, input, select, textarea, summary),
+.pn-auth :is(a, button),
+.pn-board :is(button, summary, select) {
+  transition-duration: var(--pn-motion-control);
+  transition-timing-function: var(--pn-motion-control-ease);
+}
+.pn-workspace .pn-material-grid .studio-row:hover,
+.pn-quick-action:hover,
+.pn-class-tile:hover {
+  transform: none;
+}
+.pn-workspace .pn-material-grid .studio-row:hover {
+  box-shadow: 0 3px 10px #283d3d0b;
+}
+.pn-account-menu[open] .pn-account-popover {
+  transform-origin: top right;
+  animation: pn-popover-in var(--pn-motion-popover) ease-out both;
+}
+.studio-overlay {
+  animation: pn-overlay-in var(--pn-motion-dialog) ease both;
+}
+.studio-sheet {
+  animation: pn-dialog-in var(--pn-motion-dialog) var(--pn-motion-dialog-ease)
+    both;
+}
+.pn-workspace details[open]::details-content,
+.pn-board details[open]::details-content {
+  animation: pn-disclosure-in var(--pn-motion-popover) ease-out both;
+}
+.pn-group-flow .workflow-steps li > span:first-child {
+  transition:
+    background-color var(--pn-motion-control),
+    color var(--pn-motion-control);
+}
+.pn-workspace .teacher-disclosure > summary > svg,
+.pn-board .board-menu-chevron {
+  transition: transform var(--pn-motion-control) var(--pn-motion-control-ease);
+}
+@keyframes pn-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes pn-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pn-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pn-disclosure-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+:is(
+    [data-motion="off"],
+    [data-reduced-motion="true"],
+    [data-light-display="true"]
+  )
+  *,
+:is(
+    [data-motion="off"],
+    [data-reduced-motion="true"],
+    [data-light-display="true"]
+  )
+  *::details-content {
+  animation: none !important;
+  transition: none !important;
+}

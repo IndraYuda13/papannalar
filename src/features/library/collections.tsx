@@ -33,22 +33,27 @@ import {
   BoardLegality,
 } from "@/ui/components/studio";
 import { ToolPoster } from "@/ui/components/decorative-scene";
-import { FileQuestion, Plus } from "lucide-react";
+import { FileQuestion, Plus, Search, ArrowUpRight } from "lucide-react";
+import { findCollections } from "./discovery";
 export function CollectionsPage({
   initialTab = "system",
   savedId,
-}: { initialTab?: "system" | "teacher"; savedId?: string } = {}) {
+  initialQuery = "",
+}: {
+  initialTab?: "system" | "teacher" | "all";
+  savedId?: string;
+  initialQuery?: string;
+} = {}) {
   const { state } = useTeacher(),
-    [tab, setTab] = useState<"system" | "teacher">(initialTab);
+    [tab, setTab] = useState<"system" | "teacher" | "all">(initialTab),
+    [query, setQuery] = useState(initialQuery);
   const savedCollection = savedId
     ? state.collections.find(
         (c) =>
           c.id === savedId && c.source === "teacher" && c.status === "ready",
       )
     : undefined;
-  const sets = state.collections.filter(
-    (c) => c.source === tab && c.status !== "archived",
-  );
+  const sets = findCollections(state.collections, tab, query);
   return (
     <div className="space-y-6">
       <PageHeader
@@ -70,20 +75,45 @@ export function CollectionsPage({
           kumpulan untuk mengedit atau menggunakannya.
         </p>
       )}
-      <div role="group" aria-label="Sumber soal" className="studio-segmented">
-        {(["system", "teacher"] as const).map((t) => (
-          <Button
-            key={t}
-            variant="quiet"
-            aria-pressed={tab === t}
-            onClick={() => setTab(t)}
-          >
-            {t === "system" ? "Dari Sistem" : "Soal Saya"}
-          </Button>
-        ))}
+      <div className="pn-library-toolbar">
+        <div role="group" aria-label="Sumber soal" className="studio-segmented">
+          {(["all", "system", "teacher"] as const).map((t) => (
+            <Button
+              key={t}
+              variant="quiet"
+              aria-pressed={tab === t}
+              onClick={() => setTab(t)}
+            >
+              {t === "all"
+                ? "Semua"
+                : t === "system"
+                  ? "Dari Sistem"
+                  : "Soal Saya"}
+            </Button>
+          ))}
+        </div>
+        <label className="pn-library-search">
+          <Search size={19} aria-hidden />
+          <span className="sr-only">Cari kumpulan soal</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Cari kumpulan soal"
+            maxLength={120}
+          />
+        </label>
       </div>
-      <Section label={tab === "system" ? "Kumpulan dari sistem" : "Soal saya"}>
-        <ul className="studio-row-list">
+      <Section
+        label={
+          tab === "all"
+            ? "Semua kumpulan soal"
+            : tab === "system"
+              ? "Kumpulan dari sistem"
+              : "Soal saya"
+        }
+      >
+        <ul className="studio-row-list pn-material-grid">
           {sets.map((c) => (
             <li key={c.id}>
               <Link
@@ -125,7 +155,7 @@ export function CollectionsPage({
                   </p>
                 </span>
                 <span className="studio-row-action" data-row-action>
-                  Buka kumpulan
+                  Buka kumpulan <ArrowUpRight size={17} aria-hidden />
                 </span>
               </Link>
             </li>
@@ -133,14 +163,22 @@ export function CollectionsPage({
         </ul>
         {!sets.length && (
           <StateNotice
-            title="Belum ada yang cocok"
+            title={
+              query.trim()
+                ? "Belum ada yang cocok"
+                : tab === "teacher"
+                  ? "Mulai dari soal pertama Anda"
+                  : "Belum ada soal sistem"
+            }
             action={
               <Button asChild>
                 <Link href="/guru/soal/baru">Buat kumpulan soal</Link>
               </Button>
             }
           >
-            Mulai dari satu pertanyaan, lalu tambahkan contoh atau alat belajar.
+            {query.trim()
+              ? "Coba judul atau jenis kegiatan lain, atau kosongkan pencarian untuk melihat semua soal pada tab ini."
+              : "Mulai dari satu pertanyaan, lalu tambahkan contoh atau alat belajar."}
           </StateNotice>
         )}
       </Section>

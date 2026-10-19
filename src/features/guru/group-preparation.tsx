@@ -51,8 +51,12 @@ export function GroupPreparation({
   onPrepare,
 }: Props) {
   return (
-    <Section label="Kelas dan pembagian">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <Section
+      label="Kelas dan pembagian"
+      ground="inset"
+      className="pn-group-preparation"
+    >
+      <div className="pn-preparation-fields grid gap-4 sm:grid-cols-2">
         <label>
           Kelas
           <select
@@ -74,8 +78,10 @@ export function GroupPreparation({
           disabled={busy}
         />
       </div>
-      <p>{presentCount} siswa hadir</p>
-      <details>
+      <p className="pn-presence-count">
+        <strong>{presentCount}</strong> siswa hadir
+      </p>
+      <details className="pn-attendance-list">
         <summary className="min-h-12 cursor-pointer content-center font-semibold">
           Periksa kehadiran
         </summary>
@@ -97,7 +103,7 @@ export function GroupPreparation({
           </label>
         ))}
       </details>
-      <label className="block max-w-sm">
+      <label className="pn-group-count block max-w-sm">
         Jumlah kelompok
         <input
           className={field}
@@ -117,7 +123,7 @@ export function GroupPreparation({
           ? `${clampGroupCount(count, presentCount)} kelompok dari ${presentCount} siswa hadir.`
           : `Isi jumlah kelompok, maksimal ${presentCount || 1}.`}
       </p>
-      <fieldset>
+      <fieldset className="pn-grouping-choice">
         <legend className="font-semibold">Pembagian kelompok</legend>
         {(["random", "evidence"] as const).map((v) => (
           <label className="flex min-h-12 items-center gap-3" key={v}>

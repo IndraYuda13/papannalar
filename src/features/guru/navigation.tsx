@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Home,
   UsersRound,
@@ -9,11 +9,18 @@ import {
   ClipboardCheck,
   LogOut,
   Presentation,
+  Menu,
+  Search,
+  Plus,
+  UserRound,
+  ArrowUpRight,
+  Shapes,
 } from "lucide-react";
 import { Brand } from "@/ui/components/brand";
 import { TeacherProvider } from "./app-context";
 import { logoutTeacher } from "@/features/classroom/logout-transport";
 import { MotionSwap } from "@/ui/components/interactive-motion";
+import { teacherSectionForPath } from "./workspace-navigation";
 
 const entries = [
   ["/guru", "Beranda", Home],
@@ -22,18 +29,11 @@ const entries = [
   ["/guru/asesmen", "Hasil", ClipboardCheck],
 ] as const;
 
-function isCurrent(pathname: string, href: string) {
-  if (href === "/guru") return pathname === href;
-  if (href === "/guru/asesmen")
-    return (
-      pathname.startsWith("/guru/asesmen") || pathname.startsWith("/guru/hasil")
-    );
-  return pathname.startsWith(href);
-}
-
 export function TeacherNavigation({ children }: { children: ReactNode }) {
   const pathname = usePathname(),
     router = useRouter();
+  const [compact, setCompact] = useState(false);
+  const current = teacherSectionForPath(pathname);
   async function logout() {
     try {
       await logoutTeacher();
@@ -44,99 +44,134 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
       router.refresh();
     }
   }
-  // Adaptive activities retain their offline repository and access boundaries.
   const adaptive =
     pathname === "/guru/latihan" || pathname === "/guru/simulasi";
   return (
-    <div data-surface="guru" data-register="private" className="studio-shell">
+    <div
+      data-surface="guru"
+      data-register="private"
+      className="studio-shell pn-workspace"
+      data-compact={compact}
+    >
       <a className="skip-link" href="#konten">
         Langsung ke isi
       </a>
-      <div className="lg:grid lg:grid-cols-[232px_minmax(0,1fr)]">
-        <aside className="studio-sidebar lg:sticky lg:top-0 lg:h-dvh lg:border-r">
-          <div className="flex items-center justify-between p-4 lg:px-6 lg:pt-6">
-            <Link href="/guru" prefetch={false} aria-label="Beranda PapanNalar">
-              <Brand />
-            </Link>
-            <button
-              className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-input text-primary lg:hidden"
-              aria-label="Keluar akun"
-              onClick={() => void logout()}
-            >
-              <LogOut size={20} strokeWidth={1.8} />
-            </button>
-          </div>
-          <nav
-            aria-label="Menu utama"
-            className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-pn-hairline bg-card pb-[env(safe-area-inset-bottom)] lg:static lg:mx-3 lg:flex lg:flex-col lg:gap-1 lg:border-0 lg:pb-0"
+      <header className="pn-topbar">
+        <div className="pn-topbar-brand">
+          <button
+            className="pn-icon-button pn-menu-toggle"
+            aria-label={compact ? "Perluas menu" : "Ringkas menu"}
+            aria-expanded={!compact}
+            aria-controls="pn-sidebar"
+            onClick={() => setCompact(!compact)}
           >
-            {entries.map(([href, label, Icon]) => {
-              const active = isCurrent(pathname, href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  prefetch={false}
-                  data-nav-item
-                  aria-label={label}
-                  aria-current={active ? "page" : undefined}
-                  className={`flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 rounded-input px-1 py-2 text-center text-xs leading-4 font-semibold lg:min-h-12 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-sm lg:leading-6 ${
-                    active
-                      ? "bg-pn-teal-100 text-pn-teal-800"
-                      : "text-pn-ink-600 hover:bg-pn-teal-100"
-                  }`}
-                >
-                  <span className="nav-icon shrink-0" aria-hidden>
-                    <Icon size={22} strokeWidth={1.8} />
-                  </span>
-                  <span className="nav-label">{label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="studio-sidebar-foot hidden lg:block">
+            <Menu size={22} aria-hidden />
+          </button>
+          <Link href="/guru" prefetch={false} aria-label="Beranda PapanNalar">
+            <Brand />
+          </Link>
+        </div>
+        <form action="/guru/soal" role="search" className="pn-global-search">
+          <input type="hidden" name="tab" value="all" />
+          <Search size={20} aria-hidden />
+          <label className="sr-only" htmlFor="pn-search">
+            Cari soal dan materi
+          </label>
+          <input
+            id="pn-search"
+            name="q"
+            type="search"
+            placeholder="Cari soal dan materi untuk kelas Anda"
+            maxLength={120}
+          />
+          <button type="submit" aria-label="Cari" className="pn-search-submit">
+            <ArrowUpRight size={18} aria-hidden />
+          </button>
+        </form>
+        <div className="pn-topbar-actions">
+          <Link
+            href="/guru/soal/baru"
+            className="pn-create-button"
+            aria-label="Buat kumpulan soal"
+          >
+            <Plus size={23} aria-hidden />
+            <span>Buat soal</span>
+          </Link>
+          <details className="pn-account-menu">
+            <summary aria-label="Menu akun guru">
+              <UserRound size={21} aria-hidden />
+            </summary>
+            <div className="pn-account-popover">
+              <p>Akun guru</p>
+              <Link href="/guru/akun">Kata sandi akun lama</Link>
+              <button onClick={() => void logout()}>
+                <LogOut size={17} aria-hidden />
+                Keluar akun
+              </button>
+            </div>
+          </details>
+        </div>
+      </header>
+      <aside id="pn-sidebar" className="studio-sidebar pn-sidebar">
+        <p className="pn-sidebar-label">RUANG GURU</p>
+        <nav aria-label="Menu utama" className="pn-main-nav">
+          {entries.map(([href, label, Icon]) => (
             <Link
-              className="mb-3 flex min-h-12 items-center gap-3 rounded-input border border-pn-edge px-3 text-sm font-semibold text-pn-teal-700 hover:bg-pn-teal-100"
-              href="/layar"
+              key={href}
+              href={href}
               prefetch={false}
-              target="_blank"
-              rel="noreferrer"
+              data-nav-item
+              aria-label={label}
+              aria-current={current === href ? "page" : undefined}
             >
-              <Presentation size={20} strokeWidth={1.8} aria-hidden />
-              Layar Kelas
+              <Icon size={22} strokeWidth={1.8} aria-hidden />
+              <span className="nav-label">{label}</span>
             </Link>
-            <button
-              className="flex min-h-12 w-full items-center gap-3 rounded-input px-3 text-sm text-pn-ink-600 hover:bg-pn-teal-100"
-              onClick={() => void logout()}
-            >
-              <LogOut size={18} strokeWidth={1.8} aria-hidden />
-              Keluar akun
-            </button>
-          </div>
-        </aside>
-        <main
-          id="konten"
-          className="studio-workspace min-w-0 px-4 pt-5 sm:px-8 lg:py-8"
-        >
-          <div className="mx-auto w-full max-w-[960px]">
-            {pathname === "/guru" && (
-              <Link
-                href="/guru/akun"
-                className="mb-4 inline-flex min-h-12 items-center text-sm font-semibold text-primary underline"
-              >
-                Atur kata sandi akun lama
-              </Link>
+          ))}
+        </nav>
+        <div className="pn-sidebar-secondary">
+          <p className="pn-sidebar-label">KEGIATAN KELAS</p>
+          <Link
+            href="/guru/latihan"
+            aria-current={current === "/guru/latihan" ? "page" : undefined}
+          >
+            <Shapes size={21} aria-hidden />
+            <span>Latihan kelompok</span>
+          </Link>
+          <Link href="/layar" target="_blank" rel="noreferrer">
+            <Presentation size={21} aria-hidden />
+            <span>Layar Kelas</span>
+            <ArrowUpRight size={15} className="pn-external-icon" aria-hidden />
+          </Link>
+        </div>
+        <div className="pn-sidebar-note">
+          <span className="pn-note-mark" aria-hidden>
+            ↗
+          </span>
+          <p>
+            Satu papan.
+            <br />
+            <strong>Banyak cara memahami.</strong>
+          </p>
+        </div>
+      </aside>
+      <main id="konten" className="studio-workspace pn-main">
+        <div className="pn-content-rail">
+          <MotionSwap change={pathname}>
+            {adaptive ? (
+              children
+            ) : (
+              <TeacherProvider>{children}</TeacherProvider>
             )}
-            <MotionSwap change={pathname}>
-              {adaptive ? (
-                children
-              ) : (
-                <TeacherProvider>{children}</TeacherProvider>
-              )}
-            </MotionSwap>
-          </div>
-        </main>
-      </div>
+          </MotionSwap>
+          <footer className="pn-workspace-footer">
+            <span>PapanNalar · Ruang untuk memahami bersama</span>
+            <Link href="/layar" target="_blank" rel="noreferrer">
+              Buka Layar Kelas <ArrowUpRight size={14} aria-hidden />
+            </Link>
+          </footer>
+        </div>
+      </main>
     </div>
   );
 }

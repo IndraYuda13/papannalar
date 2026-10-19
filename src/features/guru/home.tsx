@@ -15,7 +15,16 @@ import {
 } from "@/ui/components/studio";
 import { ToolExplorer } from "@/ui/components/tool-explorer";
 import { useClassSpreads, RungRail, type Spread } from "./class-spread";
-import { ArrowRight, Presentation, Shapes } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Presentation,
+  Shapes,
+  Layers,
+  UsersRound,
+  Sparkles,
+} from "lucide-react";
+import { LearningPreview } from "@/ui/components/learning-preview";
 import type { LibraryRun } from "@/contracts/library";
 import { MotionBoundary } from "@/ui/components/motion-boundary";
 
@@ -152,6 +161,91 @@ export function TeacherHome() {
           Layar ditemukan. Pilih atau lanjutkan sesi untuk menyambungkannya.
         </p>
       )}
+      <nav className="pn-quick-actions" aria-label="Pintasan kegiatan">
+        <Link
+          className="pn-quick-action"
+          href={last ? `/guru/mulai?class=${last.id}` : "/guru/kelas"}
+        >
+          <span>
+            <Presentation size={23} aria-hidden />
+          </span>
+          <span>Mulai mengajar</span>
+          <ArrowUpRight size={18} aria-hidden />
+        </Link>
+        <Link className="pn-quick-action" href="/guru/soal">
+          <span>
+            <Layers size={23} aria-hidden />
+          </span>
+          <span>Jelajahi soal</span>
+          <ArrowUpRight size={18} aria-hidden />
+        </Link>
+        <Link className="pn-quick-action" href={practiceHref}>
+          <span>
+            <Shapes size={23} aria-hidden />
+          </span>
+          <span>Latihan kelompok</span>
+          <ArrowUpRight size={18} aria-hidden />
+        </Link>
+      </nav>
+      <section
+        className="pn-home-hero"
+        aria-label={
+          hasActive
+            ? "Kegiatan yang sedang berlangsung"
+            : "Mulai kegiatan kelas"
+        }
+      >
+        <div>
+          <span className="pn-hero-tag">
+            <Sparkles size={14} aria-hidden />
+            {hasActive
+              ? "SIAP DILANJUTKAN"
+              : "BELAJAR BERSAMA, SELANGKAH DEMI SELANGKAH"}
+          </span>
+          <h2>
+            {hasActive
+              ? active[0].document.title
+              : "Bawa rasa ingin tahu ke ruang kelas."}
+          </h2>
+          <p>
+            {hasActive
+              ? `${active[0].classLabel} · ${active[0].mode === "assessment" ? "Cek pemahaman" : "Mengajar"}. Lanjutkan kegiatan dari soal terakhir yang Anda buka.`
+              : "Satu layar untuk mencoba, berdiskusi, dan memahami. Siapkan kelas dan pilih soal untuk memulai."}
+          </p>
+          {hasActive && (
+            <div className="pn-session-progress">
+              <progress
+                value={active[0].position + 1}
+                max={Math.max(1, active[0].document.items.length)}
+                aria-label="Posisi soal dalam sesi"
+              />
+              <span>
+                Soal {active[0].position + 1} dari{" "}
+                {active[0].document.items.length}
+              </span>
+            </div>
+          )}
+          <Button asChild>
+            <Link
+              href={
+                hasActive
+                  ? `/guru/sesi/${active[0].id}`
+                  : last
+                    ? `/guru/mulai?class=${last.id}`
+                    : "/guru/kelas"
+              }
+            >
+              {hasActive
+                ? "Lanjutkan sesi"
+                : classes.length
+                  ? "Siapkan sesi mengajar"
+                  : "Buat kelas pertama"}
+              <ArrowRight size={17} aria-hidden />
+            </Link>
+          </Button>
+        </div>
+        <LearningPreview compact />
+      </section>
       {hasActive ? (
         <Section
           id="teacher-home-resume"
@@ -242,6 +336,33 @@ export function TeacherHome() {
               </Link>
             </li>
           </ul>
+        </Section>
+      )}
+
+      {classes.length > 0 && (
+        <Section
+          label="Kelas Anda"
+          action={
+            <Link href="/guru/kelas">
+              Lihat semua <ArrowRight size={16} aria-hidden />
+            </Link>
+          }
+        >
+          <div className="pn-home-classes">
+            {classes.slice(0, 3).map((c) => (
+              <Link
+                key={c.id}
+                className="pn-class-tile"
+                href={`/guru/kelas/${c.id}`}
+              >
+                <UsersRound size={24} strokeWidth={1.6} aria-hidden />
+                <strong>{c.label}</strong>
+                <span>
+                  Tingkat {c.grade} · {c.count} siswa
+                </span>
+              </Link>
+            ))}
+          </div>
         </Section>
       )}
 

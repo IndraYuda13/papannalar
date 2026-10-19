@@ -488,7 +488,12 @@ export function PresentationControls({
       aria-label="Kontrol Layar Kelas"
       className="space-y-3 rounded-kartu border bg-white p-4"
     >
-      <fieldset disabled={busy} className="space-y-3">
+      <fieldset
+        disabled={busy}
+        className="space-y-3"
+        data-testid="board-connection"
+        data-connected={connected}
+      >
         <h4 className="text-lg font-bold">
           {snapshot ? "Kendalikan layar kelas" : "Sambungkan layar kelas"}
         </h4>

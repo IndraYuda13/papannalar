@@ -5,6 +5,8 @@ import {
   SlidersHorizontal,
   ChevronDown,
   RotateCcw,
+  Presentation,
+  QrCode,
 } from "lucide-react";
 import {
   challengeSchema,
@@ -450,7 +452,10 @@ function BoardSessionWorkspace({
   // closing card, because a lesson that just ended needs one sentence, not a login screen.
   const closed = connection?.session === "closed";
   return (
-    <div className="board-workspace flex w-full min-h-0 flex-1 flex-col">
+    <div
+      className="board-workspace pn-board-workspace flex w-full min-h-0 flex-1 flex-col"
+      data-board-view={displayed || closed ? "active" : "idle"}
+    >
       {!displayed || testing ? (
         <>
           {testing && (
@@ -686,10 +691,14 @@ function BoardSessionWorkspace({
         <section className="board-idle" data-beat="idle">
           <div className="board-idle-frame" data-board-safe>
             <div className="board-idle-copy">
+              <span className="pn-board-eyebrow">
+                <Presentation size={21} aria-hidden /> BELAJAR BERSAMA
+                PAPANNALAR
+              </span>
+              <h1 className="board-heading">Layar Kelas menunggu.</h1>
               <p className="board-role-line" data-role-line>
                 Layar Kelas menunggu sesi. Semua siswa akan melihat papan ini.
               </p>
-              <h1 className="board-heading">Layar Kelas menunggu.</h1>
 
               <ol className="board-idle-steps">
                 <li>Buka sesi di HP guru.</li>
@@ -707,6 +716,15 @@ function BoardSessionWorkspace({
               </Button>
             </div>
             <div className="board-idle-code">
+              <div className="pn-pairing-heading">
+                <QrCode size={24} aria-hidden />
+                <h2>Sambungkan HP guru</h2>
+              </div>
+              {!challenge && (
+                <div className="pn-pairing-placeholder" aria-hidden>
+                  <QrCode size={100} strokeWidth={1} />
+                </div>
+              )}
               {challenge?.pairingUrl && (
                 <PairingQrCode url={challenge.pairingUrl} />
               )}

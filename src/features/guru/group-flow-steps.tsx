@@ -11,7 +11,7 @@ export function GroupFlowSteps({
 }) {
   const current = phase === "prepare" ? 0 : phase === "edit" ? 1 : 2;
   return (
-    <>
+    <div className="pn-group-flow" aria-label="Tahapan persiapan kelompok">
       <WorkflowSteps steps={STEPS} current={current} />
       <ProgressLabel
         index={current + 1}
@@ -24,6 +24,6 @@ export function GroupFlowSteps({
               : "Pilih kelas dan topik dulu"
         }
       />
-    </>
+    </div>
   );
 }

@@ -7,11 +7,14 @@ export default async function Page({
 }) {
   const q = await searchParams;
   const saved = randomIdSchema.safeParse(q.saved);
+  const tab =
+    q.tab === "teacher" ? "teacher" : q.tab === "all" ? "all" : "system";
   return (
     <CollectionsPage
-      key={`${q.tab === "teacher" ? "teacher" : "system"}:${saved.success ? saved.data : ""}`}
-      initialTab={q.tab === "teacher" ? "teacher" : "system"}
+      key={`${tab}:${saved.success ? saved.data : ""}:${typeof q.q === "string" ? q.q.slice(0, 120) : ""}`}
+      initialTab={tab}
       savedId={saved.success ? saved.data : undefined}
+      initialQuery={typeof q.q === "string" ? q.q.slice(0, 120) : ""}
     />
   );
 }

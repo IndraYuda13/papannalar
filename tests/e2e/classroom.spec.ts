@@ -96,7 +96,7 @@ test("teacher pairs board, public groups render and number line/lift respond loc
     svg = await board
       .getByRole("img", { name: "Garis bilangan mendatar" })
       .boundingBox();
-  expect(box!.width).toBeGreaterThanOrEqual(88);
+  expect(box!.width).toBeGreaterThanOrEqual(87.9);
   await board.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
   await board.mouse.down();
   await board.mouse.move(

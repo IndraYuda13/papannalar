@@ -118,7 +118,7 @@ test("magic link PKCE, reload session, cookie HttpOnly dan logout bekerja", asyn
     else {
       expect(key).toMatch(
         new RegExp(
-          `^pn-teacher-view:${identity.id}:pilot:teacher-(prepare|teach|rehearsal|ai|oral|class|device|extras)$`,
+          `^pn-teacher-view:${identity.id}:(demo|pilot):teacher-(prepare|teach|rehearsal|ai|oral|class|device|extras)$`,
         ),
       );
       expect(value).toMatch(/^(open|closed)$/u);
@@ -261,9 +261,12 @@ test("CRUD kelas A/B melalui API tetap dibatasi RLS PostgreSQL", async ({
       0,
     );
     await expect(
-      page.getByText("Tambahkan kelas pertama untuk menyiapkan latihan.", {
-        exact: true,
-      }),
+      page.getByText(
+        "Buat kelas contoh terlebih dahulu. Nama siswa tidak diperlukan.",
+        {
+          exact: true,
+        },
+      ),
     ).toBeVisible();
     expect(
       (await page.request.get(`/api/v1/classes/${a.class.id}`)).status(),
@@ -284,7 +287,7 @@ test("nama local-only bergabung di UI guru; API baru dan papan tidak menerima ca
     async ({ ownerId, studentId }) => {
       const names = window.__privacyFixture.createNameRepository({
         ownerId,
-        mode: "pilot",
+        mode: "demo",
       });
       await names.save(studentId, "LOCAL_ONLY_M01C_CANARY");
       names.close();

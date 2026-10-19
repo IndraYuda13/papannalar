@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { StateNotice } from "@/ui/components/studio";
+import { Brand } from "@/ui/components/brand";
 export default function NotFound() {
   return (
-    <main className="mx-auto max-w-2xl px-6 py-16">
+    <main className="pn-not-found mx-auto max-w-2xl px-6 py-16">
+      <Link href="/guru" aria-label="Beranda PapanNalar">
+        <Brand />
+      </Link>
       <StateNotice
         title="Halaman tidak ditemukan"
         action={

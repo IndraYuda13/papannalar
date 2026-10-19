@@ -1,0 +1,543 @@
+/* Page-specific composition for the modern and example group journeys. */
+.studio-overlay {
+  background: #283d3d59;
+}
+.studio-sheet {
+  font-family: var(--font-sans), sans-serif;
+  box-shadow: 0 24px 80px #283d3d29;
+}
+.studio-sheet [data-slot="button"] {
+  border-radius: 100px;
+  min-height: 48px;
+  padding-inline: 22px;
+}
+@media (min-width: 761px) {
+  .studio-overlay {
+    align-items: center;
+    padding: 24px;
+  }
+  .studio-sheet {
+    width: min(560px, 100%);
+    border-radius: 20px;
+    padding: 28px;
+  }
+}
+.pn-workspace .pn-group-flow {
+  display: grid;
+  gap: 14px;
+  padding: 22px 26px;
+  background: white;
+  border: 1px solid #d8e5e5;
+  border-radius: 16px;
+}
+.pn-group-flow .workflow-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.pn-group-flow .workflow-steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #597f7e;
+  white-space: normal;
+}
+.pn-group-flow .workflow-steps li::before,
+.pn-group-flow .workflow-steps li::after {
+  display: none;
+}
+.pn-group-flow .workflow-steps li > span:first-child {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d8e5e5;
+  border-radius: 50%;
+  background: #f7f9f9;
+  color: #2d5453;
+  font-size: 12px;
+}
+.pn-group-flow .workflow-steps li[aria-current="step"] {
+  color: #0b6b6b;
+  font-weight: 800;
+}
+.pn-group-flow .workflow-steps li[aria-current="step"] > span:first-child {
+  background: #0b6b6b;
+  border-color: #0b6b6b;
+  color: white;
+}
+.pn-group-flow .studio-progress-label {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid #eaf0f0;
+}
+.pn-group-phase-title {
+  font-size: 20px;
+  letter-spacing: -0.03em;
+  margin-block: 28px 18px;
+}
+.pn-workspace .pn-group-preparation > .studio-section-body {
+  display: grid;
+  background: white;
+  gap: 22px;
+  padding: 28px;
+}
+.pn-group-preparation label,
+.pn-group-assignment label {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+  min-width: 0;
+}
+.pn-group-preparation .pn-preparation-fields {
+  gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #d8e5e5;
+}
+.pn-preparation-fields :is(input, select) {
+  margin-top: 10px;
+}
+.pn-presence-count {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: #2d5453;
+}
+.pn-presence-count strong {
+  display: grid;
+  place-items: center;
+  min-width: 40px;
+  height: 32px;
+  background: #e6f4f2;
+  color: #0b6b6b;
+  border-radius: 8px;
+}
+.pn-attendance-list {
+  border: 1px solid #d8e5e5;
+  padding: 4px 18px;
+  border-radius: 12px;
+  background: #f7f9f9;
+}
+.pn-attendance-list > summary {
+  font-size: 13px;
+}
+.pn-attendance-list[open] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 20px;
+}
+.pn-attendance-list[open] > summary {
+  grid-column: 1 / -1;
+}
+.pn-attendance-list label {
+  border-top: 1px solid #e2ebeb;
+  font-weight: 400;
+}
+.pn-group-count {
+  display: grid;
+  gap: 8px;
+  max-width: 240px;
+}
+.pn-group-preparation .pn-group-count + p {
+  margin-top: -12px;
+  color: #2d5453;
+}
+.pn-grouping-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding-top: 6px;
+}
+.pn-grouping-choice legend {
+  padding-block: 4px 14px;
+  font-size: 13px;
+}
+.pn-grouping-choice label {
+  display: flex;
+  padding: 16px 18px;
+  border: 1px solid #d8e5e5;
+  border-radius: 12px;
+  min-height: 64px;
+  cursor: pointer;
+}
+.pn-grouping-choice label:has(input:checked) {
+  border-color: #0b6b6b;
+  background: #f0ffff;
+  color: #0b6b6b;
+}
+.pn-grouping-choice label:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.pn-grouping-choice input,
+.pn-attendance-list input,
+.pn-group-assignment input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: #0b6b6b;
+}
+.pn-group-preparation .studio-section-body > p {
+  font-size: 13px;
+  line-height: 1.85;
+  color: #2d5453;
+  max-width: 78ch;
+}
+.pn-group-preparation .studio-section-body > [data-slot="button"] {
+  justify-self: start;
+  min-width: 174px;
+}
+.pn-workspace .pn-group-assignment {
+  height: 100%;
+  gap: 12px;
+  margin: 0;
+}
+.pn-group-assignment > .studio-section-head {
+  padding: 0 4px;
+}
+.pn-workspace .pn-group-assignment > .studio-section-body {
+  height: 100%;
+  background: white;
+  display: grid;
+  align-content: start;
+  gap: 20px;
+  padding: 24px;
+}
+.pn-group-assignment .studio-section-body > p {
+  font-size: 12px;
+  color: #2d5453;
+  line-height: 1.8;
+}
+.pn-group-assignment-summary {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #d8e5e5;
+}
+.pn-group-assignment-summary > span:first-child {
+  font-size: 11px;
+  color: #597f7e;
+}
+.pn-group-assignment-summary > p {
+  font-size: 16px;
+  line-height: 1.65;
+  font-weight: 700;
+  color: #283d3d;
+}
+.pn-group-status {
+  padding: 5px 10px;
+  font-size: 10px;
+  border-radius: 100px;
+  background: #e6f4f2;
+  color: #0b6b6b;
+}
+.pn-group-result > .studio-section-body {
+  display: grid;
+  gap: 20px;
+}
+.pn-group-result .studio-row-list {
+  display: grid;
+  gap: 14px;
+  border: 0;
+  background: transparent;
+}
+.pn-group-result .studio-row-list > li {
+  padding: 20px 24px;
+  border: 1px solid #d8e5e5;
+  border-radius: 14px;
+  background: white;
+}
+.pn-group-result .studio-row-list > li > p {
+  margin-block: 8px 12px;
+  color: #2d5453;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.pn-group-result h2 {
+  font-size: 16px;
+}
+.pn-group-result .studio-section-body > [data-slot="button"] {
+  justify-self: start;
+}
+.pn-library-result > .studio-section-body {
+  display: grid;
+  background: white;
+  gap: 18px;
+  line-height: 1.8;
+}
+.pn-library-result .studio-section-body > ol {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+}
+.pn-library-result .studio-section-body > ol > li {
+  padding: 16px 20px;
+  border-radius: 10px;
+  background: #f7f9f9;
+  border: 1px solid #d8e5e5;
+}
+.pn-library-result .studio-row-list > li {
+  padding-inline: 20px;
+}
+.pn-group-assignment fieldset > label {
+  padding: 8px 12px;
+  border: 1px solid #d8e5e5;
+  margin-top: 8px;
+  border-radius: 10px;
+  font-weight: 400;
+}
+.pn-group-assignment fieldset > label:has(input:checked) {
+  background: #f0ffff;
+  border-color: #0b6b6b;
+}
+.pn-group-orientation {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.pn-group-orientation > div {
+  background: white;
+  border: 1px solid #d8e5e5;
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 0;
+}
+.pn-group-orientation > div > span {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: #e6f4f2;
+  color: #0b6b6b;
+  border-radius: 12px;
+  margin-bottom: 18px;
+}
+.pn-group-orientation h2 {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+.pn-group-orientation p {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.85;
+  color: #2d5453;
+}
+.pn-workspace .pn-adaptive-content {
+  display: grid;
+  gap: 24px;
+}
+.pn-adaptive-content > * {
+  margin-block: 0;
+  min-width: 0;
+}
+.pn-workspace .teacher-class-picker {
+  display: grid;
+  gap: 20px;
+  padding: 26px;
+  border: 1px solid #d8e5e5;
+  border-radius: 16px;
+  background: white;
+}
+.pn-workspace .teacher-class-picker h2 {
+  font-size: 18px;
+  letter-spacing: -0.025em;
+}
+.pn-workspace .teacher-class-picker > ul {
+  gap: 12px;
+}
+.pn-workspace .teacher-class-picker [aria-pressed] {
+  background: white;
+  color: #2d5453;
+  border: 1px solid #d8e5e5;
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-height: 64px;
+  text-align: left;
+}
+.pn-workspace .teacher-class-picker [aria-pressed="true"] {
+  border-color: #0b6b6b;
+  background: #eaf6f4;
+  color: #0b6b6b;
+  box-shadow: none;
+}
+.pn-adaptive-content > [role="status"]:empty {
+  display: none;
+}
+.pn-workspace .teacher-disclosure {
+  background: white;
+  border: 1px solid #d8e5e5;
+  border-radius: 16px;
+  margin: 0;
+  padding: 0;
+  overflow: clip;
+}
+.pn-workspace .teacher-disclosure > summary {
+  padding: 22px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  min-height: 76px;
+  color: #283d3d;
+  list-style: none;
+}
+.pn-workspace .teacher-disclosure > summary small {
+  color: #2d5453;
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 6px;
+}
+.pn-workspace .teacher-disclosure[open] > summary {
+  border-bottom: 1px solid #d8e5e5;
+  background: #f8fcfc;
+}
+.pn-workspace .teacher-disclosure-body {
+  padding: 24px;
+  display: grid;
+  gap: 24px;
+}
+.pn-workspace .teacher-disclosure:not([open]) > :not(summary) {
+  display: none;
+}
+.pn-workspace .teacher-disclosure-body > section {
+  margin: 0;
+}
+.pn-adaptive-content [aria-label="Sesi Tepat Level"] {
+  padding: 28px;
+  border: 1px solid #c9dedd;
+  border-radius: 18px;
+  background: #eaf6f4;
+}
+.pn-adaptive-content [aria-label="Sesi Tepat Level"] > h3 {
+  font-size: 22px;
+  line-height: 1.5;
+  letter-spacing: -0.035em;
+}
+.pn-adaptive-content [aria-label="Sesi Tepat Level"] > p {
+  max-width: 70ch;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.pn-workspace .pn-account-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 32px;
+  border: 1px solid #d8e5e5;
+  background: white;
+  border-radius: 18px;
+}
+.pn-account-page h1 {
+  font-size: 28px;
+  letter-spacing: -0.04em;
+  line-height: 1.4;
+}
+.pn-account-page > p {
+  font-size: 14px;
+  line-height: 1.9;
+  color: #2d5453;
+}
+.pn-not-found {
+  display: grid;
+  min-height: 100dvh;
+  align-content: center;
+  gap: 36px;
+  max-width: 680px;
+}
+.pn-not-found > a {
+  justify-self: center;
+}
+.pn-not-found .studio-state {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  padding: 48px 32px;
+  gap: 20px;
+  border: 1px solid #d8e5e5;
+  border-radius: 20px;
+  box-shadow: 0 8px 28px #283d3d08;
+}
+.pn-not-found .studio-state-icon {
+  padding: 18px;
+  border-radius: 18px;
+}
+.pn-not-found .studio-state h2 {
+  font-size: 24px;
+  letter-spacing: -0.035em;
+}
+@media (max-width: 760px) {
+  .pn-workspace .pn-group-flow {
+    padding: 18px;
+  }
+  .pn-group-flow .workflow-steps {
+    gap: 10px;
+  }
+  .pn-group-flow .workflow-steps li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 10px;
+  }
+  .pn-group-phase-title {
+    font-size: 18px;
+  }
+  .pn-workspace .pn-group-preparation > .studio-section-body {
+    padding: 20px;
+    gap: 20px;
+  }
+  .pn-grouping-choice {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .pn-attendance-list[open] {
+    grid-template-columns: 1fr;
+  }
+  .pn-group-orientation {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .pn-group-orientation > div {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 0 14px;
+    padding: 20px;
+  }
+  .pn-group-orientation > div > span {
+    grid-row: span 2;
+    margin: 0;
+    width: 42px;
+    height: 42px;
+  }
+  .pn-group-orientation h2 {
+    font-size: 14px;
+  }
+  .pn-group-orientation p {
+    grid-column: 2;
+    margin-top: 5px;
+  }
+  .pn-workspace .teacher-class-picker,
+  .pn-adaptive-content [aria-label="Sesi Tepat Level"] {
+    padding: 20px;
+  }
+  .pn-workspace .teacher-disclosure > summary {
+    padding: 20px;
+  }
+  .pn-workspace .teacher-disclosure-body {
+    padding: 20px;
+  }
+  .pn-workspace .pn-account-page {
+    padding: 24px 20px;
+  }
+  .pn-group-preparation .studio-section-body > [data-slot="button"] {
+    width: 100%;
+  }
+}

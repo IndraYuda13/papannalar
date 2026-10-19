@@ -1,14 +1,14 @@
 :root {
-  /* Brand values (unchanged — docs/04_BRAND_DESAIN.md). */
+  /* User-approved teal palette. Logo amber, semantic and group colors retain meaning. */
   --pn-teal-700: #0b6b6b;
-  --pn-teal-800: #085252;
-  --pn-teal-100: #d8efee;
+  --pn-teal-800: #2d5453;
+  --pn-teal-100: #f0ffff;
   --pn-amber-500: #f2a33a;
   --pn-amber-700: #9a5b00;
-  --pn-ink-900: #14212b;
-  --pn-ink-600: #4a5a66;
-  --pn-ink-400: #8494a0;
-  --pn-kertas: #f7f5f0;
+  --pn-ink-900: #283d3d;
+  --pn-ink-600: #2d5453;
+  --pn-ink-400: #93b2b1;
+  --pn-kertas: #f7f9f9;
   --pn-putih: #ffffff;
   --pn-sukses: #1e7b3a;
   --pn-peringatan: #8a5a00;
@@ -23,29 +23,29 @@
   --pn-jarak-1: #237d79;
   --pn-jarak-0: #085252;
 
-  --pn-ink-500: #6e7f8c;
+  --pn-ink-500: #597f7e;
   --pn-amber-100: #fce4c2;
   --pn-sukses-100: #e7f3ea;
 
   --pn-hairline: var(--pn-line);
-  --pn-edge: var(--pn-ink-500);
+  --pn-edge: #93b2b1;
 
   /* Board ground. `bg-pn-board` was used by the editor's board preview while no such
      token existed, so the preview rendered without the board's paper ground. */
   --pn-board: var(--pn-kertas);
 
-  --pn-r-1: 6px;
-  --pn-r-2: 10px;
-  --pn-r-3: 14px;
-  --pn-r-4: 22px;
-  --pn-e1: 0 1px 2px #14212b0f;
-  --pn-e2: 0 8px 24px #14212b1f;
+  --pn-r-1: 4px;
+  --pn-r-2: 8px;
+  --pn-r-3: 12px;
+  --pn-r-4: 24px;
+  --pn-e1: 0 2px 4px #283d3d0d;
+  --pn-e2: 0 4px 16px #283d3d1a;
 
   --pn-tap: 48px;
   --pn-tap-lg: 56px;
   /* The bottom bar's own block size, including its 1px top rule. The bar and the space the
      content reserves for it read the same number, so they cannot drift apart (V1). */
-  --pn-nav-h: 68px;
+  --pn-nav-h: 72px;
   --pn-nav-safe: calc(var(--pn-nav-h) + env(safe-area-inset-bottom));
 
   --pn-t-1: 120ms;
@@ -83,7 +83,7 @@
   --accent: var(--pn-teal-100);
   --accent-foreground: var(--pn-ink-900);
   --destructive: var(--pn-bahaya);
-  --pn-line: #d3ded8;
+  --pn-line: #d8e5e5;
   --pn-shadow: var(--pn-e1);
   --border: var(--pn-hairline);
   --input: var(--pn-edge);
