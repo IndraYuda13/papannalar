@@ -12,6 +12,7 @@ export function sampleSeedSql(owner) {
   const systemId = sampleId("system-integers"),
     fractionId = sampleId("system-fractions"),
     cardsId = sampleId(owner + ":cards"),
+    cardsFollowUpId = sampleId(owner + ":cards-2"),
     interactiveId = sampleId(owner + ":interactive");
   const item = (label, prompt, tool) => ({
     id: sampleId(label),
@@ -94,6 +95,51 @@ export function sampleSeedSql(owner) {
       explanation,
     })),
   };
+  // The second meeting is a separate collection so the results list never shows
+  // the same class and title twice with only the date changed.
+  const cardsFollowUp = {
+    title: "Pecahan Sederhana - Pertemuan 2",
+    kind: "cards",
+    items: [
+      [
+        "Manakah yang sama dengan 1/2?",
+        ["2/4", "1/3", "2/6", "3/8"],
+        "A",
+        "1/2 = 2/4 karena kedua pecahan menamakan separuh.",
+      ],
+      [
+        "Hasil 1/2 + 1/4 adalah…",
+        ["2/6", "3/4", "2/4", "1/6"],
+        "B",
+        "Setengah sama dengan 2/4, jadi 2/4 + 1/4 = 3/4.",
+      ],
+      [
+        "Urutan dari yang terkecil: 3/4, 1/4, 1/2",
+        ["1/4, 1/2, 3/4", "1/2, 1/4, 3/4", "3/4, 1/2, 1/4", "1/4, 3/4, 1/2"],
+        "A",
+        "Dengan penyebut sama, bandingkan pembilangnya.",
+      ],
+      [
+        "Pecahan yang lebih besar dari 2/3 adalah…",
+        ["1/3", "3/4", "1/2", "2/6"],
+        "B",
+        "3/4 = 0,75 sedangkan 2/3 kira-kira 0,67.",
+      ],
+      [
+        "Sisa dua pizza utuh setelah mengambil 3/8 adalah…",
+        ["5/8", "11/8", "13/8", "3/8"],
+        "C",
+        "Dua utuh = 16/8, lalu 16/8 − 3/8 = 13/8.",
+      ],
+    ].map(([prompt, options, key, explanation], i) => ({
+      id: sampleId(owner + ":card-2:" + i),
+      kind: "card",
+      prompt,
+      options,
+      key,
+      explanation,
+    })),
+  };
   const interactive = {
     title: "Eksplorasi dan Cerita Bilangan",
     kind: "interactive",
@@ -106,16 +152,22 @@ export function sampleSeedSql(owner) {
       },
     ],
   };
-  const cls = ["7B", "7C"].map((label) => ({
-    id: sampleId(owner + ":class:" + label),
-    label,
+  // 7B is the pinned demo class (grade 7, 32 students) used by the placement and
+  // grouping fixtures, so it keeps its shape. 7C varies grade and size so the two
+  // seeded classes never read as the same row twice.
+  const cls = [
+    { label: "7B", grade: 7, count: 32 },
+    { label: "7C", grade: 8, count: 28 },
+  ].map((c) => ({
+    ...c,
+    id: sampleId(owner + ":class:" + c.label),
   }));
   const token = sampleId(owner + ":seed-operator");
   let sql = `begin;\n`;
   sql += `insert into pn_private.sample_accounts(owner_id) values(${quote(owner)}::uuid) on conflict(owner_id) do nothing;\n`;
   for (const c of cls) {
-    sql += `insert into public.classes(id,owner_id,label,grade,student_count,runtime_mode) values(${quote(c.id)}::uuid,${quote(owner)}::uuid,${quote(c.label)},7,32,'demo') on conflict(id) do nothing;\n`;
-    for (let n = 1; n <= 32; n++)
+    sql += `insert into public.classes(id,owner_id,label,grade,student_count,runtime_mode) values(${quote(c.id)}::uuid,${quote(owner)}::uuid,${quote(c.label)},${c.grade},${c.count},'demo') on conflict(id) do nothing;\n`;
+    for (let n = 1; n <= c.count; n++)
       sql += `insert into public.students(id,class_id,owner_id,attendance_number) values(${quote(sampleId(owner + ":" + c.label + ":" + n))}::uuid,${quote(c.id)}::uuid,${quote(owner)}::uuid,${n}) on conflict(id) do nothing;\n`;
   }
   for (const [id, doc] of [
@@ -129,18 +181,22 @@ export function sampleSeedSql(owner) {
   sql += `do $$begin if public.sample_control(${quote(token)}::uuid,false,true) ? 'error' then raise exception 'Recording controller active';end if;end$$;\n`;
   for (const [id, doc] of [
     [cardsId, cards],
+    [cardsFollowUpId, cardsFollowUp],
     [interactiveId, interactive],
   ])
     sql += `do $$begin if not exists(select 1 from public.question_sets where id=${quote(id)}::uuid) then if public.library_action(${json({ action: "save", id, revision: 0, ready: true, document: doc })},${quote(token)}::uuid) ? 'error' then raise exception 'Sample collection rejected';end if;end if;end$$;\n`;
   for (let n = 0; n < 3; n++) {
     const id = sampleId(owner + ":run:" + n),
       classroom = cls[n === 1 ? 1 : 0],
-      date = n === 0 ? "2026-09-27" : n === 1 ? "2026-09-28" : "2026-09-30";
+      date = n === 0 ? "2026-09-27" : n === 1 ? "2026-09-28" : "2026-09-30",
+      // 7B's second meeting uses its own collection, so the results list never
+      // repeats one class and title with only the date changed.
+      collectionId = n === 2 ? cardsFollowUpId : cardsId;
     const start = {
       action: "start",
       id,
       classId: classroom.id,
-      collectionId: cardsId,
+      collectionId,
       version: 1,
       date,
       mode: "assessment",

@@ -35,6 +35,7 @@ import {
 import { PointerOwnership } from "@/core/tools/pointers";
 import { ObjectFace } from "@/ui/components/activity-icon";
 import { Button } from "@/ui/components/button";
+import { integerText } from "@/content/templates/format";
 type CoefficientAction = Extract<GraphAction, { type: "coefficient" }>;
 const number = (v: Rational) => Number(v.numerator) / Number(v.denominator);
 const text = (v: Rational) => exactText(v).replaceAll("-", "−");
@@ -318,8 +319,7 @@ export function Graphs({
       : [];
   const pointVisible = withinDomain(point, d);
   const ticks = Array.from({ length: 6 }, (_, i) => i / 5);
-  const displayTick = (n: number) =>
-    n.toLocaleString("id-ID", { maximumFractionDigits: 2 });
+  const displayTick = integerText;
   return (
     <section
       aria-label="Grafik Geser"

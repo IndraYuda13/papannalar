@@ -9,6 +9,7 @@ import {
   type ClassDto,
 } from "@/contracts/classes";
 import { getClassTarget } from "@/content/ladder/targets";
+import { sampleStudentName } from "@/content/demo/sample-names";
 import type { StudentDto } from "@/contracts/api";
 import { Button } from "@/ui/components/button";
 import { field, libraryCall, jakartaDate } from "@/features/library/client";
@@ -17,12 +18,7 @@ import { libraryCache } from "@/local/library";
 import { LocalRoster } from "./local-roster";
 import { LearningSummary } from "./learning-summary";
 import { classPresence } from "@/local/class-presence";
-import {
-  PageHeader,
-  ProgressLabel,
-  Section,
-  StateNotice,
-} from "@/ui/components/studio";
+import { PageHeader, Section, StateNotice } from "@/ui/components/studio";
 import { Check, Search, UsersRound } from "lucide-react";
 
 function Segmented<T extends string>({
@@ -76,7 +72,6 @@ export function ClassesPage() {
           </Button>
         }
       />
-      <ProgressLabel index={1} total={4} label="Pilih kelas" />
       {adding && (
         <Section label="Kelas baru" ground="inset" tone="mint">
           <form
@@ -291,7 +286,7 @@ export function ClassPage({ id }: { id: string }) {
               if (!(await repo.read(student.id)))
                 await repo.save(
                   student.id,
-                  `Awan ${String(student.attendanceNumber).padStart(2, "0")}`,
+                  sampleStudentName(student.attendanceNumber),
                 );
             localStorage.setItem(key, "1");
           }
@@ -464,6 +459,15 @@ export function ClassPage({ id }: { id: string }) {
         hidden={tab !== "students"}
         aria-label="Daftar siswa"
       >
+        {/* The attendance column is a checkbox with no visible text, so the list
+            carries the same column header a table would. Purely visual: every
+            control already names itself to assistive technology. */}
+        <div className="studio-roster-head" aria-hidden>
+          <span>Absen</span>
+          <span>Nama siswa</span>
+          <span>Hadir</span>
+          <span />
+        </div>
         <ul className="studio-row-list" aria-label={`Daftar absen`}>
           {detail.students.map((s) => {
             const label =

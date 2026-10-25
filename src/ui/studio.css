@@ -276,6 +276,130 @@
   border-radius: var(--pn-r-3);
   padding: 16px;
 }
+/* Compact filter row: labelled controls on one line, wrapping before they can
+   push the page wider than the viewport (docs/11 §6). */
+.studio-filter-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+}
+.studio-filter-fields > label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 180px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pn-ink-600);
+}
+.studio-filter-fields > label > :is(select, input) {
+  min-height: var(--pn-tap);
+}
+
+/* One table for both widths (docs/11 §3, /guru/asesmen): real column headers on
+   desktop, the same cells reflowed into rows on a phone. No duplicated markup. */
+.pn-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.pn-results-table th {
+  padding: 16px 16px 10px;
+  border-bottom: 1px solid var(--pn-edge);
+  color: var(--pn-ink-600);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pn-results-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--pn-hairline);
+  vertical-align: top;
+}
+.pn-results-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.pn-results-table [data-cell="kegiatan"] {
+  min-width: 0;
+}
+.pn-results-title {
+  display: block;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+}
+.pn-results-meta {
+  display: block;
+  margin-top: 2px;
+  color: var(--pn-ink-600);
+  font-size: 13px;
+  line-height: 18px;
+}
+.pn-results-table [data-cell="tanggal"],
+.pn-results-table [data-cell="status"] {
+  color: var(--pn-ink-600);
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.pn-results-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--pn-tap);
+  padding-inline: 16px;
+  border: 1px solid var(--pn-edge);
+  border-radius: var(--pn-r-2);
+  background: var(--pn-putih);
+  color: var(--pn-teal-700);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.pn-results-action:hover {
+  background: var(--pn-teal-100);
+}
+@media (max-width: 767px) {
+  /* The headers stay available to assistive technology but stop claiming a row
+     of their own; each cell becomes its own line inside the row block. */
+  .pn-results-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .pn-results-table,
+  .pn-results-table tbody,
+  .pn-results-table tr,
+  .pn-results-table td {
+    display: block;
+    width: 100%;
+  }
+  .pn-results-table tr {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--pn-hairline);
+  }
+  .pn-results-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .pn-results-table td {
+    padding: 0;
+    border-bottom: 0;
+  }
+  .pn-results-table td + td {
+    margin-top: 8px;
+  }
+  .pn-results-table [data-cell="aksi"] {
+    margin-top: 12px;
+  }
+  .pn-results-action {
+    width: 100%;
+    justify-content: center;
+  }
+}
 /* One list container, one level of containment: sheet + edge, rows divided by a hairline. */
 .studio-row-list {
   border: 1px solid var(--pn-edge);
@@ -285,6 +409,19 @@
 }
 .studio-row-list > li + li {
   border-top: 1px solid var(--pn-hairline);
+}
+/* Column header for a row list whose last column is an unlabelled control. The
+   tracks mirror `.studio-row` so each label sits over the column it names. */
+.studio-roster-head {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px 8px;
+  color: var(--pn-ink-600);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
 }
 .studio-row {
   display: grid;
@@ -416,6 +553,14 @@
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
+}
+/* docs/05: a phone touch target is at least 48 x 48. The wrapper carried the
+   floor but the link itself sized to its text (80 x 40 measured), so the link
+   gets the same var(--pn-tap) floor the row and results actions already use. */
+.studio-section-action > :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--pn-tap);
 }
 .studio-section-body {
   min-width: 0;

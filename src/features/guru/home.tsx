@@ -7,13 +7,9 @@ import { jakartaDate } from "@/features/library/client";
 import { Button } from "@/ui/components/button";
 import { capturePairingLink } from "@/features/classroom/pairing-url";
 import { OfflineChooser } from "@/features/library/offline-chooser";
-import {
-  PageHeader,
-  ProgressLabel,
-  Section,
-  StateNotice,
-} from "@/ui/components/studio";
+import { PageHeader, Section, StateNotice } from "@/ui/components/studio";
 import { ToolExplorer } from "@/ui/components/tool-explorer";
+import { ActivityDisclosure } from "./activity-disclosure";
 import { useClassSpreads, RungRail, type Spread } from "./class-spread";
 import {
   ArrowRight,
@@ -128,7 +124,7 @@ export function TeacherHome() {
   const hasActive = active.length > 0;
   const practiceHref = `/guru/latihan?mode=${state.sample ? "demo" : "pilot"}${last ? `&class=${last.id}` : ""}`;
   return (
-    <div className="space-y-6">
+    <div className="pn-home-stack space-y-6">
       <PageHeader
         title="Ruang mengajar"
         description={
@@ -391,17 +387,16 @@ export function TeacherHome() {
         )}
       </Section>
 
-      <MotionBoundary>
+      <MotionBoundary className="pn-home-tail">
         <Section label="Soal & alat">
-          <ProgressLabel index={2} total={4} label="Pilih soal" />
-          <details className="mt-3">
-            <summary className="min-h-12 cursor-pointer content-center font-semibold text-pn-teal-700">
-              Buka alat belajar
-            </summary>
-            <div className="mt-3">
-              <ToolExplorer />
-            </div>
-          </details>
+          <ActivityDisclosure
+            id="teacher-tools"
+            title="Buka alat belajar"
+            description="Tiga alat untuk dicoba bersama kelas, dari papan sampai ubin aljabar."
+            scope={scope}
+          >
+            <ToolExplorer />
+          </ActivityDisclosure>
         </Section>
       </MotionBoundary>
     </div>

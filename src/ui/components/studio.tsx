@@ -1,6 +1,10 @@
 import type { ComponentProps, ReactNode } from "react";
 import { CircleAlert, FolderOpen, LoaderCircle } from "lucide-react";
 
+// The tablist needs a ref to move focus, so it lives in its own client module.
+// Re-exporting keeps every importer on the server-safe studio surface.
+export { TabPanel, Tabs } from "./studio-tabs";
+
 /**
  * Orientation for a multi-step flow: one line, never a card grid (T5 V7).
  * A single line cannot orphan at any width, which is why the four-card stepper is gone.

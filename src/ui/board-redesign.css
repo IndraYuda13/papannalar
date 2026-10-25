@@ -23,7 +23,7 @@
   gap: 8px;
   align-items: center;
   color: #2d5453;
-  font-size: 13px;
+  font-size: clamp(17px, 1.5vw, 24px);
   font-weight: 600;
   background: #e6f1ef;
   padding: 9px 16px;
@@ -34,7 +34,7 @@
   background: white;
   border-radius: 100px;
   font-family: inherit;
-  font-size: 13px;
+  font-size: clamp(17px, 1.5vw, 24px);
   min-height: 44px;
   padding: 10px 18px;
 }
@@ -96,7 +96,7 @@
   font-family: inherit;
   color: #2d5453;
   padding: 10px 18px;
-  font-size: 13px;
+  font-size: clamp(17px, 1.5vw, 24px);
 }
 .pn-board .board-menu[open] .board-menu-trigger {
   border: 0;
@@ -105,12 +105,12 @@
 }
 .pn-board .board-menu > :not(summary) {
   font-family: var(--font-sans), sans-serif;
-  font-size: 15px;
+  font-size: clamp(17px, 1.5vw, 24px);
   line-height: 1.8;
 }
 .pn-board .board-menu [data-slot="button"] {
   white-space: normal;
-  font-size: 15px;
+  font-size: clamp(17px, 1.5vw, 24px);
   min-height: 56px;
   padding: 14px 18px;
   border-radius: 100px;
@@ -142,7 +142,7 @@
   align-items: center;
   gap: 10px;
   color: #0b6b6b;
-  font-size: 11px;
+  font-size: clamp(16px, 1.2vw, 18px);
   letter-spacing: 0.1em;
   font-weight: 700;
   line-height: 1.7;
@@ -184,18 +184,18 @@
   background: #e6f1ef;
   border-radius: 50%;
   color: #0b6b6b;
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 700;
 }
 .pn-board .board-idle-copy > .board-note {
-  font-size: 13px;
-  line-height: 1.85;
+  font-size: clamp(17px, 1.5vw, 24px);
+  line-height: 1.6;
   color: #2d5453;
   max-width: 54ch;
 }
 .pn-board .board-idle-copy > [data-slot="button"] {
   min-height: 48px;
-  font-size: 14px;
+  font-size: clamp(17px, 1.4vw, 20px);
   padding: 12px 22px;
   border-radius: 100px;
   border-color: #d8e5e5;
@@ -257,8 +257,10 @@
 }
 .pn-board .board-idle-code .board-note,
 .pn-board .board-idle-code .board-pairing-countdown {
-  font-size: 12px;
-  line-height: 1.8;
+  /* Board text is read from the back row; a 12px countdown is illegible on a
+     projector. Match the idle screen's secondary scale (role line and steps). */
+  font-size: clamp(17px, 1.5vw, 24px);
+  line-height: 1.6;
   max-width: 100%;
   color: #2d5453;
 }
@@ -275,8 +277,9 @@
 }
 .pn-board .board-foot .board-state-line {
   font-family: inherit;
-  font-size: 12px;
-  line-height: 1.8;
+  /* A projected status line must be legible from the back row, not 12px. */
+  font-size: clamp(17px, 1.5vw, 22px);
+  line-height: 1.6;
   gap: 10px;
   color: #2d5453;
   padding: 0;
@@ -316,7 +319,7 @@
   letter-spacing: -0.04em;
 }
 .pn-board .board-appearance-heading label {
-  font-size: 13px;
+  font-size: clamp(17px, 1.5vw, 24px);
   line-height: 1.8;
 }
 .pn-board .board-appearance :is(input, select) {
@@ -326,7 +329,7 @@
   min-height: 48px;
   padding: 12px 16px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: clamp(17px, 1.5vw, 24px);
   max-width: 100%;
 }
 .pn-board .board-appearance-presets {
@@ -357,7 +360,7 @@
   font-size: 18px;
 }
 .pn-board .board-appearance-presets :is(span, small) {
-  font-size: 12px;
+  font-size: clamp(17px, 1.5vw, 24px);
   line-height: 1.8;
   color: #2d5453;
 }
@@ -372,12 +375,12 @@
   background: white;
 }
 .pn-board .board-appearance-toolbar label {
-  font-size: 13px;
+  font-size: clamp(17px, 1.5vw, 24px);
   flex-wrap: wrap;
 }
 .pn-board .board-appearance-toolbar [data-slot="button"] {
   min-height: 48px;
-  font-size: 13px;
+  font-size: clamp(17px, 1.5vw, 24px);
   border-radius: 100px;
   padding: 10px 18px;
 }
@@ -444,7 +447,7 @@
     --board-task: 28px;
   }
   .pn-board .board-display-name {
-    font-size: 11px;
+    font-size: 16px;
     padding: 6px 10px;
   }
   .pn-board .board-header > div:last-child {
@@ -453,13 +456,13 @@
   }
   .pn-board .board-header [data-slot="button"] {
     padding-inline: 14px;
-    font-size: 12px;
+    font-size: 16px;
   }
   .pn-board .board-idle-copy .board-heading {
     font-size: 38px;
   }
   .pn-board-eyebrow {
-    font-size: 9px;
+    font-size: 16px;
     letter-spacing: 0.06em;
   }
   .pn-board .board-idle .board-idle-code {

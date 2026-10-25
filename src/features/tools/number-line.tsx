@@ -18,8 +18,9 @@ import {
 import type { ToolModel } from "@/core/tools/patterns";
 import { FaceMarks } from "@/ui/components/activity-icon";
 import { Button } from "@/ui/components/button";
+import { integerText } from "@/content/templates/format";
 const asNumber = (n: Rational) => Number(n.numerator) / Number(n.denominator);
-const label = (n: number) => String(n).replace("-", "−").replace(".", ",");
+const label = integerText;
 export function NumberLine({
   vertical: defaultVertical = false,
   task: suppliedTask,

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTeacher } from "./app-context";
 import { readLearningResult, readResultsIndex } from "@/local/learning-client";
 import type { ResultDetail, ResultIndexEntry } from "@/contracts/results-index";
@@ -10,7 +10,13 @@ import { field } from "@/features/library/client";
 import { pendingCardResponses } from "@/features/library/pending-card-responses";
 import { mathText } from "@/features/library/item-view";
 import { Button } from "@/ui/components/button";
-import { PageHeader, Section, StateNotice } from "@/ui/components/studio";
+import {
+  PageHeader,
+  Section,
+  StateNotice,
+  TabPanel,
+  Tabs,
+} from "@/ui/components/studio";
 
 const templateLabel = {
   activity: "Ringkasan kegiatan",
@@ -18,6 +24,99 @@ const templateLabel = {
   groups: "Kegiatan kelompok",
   diagnostic: "Hasil diagnostik",
 };
+const views = [
+  { id: "asesmen", label: "Asesmen" },
+  { id: "hasil", label: "Hasil" },
+] as const;
+type View = (typeof views)[number]["id"];
+
+/**
+ * Where a still-running activity is continued. A diagnostic keeps no live
+ * surface, so its row reads its stored record instead of pretending to resume.
+ */
+function continueTarget(entry: ResultIndexEntry) {
+  if (entry.source === "library")
+    return { href: `/guru/sesi/${entry.id}`, label: "Lanjutkan" };
+  if (entry.source === "group_lesson")
+    return {
+      href: `/guru/latihan?lesson=${entry.id}&class=${entry.classId}`,
+      label: "Lanjutkan",
+    };
+  return {
+    href: `/guru/hasil/${entry.id}?source=${entry.source}`,
+    label: "Buka catatan",
+  };
+}
+function resultTarget(entry: ResultIndexEntry) {
+  return {
+    href: `/guru/hasil/${entry.id}?source=${entry.source}`,
+    label: "Buka hasil",
+  };
+}
+function dateLabel(entry: ResultIndexEntry) {
+  return entry.date
+    ? entry.date.split("-").reverse().join("/")
+    : "Belum terjadwal";
+}
+
+/**
+ * One table for both widths (docs/11 §3): real column headers on desktop, the
+ * same cells reflowed into rows on a phone. `empty` is the state for this tab
+ * and filter combination, never a shared "nothing here" sentence.
+ */
+function ResultTable({
+  caption,
+  entries,
+  target,
+  empty,
+}: {
+  caption: string;
+  entries: readonly ResultIndexEntry[];
+  target: (entry: ResultIndexEntry) => { href: string; label: string };
+  empty: ReactNode;
+}) {
+  if (!entries.length) return <>{empty}</>;
+  return (
+    <table className="pn-results-table">
+      <caption className="sr-only">{caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Kegiatan</th>
+          <th scope="col">Tanggal</th>
+          <th scope="col">Status</th>
+          <th scope="col">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {entries.map((entry) => {
+          const action = target(entry);
+          return (
+            <tr key={entry.key}>
+              <td data-cell="kegiatan">
+                <span className="pn-results-title">
+                  {entry.classLabel} · {entry.title}
+                </span>
+                <span className="pn-results-meta">
+                  {templateLabel[entry.template]}
+                  {entry.synthetic ? " · Data contoh" : ""}
+                </span>
+              </td>
+              <td data-cell="tanggal">{dateLabel(entry)}</td>
+              <td data-cell="status">
+                {entry.status === "active" ? "Berlangsung" : "Selesai"}
+              </td>
+              <td data-cell="aksi">
+                <Link className="pn-results-action" href={action.href}>
+                  {action.label}
+                </Link>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
 export function AssessmentsPage() {
   const { classes, scope } = useTeacher();
   const [entries, setEntries] = useState<ResultIndexEntry[]>([]),
@@ -25,6 +124,7 @@ export function AssessmentsPage() {
     [cls, setClass] = useState(""),
     [from, setFrom] = useState(""),
     [to, setTo] = useState(""),
+    [view, setView] = useState<View>("asesmen"),
     [busy, setBusy] = useState(true),
     [message, setMessage] = useState(""),
     [failed, setFailed] = useState(false);
@@ -70,6 +170,58 @@ export function AssessmentsPage() {
     const timer = setTimeout(() => void load(), 0);
     return () => clearTimeout(timer);
   }, [load]);
+  const running = entries.filter((e) => e.status === "active"),
+    filtered = Boolean(cls || from || to),
+    body = (
+      <Section label="Filter kegiatan" ground="inset">
+        <div className="studio-filter-fields">
+          <label>
+            Kelas
+            <select
+              className={field}
+              value={cls}
+              onChange={(e) => setClass(e.target.value)}
+            >
+              <option value="">Semua kelas</option>
+              {classes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Dari tanggal
+            <input
+              className={field}
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
+          </label>
+          <label>
+            Sampai tanggal
+            <input
+              className={field}
+              type="date"
+              value={to}
+              min={from}
+              onChange={(e) => setTo(e.target.value)}
+            />
+          </label>
+          <Button
+            variant="quiet"
+            onClick={() => {
+              setClass("");
+              setFrom("");
+              setTo("");
+            }}
+          >
+            Tampilkan semua
+          </Button>
+        </div>
+      </Section>
+    );
   return (
     <div className="space-y-6">
       <PageHeader
@@ -81,112 +233,110 @@ export function AssessmentsPage() {
           </Button>
         }
       />
-      <Section label="Cari kegiatan">
-        <details>
-          <summary className="min-h-12 cursor-pointer content-center font-semibold">
-            Cari berdasarkan kelas atau tanggal
-          </summary>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <label>
-              Kelas
-              <select
-                className={field}
-                value={cls}
-                onChange={(e) => setClass(e.target.value)}
-              >
-                <option value="">Semua kelas</option>
-                {classes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Dari tanggal
-              <input
-                className={field}
-                type="date"
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-              />
-            </label>
-            <label>
-              Sampai tanggal
-              <input
-                className={field}
-                type="date"
-                value={to}
-                min={from}
-                onChange={(e) => setTo(e.target.value)}
-              />
-            </label>
-          </div>
-          <Button
-            variant="quiet"
-            onClick={() => {
-              setClass("");
-              setFrom("");
-              setTo("");
-            }}
-          >
-            Tampilkan semua
-          </Button>
-        </details>
-      </Section>
-      <Section label="Kegiatan dan hasil" ground="sheet">
-        {busy && !entries.length ? (
-          <StateNotice kind="loading" title="Memuat hasil…" />
-        ) : failed && !entries.length ? (
-          <StateNotice
-            kind="error"
-            title={message}
-            action={<Button onClick={() => void load()}>Coba lagi</Button>}
-          />
-        ) : !entries.length ? (
-          <StateNotice
-            title={
-              cls || from || to ? "Belum ada yang cocok" : "Belum ada hasil"
-            }
-          >
-            Ringkasan muncul setelah kegiatan tersimpan. Ubah pencarian atau
-            mulai mengajar.
-          </StateNotice>
-        ) : (
-          <ul className="studio-row-list">
-            {entries.map((e) => (
-              <li key={e.key}>
-                <Link
-                  className="studio-row"
-                  href={`/guru/hasil/${e.id}?source=${e.source}`}
+      <Tabs
+        label="Tampilan asesmen dan hasil"
+        panel="asesmen"
+        value={view}
+        options={views}
+        onChange={setView}
+      />
+      {body}
+      <TabPanel panel="asesmen" id="asesmen" active={view === "asesmen"}>
+        <Section label="Asesmen berlangsung" ground="sheet">
+          {busy && !entries.length ? (
+            <StateNotice kind="loading" title="Memuat hasil…" />
+          ) : failed && !entries.length ? (
+            <StateNotice
+              kind="error"
+              title={message}
+              action={<Button onClick={() => void load()}>Coba lagi</Button>}
+            />
+          ) : (
+            <ResultTable
+              caption="Asesmen yang masih berlangsung"
+              entries={running}
+              target={continueTarget}
+              empty={
+                <StateNotice
+                  title={
+                    filtered
+                      ? "Belum ada asesmen berlangsung untuk filter ini"
+                      : "Belum ada asesmen berlangsung"
+                  }
+                  action={
+                    <Button asChild>
+                      <Link href="/guru/mulai?mode=assessment">
+                        Buat asesmen
+                      </Link>
+                    </Button>
+                  }
                 >
-                  <span className="studio-row-content">
-                    <h2>
-                      {e.classLabel} · {e.title}
-                    </h2>
-                    <p>
-                      {templateLabel[e.template]} ·{" "}
-                      {e.date.split("-").reverse().join("/")} ·{" "}
-                      {e.status === "active" ? "Berlangsung" : "Selesai"}
-                      {e.synthetic ? " · Data contoh" : ""}
-                    </p>
-                  </span>
-                  <span className="studio-row-action">Buka hasil</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-        {cursor && (
-          <Button
-            variant="outline"
-            disabled={busy}
-            onClick={() => void load(cursor)}
-          >
-            Muat kegiatan berikutnya
-          </Button>
-        )}
-      </Section>
+                  {filtered
+                    ? "Kegiatan yang sudah selesai ada di tab Hasil. Ubah filter untuk melihat yang lain."
+                    : "Mulai asesmen baru, atau buka tab Hasil untuk membaca kegiatan yang sudah selesai."}
+                </StateNotice>
+              }
+            />
+          )}
+        </Section>
+      </TabPanel>
+      <TabPanel panel="asesmen" id="hasil" active={view === "hasil"}>
+        <Section label="Kegiatan dan hasil" ground="sheet">
+          {busy && !entries.length ? (
+            <StateNotice kind="loading" title="Memuat hasil…" />
+          ) : failed && !entries.length ? (
+            <StateNotice
+              kind="error"
+              title={message}
+              action={<Button onClick={() => void load()}>Coba lagi</Button>}
+            />
+          ) : (
+            <ResultTable
+              caption="Semua kegiatan dan hasil tersimpan"
+              entries={entries}
+              target={resultTarget}
+              empty={
+                <StateNotice
+                  title={filtered ? "Belum ada yang cocok" : "Belum ada hasil"}
+                  action={
+                    filtered ? (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setClass("");
+                          setFrom("");
+                          setTo("");
+                        }}
+                      >
+                        Tampilkan semua
+                      </Button>
+                    ) : (
+                      <Button asChild>
+                        <Link href="/guru/mulai?mode=assessment">
+                          Buat asesmen
+                        </Link>
+                      </Button>
+                    )
+                  }
+                >
+                  {filtered
+                    ? "Coba rentang tanggal atau kelas lain, lalu mulai mengajar."
+                    : "Ringkasan muncul setelah kegiatan tersimpan. Ubah pencarian atau mulai mengajar."}
+                </StateNotice>
+              }
+            />
+          )}
+          {cursor && (
+            <Button
+              variant="outline"
+              disabled={busy}
+              onClick={() => void load(cursor)}
+            >
+              Muat kegiatan berikutnya
+            </Button>
+          )}
+        </Section>
+      </TabPanel>
       <p role="status">{message}</p>
       {failed && entries.length > 0 && (
         <Button variant="outline" onClick={() => void load()}>

@@ -178,7 +178,8 @@ test("A13 the class roster labels a student by number, never a bare name string"
   await page.waitForSelector("[data-attend-toggle]");
   const rows = page.locator("[data-student-row]");
   await expect(rows.first()).toBeVisible();
-  // Fixture names are `Awan NN`; a row must always carry its attendance numeral chip too.
+  // Sample names come from the shared fixture list; a row must always carry its
+  // attendance numeral chip too.
   const chips = await page.locator(".studio-numeral-chip").count();
   expect(chips).toBe(await rows.count());
   const namesStatement = page.getByText(

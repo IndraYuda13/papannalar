@@ -418,6 +418,26 @@ test("U2 QR is actually rendered with contrast and stays inside idle board viewp
   // torn down; late route.fetch rejections must not leak into the next test.
   await page.unrouteAll({ behavior: "wait" });
 });
+test("U2 board pairing copy agrees with whether a QR can render", async ({
+  page,
+}) => {
+  // The copy must never promise a scan the board cannot show. On an https-style
+  // origin pairingUrl() yields a URL and the QR renders, so naming "Pindai QR"
+  // is honest. On plain-HTTP/loopback pairingUrl() is null and no QR renders,
+  // so the copy falls back to the six-digit code alone. Assert the agreement
+  // either way instead of hard-coding one environment.
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await openBoard(page);
+  await expect(page.getByTestId("pairing-code")).toBeVisible();
+  const steps = page.locator(".board-idle-steps");
+  if ((await page.getByTestId("pairing-qr").count()) > 0) {
+    await expect(steps).toContainText("Pindai QR");
+  } else {
+    await expect(steps).toContainText("Masukkan kode enam digit");
+    await expect(steps).not.toContainText("Pindai QR");
+  }
+  await overflow(page);
+});
 test("U1 empty/error/retry routes keep navigation and keyboard access", async ({
   page,
 }) => {

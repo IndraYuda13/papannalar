@@ -237,24 +237,31 @@ function BoardSessionWorkspace({
             return;
           }
         }
-        setChallenge(
-          challengeSchema.parse(
-            await pairingCall(
-              "board",
-              {
-                action: "create",
-                ...(presentationId ? { presentationId } : {}),
-              },
-              signal,
-            ),
+        const fresh = challengeSchema.parse(
+          await pairingCall(
+            "board",
+            {
+              action: "create",
+              ...(presentationId ? { presentationId } : {}),
+            },
+            signal,
           ),
         );
+        setChallenge(fresh);
         setExpiredCode(undefined);
         setShowPairing(true);
+        // Promise a QR only when this origin actually yields a pairing URL
+        // (https). pairingUrl() is null on plain-HTTP and loopback deployments,
+        // where no QR renders, so the copy must fall back to the code alone
+        // instead of naming a scan that cannot happen.
         setMessage(
           resetRequest
-            ? "Sesi lama sudah dilepas dari papan. Pindai QR atau masukkan kode baru dari HP guru."
-            : "Pindai QR dengan kamera HP guru, atau masukkan kode di Sambungkan Layar.",
+            ? fresh.pairingUrl
+              ? "Sesi lama sudah dilepas dari papan. Pindai QR atau masukkan kode baru dari HP guru."
+              : "Sesi lama sudah dilepas dari papan. Masukkan kode baru dari HP guru."
+            : fresh.pairingUrl
+              ? "Pindai QR dengan kamera HP guru, atau masukkan kode di Sambungkan Layar."
+              : "Masukkan kode enam digit di Sambungkan Layar pada HP guru.",
         );
       } catch {
         if (!controller.signal.aborted)
@@ -702,7 +709,11 @@ function BoardSessionWorkspace({
 
               <ol className="board-idle-steps">
                 <li>Buka sesi di HP guru.</li>
-                <li>Pindai QR atau masukkan kode.</li>
+                <li>
+                  {challenge?.pairingUrl
+                    ? "Pindai QR atau masukkan kode."
+                    : "Masukkan kode enam digit."}
+                </li>
               </ol>
               <p role="status" className="board-note">
                 {message}

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { normaliseGroupCount, clampGroupCount } from "../../src/ui/group-count";
+import {
+  normaliseGroupCount,
+  clampGroupCount,
+  suggestedGroupCount,
+} from "../../src/ui/group-count";
 
 describe("group count input", () => {
   it("keeps the empty draft instead of collapsing to 0", () => {
@@ -20,5 +24,25 @@ describe("group count input", () => {
     expect(clampGroupCount("", 5)).toBe(1);
     expect(clampGroupCount("3", 5)).toBe(3);
     expect(clampGroupCount("0", 5)).toBe(1);
+  });
+});
+
+describe("suggested group count", () => {
+  // TaRL runs three stations, so a real class must default to three groups,
+  // not the six the old heuristic produced for a 32-student roster.
+  it("defaults a full class to three groups", () => {
+    expect(suggestedGroupCount(32)).toBe("3");
+    expect(suggestedGroupCount(24)).toBe("3");
+    expect(suggestedGroupCount(18)).toBe("3");
+  });
+  it("drops below three only for small classes", () => {
+    expect(suggestedGroupCount(13)).toBe("3");
+    expect(suggestedGroupCount(12)).toBe("2");
+    expect(suggestedGroupCount(6)).toBe("1");
+  });
+  it("never suggests zero for empty or invalid input", () => {
+    expect(suggestedGroupCount(0)).toBe("1");
+    expect(suggestedGroupCount(-5)).toBe("1");
+    expect(suggestedGroupCount(Number.NaN)).toBe("1");
   });
 });

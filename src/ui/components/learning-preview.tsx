@@ -1,4 +1,5 @@
 import { ArrowUpRight, Check, Layers, Presentation } from "lucide-react";
+import { integerText } from "@/content/templates/format";
 
 /** Product illustration only. The worked example is not a student's live result. */
 export function LearningPreview({ compact = false }: { compact?: boolean }) {
@@ -58,7 +59,7 @@ export function LearningPreview({ compact = false }: { compact?: boolean }) {
                 fill="currentColor"
                 fontSize="13"
               >
-                {i - 3}
+                {integerText(i - 3)}
               </text>
             </g>
           ))}

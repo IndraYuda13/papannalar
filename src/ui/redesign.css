@@ -44,6 +44,14 @@
     background-color 120ms,
     color 120ms;
 }
+/* docs/05: every phone touch target is at least 48 x 48. The top bar is the one
+   cluster that measured under it, so the floor is stated once here instead of
+   being repeated in each mobile override below. */
+.pn-workspace :is(.pn-icon-button, .pn-account-menu summary, .pn-create-button),
+.pn-workspace :is(.pn-search-submit, .pn-global-search input) {
+  min-width: 48px;
+  min-height: 48px;
+}
 .pn-icon-button:hover,
 .pn-account-menu summary:hover {
   background: #f0ffff;
@@ -83,6 +91,7 @@
   border-radius: 50%;
   cursor: pointer;
 }
+
 .pn-topbar-actions {
   margin-left: auto;
   display: flex;
@@ -388,10 +397,17 @@
   border-radius: 100px;
   padding-inline: 20px;
   background: white;
-  min-height: 44px;
+  min-height: 48px;
   font-size: 13px;
 }
 .pn-workspace .studio-segmented > [aria-pressed="true"] {
+  background: #283d3d;
+  color: white;
+  border-color: #283d3d;
+}
+/* A tab reports selection with aria-selected, not aria-pressed; the selected
+   chip keeps one visual rule instead of two near-identical ones. */
+.pn-workspace .studio-segmented > [aria-selected="true"] {
   background: #283d3d;
   color: white;
   border-color: #283d3d;
@@ -974,30 +990,21 @@
   }
 }
 @media (min-width: 761px) and (max-width: 960px) {
+  /* Tablet portrait (for example 768 px) keeps labelled primary navigation.
+     The previous icon-only rail hid Beranda/Kelas/Soal/Hasil behind ambiguous
+     glyphs. Narrow the rail and keep the labels instead of dropping them; the
+     secondary links and note stay hidden here, matching the phone tab bar. */
   .pn-workspace {
-    --pn-sidebar-width: 80px;
+    --pn-sidebar-width: 160px;
   }
-  .pn-sidebar {
-    padding-inline: 12px !important;
-  }
-  .pn-sidebar
-    :is(
-      .pn-sidebar-label,
-      .nav-label,
-      .pn-sidebar-secondary,
-      .pn-sidebar-note
-    ) {
+  .pn-sidebar :is(.pn-sidebar-label, .pn-sidebar-secondary, .pn-sidebar-note) {
     display: none;
-  }
-  .pn-sidebar .pn-main-nav a {
-    padding-inline: 0;
-    justify-content: center;
   }
   .pn-menu-toggle {
     display: none;
   }
   .pn-topbar-brand {
-    min-width: 170px;
+    min-width: 150px;
   }
   .pn-create-button span {
     display: none;
@@ -1025,21 +1032,15 @@
     gap: 12px;
   }
   .pn-create-button {
-    min-width: 40px;
-    min-height: 40px;
     padding: 0;
   }
   .pn-create-button span {
     display: none;
   }
-  .pn-account-menu summary {
-    min-width: 38px;
-    min-height: 38px;
-  }
   .pn-global-search {
     order: 3;
     flex: 1 0 100%;
-    height: 44px;
+    height: 48px;
   }
   .pn-global-search input {
     font-size: 13px;
@@ -1080,6 +1081,11 @@
     padding: 28px 20px calc(96px + env(safe-area-inset-bottom));
     min-height: calc(100dvh - 130px);
   }
+  .pn-content-rail {
+    /* The bar is fixed below 1024, so the rail reserves the bar's own height and
+       the last content on a page never slides under it (tokens.css, V1). */
+    padding-bottom: var(--pn-nav-safe);
+  }
   .pn-workspace .studio-page-header {
     gap: 16px;
     margin-bottom: 24px;
@@ -1094,7 +1100,7 @@
     width: 100%;
   }
   .pn-workspace .studio-header-actions [data-slot="button"] {
-    min-height: 44px;
+    min-height: 48px;
     font-size: 12px;
   }
   .pn-quick-actions {
@@ -1131,6 +1137,23 @@
   .pn-home-hero .pn-learning-preview {
     max-width: 310px;
     margin-top: 8px;
+  }
+  /* A phone's first screen must hold the whole hero. The shortcut row used to sit
+     between the page header and the hero, which pushed the session CTA down into
+     the fixed bottom bar's band, so the hero leads here and the row follows it.
+     Desktop keeps the header, row, hero order untouched. */
+  .pn-home-stack {
+    display: flex;
+    flex-direction: column;
+  }
+  .pn-home-stack > .pn-home-hero {
+    order: 1;
+  }
+  .pn-home-stack > .pn-quick-actions {
+    order: 2;
+  }
+  .pn-home-stack > :is(.studio-section, .pn-home-tail) {
+    order: 3;
   }
   .pn-workspace .studio-section-label {
     font-size: 17px;

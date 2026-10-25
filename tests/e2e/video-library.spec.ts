@@ -13,6 +13,7 @@ import {
   sampleLogin,
 } from "../browser/helpers";
 import { customFormBindingSchema } from "../../src/contracts/custom-form";
+import { SAMPLE_STUDENT_NAMES } from "../../src/content/demo/sample-names";
 import { readFile } from "node:fs/promises";
 import { appOrigin } from "../harness/ports.mjs";
 const origin = appOrigin;
@@ -87,7 +88,11 @@ test("U02 local class identity, attendance and export persist; student UUID and 
     if (r.postData()) bodies.push(r.postData()!);
   });
   await page.goto(`/guru/kelas/${cls.id}`);
-  const row = page.getByRole("listitem").filter({ hasText: "Awan 01" });
+  // The seeded sample name for attendance 1; the row is still located by name so
+  // the edit target stays explicit.
+  const row = page
+    .getByRole("listitem")
+    .filter({ hasText: SAMPLE_STUDENT_NAMES[0] });
   await row.getByRole("button", { name: "Edit", exact: true }).click();
   await page
     .getByLabel("Nama panggilan di perangkat ini")

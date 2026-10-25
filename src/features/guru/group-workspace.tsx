@@ -26,7 +26,7 @@ import { confirmAction } from "@/ui/components/confirm";
 import { GroupDrafts } from "./group-drafts";
 import { useDraftGuard } from "@/ui/use-draft-guard";
 import { GroupTeacherBoard } from "@/features/library/group-board";
-import { clampGroupCount } from "@/ui/group-count";
+import { clampGroupCount, suggestedGroupCount } from "@/ui/group-count";
 import { orderAssignmentsByGroup } from "@/ui/group-order";
 import { GroupFlowSteps } from "./group-flow-steps";
 import { GroupCardGrid } from "./group-card-grid";
@@ -122,18 +122,9 @@ export function GroupWorkspace({
       setAbsent(presence);
       if (!lessonId)
         setCount(
-          String(
-            Math.max(
-              1,
-              Math.min(
-                6,
-                Math.ceil(
-                  data.students.filter(
-                    (s) => s.active && !presence.includes(s.id),
-                  ).length / 6,
-                ),
-              ),
-            ),
+          suggestedGroupCount(
+            data.students.filter((s) => s.active && !presence.includes(s.id))
+              .length,
           ),
         );
       const repo = createNameRepository(scope);

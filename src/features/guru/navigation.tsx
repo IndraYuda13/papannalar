@@ -103,7 +103,7 @@ export function TeacherNavigation({ children }: { children: ReactNode }) {
             </summary>
             <div className="pn-account-popover">
               <p>Akun guru</p>
-              <Link href="/guru/akun">Kata sandi akun lama</Link>
+              <Link href="/guru/akun">Kata sandi</Link>
               <button onClick={() => void logout()}>
                 <LogOut size={17} aria-hidden />
                 Keluar akun

@@ -7,17 +7,16 @@ export default function RegisterPage() {
     <AuthShell mode="register">
       <h1>Mulai ruang belajar Anda.</h1>
       <p className="pn-auth-description">
-        Buat akun guru untuk menyimpan kelas dan soal Anda. Jika diminta,
-        konfirmasikan email sebelum masuk.
+        Buat akun guru untuk menyimpan kelas dan soal Anda.
       </p>
       <LoginForm mode="register" />
       <p className="pn-auth-switch">
         Sudah punya akun? <a href="/masuk">Masuk</a>
       </p>
       <p className="pn-auth-note">
-        Pendaftaran tidak berarti email sudah terverifikasi. Akun lama tanpa
-        kata sandi: gunakan sesi yang masih masuk untuk mengatur kata sandi.
-        Jika sesi sudah berakhir, hubungi pengelola untuk pemulihan akun.
+        Pendaftaran belum selesai sebelum email dikonfirmasi. Buka kotak masuk,
+        lalu pakai tautan dari email itu untuk masuk. Kata sandi dapat
+        ditambahkan kemudian dari menu akun di pojok kanan atas.
       </p>
     </AuthShell>
   );
