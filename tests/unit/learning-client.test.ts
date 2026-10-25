@@ -4,6 +4,10 @@ import {
   LearningRequestError,
 } from "../../src/local/learning-client";
 import { libraryV2ActionSchema } from "../../src/contracts/library";
+import {
+  resultsActionSchema,
+  resultsIndexSchema,
+} from "../../src/contracts/results-index";
 afterEach(() => vi.unstubAllGlobals());
 it("negotiates v2 without sending private fields", async () => {
   const fetch = vi.fn(async (url: string, init: RequestInit) => {
@@ -58,5 +62,38 @@ it("requires actual blank row states and prevents received blank grading", () =>
   ).toBe(false);
   expect(
     libraryV2ActionSchema.safeParse({ ...base, answers: ["?"] }).success,
+  ).toBe(false);
+});
+it("keeps a results index written before the collection field readable", () => {
+  const id = "7b000000-0000-4000-8000-000000000001",
+    legacy = {
+      key: "library:" + id,
+      source: "library",
+      id,
+      classId: id,
+      classLabel: "7B",
+      date: "2026-10-25",
+      title: "Latihan rekaman",
+      status: "active",
+      template: "cards",
+      synthetic: false,
+    };
+  // The collection is derived on read, so an index cached before the field
+  // existed still validates and renders, with no collection to filter on yet.
+  const parsed = resultsIndexSchema.parse({
+    entries: [legacy],
+    nextCursor: null,
+  });
+  expect(parsed.entries[0].collectionId).toBeNull();
+  expect(parsed.entries[0].collectionLabel).toBeNull();
+  const collectionId = "7b000000-0000-4000-8000-000000000002";
+  expect(resultsActionSchema.parse({ action: "list", collectionId })).toEqual({
+    action: "list",
+    collectionId,
+  });
+  // The allowlist stays closed to anything the index cannot filter on.
+  expect(
+    resultsActionSchema.safeParse({ action: "list", kumpulan: collectionId })
+      .success,
   ).toBe(false);
 });

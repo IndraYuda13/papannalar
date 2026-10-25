@@ -73,6 +73,8 @@ describe("teacher surface structure", () => {
     expect(html).toContain('role="tablist"');
     expect(html).toContain("Filter kegiatan");
     expect(html).toContain("Semua kelas");
+    expect(html).toContain("Kumpulan");
+    expect(html).toContain("Semua kumpulan");
     expect(html).toContain("Dari tanggal");
     expect(html).toContain("Sampai tanggal");
     // The collapsed disclosure hid every filter behind one summary line.

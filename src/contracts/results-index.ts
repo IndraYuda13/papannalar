@@ -9,6 +9,14 @@ export const resultIndexEntrySchema = z.strictObject({
   id: randomIdSchema,
   classId: randomIdSchema,
   classLabel: z.string(),
+  // The collection (kumpulan soal) behind one stored activity. It is derived on
+  // read, never a new stored column: a library run carries its own question set,
+  // a group lesson carries the single collection its groups share, and a
+  // diagnostic session belongs to no collection at all. `null` therefore means
+  // "not one collection", not "missing data". Both fields default to null so an
+  // index cached before this field existed still validates.
+  collectionId: randomIdSchema.nullable().default(null),
+  collectionLabel: z.string().nullable().default(null),
   date: z.string(),
   title: z.string(),
   status: z.enum(["active", "closed"]),
@@ -35,6 +43,7 @@ export const resultsActionSchema = z.discriminatedUnion("action", [
   z.strictObject({
     action: z.literal("list"),
     classId: randomIdSchema.optional(),
+    collectionId: randomIdSchema.optional(),
     from: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/)

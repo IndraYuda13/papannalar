@@ -666,10 +666,14 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
   expect(second.responses).toHaveLength(0);
   expect(second.run.classLabel).toBe("7C");
   await page.goto("/guru/asesmen");
-  await page.getByRole("button", { name: "Hasil", exact: true }).click();
-  await page
-    .getByText("Cari berdasarkan kelas atau tanggal", { exact: true })
-    .click();
+  // The asesmen/hasil switch is a real tablist, so the panel is selected by tab
+  // role rather than by a bare button.
+  await page.getByRole("tab", { name: "Hasil", exact: true }).click();
+  // The filter bar shows its controls outright; the collapsed disclosure it
+  // replaced is gone by design, so there is no summary line left to open.
+  await expect(
+    page.getByRole("heading", { name: "Filter kegiatan", exact: true }),
+  ).toBeVisible();
   await page
     .getByRole("combobox", { name: "Kumpulan", exact: true })
     .selectOption(setId);
@@ -678,16 +682,24 @@ test("U08-U13 author five cards, reuse across classes, store revise and retain h
     .getByLabel("Sampai tanggal", { exact: true })
     .fill(detail.run.date);
   const resultLinks = page.locator('a[href^="/guru/hasil/"]');
+  // Every row links with its source, because a group lesson or a diagnostic
+  // record cannot be read without it; the id is what the filter must resolve to.
   await page
     .getByRole("combobox", { name: "Kelas", exact: true })
     .selectOption(detail.run.classId);
   await expect(resultLinks).toHaveCount(1);
-  await expect(resultLinks).toHaveAttribute("href", `/guru/hasil/${runId}`);
+  await expect(resultLinks).toHaveAttribute(
+    "href",
+    `/guru/hasil/${runId}?source=library`,
+  );
   await page
     .getByRole("combobox", { name: "Kelas", exact: true })
     .selectOption(second.run.classId);
   await expect(resultLinks).toHaveCount(1);
-  await expect(resultLinks).toHaveAttribute("href", `/guru/hasil/${secondId}`);
+  await expect(resultLinks).toHaveAttribute(
+    "href",
+    `/guru/hasil/${secondId}?source=library`,
+  );
   await page.getByLabel("Dari tanggal", { exact: true }).fill("2100-01-01");
   await expect(resultLinks).toHaveCount(0);
   // A filter that matches nothing is its own state (v4 §6.5), not "no data yet".

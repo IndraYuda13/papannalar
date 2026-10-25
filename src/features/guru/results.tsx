@@ -1,6 +1,12 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useTeacher } from "./app-context";
 import { readLearningResult, readResultsIndex } from "@/local/learning-client";
 import type { ResultDetail, ResultIndexEntry } from "@/contracts/results-index";
@@ -58,6 +64,14 @@ function dateLabel(entry: ResultIndexEntry) {
     ? entry.date.split("-").reverse().join("/")
     : "Belum terjadwal";
 }
+/**
+ * The collection a row belongs to. Derived on read, so a diagnostic session and a
+ * group lesson whose groups used different collections have none; both keep a
+ * readable label instead of an empty slot.
+ */
+function collectionLabel(entry: ResultIndexEntry) {
+  return entry.collectionLabel ?? "Tanpa kumpulan";
+}
 
 /**
  * One table for both widths (docs/11 §3): real column headers on desktop, the
@@ -97,7 +111,7 @@ function ResultTable({
                   {entry.classLabel} · {entry.title}
                 </span>
                 <span className="pn-results-meta">
-                  {templateLabel[entry.template]}
+                  {templateLabel[entry.template]} · {collectionLabel(entry)}
                   {entry.synthetic ? " · Data contoh" : ""}
                 </span>
               </td>
@@ -118,28 +132,36 @@ function ResultTable({
   );
 }
 export function AssessmentsPage() {
-  const { classes, scope } = useTeacher();
+  const { classes, scope, state } = useTeacher();
   const [entries, setEntries] = useState<ResultIndexEntry[]>([]),
     [cursor, setCursor] = useState<string | null>(null),
     [cls, setClass] = useState(""),
+    [collection, setCollection] = useState(""),
     [from, setFrom] = useState(""),
     [to, setTo] = useState(""),
     [view, setView] = useState<View>("asesmen"),
     [busy, setBusy] = useState(true),
     [message, setMessage] = useState(""),
     [failed, setFailed] = useState(false);
+  // Filters change faster than the index answers, and a request answers for the
+  // filters it was sent with. Only the newest request may write the list, so a
+  // slow answer for an older filter cannot overwrite the one just selected.
+  const latest = useRef(0);
   const load = useCallback(
     async (next?: string) => {
+      const attempt = ++latest.current;
       setBusy(true);
       setFailed(false);
       setMessage("");
       try {
         const result = await readResultsIndex(scope, {
           ...(cls ? { classId: cls } : {}),
+          ...(collection ? { collectionId: collection } : {}),
           ...(from ? { from } : {}),
           ...(to ? { to } : {}),
           ...(next ? { cursor: next } : {}),
         });
+        if (attempt !== latest.current) return;
         setEntries((old) =>
           next
             ? [
@@ -156,22 +178,23 @@ export function AssessmentsPage() {
             "Sambungan terputus. Menampilkan data terakhir yang tersimpan.",
           );
       } catch {
+        if (attempt !== latest.current) return;
         setFailed(true);
         setMessage(
           "Hasil belum dapat dimuat. Periksa sambungan lalu coba lagi.",
         );
       } finally {
-        setBusy(false);
+        if (attempt === latest.current) setBusy(false);
       }
     },
-    [scope, cls, from, to],
+    [scope, cls, collection, from, to],
   );
   useEffect(() => {
     const timer = setTimeout(() => void load(), 0);
     return () => clearTimeout(timer);
   }, [load]);
   const running = entries.filter((e) => e.status === "active"),
-    filtered = Boolean(cls || from || to),
+    filtered = Boolean(cls || collection || from || to),
     body = (
       <Section label="Filter kegiatan" ground="inset">
         <div className="studio-filter-fields">
@@ -186,6 +209,21 @@ export function AssessmentsPage() {
               {classes.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Kumpulan
+            <select
+              className={field}
+              value={collection}
+              onChange={(e) => setCollection(e.target.value)}
+            >
+              <option value="">Semua kumpulan</option>
+              {state.collections.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.document.title || "Kumpulan tanpa judul"}
                 </option>
               ))}
             </select>
@@ -213,6 +251,7 @@ export function AssessmentsPage() {
             variant="quiet"
             onClick={() => {
               setClass("");
+              setCollection("");
               setFrom("");
               setTo("");
             }}
@@ -304,6 +343,7 @@ export function AssessmentsPage() {
                         variant="outline"
                         onClick={() => {
                           setClass("");
+                          setCollection("");
                           setFrom("");
                           setTo("");
                         }}
@@ -320,7 +360,7 @@ export function AssessmentsPage() {
                   }
                 >
                   {filtered
-                    ? "Coba rentang tanggal atau kelas lain, lalu mulai mengajar."
+                    ? "Coba rentang tanggal, kelas, atau kumpulan lain, lalu mulai mengajar."
                     : "Ringkasan muncul setelah kegiatan tersimpan. Ubah pencarian atau mulai mengajar."}
                 </StateNotice>
               }
