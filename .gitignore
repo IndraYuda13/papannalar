@@ -15,6 +15,9 @@ public/offline/
 artifacts/
 design/pn-ui-v2/renders/
 
+# Build provenance stamp written by the release procedure, never product source.
+.source-sha
+
 # Local agent instructions and workspace state, not product source.
 AGENTS.md
 SOUL.md
